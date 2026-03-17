@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head"></head>
+<body>
+<main class="py-4">
+    <div class="container">
+        <div th:replace="layout :: content">
+            <!-- Conteúdo original do produtos.html será inserido aqui -->
+            <h2 class="mb-4 text-center">Catálogo de Produtos</h2>
+            <form th:action="@{/produtos}" method="get" class="mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" name="busca" class="form-control" placeholder="Buscar produtos">
+                            <button class="btn btn-secondary" type="submit"><i class="fas fa-search"></i> Buscar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <select name="cat" class="form-select" onchange="this.form.submit()">
+                            <option value="">Todas as categorias</option>
+                            <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}" th:selected="${catObj.id == categoriaSelecionada}"></option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+            <div th:each="catObj : ${categorias}">
+                <h4 class="mt-4 mb-3 text-primary" th:text="${catObj.nome}"></h4>
+                <div class="row">
+                    <div class="col-md-4 mb-4" th:each="produto : ${produtos}" th:if="${produto.categoria != null} and ${produto.categoria.id} == ${catObj.id}">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img th:if="${produto.imagemBlob}" th:src="@{/produto/imagem/{id}(id=${produto.id})}" class="card-img-top" alt="Imagem" style="height:220px;object-fit:cover;">
+                            <img th:if="${produto.imagemBlob == null}" th:src="${produto.imagem}" class="card-img-top" alt="Imagem" style="height:220px;object-fit:cover;">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-primary" th:text="${produto.nome}"></h5>
+                                <p class="card-text text-muted" th:text="${produto.descricao}"></p>
+                                <p class="card-text"><strong>Código de Barras:</strong> <span th:text="${produto.codigoBarra}"></span></p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/produto/detalhes/{id}(id=${produto.id})}" class="btn btn-outline-info btn-sm me-2"><i class="fas fa-info-circle"></i> Detalhes</a>
+                                    <a th:href="@{/adicionarProduto(produtoId=${produto.id},quantidade=1)}" class="btn btn-primary btn-sm"><i class="fas fa-cart-plus"></i> Adicionar ao Carrinho</a>
+                                </div>
+                                <span class="badge bg-primary mt-2" th:text="${produto.preco} + ' Kz'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${#lists.isEmpty(produtos)}" class="alert alert-info text-center">Nenhum produto encontrado.</div>
+            <div th:if="${produtosPage.totalPages > 1}" class="mt-4">
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${produtosPage.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/produtos(page=${produtosPage.number - 1},busca=${param.busca},cat=${categoriaSelecionada})}" aria-label="Anterior">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, produtosPage.totalPages-1)}" th:classappend="${produtosPage.number == i} ? 'active'">
+                            <a class="page-link" th:href="@{/produtos(page=${i},busca=${param.busca},cat=${categoriaSelecionada})}" th:text="${i+1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${produtosPage.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/produtos(page=${produtosPage.number + 1},busca=${param.busca},cat=${categoriaSelecionada})}" aria-label="Próxima">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

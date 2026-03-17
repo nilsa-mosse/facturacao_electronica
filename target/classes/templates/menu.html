@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Sidebar Menu -->
+  <aside class="main-sidebar sidebar-light-primary elevation-4">
+
+    <div class="sidebar">
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex"> 
+     
+        <div class="info"><a href="#" class="d-block"> <p>Bem-vindo, </a></div>
+      </div>
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <!-- Dashboard Menu -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>1. Dashboard<i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a th:href="@{/dashboard/vendas-dia}" class="nav-link">
+                  <i class="fas fa-chart-line nav-icon"></i>
+                  <p>Vendas do dia</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/dashboard/facturas-emitidas}" class="nav-link">
+                  <i class="fas fa-file-invoice nav-icon"></i>
+                  <p>Facturas emitidas</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/dashboard/alertas-pendencias}" class="nav-link">
+                  <i class="fas fa-exclamation-triangle nav-icon"></i>
+                  <p>Alertas de pendências</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/dashboard/totais-impostos}" class="nav-link">
+                  <i class="fas fa-coins nav-icon"></i>
+                  <p>Totais de impostos</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link"><i class="nav-icon fas fa-file-invoice-dollar"></i><p>Categorias <span class="right badge badge-warning" th:text="${badgeVencidas}"></span><i class="right fas fa-angle-left"></i></p></a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item" th:each="cat : ${categorias}">
+                <a th:href="@{/produtos(cat=${cat.id})}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p th:text="${cat.nome}"></p>
+                </a>
+              </li>
+            </ul>     
+          </li>
+          
+          
+           <li class="nav-item has-treeview">
+            <a href="#" class="nav-link"><i class="nav-icon fas fa-file-invoice-dollar"></i><p>Produto <span class="right badge badge-warning" th:text="${badgeVencidas}"></span><i class="right fas fa-angle-left"></i></p></a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item"><a th:href="@{/cadastroProduto}" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Cadastrar</p></a></li>
+              <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Listar</p></a></li>
+            </ul>
+          </li>
+          
+          <!-- Cadastros Menu -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-folder"></i>
+              <p>2. Cadastros<i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <!-- Clientes Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-user nav-icon"></i>
+                  <p>Clientes<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Lista de Clientes</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Adicionar Cliente</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/detalhes}" class="nav-link">
+                      <i class="fas fa-user-edit nav-icon"></i>
+                      <p>Ver / Editar Detalhes</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/historico-compras}" class="nav-link">
+                      <i class="fas fa-history nav-icon"></i>
+                      <p>Histórico de Compras</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <!-- Fornecedores Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-truck nav-icon"></i>
+                  <p>Fornecedores<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Lista de Fornecedores</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Adicionar Fornecedor</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <!-- Outros submenus já existentes -->
+              <li class="nav-item">
+                <a th:href="@{/produtos/listar}" class="nav-link">
+                  <i class="fas fa-box-open nav-icon"></i>
+                  <p>Produtos/Serviços</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/tabelas-apoio}" class="nav-link">
+                  <i class="fas fa-table nav-icon"></i>
+                  <p>Tabelas de Apoio</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+          
+              <!-- Facturaçao Menu -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-folder"></i>
+              <p>3. Facturaçao<i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <!-- Clientes Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-user nav-icon"></i>
+                  <p>Facturas<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Nova Factura</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Facturas Emitidas</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/detalhes}" class="nav-link">
+                      <i class="fas fa-user-edit nav-icon"></i>
+                      <p>Facturas Canceladas</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/historico-compras}" class="nav-link">
+                      <i class="fas fa-history nav-icon"></i>
+                      <p>Facturas por Estado (Emitidas, Enviadas, Validadas AGT, Rejeitadas AGT)</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <!-- Fornecedores Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-truck nav-icon"></i>
+                  <p>Facturas de Clientes<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Emitir Facturas</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Reimprimir</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Ver Detalhes</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              
+              <!-- Fornecedores Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-truck nav-icon"></i>
+                  <p>Facturas Electronicas AGT<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Enviar para AGT</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Estado (Em processamento, Validada, Rejeitada)</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Consultar Resultado / Mensagens AGT</p>
+                    </a>
+                  </li>
+                   <li class="nav-item">
+                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Reenvio Automático</p>
+                    </a>
+                  </li>
+
+                </ul>
+              </li>
+              
+              <li class="nav-item">
+                <a th:href="@{/tabelas-apoio}" class="nav-link">
+                  <i class="fas fa-table nav-icon"></i>
+                  <p>Faturas Recibidas</p>
+                </a>
+              </li>   
+              <!-- Fornecedores Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-truck nav-icon"></i>
+                  <p>Guias de Remessa / Notas de Crédito / Débito<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Nova Guia de Remessa</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Notas de Crédito / Débito</p>
+                    </a>
+                  </li>
+
+                </ul>
+              </li>
+              
+            </ul>
+          </li>
+          <!-- FINAL DO MEUN FACTURACAO:  -->
+          
+          
+          
+          
+          
+          
+          
+          
+          
+             <!-- 4. Inventário / Stock Menu -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-folder"></i>
+              <p>4. Inventário / Stock<i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <!-- Movimentos de Stock Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-user nav-icon"></i>
+                  <p>Movimentos de Stock<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Entrada</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Saídas</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/detalhes}" class="nav-link">
+                      <i class="fas fa-user-edit nav-icon"></i>
+                      <p>Ajustes</p>
+                    </a>
+                  </li>
+                
+                </ul>
+              </li>
+              <!-- Relatórios Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-truck nav-icon"></i>
+                  <p>Relatórios<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                   <li class="nav-item">
+                    <a th:href="@{/fornecedores/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Saldo Por Produto</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/fornecedores/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Alertas de stock mínimo</p>
+                    </a>
+                  </li>
+              
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <!-- FINAL DO MEUN 4. Inventário / Stock:  -->
+          
+          
+          
+          
+          
+                   <!-- 5. Pagamentos / RecebimentosMenu -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-folder"></i>
+              <p>5. Pagamentos / Recebimentos<i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <!-- Movimentos de Stock Submenu -->
+              <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-user nav-icon"></i>
+                  <p>Pagamentos de Clientes<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Registar Recebimento</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/clientes/adicionar}" class="nav-link">
+                      <i class="fas fa-user-plus nav-icon"></i>
+                      <p>Histórico</p>
+                    </a>
+                  </li>
+                  
+                
+                </ul>
+              </li>
+              <!-- Relatórios Submenu -->
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="fas fa-truck nav-icon"></i>
+                  <p>Quotas / Parcelamentos</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <!-- FINAL DO MEUN 5. Pagamentos / Recebimentos  -->
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+        </ul>
+        
+        
+        
+      </nav>
+    </div>
+  </aside>
+</body>
+</html>
