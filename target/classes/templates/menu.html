@@ -15,56 +15,36 @@
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>1. Dashboard<i class="right fas fa-angle-left"></i></p>
+              <p>Dashboard<i class="right fas fa-angle-left"></i></p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a th:href="@{/dashboard/vendas-dia}" class="nav-link">
-                  <i class="fas fa-chart-line nav-icon"></i>
-                  <p>Vendas do dia</p>
+                <a th:href="@{/dashboard}" class="nav-link">
+                  <i class="fas fa-home nav-icon"></i>
+                  <p>Visão Geral</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a th:href="@{/dashboard/facturas-emitidas}" class="nav-link">
-                  <i class="fas fa-file-invoice nav-icon"></i>
-                  <p>Facturas emitidas</p>
+                <a th:href="@{/dashboard/estatisticas}" class="nav-link">
+                  <i class="fas fa-chart-bar nav-icon"></i>
+                  <p>Estatísticas</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a th:href="@{/dashboard/alertas-pendencias}" class="nav-link">
-                  <i class="fas fa-exclamation-triangle nav-icon"></i>
-                  <p>Alertas de pendências</p>
+                <a th:href="@{/dashboard/relatorios}" class="nav-link">
+                  <i class="fas fa-file-alt nav-icon"></i>
+                  <p>Relatórios</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a th:href="@{/dashboard/totais-impostos}" class="nav-link">
-                  <i class="fas fa-coins nav-icon"></i>
-                  <p>Totais de impostos</p>
+                <a th:href="@{/dashboard/configuracoes}" class="nav-link">
+                  <i class="fas fa-cogs nav-icon"></i>
+                  <p>Configurações</p>
                 </a>
               </li>
             </ul>
           </li>
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link"><i class="nav-icon fas fa-file-invoice-dollar"></i><p>Categorias <span class="right badge badge-warning" th:text="${badgeVencidas}"></span><i class="right fas fa-angle-left"></i></p></a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item" th:each="cat : ${categorias}">
-                <a th:href="@{/produtos(cat=${cat.id})}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p th:text="${cat.nome}"></p>
-                </a>
-              </li>
-            </ul>     
-          </li>
-          
-          
-           <li class="nav-item has-treeview">
-            <a href="#" class="nav-link"><i class="nav-icon fas fa-file-invoice-dollar"></i><p>Produto <span class="right badge badge-warning" th:text="${badgeVencidas}"></span><i class="right fas fa-angle-left"></i></p></a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/cadastroProduto}" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Cadastrar</p></a></li>
-              <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i><p>Listar</p></a></li>
-            </ul>
-          </li>
-          
+
           <!-- Cadastros Menu -->
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
@@ -75,7 +55,7 @@
               <!-- Clientes Submenu -->
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
-                  <i class="fas fa-user nav-icon"></i>
+                  <i class="fas fa-users nav-icon"></i>
                   <p>Clientes<i class="right fas fa-angle-left"></i></p>
                 </a>
                 <ul class="nav nav-treeview">
@@ -126,19 +106,73 @@
                   </li>
                 </ul>
               </li>
-              <!-- Outros submenus já existentes -->
-              <li class="nav-item">
-                <a th:href="@{/produtos/listar}" class="nav-link">
+              
+              
+              
+            
+               <li class="nav-item has-treeview">
+                <a href="#" class="nav-link">
                   <i class="fas fa-box-open nav-icon"></i>
-                  <p>Produtos/Serviços</p>
+                  <p>Produtos/Serviços<i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/produtos/listar}" class="nav-link">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p>Lista de Produtos</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/cadastroProduto}" class="nav-link">
+                      <i class="fas fa-plus nav-icon"></i>
+                      <p>Adicionar Produto</p>
+                    </a>
+                  </li>
+                  
+                  
+                  
+                     <!-- Categorias Menu -->
+          <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-tags"></i>
+              <p>Categorias<i class="right fas fa-angle-left"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item" th:each="cat : ${categorias}">
+                <a th:href="@{/produtos(cat=${cat.id})}" class="nav-link">
+                  <i class="fas fa-tag nav-icon"></i>
+                  <p th:text="${cat.nome}"></p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a th:href="@{/tabelas-apoio}" class="nav-link">
-                  <i class="fas fa-table nav-icon"></i>
-                  <p>Tabelas de Apoio</p>
-                </a>
+            </ul>
+          </li>
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  <li class="nav-item">
+                    <a th:href="@{/precos}" class="nav-link">
+                      <i class="fas fa-dollar-sign nav-icon"></i>
+                      <p>Preços</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/inventario}" class="nav-link">
+                      <i class="fas fa-warehouse nav-icon"></i>
+                      <p>Inventário</p>
+                    </a>
+                  </li>
+                </ul>
               </li>
+              
             </ul>
           </li>
           

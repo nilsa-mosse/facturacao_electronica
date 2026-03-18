@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head"></head>
+<body>
+<main class="py-4">
+<div class="container-fluid px-4">
+    <h3 class="fw-bold mb-4">Dashboard - Visão Geral</h3>
+
+    <!-- Indicadores principais -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Vendas do Dia</h5>
+                    <p class="card-text display-6" th:text="${vendasDia}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Receita Mensal</h5>
+                    <p class="card-text display-6" th:text="${receitaMensal}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Faturas Pendentes</h5>
+                    <p class="card-text display-6" th:text="${faturasPendentes}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Estoque Baixo</h5>
+                    <p class="card-text display-6" th:text="${produtosEstoqueBaixo}">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de vendas -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header">Vendas nos últimos 30 dias</div>
+                <div class="card-body">
+                    <canvas id="graficoVendas" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header">Produtos mais vendidos</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item" th:each="produto : ${produtosMaisVendidos}" th:text="${produto.nome}">Produto Exemplo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas e pendências -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header bg-danger text-white">Alertas/Pendências</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr><th>Tipo</th><th>Descrição</th><th>Ação</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="alerta : ${alertas}">
+                                <td th:text="${alerta.tipo}">Estoque</td>
+                                <td th:text="${alerta.descricao}">Produto X com estoque baixo</td>
+                                <td><a th:href="${alerta.link}" class="btn btn-sm btn-danger">Ver</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Links Rápidos</div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/produtos/novo" class="btn btn-primary">Adicionar Produto</a>
+                        <a href="/clientes/adicionar" class="btn btn-success">Adicionar Cliente</a>
+                        <a href="/produtos/listar" class="btn btn-dark">Listar Produtos</a>
+                        <a href="/faturas/nova" class="btn btn-warning">Emitir Fatura</a>
+                        <a href="/dashboard/relatorios" class="btn btn-info">Relatórios</a>
+                        <a href="/dashboard/configuracoes" class="btn btn-secondary">Configurações</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clientes e faturação -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Clientes Ativos</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item" th:each="cliente : ${clientesAtivos}" th:text="${cliente.nome}">Cliente Exemplo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Faturas Recentes</div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item" th:each="fatura : ${faturasRecentes}" th:text="${fatura.numero}">FAT-0001</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Exemplo de gráfico de vendas
+var ctx = document.getElementById('graficoVendas').getContext('2d');
+var graficoVendas = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ["Dia 1", "Dia 2", "Dia 3", "Dia 4", "Dia 5", "Dia 6", "Dia 7"],
+        datasets: [{
+            label: 'Vendas',
+            data: [12, 19, 3, 5, 2, 3, 7],
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: true }
+        }
+    }
+});
+</script>
+</body>
+</html>

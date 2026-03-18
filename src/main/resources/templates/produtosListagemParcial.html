@@ -1,0 +1,146 @@
+<table class="table table-bordered table-hover" th:if="${!#lists.isEmpty(produtos)}">
+    <thead class="table-light">
+        <tr>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Código de Barras</th>
+            <th>Preço</th>
+            <th>Imagem</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="produto : ${produtos}">
+            <td th:text="${produto.nome}"></td>
+            <td th:text="${produto.categoria != null ? produto.categoria.nome : 'Sem categoria'}"></td>
+            <td th:text="${produto.codigoBarra}"></td>
+            <td><span class="badge bg-primary" th:text="${produto.preco} + ' Kz'"></span></td>
+            <td>
+              <div th:if="${produto.imagemBlob != null}">
+                <img th:src="@{/produto/imagem/{id}(id=${produto.id})}" alt="Imagem do Produto" style="max-width:80px; max-height:80px;"/>
+              </div>
+            </td>
+            <td>
+              <button class="btn btn-info btn-sm btn-custom" type="button" data-bs-toggle="modal" th:data-bs-target="${'#detalhesModal_' + produto.id}">
+                <i class="fas fa-eye"></i> Detalhes
+              </button>
+              <button class="btn btn-danger btn-sm btn-custom" type="button" th:onclick="|apagarProduto('${produto.id}')|">
+                <i class="fas fa-trash"></i> Apagar
+              </button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<!-- Paginação -->
+<div th:if="${produtosPage.totalPages > 1}" class="d-flex justify-content-center mt-3">
+    <nav>
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${produtosPage.number == 0} ? 'disabled'">
+                <a class="page-link" th:href="@{/produtos/listar(page=${produtosPage.number - 1}, busca=${busca}, cat=${categoriaSelecionada})}">Anterior</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(1, produtosPage.totalPages)}" th:classappend="${i - 1 == produtosPage.number} ? 'active'">
+                <a class="page-link" th:href="@{/produtos/listar(page=${i - 1}, busca=${busca}, cat=${categoriaSelecionada})}" th:text="${i}"></a>
+            </li>
+            <li class="page-item" th:classappend="${produtosPage.number + 1 == produtosPage.totalPages} ? 'disabled'">
+                <a class="page-link" th:href="@{/produtos/listar(page=${produtosPage.number + 1}, busca=${busca}, cat=${categoriaSelecionada})}">Próxima</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<!-- Modal de Detalhes do Produto -->
+<div th:each="produto : ${produtos}">
+  <div class="modal fade" th:id="${'detalhesModal_' + produto.id}" tabindex="-1" aria-labelledby="detalhesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data" onsubmit="return atualizarProdutos(event, this)">
+          <div class="modal-header">
+            <h5 class="modal-title produto-titulo" id="detalhesModalLabel">Detalhes do Produto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row mb-4 align-items-center">
+              <div class="col-md-4 text-center">
+                <div class="produto-imagem mb-3">
+                  <div th:if="${produto.imagemBlob != null}">
+                    <img th:src="@{/produto/imagem/{id}(id=${produto.id})}" alt="Imagem do Produto" style="max-width:180px; max-height:180px;"/>
+                  </div>
+                  <div th:if="${produto.imagemBlob == null}" class="text-muted" style="font-size:1.2rem;">Sem imagem</div>
+                </div>
+                <input type="file" name="imagem" class="form-control mt-2">
+              </div>
+              <div class="col-md-8">
+                <table class="table produto-tabela table-bordered">
+                  <tr>
+                    <th>Nome</th>
+                    <td><input type="text" name="nome" class="form-control" th:value="${produto.nome}" required></td>
+                  </tr>
+                  <tr>
+                    <th>Categoria</th>
+                    <td>
+                      <select name="categoriaId" class="form-select">
+                        <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}" th:selected="${produto.categoria != null && produto.categoria.id == catObj.id}"></option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Código de Barras</th>
+                    <td><input type="text" name="codigoBarra" class="form-control" th:value="${produto.codigoBarra}"></td>
+                  </tr>
+                  <tr>
+                    <th>Preço</th>
+                    <td><input type="number" name="preco" class="form-control" th:value="${produto.preco}" min="0" step="0.01"></td>
+                  </tr>
+                  <tr>
+                    <th>Descrição</th>
+                    <td><textarea name="descricao" class="form-control" th:text="${produto.descricao}" rows="3"></textarea></td>
+                  </tr>
+                  <tr>
+                    <th>Quantidade em Estoque</th>
+                    <td><input type="number" name="quantidadeEstoque" class="form-control" th:value="${produto.quantidadeEstoque}" min="0"></td>
+                  </tr>
+                </table>
+                <input type="hidden" name="id" th:value="${produto.id}">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success btn-custom">Salvar</button>
+            <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Reatribui o submit AJAX para todos os formulários de edição de produto após atualização via AJAX
+if (window.atualizarProdutos) {
+  document.querySelectorAll('form[onsubmit^="return atualizarProdutos"]').forEach(function(form) {
+    form.onsubmit = function(event) {
+      event.preventDefault();
+      var formData = new FormData(form);
+      fetch(form.action, {
+        method: 'POST',
+        body: formData
+      }).then(response => {
+        if (response.redirected || response.ok) {
+          // Fecha o modal
+          if (window.jQuery) {
+            $(form).closest('.modal').modal('hide');
+          }
+          // Atualiza a listagem novamente
+          if (window.atualizarListagemProdutos) {
+            atualizarListagemProdutos();
+          } else {
+            location.reload();
+          }
+        } else {
+          alert('Erro ao salvar alterações.');
+        }
+      });
+      return false;
+    };
+  });
+}
+</script>

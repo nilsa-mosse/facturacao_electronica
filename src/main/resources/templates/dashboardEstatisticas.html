@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head"></head>
+<body>
+<main class="py-4">
+<div class="container-fluid px-4">
+    <h3 class="fw-bold mb-4">Dashboard - Estatísticas</h3>
+
+    <!-- Indicadores principais -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Vendas Totais</h5>
+                    <p class="card-text display-6" th:text="${vendasTotais}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Receita Total</h5>
+                    <p class="card-text display-6" th:text="${receitaTotal}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Clientes Ativos</h5>
+                    <p class="card-text display-6" th:text="${clientesAtivosCount}">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Produtos Vendidos</h5>
+                    <p class="card-text display-6" th:text="${produtosVendidosCount}">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Vendas por mês (últimos 12 meses)</div>
+                <div class="card-body">
+                    <canvas id="graficoVendasMes" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Receita por mês (últimos 12 meses)</div>
+                <div class="card-body">
+                    <canvas id="graficoReceitaMes" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Produtos mais vendidos</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead><tr><th>Produto</th><th>Quantidade</th></tr></thead>
+                        <tbody>
+                            <tr th:each="produto : ${produtosMaisVendidos}">
+                                <td th:text="${produto.nome}">Produto Exemplo</td>
+                                <td th:text="${produto.quantidade}">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Clientes com mais compras</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead><tr><th>Cliente</th><th>Compras</th></tr></thead>
+                        <tbody>
+                            <tr th:each="cliente : ${clientesTopCompras}">
+                                <td th:text="${cliente.nome}">Cliente Exemplo</td>
+                                <td th:text="${cliente.compras}">0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparativos -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Comparativo: Vendas mês atual vs. anterior</div>
+                <div class="card-body">
+                    <p>Mês atual: <span th:text="${vendasMesAtual}">0</span></p>
+                    <p>Mês anterior: <span th:text="${vendasMesAnterior}">0</span></p>
+                    <p>Variação: <span th:text="${variacaoVendas}">0%</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Comparativo: Receita mês atual vs. anterior</div>
+                <div class="card-body">
+                    <p>Mês atual: <span th:text="${receitaMesAtual}">0</span></p>
+                    <p>Mês anterior: <span th:text="${receitaMesAnterior}">0</span></p>
+                    <p>Variação: <span th:text="${variacaoReceita}">0%</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de clientes por mês -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card mb-3">
+                <div class="card-header">Novos clientes por mês (últimos 12 meses)</div>
+                <div class="card-body">
+                    <canvas id="graficoClientesMes" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de vendas por mês
+var ctxVendas = document.getElementById('graficoVendasMes').getContext('2d');
+var graficoVendasMes = new Chart(ctxVendas, {
+    type: 'bar',
+    data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+            label: 'Vendas',
+            data: [120, 150, 180, 200, 170, 210, 190, 220, 230, 250, 240, 260],
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }]
+    },
+    options: {responsive: true}
+});
+// Gráfico de receita por mês
+var ctxReceita = document.getElementById('graficoReceitaMes').getContext('2d');
+var graficoReceitaMes = new Chart(ctxReceita, {
+    type: 'line',
+    data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+            label: 'Receita',
+            data: [1000, 1200, 1400, 1600, 1500, 1700, 1650, 1800, 1900, 2000, 2100, 2200],
+            borderColor: 'rgba(255, 99, 132, 1)',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            fill: true
+        }]
+    },
+    options: {responsive: true}
+});
+// Gráfico de clientes por mês
+var ctxClientes = document.getElementById('graficoClientesMes').getContext('2d');
+var graficoClientesMes = new Chart(ctxClientes, {
+    type: 'bar',
+    data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+            label: 'Novos Clientes',
+            data: [5, 8, 10, 12, 9, 11, 13, 14, 15, 16, 17, 18],
+            backgroundColor: 'rgba(75, 192, 192, 0.7)'
+        }]
+    },
+    options: {responsive: true}
+});
+</script>
+</body>
+</html>

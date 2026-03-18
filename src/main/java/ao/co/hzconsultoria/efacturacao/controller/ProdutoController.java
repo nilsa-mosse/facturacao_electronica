@@ -52,11 +52,13 @@ public class ProdutoController {
         produto.setCodigoBarra(codigoBarra);
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
+        // Salva primeiro para gerar o ID
+        produtoRepository.save(produto);
         if (imagem != null && !imagem.isEmpty()) {
             produto.setImagemBlob(imagem.getBytes());
-            produto.setImagem(imagem.getOriginalFilename());
+            produto.setImagem("/produto/imagem/" + produto.getId()); // Caminho correto
+            produtoRepository.save(produto); // Salva novamente com imagem
         }
-        produtoRepository.save(produto);
         model.addAttribute("mensagem", "Produto cadastrado com sucesso!");
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
@@ -70,5 +72,60 @@ public class ProdutoController {
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(produto.getImagemBlob());
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/produtos/detalhes/{id}")
+    public String detalhesProduto(@PathVariable Long id, Model model) {
+        Produto produto = produtoRepository.findById(id).orElse(new Produto());
+        Pageable pageable = PageRequest.of(0, 50);
+        model.addAttribute("produto", produto);
+        model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
+        return "detalhesProduto";
+    }
+
+    @PostMapping("/produtos/editar")
+    public String editarProduto(
+            @RequestParam("id") Long id,
+            @RequestParam("nome") String nome,
+            @RequestParam("descricao") String descricao,
+            @RequestParam("preco") double preco,
+            @RequestParam("quantidadeEstoque") int quantidadeEstoque,
+            @RequestParam("codigoBarra") String codigoBarra,
+            @RequestParam("categoriaId") Long categoriaId,
+            @RequestParam(value = "imagem", required = false) MultipartFile imagem,
+            Model model) throws IOException {
+
+        // Buscar o produto pelo ID
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
+
+        // Atualizar campos
+        produto.setNome(nome);
+        produto.setDescricao(descricao);
+        produto.setPreco(preco);
+        produto.setQuantidadeEstoque(quantidadeEstoque);
+        produto.setCodigoBarra(codigoBarra);
+
+        // Atualizar categoria
+        Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
+        produto.setCategoria(categoria);
+
+        // Atualizar imagem se houver upload
+        if (imagem != null && !imagem.isEmpty()) {
+            produto.setImagemBlob(imagem.getBytes());
+            produto.setImagem("/produto/imagem/" + produto.getId());
+        }
+
+        // Salvar alterações no banco
+        produtoRepository.save(produto);
+
+        // Redirecionar para a listagem com os dados atualizados
+        return "redirect:/produtos/listar";
+    }
+
+    @GetMapping("/produtos/apagar/{id}")
+    public String apagarProduto(@PathVariable Long id) {
+        produtoRepository.deleteById(id);
+        return "redirect:/produtos/listar";
     }
 }

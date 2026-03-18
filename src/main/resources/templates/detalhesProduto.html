@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head">
+    <link rel="stylesheet" th:href="@{/assets/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/assets/adminlte.min.css}" />
+    <style>
+        .produto-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+            margin-top: 32px;
+        }
+        .produto-imagem {
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.10);
+            background: #f8f9fa;
+            padding: 12px;
+        }
+        .produto-tabela th {
+            width: 180px;
+            background: #f4f6f9;
+            color: #333;
+        }
+        .produto-tabela td {
+            background: #fff;
+        }
+        .btn-custom {
+            min-width: 120px;
+            font-weight: 500;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,123,255,0.08);
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .btn-success.btn-custom {
+            background: linear-gradient(90deg, #28a745 0%, #218838 100%);
+            color: #fff;
+            border: none;
+        }
+        .btn-success.btn-custom:hover {
+            background: linear-gradient(90deg, #218838 0%, #28a745 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(40,167,69,0.15);
+        }
+        .btn-secondary.btn-custom {
+            background: linear-gradient(90deg, #6c757d 0%, #495057 100%);
+            color: #fff;
+            border: none;
+        }
+        .btn-secondary.btn-custom:hover {
+            background: linear-gradient(90deg, #495057 0%, #6c757d 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(108,117,125,0.15);
+        }
+        .btn-custom:active {
+            box-shadow: 0 2px 6px rgba(0,123,255,0.18);
+        }
+        .produto-titulo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+<main class="py-4">
+    <div class="container">
+        <div class="produto-card mx-auto col-md-8">
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-4 text-center">
+                    <div class="produto-imagem mb-3">
+                        <div th:if="${produto.imagemBlob != null}">
+                            <img th:src="@{/produto/imagem/{id}(id=${produto.id})}" alt="Imagem do Produto" style="max-width:180px; max-height:180px;"/>
+                        </div>
+                        <div th:if="${produto.imagemBlob == null}" class="text-muted" style="font-size:1.2rem;">Sem imagem</div>
+                    </div>
+                    <input type="file" name="imagem" class="form-control mt-2">
+                </div>
+                <div class="col-md-8">
+                    <div class="produto-titulo">Detalhes do Produto</div>
+                    <table class="table produto-tabela table-bordered">
+                        <tr>
+                            <th>Nome</th>
+                            <td><input type="text" name="nome" class="form-control" th:value="${produto.nome}" required></td>
+                        </tr>
+                        <tr>
+                            <th>Categoria</th>
+                            <td>
+                                <select name="categoriaId" class="form-select">
+                                    <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}" th:selected="${produto.categoria != null && produto.categoria.id == catObj.id}"></option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Código de Barras</th>
+                            <td><input type="text" name="codigoBarra" class="form-control" th:value="${produto.codigoBarra}"></td>
+                        </tr>
+                        <tr>
+                            <th>Preço</th>
+                            <td><input type="number" name="preco" class="form-control" th:value="${produto.preco}" min="0" step="0.01"></td>
+                        </tr>
+                        <tr>
+                            <th>Descrição</th>
+                            <td><textarea name="descricao" class="form-control" th:text="${produto.descricao}" rows="3"></textarea></td>
+                        </tr>
+                        <tr>
+                            <th>Quantidade em Estoque</th>
+                            <td><input type="number" name="quantidadeEstoque" class="form-control" th:value="${produto.quantidadeEstoque}" min="0"></td>
+                        </tr>
+                    </table>
+                    <input type="hidden" name="id" th:value="${produto.id}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 text-end">
+                    <button type="submit" class="btn btn-success btn-custom">Salvar Alterações</button>
+                    <a th:href="@{/produtos/listar}" class="btn btn-secondary btn-custom ms-2">Voltar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

@@ -54,6 +54,15 @@ CREATE TABLE fatura (
     FOREIGN KEY (venda_id) REFERENCES venda(id)
 );
 
+-- Tabela de usuários para autenticação
+CREATE TABLE IF NOT EXISTS usuario (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL
+);
+
 -- Dados fake para categoria
 INSERT INTO categoria (nome) VALUES
 ('Informática'),
@@ -137,3 +146,9 @@ INSERT INTO item_carrinho (venda_id, produto_id, quantidade, preco_total) VALUES
 INSERT INTO fatura (venda_id, numero_fatura, data_emissao, enviada_agt) VALUES
 (1, 'FAT20260314001', '2026-03-14 10:05:00', TRUE),
 (2, 'FAT20260314002', '2026-03-14 11:05:00', FALSE);
+
+-- Usuários de exemplo (senha: 'admin123' e 'user123' criptografadas com BCrypt)
+INSERT INTO usuario (login, senha, nome, role) VALUES
+('admin', '$2a$10$7QJwK6QZK6QJwK6QZK6QJwK6QZK6QJwK6QJwK6QZK6QJwK6QZK6QJwK', 'Administrador', 'ADMIN'),
+('user', '$2a$10$7QJwK6QZK6QJwK6QZK6QJwK6QZK6QJwK6QJwK6QZK6QJwK6QZK6QJwK', 'Usuário', 'USER');
+-- Substitua as senhas por hashes reais gerados com BCrypt

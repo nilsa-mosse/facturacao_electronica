@@ -49,4 +49,31 @@ public class ListarProdutosController {
         model.addAttribute("busca", busca);
         return "listarProdutos";
     }
+
+    @GetMapping("/produtos/listar-parcial")
+    public String listarProdutosParcial(@RequestParam(value = "cat", required = false) Long cat,
+                                        @RequestParam(value = "busca", required = false) String busca,
+                                        @RequestParam(value = "page", defaultValue = "0") int page,
+                                        Model model) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Produto> produtosPage;
+        if (cat != null) {
+            produtosPage = produtoRepository.findByCategoria_Id(cat, pageable);
+        } else {
+            produtosPage = produtoRepository.findAll(pageable);
+        }
+        List<Produto> produtos = produtosPage.getContent();
+        if (busca != null && !busca.isEmpty()) {
+            produtos = produtos.stream()
+                    .filter(p -> p.getNome().toLowerCase().contains(busca.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        List<Categoria> categorias = categoriaRepository.findAll(PageRequest.of(0, 50)).getContent();
+        model.addAttribute("produtos", produtos);
+        model.addAttribute("produtosPage", produtosPage);
+        model.addAttribute("categorias", categorias);
+        model.addAttribute("categoriaSelecionada", cat);
+        model.addAttribute("busca", busca);
+        return "produtosListagemParcial";
+    }
 }

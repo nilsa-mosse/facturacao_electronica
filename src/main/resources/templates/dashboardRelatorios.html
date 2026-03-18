@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head"></head>
+<body>
+<main class="py-4">
+<div class="container-fluid px-4">
+    <h3 class="fw-bold mb-4">Dashboard - Relatórios</h3>
+
+    <!-- Filtros de período -->
+    <form class="mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                <label>Data Inicial</label>
+                <input type="date" name="dataInicial" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label>Data Final</label>
+                <input type="date" name="dataFinal" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label>Tipo de Relatório</label>
+                <select name="tipoRelatorio" class="form-select">
+                    <option value="vendas">Vendas</option>
+                    <option value="faturacao">Faturação</option>
+                    <option value="clientes">Clientes</option>
+                    <option value="produtos">Produtos</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-grid align-items-end">
+                <button class="btn btn-primary mt-4">Gerar Relatório</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Relatórios disponíveis -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Relatório de Vendas</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead><tr><th>Data</th><th>Valor</th><th>Cliente</th></tr></thead>
+                        <tbody>
+                            <tr th:each="venda : ${relatorioVendas}">
+                                <td th:text="${venda.data}">2026-03-01</td>
+                                <td th:text="${venda.valor}">1000</td>
+                                <td th:text="${venda.cliente}">Cliente Exemplo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="btn btn-success btn-sm">Exportar PDF</a>
+                    <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Relatório de Faturação</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead><tr><th>Nº Fatura</th><th>Data</th><th>Valor</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr th:each="fatura : ${relatorioFaturacao}">
+                                <td th:text="${fatura.numero}">FAT-0001</td>
+                                <td th:text="${fatura.data}">2026-03-01</td>
+                                <td th:text="${fatura.valor}">1500</td>
+                                <td th:text="${fatura.status}">Emitida</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="btn btn-success btn-sm">Exportar PDF</a>
+                    <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Relatório de Clientes</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead><tr><th>Cliente</th><th>Compras</th><th>Valor Total</th></tr></thead>
+                        <tbody>
+                            <tr th:each="cliente : ${relatorioClientes}">
+                                <td th:text="${cliente.nome}">Cliente Exemplo</td>
+                                <td th:text="${cliente.compras}">5</td>
+                                <td th:text="${cliente.valorTotal}">5000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="btn btn-success btn-sm">Exportar PDF</a>
+                    <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">Relatório de Produtos</div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead><tr><th>Produto</th><th>Vendas</th><th>Estoque</th></tr></thead>
+                        <tbody>
+                            <tr th:each="produto : ${relatorioProdutos}">
+                                <td th:text="${produto.nome}">Produto Exemplo</td>
+                                <td th:text="${produto.vendas}">10</td>
+                                <td th:text="${produto.estoque}">50</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="btn btn-success btn-sm">Exportar PDF</a>
+                    <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+</body>
+</html>
