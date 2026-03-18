@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Cliente</title>
+    <link rel="stylesheet" href="/assets/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Cadastro de Cliente</h1>
+        <form action="/clientes/save" method="post">
+            <div class="form-group">
+                <label for="name">Nome</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Digite o nome do cliente" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Digite o email do cliente" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefone</label>
+                <input type="text" class="form-control" id="phone" name="phone" placeholder="Digite o telefone do cliente" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Endereço</label>
+                <textarea class="form-control" id="address" name="address" rows="3" placeholder="Digite o endereço do cliente" required></textarea>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="/clientes" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+    <script src="/assets/jquery-3.6.0.min.js"></script>
+    <script src="/assets/bootstrap.bundle.min.js"></script>
+</body>
+</html>

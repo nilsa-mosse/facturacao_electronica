@@ -63,6 +63,15 @@ CREATE TABLE IF NOT EXISTS usuario (
     role VARCHAR(20) NOT NULL
 );
 
+-- Criação da tabela de clientes
+CREATE TABLE IF NOT EXISTS clients (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    address TEXT NOT NULL
+);
+
 -- Dados fake para categoria
 INSERT INTO categoria (nome) VALUES
 ('Informática'),
@@ -152,3 +161,9 @@ INSERT INTO usuario (login, senha, nome, role) VALUES
 ('admin', '$2a$10$7QJwK6QZK6QJwK6QZK6QJwK6QZK6QJwK6QJwK6QZK6QJwK6QZK6QJwK', 'Administrador', 'ADMIN'),
 ('user', '$2a$10$7QJwK6QZK6QJwK6QZK6QJwK6QZK6QJwK6QJwK6QZK6QJwK6QZK6QJwK', 'Usuário', 'USER');
 -- Substitua as senhas por hashes reais gerados com BCrypt
+
+-- Dados fake para a tabela de clientes
+INSERT INTO clients (name, email, phone, address) VALUES
+('John Doe', 'john.doe@example.com', '123456789', '123 Main St'),
+('Jane Smith', 'jane.smith@example.com', '987654321', '456 Elm St'),
+('Alice Johnson', 'alice.johnson@example.com', '555123456', '789 Oak St');

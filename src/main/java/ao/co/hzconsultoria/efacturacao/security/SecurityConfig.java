@@ -35,6 +35,7 @@ public class SecurityConfig {
         http
             .authorizeRequests()
                 .antMatchers("/login", "/assets/**").permitAll()
+                .antMatchers("/produtos/listar").hasAuthority("USER")
                 .anyRequest().authenticated()
             .and()
             .formLogin()
