@@ -9,6 +9,7 @@ public class Venda {
     private List<ItemCarrinho> itens;
     private double total;
     private Date dataVenda;
+    
 	public Long getId() {
 		return id;
 	}

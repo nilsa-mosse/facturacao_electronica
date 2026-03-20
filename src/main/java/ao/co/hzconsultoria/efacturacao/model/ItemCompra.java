@@ -16,7 +16,9 @@ public class ItemCompra {
     private Double preco;
 
     private Double subtotal;
-    
+
+    @ManyToOne
+    private Compra compra;
 
     // Getters and Setters
     public Long getId() {
@@ -57,5 +59,13 @@ public class ItemCompra {
 
     public void setSubtotal(Double subtotal) {
         this.subtotal = subtotal;
+    }
+
+    public Compra getCompra() {
+        return compra;
+    }
+
+    public void setCompra(Compra compra) {
+        this.compra = compra;
     }
 }

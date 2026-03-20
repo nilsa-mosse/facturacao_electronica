@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
+import ao.co.hzconsultoria.efacturacao.model.Venda;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
 
@@ -46,6 +47,7 @@ public class VendaController {
         return "redirect:/pos";
     }
     
+    /*
     @PostMapping("/api/compras")
     public ResponseEntity<?>  finalizarCompra(@RequestBody Compra compra) {
     	
@@ -53,6 +55,35 @@ public class VendaController {
         vendaService.finalizarVenda(compra);
     	return ResponseEntity.ok("OK");
     }   
+    */
+    
+    
+    @PostMapping("/api/compras")
+    public ResponseEntity<?> finalizarCompra(@RequestBody List<Compra> compras) 
+    {
+        if (compras == null || compras.isEmpty()) {
+            return ResponseEntity.badRequest().body("Compras list cannot be null or empty");
+        }
+        for (Compra compra : compras) {
+            if (compra.getItens() == null || compra.getItens().isEmpty()) {
+                return ResponseEntity.badRequest().body("Each compra must have at least one item");
+            }
+        }
+        vendaService.finalizarVendas(compras);
+        return ResponseEntity.ok().build();
+    }
+    
+    /*
+    @GetMapping("/vendas/historico")
+    public String historico(Model model) {
+
+        List<Venda> vendas = vendaService.listarTodas();
+
+        model.addAttribute("vendas", vendas);
+
+        return "historico";
+    }
+    */
     
     
 }

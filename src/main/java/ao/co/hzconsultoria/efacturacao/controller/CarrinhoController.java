@@ -1,11 +1,10 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
-import ao.co.hzconsultoria.efacturacao.model.Carrinho;
-import ao.co.hzconsultoria.efacturacao.model.Categoria;
-import ao.co.hzconsultoria.efacturacao.model.Produto;
+import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.CarrinhoService;
+import ao.co.hzconsultoria.efacturacao.service.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +31,9 @@ public class CarrinhoController {
     @Autowired(required = false)
     private ao.co.hzconsultoria.efacturacao.service.FaturaService faturaService;
 
+    @Autowired
+    private VendaService vendaService;
+
     @GetMapping("/")
     public String index(Model model) {
         long start = System.currentTimeMillis();
@@ -52,6 +54,8 @@ public class CarrinhoController {
         Produto produto = produtoRepository.findById(produtoId).orElse(null);
         if (produto != null) {
             carrinhoService.adicionarProduto(carrinho, produto, quantidade);
+            // Save the item to the database
+            carrinhoService.salvarItemNoBanco(carrinho, produto, quantidade);
         }
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("produtos", produtoRepository.findAll(pageable).getContent());
@@ -61,12 +65,25 @@ public class CarrinhoController {
 
     @PostMapping("/finalizarVenda")
     public String finalizarVenda(Model model) {
-        // Gera a fatura se o serviço estiver disponível
-        if (faturaService != null) {
-            faturaService.gerarFatura(carrinho);
-        }
-        carrinho = new Carrinho(); // Limpa carrinho após venda
-        // Redireciona para a página inicial
+        // Convert Carrinho to Compra
+        Compra compra = new Compra();
+        compra.setItens(carrinho.getItens().stream().map(item -> {
+            ItemCompra itemCompra = new ItemCompra();
+            itemCompra.setNomeProduto(item.getProduto().getNome());
+            itemCompra.setQuantidade(item.getQuantidade());
+            itemCompra.setPreco(item.getProduto().getPreco());
+            itemCompra.setSubtotal(item.getQuantidade() * item.getProduto().getPreco());
+            itemCompra.setCompra(compra); // Vincula o item à compra
+            return itemCompra;
+        }).collect(Collectors.toList()));
+
+        // Finalize the purchase using VendaService
+        vendaService.finalizarVenda(compra);
+
+        // Clear the cart after saving
+        carrinho = new Carrinho();
+
+        // Redirect to the home page
         return "index";
     }
 

@@ -15,7 +15,7 @@ public class Compra {
 
     private Double total;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<ItemCompra> itens;
 
     // Getters and Setters

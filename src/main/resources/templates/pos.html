@@ -137,11 +137,22 @@ $(document).ready(function() {
             return;
         }
 
+        // Monta objeto Compra
+        let compra = {
+            itens: cart.map(item => ({
+                nomeProduto: item.nome,
+                quantidade: item.qtd,
+                preco: item.preco,
+                subtotal: item.qtd * item.preco
+            })),
+            total: cart.reduce((sum, item) => sum + item.qtd * item.preco, 0)
+        };
+
         $.ajax({
-            url: '/api/compras',
+            url: '/api/compras/single', // Corrigido para endpoint correto
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(cart),
+            data: JSON.stringify(compra),
 
             success: function() {
                 alert('Compra finalizada!');
