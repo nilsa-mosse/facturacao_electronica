@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
-import ao.co.hzconsultoria.efacturacao.model.Venda;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
 
 
 @Controller
-public class VendaController {
+public class CompraController {
 
     @Autowired
     private ProdutoRepository produtoRepository;
@@ -47,43 +46,15 @@ public class VendaController {
         return "redirect:/pos";
     }
     
-    /*
-    @PostMapping("/api/compras")
-    public ResponseEntity<?>  finalizarCompra(@RequestBody Compra compra) {
-    	
-    	System.out.println("Resultado: "+ compra.getId());
+    @PostMapping("/api/compras/single")
+    public ResponseEntity<?> finalizarCompraSingle(@RequestBody Compra compra) {
+        if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
+            return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
+        }
+        // Vincula cada item à compra para garantir persistência
+        compra.getItens().forEach(item -> item.setCompra(compra));
         vendaService.finalizarVenda(compra);
-    	return ResponseEntity.ok("OK");
-    }   
-    */
-    
-    
-    @PostMapping("/api/compras")
-    public ResponseEntity<?> finalizarCompra(@RequestBody List<Compra> compras) 
-    {
-        if (compras == null || compras.isEmpty()) {
-            return ResponseEntity.badRequest().body("Compras list cannot be null or empty");
-        }
-        for (Compra compra : compras) {
-            if (compra.getItens() == null || compra.getItens().isEmpty()) {
-                return ResponseEntity.badRequest().body("Each compra must have at least one item");
-            }
-        }
-        vendaService.finalizarVendas(compras);
         return ResponseEntity.ok().build();
     }
-    
-    /*
-    @GetMapping("/vendas/historico")
-    public String historico(Model model) {
-
-        List<Venda> vendas = vendaService.listarTodas();
-
-        model.addAttribute("vendas", vendas);
-
-        return "historico";
-    }
-    */
-    
     
 }

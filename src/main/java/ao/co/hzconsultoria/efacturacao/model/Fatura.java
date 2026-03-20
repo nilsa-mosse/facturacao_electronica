@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Fatura {
     private Long id;
-    private Venda venda;
+    private Compra compra;
     private String numeroFatura;
     private Date dataEmissao;
     private boolean enviadaAGT;

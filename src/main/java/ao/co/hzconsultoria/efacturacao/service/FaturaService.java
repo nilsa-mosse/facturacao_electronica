@@ -1,6 +1,5 @@
 package ao.co.hzconsultoria.efacturacao.service;
 
-import ao.co.hzconsultoria.efacturacao.model.Venda;
 import ao.co.hzconsultoria.efacturacao.model.Fatura;
 import ao.co.hzconsultoria.efacturacao.model.Carrinho;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
@@ -8,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FaturaService {
-    public Fatura emitirFatura(Venda venda) {
+    public Fatura emitirFatura(Compra compra) {
         // Lógica para emitir fatura
         return null;
     }

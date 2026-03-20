@@ -88,6 +88,7 @@
                         <th>Produto</th>
                         <th>Qtd</th>
                         <th>Total</th>
+                        <th>Ações</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -118,56 +119,6 @@
 <script>
 let cart = [];
 
-$(document).ready(function() {
-
-    // PESQUISA
-    $('#search').on('input', function() {
-        let value = $(this).val().toLowerCase();
-
-        $('.card-product').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-        });
-    });
-
-    // FINALIZAR
-    $('#finalizarCompra').click(function() {
-
-        if (cart.length === 0) {
-            alert("Carrinho vazio!");
-            return;
-        }
-
-        // Monta objeto Compra
-        let compra = {
-            itens: cart.map(item => ({
-                nomeProduto: item.nome,
-                quantidade: item.qtd,
-                preco: item.preco,
-                subtotal: item.qtd * item.preco
-            })),
-            total: cart.reduce((sum, item) => sum + item.qtd * item.preco, 0)
-        };
-
-        $.ajax({
-            url: '/api/compras/single', // Corrigido para endpoint correto
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(compra),
-
-            success: function() {
-                alert('Compra finalizada!');
-                cart = [];
-                renderCart();
-            },
-
-            error: function() {
-                alert('Erro no backend!');
-            }
-        });
-    });
-
-});
-
 // ADD
 function addToCart(btn) {
 
@@ -194,7 +145,7 @@ function renderCart() {
 
     let total = 0;
 
-    cart.forEach(item => {
+    cart.forEach((item, index) => {
 
         let subtotal = item.qtd * item.preco;
         total += subtotal;
@@ -202,14 +153,117 @@ function renderCart() {
         tbody.append(`
             <tr>
                 <td>${item.nome}</td>
-                <td>${item.qtd}</td>
-                <td>${subtotal}</td>
+
+                <td>
+                    <div class="d-flex align-items-center">
+
+                        <button class="btn btn-sm btn-danger me-1"
+                                onclick="decreaseQty(${index})">
+                            <i class="fas fa-minus"></i>
+                        </button>
+
+                        <span>${item.qtd}</span>
+
+                        <button class="btn btn-sm btn-success ms-1"
+                                onclick="increaseQty(${index})">
+                            <i class="fas fa-plus"></i>
+                        </button>
+
+                    </div>
+                </td>
+
+                <td>${subtotal} Kz</td>
+
+                <td>
+                    <button class="btn btn-sm btn-primary me-1"
+                            onclick="editItem(${index})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+
+                    <button class="btn btn-sm btn-danger"
+                            onclick="removeItem(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
             </tr>
         `);
     });
 
     $("#total").text(total);
     $("#itensInput").val(JSON.stringify(cart));
+}
+
+
+
+
+$(document).ready(function() {
+    $('#finalizarCompra').click(function() {
+        if (cart.length === 0) {
+            alert("Carrinho vazio!");
+            return;
+        }
+        // Monta objeto Compra
+        let compra = {
+            itens: cart.map(item => ({
+                nomeProduto: item.nome,
+                quantidade: item.qtd,
+                preco: item.preco,
+                subtotal: item.qtd * item.preco
+            })),
+            total: cart.reduce((sum, item) => sum + item.qtd * item.preco, 0)
+        };
+        $.ajax({
+            url: '/api/compras/single',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(compra),
+            success: function() {
+                alert('Compra finalizada!');
+                cart = [];
+                renderCart();
+            },
+            error: function(xhr) {
+                alert('Erro ao finalizar compra: ' + (xhr.responseText || 'Erro desconhecido'));
+            }
+        });
+    });
+});
+
+
+function increaseQty(index) {
+    cart[index].qtd++;
+    renderCart();
+}
+
+function decreaseQty(index) {
+    if (cart[index].qtd > 1) {
+        cart[index].qtd--;
+    } else {
+        removeItem(index);
+    }
+    renderCart();
+}
+
+function removeItem(index) {
+    if (confirm("Remover este produto?")) {
+        cart.splice(index, 1);
+        renderCart();
+    }
+}
+
+function editItem(index) {
+    let novaQtd = prompt("Nova quantidade:", cart[index].qtd);
+
+    if (novaQtd !== null) {
+        novaQtd = parseInt(novaQtd);
+
+        if (!isNaN(novaQtd) && novaQtd > 0) {
+            cart[index].qtd = novaQtd;
+            renderCart();
+        } else {
+            alert("Quantidade inválida!");
+        }
+    }
 }
 </script>
 
