@@ -34,9 +34,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/login", "/assets/**").permitAll()
-                .antMatchers("/produtos/listar").hasAuthority("USER")
+                .antMatchers("/login", "/assets/**", "/api/compras").permitAll()
                 .anyRequest().authenticated()
+            .and()
+            .csrf()
+                .ignoringAntMatchers("/api/compras")
             .and()
             .formLogin()
                 .loginPage("/login")

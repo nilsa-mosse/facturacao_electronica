@@ -28,4 +28,12 @@ public class ItemCarrinho {
     public void setPrecoTotal(double precoTotal) {
         this.precoTotal = precoTotal;
     }
+
+    public String getNome() {
+        return produto != null ? produto.getNome() : null;
+    }
+
+    public double getPreco() {
+        return produto != null ? produto.getPreco() : 0.0;
+    }
 }
