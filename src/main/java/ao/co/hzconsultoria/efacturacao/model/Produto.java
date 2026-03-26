@@ -17,6 +17,7 @@ public class Produto {
     private String codigoBarra;
     @Lob
     private byte[] imagemBlob;
+    private Double ivaPercentual;
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     @JsonBackReference
@@ -85,6 +86,14 @@ public class Produto {
 
     public void setImagemBlob(byte[] imagemBlob) {
         this.imagemBlob = imagemBlob;
+    }
+
+    public Double getIvaPercentual() {
+        return ivaPercentual;
+    }
+
+    public void setIvaPercentual(Double ivaPercentual) {
+        this.ivaPercentual = ivaPercentual;
     }
 
     public Categoria getCategoria() {

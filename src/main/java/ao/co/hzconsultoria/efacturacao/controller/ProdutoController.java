@@ -43,6 +43,7 @@ public class ProdutoController {
                                 @RequestParam("codigoBarra") String codigoBarra,
                                 @RequestParam("categoriaId") Long categoriaId,
                                 @RequestParam(value = "imagem", required = false) MultipartFile imagem,
+                                @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
                                 Model model) throws IOException {
         Produto produto = new Produto();
         produto.setNome(nome);
@@ -50,6 +51,7 @@ public class ProdutoController {
         produto.setPreco(preco);
         produto.setQuantidadeEstoque(quantidadeEstoque);
         produto.setCodigoBarra(codigoBarra);
+        produto.setIvaPercentual(ivaPercentual);
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
         // Salva primeiro para gerar o ID
@@ -93,6 +95,7 @@ public class ProdutoController {
             @RequestParam("codigoBarra") String codigoBarra,
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam(value = "imagem", required = false) MultipartFile imagem,
+            @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
             Model model) throws IOException {
 
         // Buscar o produto pelo ID
@@ -105,6 +108,7 @@ public class ProdutoController {
         produto.setPreco(preco);
         produto.setQuantidadeEstoque(quantidadeEstoque);
         produto.setCodigoBarra(codigoBarra);
+        produto.setIvaPercentual(ivaPercentual);
 
         // Atualizar categoria
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Receita Mensal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous">
+    <style>
+        body { background: #f8f9fa; }
+        .card {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            border-radius: 12px;
+        }
+        .table thead th {
+            background: #007bff;
+            color: #fff;
+            font-weight: 600;
+        }
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: #f2f2f2;
+        }
+        .header-icon {
+            color: #007bff;
+            margin-right: 10px;
+        }
+        .badge-total {
+            font-size: 1.1rem;
+            background: #007bff;
+            color: #fff;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-coins fa-2x header-icon"></i>
+                    <h2 class="mb-0">Receita Mensal
+                        <span class="badge badge-total"  th:text="${#numbers.formatDecimal(#aggregates.sum(vendasDoMes.![total]), 1, 'COMMA', 2, 'POINT')}">0,00 Kz</span>
+                    
+                    </h2>
+                </div>
+                <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                </a>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Data</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="venda : ${vendasDoMes}">
+                                <td th:text="${venda.id}">1</td>
+                                <td th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy HH:mm')}">20/03/2026</td>
+                                <td th:text="${#numbers.formatDecimal(venda.total, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">0,00 Kz</td>
+                            </tr>
+                            <tr th:if="${vendasDoMes.size() == 0}">
+                                <td colspan="3" class="text-center">Nenhuma venda realizada neste mês.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

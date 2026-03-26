@@ -155,6 +155,7 @@
                 <th>Código</th>
                 <th>Preço</th>
                 <th>Stock</th>
+                <th>IVA (%)</th>
                 <th class="text-end">Ações</th>
               </tr>
             </thead>
@@ -175,6 +176,7 @@
                 <td>
                   <span class="badge" th:classappend="${produto.quantidadeEstoque < 5} ? 'bg-danger' : 'bg-primary'" th:text="${produto.quantidadeEstoque}"></span>
                 </td>
+                <td th:text="${produto.ivaPercentual != null ? produto.ivaPercentual + '%': '-'}"></td>
                 <td class="text-end">
                   <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" th:data-bs-target="${'#detalhesModal_' + produto.id}">✏️</button>
                   <button class="btn btn-sm btn-outline-danger" th:onclick="|apagarProduto('${produto.id}')|">🗑️</button>

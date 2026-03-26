@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
+import ao.co.hzconsultoria.efacturacao.model.Fatura;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
+import ao.co.hzconsultoria.efacturacao.service.FaturaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
 
 
@@ -26,6 +28,9 @@ public class CompraController {
     
     @Autowired
     private VendaService vendaService;
+    
+    @Autowired
+    private FaturaService faturaService;
 
     @GetMapping("/pos")
     public String abrirPDV(Model model) {
@@ -51,10 +56,11 @@ public class CompraController {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
             return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
         }
-        // Vincula cada item à compra para garantir persistência
         compra.getItens().forEach(item -> item.setCompra(compra));
-        vendaService.finalizarVenda(compra);
-        return ResponseEntity.ok().build();
+        Compra compraSalva = vendaService.finalizarVenda(compra);
+        Fatura fatura = faturaService.emitirFatura(compraSalva);
+        String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
+        return ResponseEntity.ok().body(pdfFile);
     }
     
 }

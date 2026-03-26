@@ -67,6 +67,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Nome</th>
+                            <th>NIF</th>
                             <th>Email</th>
                             <th>Telefone</th>
                             <th>Endereço</th>
@@ -74,27 +75,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Exemplo de cliente -->
-                        <tr>
-                            <td>1</td>
-                            <td>João Silva</td>
-                            <td>joao.silva@email.com</td>
-                            <td>923000001</td>
-                            <td>Rua 1, Luanda</td>
+                        <tr th:each="cliente : ${clientes}">
+                            <td th:text="${cliente.id}"></td>
+                            <td th:text="${cliente.nome}"></td>
+                            <td th:text="${cliente.nif}"></td>
+                            <td th:text="${cliente.email}"></td>
+                            <td th:text="${cliente.telefone}"></td>
+                            <td th:text="${cliente.endereco}"></td>
                             <td>
                                 <div class="btn-group">
-                                    <a href="/clientes/editar/1" class="btn btn-warning btn-sm"><i class="fas fa-edit me-1"></i>Editar</a>
-                                    <a href="/clientes/delete/1" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>Excluir</a>
+                                    <a th:href="@{'/clientes/editar/' + ${cliente.id}}" class="btn btn-warning btn-sm"><i class="fas fa-edit me-1"></i>Editar</a>
+                                    <a th:href="@{'/clientes/delete/' + ${cliente.id}}" class="btn btn-danger btn-sm"><i class="fas fa-trash me-1"></i>Excluir</a>
                                 </div>
                             </td>
                         </tr>
-                        <!-- Fim do exemplo -->
                     </tbody>
                 </table>
             </div>
 
             <div class="text-center mt-3">
-                <a href="/clientes/cadastro" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Cadastrar Novo Cliente</a>
+                <a th:href="@{/clientes/adicionar}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Cadastrar Novo Cliente</a>
             </div>
         </div>
     </div>

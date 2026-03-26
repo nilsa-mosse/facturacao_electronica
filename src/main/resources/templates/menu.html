@@ -95,19 +95,13 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link">
+                <a th:href="@{/devolucoes}" class="nav-link">
                   <i class="fas fa-file-alt nav-icon"></i>
                   <p>Devolucoes</p>
                 </a>
               </li>
             </ul>
           </li>
-          
-          
-          
-          
-          
-          
 
           <!-- Cadastros Menu -->
           <li class="nav-item has-treeview">
@@ -135,14 +129,9 @@
                       <p>Adicionar Cliente</p>
                     </a>
                   </li>
+ 
                   <li class="nav-item">
-                    <a th:href="@{/clientes/detalhes}" class="nav-link">
-                      <i class="fas fa-user-edit nav-icon"></i>
-                      <p>Ver / Editar Detalhes</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/clientes/historico-compras}" class="nav-link">
+                    <a th:href="@{/clientes/historico}" class="nav-link">
                       <i class="fas fa-history nav-icon"></i>
                       <p>Histórico de Compras</p>
                     </a>
@@ -317,13 +306,13 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a th:href="@{/fornecedores/listar}" class="nav-link">
+                    <a th:href="@{/factura-eletronica/enviar}" class="nav-link">
                       <i class="fas fa-list nav-icon"></i>
                       <p>Enviar para AGT</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
+                    <a th:href="@{/factura-eletronica/estado}" class="nav-link">
                       <i class="fas fa-user-plus nav-icon"></i>
                       <p>Estado (Em processamento, Validada, Rejeitada)</p>
                     </a>

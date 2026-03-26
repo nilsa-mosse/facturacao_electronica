@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Devoluções</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f4f6f9; }
+        .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 24px; }
+        .card-header { background: #0d6efd; color: #fff; border-radius: 12px 12px 0 0; }
+        .table th, .table td { vertical-align: middle; }
+        .table-striped tbody tr:nth-of-type(odd) { background-color: #e9ecef; }
+        .icon { color: #0d6efd; margin-right: 8px; }
+        .badge { font-size: 0.9em; }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-undo fa-lg icon"></i>
+                    <h3 class="mb-0">Devoluções</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>ID</th>
+                                <th>Data</th>
+                                <th>Total</th>
+                                <th>Itens</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="devolucao : ${devolucoes}">
+                                <td th:text="${devolucao.id}"></td>
+                                <td th:text="${#temporals.format(devolucao.dataDevolucao, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td><span class="badge bg-primary" th:text="${devolucao.total} + ' Kz'"></span></td>
+                                <td>
+                                    <ul class="list-unstyled mb-0">
+                                        <li th:each="item : ${devolucao.itens}">
+                                            <span class="fw-bold" th:text="${item.nomeProduto}"></span>
+                                            <span class="badge bg-secondary ms-2" th:text="'x ' + ${item.quantidade}"></span>
+                                            <span class="badge bg-info ms-2" th:text="${item.subtotal} + ' Kz'"></span>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

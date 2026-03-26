@@ -15,6 +15,7 @@ CREATE TABLE produto (
     imagem_blob LONGBLOB,
     codigo_barra VARCHAR(50),
     categoria_id BIGINT,
+    iva_percentual DECIMAL(5,2) NULL,
     FOREIGN KEY (categoria_id) REFERENCES categoria(id)
 );
 
@@ -51,7 +52,20 @@ CREATE TABLE fatura (
     numero_fatura VARCHAR(50) NOT NULL,
     data_emissao DATETIME NOT NULL,
     enviada_agt BOOLEAN DEFAULT FALSE,
+    total DECIMAL(15,2),
+    iva DECIMAL(15,2),
+    hash VARCHAR(255),
+    codigo_agt VARCHAR(100),
     FOREIGN KEY (venda_id) REFERENCES venda(id)
+);
+
+CREATE TABLE item_factura (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    factura_id BIGINT,
+    produto VARCHAR(255) NOT NULL,
+    quantidade INT NOT NULL,
+    preco DECIMAL(15,2) NOT NULL,
+    FOREIGN KEY (factura_id) REFERENCES fatura(id)
 );
 
 -- Tabela de usuários para autenticação
@@ -152,9 +166,9 @@ INSERT INTO item_carrinho (venda_id, produto_id, quantidade, preco_total) VALUES
 (2, 2, 1, 20.00);
 
 -- Dados fake para fatura
-INSERT INTO fatura (venda_id, numero_fatura, data_emissao, enviada_agt) VALUES
-(1, 'FAT20260314001', '2026-03-14 10:05:00', TRUE),
-(2, 'FAT20260314002', '2026-03-14 11:05:00', FALSE);
+INSERT INTO fatura (venda_id, numero_fatura, data_emissao, enviada_agt, total, iva, hash, codigo_agt) VALUES
+(1, 'FAT20260314001', '2026-03-14 10:05:00', TRUE, 1000.00, 140.00, 'HASH123', 'AGT001'),
+(2, 'FAT20260314002', '2026-03-14 11:05:00', FALSE, 500.00, 70.00, 'HASH456', 'AGT002');
 
 -- Usuários de exemplo (senha: 'admin123' e 'user123' criptografadas com BCrypt)
 INSERT INTO usuario (login, senha, nome, role) VALUES

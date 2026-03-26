@@ -16,6 +16,7 @@ public class ItemCompra {
     private Double preco;
 
     private Double subtotal;
+    private Double iva;
 
     @ManyToOne
     private Compra compra;
@@ -68,4 +69,14 @@ public class ItemCompra {
     public void setCompra(Compra compra) {
         this.compra = compra;
     }
+
+	public Double getIva() {
+		return iva;
+	}
+
+	public void setIva(Double iva) {
+		this.iva = iva;
+	}
+    
+    
 }

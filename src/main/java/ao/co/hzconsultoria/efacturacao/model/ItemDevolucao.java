@@ -1,0 +1,29 @@
+package ao.co.hzconsultoria.efacturacao.model;
+
+import javax.persistence.*;
+
+@Entity
+public class ItemDevolucao {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String nomeProduto;
+    private Integer quantidade;
+    private Double preco;
+    private Double subtotal;
+    @ManyToOne
+    private Devolucao devolucao;
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getNomeProduto() { return nomeProduto; }
+    public void setNomeProduto(String nomeProduto) { this.nomeProduto = nomeProduto; }
+    public Integer getQuantidade() { return quantidade; }
+    public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
+    public Double getPreco() { return preco; }
+    public void setPreco(Double preco) { this.preco = preco; }
+    public Double getSubtotal() { return subtotal; }
+    public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+    public Devolucao getDevolucao() { return devolucao; }
+    public void setDevolucao(Devolucao devolucao) { this.devolucao = devolucao; }
+}

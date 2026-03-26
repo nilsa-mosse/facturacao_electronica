@@ -63,6 +63,13 @@
                             <th>Quantidade em Estoque</th>
                             <td><input type="number" name="quantidadeEstoque" class="form-control" th:value="${produto.quantidadeEstoque}" min="0"></td>
                         </tr>
+                        <tr>
+                            <th>IVA (%)</th>
+                            <td>
+                                <input type="number" name="ivaPercentual" class="form-control" th:value="${produto.ivaPercentual}" min="0" max="100" step="0.01" placeholder="Digite o IVA em % (opcional)">
+                                <small class="form-text text-muted">Preencha apenas se o produto possuir IVA.</small>
+                            </td>
+                        </tr>
                     </table>
                     <input type="hidden" name="id" th:value="${produto.id}">
                 </div>

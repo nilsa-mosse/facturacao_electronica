@@ -6,6 +6,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background: #f4f6f9; }
+        .erp-toolbar {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+        .erp-toolbar input, .erp-toolbar select {
+            min-width: 180px;
+        }
         .card {
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.07);
@@ -29,12 +43,53 @@
         .badge {
             font-size: 0.9em;
         }
+        .pagination .page-link {
+            color: #198754;
+        }
+        .pagination .active .page-link {
+            background: #198754;
+            color: #fff;
+            border-color: #198754;
+        }
+        .erp-toolbar .form-control {
+            border-radius: 8px;
+            box-shadow: none;
+            border: 1px solid #d1d5db;
+        }
+        .erp-toolbar .btn-success {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 8px 24px;
+        }
+        .erp-toolbar .btn-success i {
+            margin-right: 6px;
+        }
+        .erp-toolbar input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5);
+        }
     </style>
 </head>
 <body>
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
+            <div class="erp-toolbar mb-4">
+                <form th:action="@{/historico-vendas}" method="get" class="d-flex flex-wrap gap-3 w-100 align-items-center">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa fa-calendar"></i></span>
+                        <input type="date" name="dataInicio" th:value="${dataInicio}" class="form-control" placeholder="Data início">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa fa-calendar"></i></span>
+                        <input type="date" name="dataFim" th:value="${dataFim}" class="form-control" placeholder="Data fim">
+                    </div>
+                    <div class="input-group flex-grow-1">
+                        <span class="input-group-text bg-light"><i class="fa fa-search"></i></span>
+                        <input type="text" name="pesquisa" th:value="${pesquisa}" class="form-control" placeholder="Pesquisar produto ou ID">
+                    </div>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-filter"></i> Filtrar</button>
+                </form>
+            </div>
             <div class="card">
                 <div class="card-header d-flex align-items-center">
                     <i class="fas fa-history fa-lg icon"></i>
@@ -69,6 +124,13 @@
                             </tr>
                         </tbody>
                     </table>
+                    <nav th:if="${totalPages > 1}" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li th:each="page : ${#numbers.sequence(1, totalPages)}" th:classappend="${page == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/historico-vendas(dataInicio=${dataInicio},dataFim=${dataFim},pesquisa=${pesquisa},page=${page})}" th:text="${page}"></a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
