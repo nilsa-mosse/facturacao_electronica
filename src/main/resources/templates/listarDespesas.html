@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Despesas</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        crossorigin="anonymous">
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
+        crossorigin="anonymous">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous">
+
+    <style>
+        .card {
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #dc3545;
+            color: #fff;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .badge-status {
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1 class="fw-bold">Gestão de Despesas</h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title">Listagem de Despesas</h3>
+                            <div class="card-tools ms-auto">
+                                <a th:href="@{/despesas/adicionar}" class="btn btn-light btn-sm text-danger fw-bold">
+                                    <i class="fas fa-plus me-1"></i> Nova Despesa
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Descrição</th>
+                                            <th>Valor (Kz)</th>
+                                            <th>Data</th>
+                                            <th>Categoria</th>
+                                            <th>Estado</th>
+                                            <th class="text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="despesa : ${despesas}">
+                                            <td th:text="${despesa.id}"></td>
+                                            <td th:text="${despesa.descricao}"></td>
+                                            <td class="fw-bold text-danger" th:text="${#numbers.formatDecimal(despesa.valor, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">0,00</td>
+                                            <td th:text="${despesa.dataDespesa}"></td>
+                                            <td th:text="${despesa.categoria}"></td>
+                                            <td>
+                                                <span class="badge bg-success" th:if="${despesa.status == 'PAGO'}">Pago</span>
+                                                <span class="badge bg-warning" th:if="${despesa.status == 'PENDENTE'}">Pendente</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group">
+                                                    <a th:href="@{'/despesas/editar/' + ${despesa.id}}" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a th:href="@{'/despesas/excluir/' + ${despesa.id}}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Deseja excluir esta despesa?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(despesas)}">
+                                            <td colspan="7" class="text-center py-4 bg-light">Nenhuma despesa registrada.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+</body>
+
+</html>

@@ -16,9 +16,26 @@ public class DashboardController {
         // ...outros indicadores...
         model.addAttribute("produtosMaisVendidos", dashboardService.getProdutosMaisVendidos(10));
         model.addAttribute("vendasUltimos30Dias", dashboardService.getVendasUltimos30Dias());
-        model.addAttribute("vendasDia", dashboardService.getVendasDia());
-        model.addAttribute("receitaMensal", dashboardService.getReceitaMensal());
-        model.addAttribute("produtosEstoqueBaixo", dashboardService.getProdutosEstoqueBaixo(5)); // Limite de estoque baixo = 5
+        model.addAttribute("produtosEstoqueBaixo", dashboardService.getProdutosEstoqueBaixo(5));
+
+        // 1ª Linha
+        model.addAttribute("vendasHoje", dashboardService.getReceitaDia());
+        model.addAttribute("vendasMes", dashboardService.getReceitaMensal());
+        model.addAttribute("totalIva", dashboardService.getTotalIvaMes());
+        model.addAttribute("totalFacturas", dashboardService.getTotalFacturasMes());
+        
+        // 2ª Linha
+        model.addAttribute("totalPagamentos", dashboardService.getTotalPagamentosMes());
+        model.addAttribute("totalClientes", dashboardService.getTotalClientes());
+        model.addAttribute("totalPendentes", dashboardService.getTotalPendentes());
+        model.addAttribute("lucroMensal", dashboardService.getLucroMensal());
+
+        // Dados para os novos gráficos
+        model.addAttribute("receitaVsDespesa", dashboardService.getReceitaVsDespesaData());
+        model.addAttribute("comparacaoPeriodos", dashboardService.getComparacaoPeriodosData());
+        model.addAttribute("vendasPorLocalizacao", dashboardService.getVendasPorLocalizacao());
+        model.addAttribute("horariosPico", dashboardService.getHorariosPicoVendas());
+
         // ...outros atributos...
         return "dashboard";
     }

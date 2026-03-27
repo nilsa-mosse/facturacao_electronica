@@ -32,65 +32,151 @@
                 <div class="container-fluid px-4">
                     <h3 class="fw-bold mb-4">Dashboard - Visão Geral</h3>
 
-                    <!-- Indicadores principais -->
+                    <!-- Indicadores principais - 1ª Linha -->
                     <div class="row mb-4">
-                        <div class="col-md-3">
-                            <a th:href="@{/dashboard/vendas-dia}" style="text-decoration:none;">
-                                <div class="card text-white bg-success mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Vendas do Dia</h5>
-                                        <p class="card-text display-6" th:text="${vendasDia}">0</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a th:href="@{/dashboard/receita-mensal}" style="text-decoration:none;">
-                                <div class="card text-white bg-primary mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Receita Mensal</h5>
-                                        <p class="card-text display-6"
-                                            th:text="${#numbers.formatDecimal(receitaMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
-                                            Kz 0,00</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-warning mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Faturas Pendentes</h5>
-                                    <p class="card-text display-6" th:text="${faturasPendentes}">0</p>
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box bg-success shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Vendas Hoje</span>
+                                    <span class="info-box-number h5 mb-0" th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <a th:href="@{/dashboard/estoque-baixo}" style="text-decoration:none;">
-                                <div class="card text-white bg-danger mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Estoque Baixo</h5>
-                                        <p class="card-text display-6" th:text="${produtosEstoqueBaixo.size()}">0</p>
-                                    </div>
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box bg-primary shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Vendas Mês</span>
+                                    <span class="info-box-number h5 mb-0" th:text="${'Kz ' + #numbers.formatDecimal(vendasMes, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
-                            </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box bg-warning shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-percent text-white"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold text-white">IVA</span>
+                                    <span class="info-box-number h5 mb-0 text-white" th:text="${'Kz ' + #numbers.formatDecimal(totalIva, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box bg-danger shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-file-invoice"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Facturas</span>
+                                    <span class="info-box-number h5 mb-0" th:text="${totalFacturas}">0</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Gráfico de vendas -->
+                    <!-- Indicadores principais - 2ª Linha -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box bg-info shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Pagamentos</span>
+                                    <span class="info-box-number h5 mb-0" th:text="${totalPagamentos}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box bg-secondary shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Clientes</span>
+                                    <span class="info-box-number h5 mb-0" th:text="${totalClientes}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box shadow-sm" style="background-color: #fd7e14; color: white;">
+                                <span class="info-box-icon"><i class="fas fa-clock text-white"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Pendentes</span>
+                                    <span class="info-box-number h5 mb-0" th:text="${totalPendentes}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-12">
+                            <div class="info-box bg-dark shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Lucros</span>
+                                    <span class="info-box-number h5 mb-0" th:text="${'Kz ' + #numbers.formatDecimal(lucroMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Novos Gráficos - Linha 1 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white">
+                                    <h5 class="card-title mb-0 fw-bold">Receita vs Despesas (Últimos 6 Meses)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoReceitaDespesa" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white">
+                                    <h5 class="card-title mb-0 fw-bold">Comparação de Vendas (Mês Atual vs Passado)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoComparacao" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Novos Gráficos - Linha 2 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white">
+                                    <h5 class="card-title mb-0 fw-bold">Vendas por Localização</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div style="height: 300px; display: flex; justify-content: center;">
+                                        <canvas id="graficoLocalizacao"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white">
+                                    <h5 class="card-title mb-0 fw-bold">Horários de Pico de Vendas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="graficoHorarios" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de vendas (Old) -->
                     <div class="row mb-4">
                         <div class="col-md-8">
-                            <div class="card mb-3">
-                                <div class="card-header">Vendas nos últimos 30 dias</div>
+                            <div class="card mb-3 shadow-sm">
+                                <div class="card-header bg-white">Vendas nos últimos 30 dias</div>
                                 <div class="card-body">
-                                    <canvas id="graficoVendas" height="100"></canvas>
+                                    <canvas id="graficoVendas" height="150"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card mb-3">
-                                <div class="card-header">Top 10 de Produtos Mais Vendidos</div>
-                                <div class="card-body">
-                                    <ul class="list-group">
+                            <div class="card mb-3 shadow-sm">
+                                <div class="card-header bg-white fw-bold text-success">Top 10 de Produtos Mais Vendidos</div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush">
                                         <li class="list-group-item d-flex justify-content-between align-items-center"
                                             th:each="produto : ${produtosMaisVendidos}">
                                             <span>
@@ -132,100 +218,124 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-    <script>
-        // Gráfico de vendas dos últimos 30 dias - visual mais fácil de compreender
+    <script th:inline="javascript">
+        // 1. Gráfico de Vendas 30 Dias
         var vendasUltimos30Dias = /*[[${vendasUltimos30Dias}]]*/ {};
-        var labels = Object.keys(vendasUltimos30Dias).map(function (dateStr) {
-            // Mostra apenas dia/mês para facilitar leitura
+        var labels30 = Object.keys(vendasUltimos30Dias).map(function (dateStr) {
             var d = new Date(dateStr);
             return (d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0'));
         });
-        var data = Object.values(vendasUltimos30Dias);
-        var ctx = document.getElementById('graficoVendas').getContext('2d');
-        var graficoVendas = new Chart(ctx, {
+        var data30 = Object.values(vendasUltimos30Dias);
+        
+        new Chart(document.getElementById('graficoVendas'), {
             type: 'bar',
             data: {
-                labels: labels,
+                labels: labels30,
                 datasets: [{
-                    label: 'Qtde de Vendas',
-                    data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'top',
-                        color: '#222',
-                        font: { weight: 'bold' },
-                        formatter: function (value) { return value > 0 ? value : ''; }
-                    }
+                    label: 'Vendas',
+                    data: data30,
+                    backgroundColor: '#28a745'
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            color: '#222',
-                            font: { size: 14, weight: 'bold' }
-                        }
+            options: { responsive: true }
+        });
+
+        // 2. Gráfico Receita vs Despesas
+        var rdData = /*[[${receitaVsDespesa}]]*/ {labels:[], receitas:[], despesas:[]};
+        new Chart(document.getElementById('graficoReceitaDespesa'), {
+            type: 'line',
+            data: {
+                labels: rdData.labels,
+                datasets: [
+                    {
+                        label: 'Receita',
+                        data: rdData.receitas,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        fill: true,
+                        tension: 0.4
                     },
-                    tooltip: {
-                        enabled: true,
-                        callbacks: {
-                            title: function (context) {
-                                return 'Dia: ' + context[0].label;
-                            },
-                            label: function (context) {
-                                return 'Vendas: ' + context.parsed.y;
-                            }
-                        }
-                    },
-                    datalabels: {
-                        display: true
-                    },
-                    title: {
-                        display: true,
-                        text: 'Vendas diárias nos últimos 30 dias',
-                        font: { size: 18 }
+                    {
+                        label: 'Despesas',
+                        data: rdData.despesas,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        fill: true,
+                        tension: 0.4
                     }
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Dia/Mês',
-                            font: { size: 14, weight: 'bold' }
-                        },
-                        ticks: {
-                            color: '#222',
-                            font: { size: 12 }
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Quantidade de Vendas',
-                            font: { size: 14, weight: 'bold' }
-                        },
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            color: '#222',
-                            font: { size: 12 }
-                        }
-                    }
-                }
+                ]
             },
-            plugins: [ChartDataLabels]
+            options: { responsive: true }
+        });
+
+        // 3. Gráfico Comparação de Períodos
+        var compData = /*[[${comparacaoPeriodos}]]*/ {labels:[], atual:[], passado:[]};
+        new Chart(document.getElementById('graficoComparacao'), {
+            type: 'bar',
+            data: {
+                labels: compData.labels,
+                datasets: [
+                    {
+                        label: 'Mês Atual',
+                        data: compData.atual,
+                        backgroundColor: '#007bff'
+                    },
+                    {
+                        label: 'Mês Passado',
+                        data: compData.passado,
+                        backgroundColor: '#6c757d'
+                    }
+                ]
+            },
+            options: { 
+                responsive: true,
+                scales: { x: { title: { display: true, text: 'Dia do Mês' } } }
+            }
+        });
+
+        // 4. Gráfico Vendas por Localização
+        var locData = /*[[${vendasPorLocalizacao}]]*/ {};
+        new Chart(document.getElementById('graficoLocalizacao'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(locData),
+                datasets: [{
+                    data: Object.values(locData),
+                    backgroundColor: ['#17a2b8', '#ffc107', '#fd7e14', '#20c997', '#6f42c1']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 5. Gráfico Horários de Pico
+        var picoData = /*[[${horariosPico}]]*/ {};
+        var picoLabels = Object.keys(picoData).map(h => h + ':00');
+        new Chart(document.getElementById('graficoHorarios'), {
+            type: 'line',
+            data: {
+                labels: picoLabels,
+                datasets: [{
+                    label: 'Vendas por Hora',
+                    data: Object.values(picoData),
+                    borderColor: '#fd7e14',
+                    backgroundColor: 'rgba(253, 126, 20, 0.2)',
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: { 
+                responsive: true,
+                scales: { x: { title: { display: true, text: 'Hora do Dia' } } }
+            }
         });
 
         function exportarGrafico() {
+            // Simplified export for the main chart
+            var canvas = document.getElementById('graficoVendas');
             var link = document.createElement('a');
-            link.href = graficoVendas.toBase64Image();
-            link.download = 'vendas_ultimos_30_dias.png';
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'vendas.png';
             link.click();
         }
     </script>
