@@ -5,6 +5,7 @@ public class Sistema {
     private String versao;
     private String emailSuporte;
     private boolean backup;
+    private String tema;
 
     // Getters and Setters
     public String getNome() {
@@ -37,5 +38,13 @@ public class Sistema {
 
     public void setBackup(boolean backup) {
         this.backup = backup;
+    }
+
+    public String getTema() {
+        return tema;
+    }
+
+    public void setTema(String tema) {
+        this.tema = tema;
     }
 }

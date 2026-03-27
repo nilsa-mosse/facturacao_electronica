@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>PDV - Vendas</title>
 
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
         body {
@@ -21,14 +23,14 @@
 
         .card-product:hover {
             transform: scale(1.03);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .cart-box {
             background: white;
             border-radius: 10px;
             padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .total-box {
@@ -39,133 +41,142 @@
     </style>
 </head>
 
-<body>
+<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
 
-<div class="container-fluid mt-3">
-    <div class="row">
+    <!-- Sidebar e Wrapper do AdminLTE -->
+    <aside th:replace="menu :: sidebar"></aside>
 
-        <!-- PRODUTOS -->
-        <div class="col-md-8">
-            <div class="d-flex justify-content-between mb-3">
-                <h4><i class="fas fa-box"></i> Produtos</h4>
-                <input type="text" id="search" class="form-control w-50" placeholder="Pesquisar...">
-            </div>
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid pt-3">
+        <div class="row">
 
-            <div class="row" id="productList">
+            <!-- PRODUTOS -->
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between mb-3">
+                    <h4><i class="fas fa-box"></i> Produtos</h4>
+                    <input type="text" id="search" class="form-control w-50" placeholder="Pesquisar...">
+                </div>
 
-                <div class="col-md-4 mb-3" th:each="produto : ${produtos}">
-                    <div class="card card-product text-center p-2">
-                        <img th:src="${produto.imagem}" class="img-fluid mb-2" style="height:120px; object-fit:cover;">
-                        <h6 th:text="${produto.nome}"></h6>
-                        <p class="text-success fw-bold mb-0">
-                            <span th:text="${produto.preco}"></span> Kz
-                        </p>
-                        <p class="mb-1" th:if="${produto.ivaPercentual != null}">
-                            <span class="badge bg-info">IVA: <span th:text="${produto.ivaPercentual}"></span>%</span>
-                        </p>
-                        <button class="btn btn-primary btn-sm"
+                <div class="row" id="productList">
+
+                    <div class="col-md-4 mb-3" th:each="produto : ${produtos}">
+                        <div class="card card-product text-center p-2">
+                            <img th:src="${produto.imagem}" class="img-fluid mb-2"
+                                style="height:120px; object-fit:cover;">
+                            <h6 th:text="${produto.nome}"></h6>
+                            <p class="text-success fw-bold mb-0">
+                                <span th:text="${produto.preco}"></span> Kz
+                            </p>
+                            <p class="mb-1" th:if="${produto.ivaPercentual != null}">
+                                <span class="badge bg-info">IVA: <span
+                                        th:text="${produto.ivaPercentual}"></span>%</span>
+                            </p>
+                            <button class="btn btn-primary btn-sm"
                                 th:attr="data-id=${produto.id},data-nome=${produto.nome},data-preco=${produto.preco},data-iva=${produto.ivaPercentual}"
                                 onclick="addToCart(this)">
-                            <i class="fas fa-cart-plus"></i> Adicionar
+                                <i class="fas fa-cart-plus"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- CARRINHO -->
+            <div class="col-md-4">
+                <div class="cart-box">
+
+                    <h4><i class="fas fa-shopping-cart"></i> Carrinho</h4>
+
+                    <table class="table table-sm mt-3" id="cartTable">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Qtd</th>
+                                <th>Total</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+                    <div class="total-box text-end">
+                        <button type="button" class="btn btn-warning mb-2" id="calcularImpostos">
+                            <i class="fas fa-calculator"></i> Calcular Impostos
                         </button>
+                        <div id="impostosBox" class="mb-2 d-none">
+                            <div>IVA: <span id="valorIva">0</span> Kz</div>
+                            <div>Total sem imposto: <span id="totalSemImposto">0</span> Kz</div>
+                            <div class="fw-bold">Total Final: <span id="totalFinal">0</span> Kz</div>
+                        </div>
+                        Total: <span id="total">0</span> Kz
                     </div>
+
+                    <form method="post">
+                        <input type="hidden" id="itensInput">
+
+                        <button type="button" id="finalizarCompra" class="btn btn-success w-100 mt-3">
+                            <i class="fas fa-check"></i> Finalizar Compra
+                        </button>
+                    </form>
+
+                    <div id="pdfLinkBox" class="alert alert-success mt-3 d-none">
+                        Fatura gerada! <a id="pdfLink" href="#" target="_blank" class="fw-bold">Baixar PDF da Fatura</a>
+                    </div>
+
                 </div>
+            </div>
 
             </div>
-        </div>
-
-        <!-- CARRINHO -->
-        <div class="col-md-4">
-            <div class="cart-box">
-
-                <h4><i class="fas fa-shopping-cart"></i> Carrinho</h4>
-
-                <table class="table table-sm mt-3" id="cartTable">
-                    <thead>
-                    <tr>
-                        <th>Produto</th>
-                        <th>Qtd</th>
-                        <th>Total</th>
-                        <th>Ações</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-
-                <div class="total-box text-end">
-                    <button type="button" class="btn btn-warning mb-2" id="calcularImpostos">
-                        <i class="fas fa-calculator"></i> Calcular Impostos
-                    </button>
-                    <div id="impostosBox" class="mb-2 d-none">
-                        <div>IVA: <span id="valorIva">0</span> Kz</div>
-                        <div>Total sem imposto: <span id="totalSemImposto">0</span> Kz</div>
-                        <div class="fw-bold">Total Final: <span id="totalFinal">0</span> Kz</div>
-                    </div>
-                    Total: <span id="total">0</span> Kz
-                </div>
-
-                <form method="post">
-                    <input type="hidden" id="itensInput">
-
-                    <button type="button" id="finalizarCompra"
-                            class="btn btn-success w-100 mt-3">
-                        <i class="fas fa-check"></i> Finalizar Compra
-                    </button>
-                </form>
-
-                <div id="pdfLinkBox" class="alert alert-success mt-3 d-none">
-                    Fatura gerada! <a id="pdfLink" href="#" target="_blank" class="fw-bold">Baixar PDF da Fatura</a>
-                </div>
-
-            </div>
-        </div>
-
+        </section>
     </div>
-</div>
 
-<!-- JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
 
-<script>
-let cart = [];
+    <script>
+        let cart = [];
 
-// ADD
-function addToCart(btn) {
-    const id = parseInt(btn.dataset.id);
-    const nome = btn.dataset.nome;
-    const preco = parseFloat(btn.dataset.preco);
-    const ivaPercentual = btn.dataset.iva ? parseFloat(btn.dataset.iva) : null;
+        // ADD
+        function addToCart(btn) {
+            const id = parseInt(btn.dataset.id);
+            const nome = btn.dataset.nome;
+            const preco = parseFloat(btn.dataset.preco);
+            const ivaPercentual = btn.dataset.iva ? parseFloat(btn.dataset.iva) : null;
 
-    let item = cart.find(p => p.id === id);
+            let item = cart.find(p => p.id === id);
 
-    if (item) {
-        item.qtd++;
-    } else {
-        cart.push({ id, nome, preco, qtd: 1, ivaPercentual });
-    }
+            if (item) {
+                item.qtd++;
+            } else {
+                cart.push({ id, nome, preco, qtd: 1, ivaPercentual });
+            }
 
-    renderCart();
-}
-
-// RENDER
-function renderCart() {
-
-    let tbody = $("#cartTable tbody");
-    tbody.empty();
-
-    let total = 0;
-
-    cart.forEach((item, index) => {
-
-        let subtotal = item.qtd * item.preco;
-        total += subtotal;
-
-        let ivaInfo = '';
-        if (item.ivaPercentual && item.ivaPercentual > 0) {
-            ivaInfo = `<span class='badge bg-info ms-1'>IVA: ${item.ivaPercentual}%</span>`;
+            renderCart();
         }
 
-        tbody.append(`
+        // RENDER
+        function renderCart() {
+
+            let tbody = $("#cartTable tbody");
+            tbody.empty();
+
+            let total = 0;
+
+            cart.forEach((item, index) => {
+
+                let subtotal = item.qtd * item.preco;
+                total += subtotal;
+
+                let ivaInfo = '';
+                if (item.ivaPercentual && item.ivaPercentual > 0) {
+                    ivaInfo = `<span class='badge bg-info ms-1'>IVA: ${item.ivaPercentual}%</span>`;
+                }
+
+                tbody.append(`
             <tr>
                 <td>${item.nome} ${ivaInfo}</td>
 
@@ -202,96 +213,112 @@ function renderCart() {
                 </td>
             </tr>
         `);
-    });
+            });
 
-    $("#total").text(total);
-    $("#itensInput").val(JSON.stringify(cart));
-}
+            $("#total").text(total);
+            $("#itensInput").val(JSON.stringify(cart));
+        }
 
-function calcularImpostos() {
-    let totalSemImposto = 0;
-    let valorIva = 0;
-    cart.forEach(item => {
-        // Buscar o produto na lista de produtos do backend (disponível via window.produtos, se renderizado)
-        let produto = null;
-        if (window.produtos) {
-            produto = window.produtos.find(p => p.id === item.id);
-        }
-        // Se não houver window.produtos, tentar pegar ivaPercentual do botão (data-iva)
-        let ivaPercentual = 0;
-        if (produto && produto.ivaPercentual) {
-            ivaPercentual = produto.ivaPercentual;
-        } else if (item.ivaPercentual) {
-            ivaPercentual = item.ivaPercentual;
-        } else if (item.iva !== undefined) {
-            ivaPercentual = item.iva;
-        } else if (item.iva_percentual !== undefined) {
-            ivaPercentual = item.iva_percentual;
-        } else if (item.ivaPercentual !== undefined) {
-            ivaPercentual = item.ivaPercentual;
-        }
-        const subtotal = item.qtd * item.preco;
-        if (ivaPercentual > 0) {
-            valorIva += subtotal * (ivaPercentual / 100);
-            totalSemImposto += subtotal;
-        } else {
-            totalSemImposto += subtotal;
-        }
-    });
-    const totalFinal = totalSemImposto + valorIva;
-    $("#valorIva").text(valorIva.toFixed(2));
-    $("#totalSemImposto").text(totalSemImposto.toFixed(2));
-    $("#totalFinal").text(totalFinal.toFixed(2));
-    $("#impostosBox").removeClass("d-none");
-}
-
-$(document).ready(function() {
-    $('#finalizarCompra').click(function() {
-        if (cart.length === 0) {
-            alert("Carrinho vazio!");
-            return;
-        }
-        // Monta objeto Compra
-        let compra = {
-            itens: cart.map(item => ({
-                nomeProduto: item.nome,
-                quantidade: item.qtd,
-                preco: item.preco,
-                subtotal: item.qtd * item.preco
-            })),
-            total: cart.reduce((sum, item) => sum + item.qtd * item.preco, 0)
-        };
-        $.ajax({
-            url: '/api/compras/single',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(compra),
-            success: function(pdfPath) {
-                alert('Compra finalizada!');
-                cart = [];
-                renderCart();
-                if (pdfPath) {
-                    $('#pdfLink').attr('href', pdfPath);
-                    $('#pdfLinkBox').removeClass('d-none');
+        function calcularImpostos() {
+            let totalSemImposto = 0;
+            let valorIva = 0;
+            cart.forEach(item => {
+                // Buscar o produto na lista de produtos do backend (disponível via window.produtos, se renderizado)
+                let produto = null;
+                if (window.produtos) {
+                    produto = window.produtos.find(p => p.id === item.id);
                 }
-            },
-            error: function(xhr) {
-                alert('Erro ao finalizar compra: ' + (xhr.responseText || 'Erro desconhecido'));
-            }
-        });
-    });
+                // Se não houver window.produtos, tentar pegar ivaPercentual do botão (data-iva)
+                let ivaPercentual = 0;
+                if (produto && produto.ivaPercentual) {
+                    ivaPercentual = produto.ivaPercentual;
+                } else if (item.ivaPercentual) {
+                    ivaPercentual = item.ivaPercentual;
+                } else if (item.iva !== undefined) {
+                    ivaPercentual = item.iva;
+                } else if (item.iva_percentual !== undefined) {
+                    ivaPercentual = item.iva_percentual;
+                } else if (item.ivaPercentual !== undefined) {
+                    ivaPercentual = item.ivaPercentual;
+                }
+                const subtotal = item.qtd * item.preco;
+                if (ivaPercentual > 0) {
+                    valorIva += subtotal * (ivaPercentual / 100);
+                    totalSemImposto += subtotal;
+                } else {
+                    totalSemImposto += subtotal;
+                }
+            });
+            const totalFinal = totalSemImposto + valorIva;
+            $("#valorIva").text(valorIva.toFixed(2));
+            $("#totalSemImposto").text(totalSemImposto.toFixed(2));
+            $("#totalFinal").text(totalFinal.toFixed(2));
+            $("#impostosBox").removeClass("d-none");
+        }
 
-    $('#calcularImpostos').click(calcularImpostos);
+        $(document).ready(function () {
+            $('#finalizarCompra').click(function () {
+                if (cart.length === 0) {
+                    alert("Carrinho vazio!");
+                    return;
+                }
+                // Monta objeto Compra
+                let compra = {
+                    itens: cart.map(item => ({
+                        nomeProduto: item.nome,
+                        quantidade: item.qtd,
+                        preco: item.preco,
+                        subtotal: item.qtd * item.preco
+                    })),
+                    total: cart.reduce((sum, item) => sum + item.qtd * item.preco, 0)
+                };
+                $.ajax({
+                    url: '/api/compras/single',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(compra),
+                    success: function (pdfPath) {
+                        alert('Compra finalizada!');
+                        cart = [];
+                        renderCart();
+                        if (pdfPath) {
+                            $('#pdfLink').attr('href', pdfPath);
+                            $('#pdfLinkBox').removeClass('d-none');
+                        }
+                    },
+                    error: function (xhr) {
+                        alert('Erro ao finalizar compra: ' + (xhr.responseText || 'Erro desconhecido'));
+                    }
+                });
+            });
 
-    // Atualização automática da lista de produtos
-    function atualizarProdutos() {
-        $.get('/api/produtos', function(produtos) {
-            window.produtos = produtos;
-            let productList = $('#productList');
-            productList.empty();
-            produtos.forEach(function(produto) {
-                let ivaBadge = produto.ivaPercentual ? `<p class='mb-1'><span class='badge bg-info'>IVA: ${produto.ivaPercentual}%</span></p>` : '';
-                productList.append(`
+            $('#calcularImpostos').click(calcularImpostos);
+
+            // Funcionalidade de Pesquisa de Produtos
+            $('#search').on('input', function() {
+                let searchTerm = $(this).val().toLowerCase();
+                $('#productList .col-md-4').each(function() {
+                    let text = $(this).text().toLowerCase();
+                    $(this).toggle(text.includes(searchTerm));
+                });
+            });
+
+            // Atualização automática da lista de produtos
+            function atualizarProdutos() {
+                $.get('/api/produtos', function (produtos) {
+                    window.produtos = produtos;
+                    let productList = $('#productList');
+                    productList.empty();
+                    
+                    let searchTerm = $('#search').val() ? $('#search').val().toLowerCase() : '';
+                    
+                    produtos.forEach(function (produto) {
+                        if (searchTerm && !produto.nome.toLowerCase().includes(searchTerm)) {
+                            return; // Filtra os produtos na atualização automática
+                        }
+                        
+                        let ivaBadge = produto.ivaPercentual ? `<p class='mb-1'><span class='badge bg-info'>IVA: ${produto.ivaPercentual}%</span></p>` : '';
+                        productList.append(`
                     <div class="col-md-4 mb-3">
                         <div class="card card-product text-center p-2">
                             <img src="${produto.imagem || ''}" class="img-fluid mb-2" style="height:120px; object-fit:cover;">
@@ -304,58 +331,59 @@ $(document).ready(function() {
                         </div>
                     </div>
                 `);
-            });
+                    });
+                });
+            }
+
+            // Atualização automática do carrinho
+            function atualizarCarrinhoPeriodicamente() {
+                renderCart();
+                setTimeout(atualizarCarrinhoPeriodicamente, 5000); // Atualiza a cada 5 segundos
+            }
+
+            atualizarProdutos();
+            setInterval(atualizarProdutos, 10000); // Atualiza produtos a cada 10 segundos
+            atualizarCarrinhoPeriodicamente();
         });
-    }
-
-    // Atualização automática do carrinho
-    function atualizarCarrinhoPeriodicamente() {
-        renderCart();
-        setTimeout(atualizarCarrinhoPeriodicamente, 5000); // Atualiza a cada 5 segundos
-    }
-
-    atualizarProdutos();
-    setInterval(atualizarProdutos, 10000); // Atualiza produtos a cada 10 segundos
-    atualizarCarrinhoPeriodicamente();
-});
 
 
-function increaseQty(index) {
-    cart[index].qtd++;
-    renderCart();
-}
-
-function decreaseQty(index) {
-    if (cart[index].qtd > 1) {
-        cart[index].qtd--;
-    } else {
-        removeItem(index);
-    }
-    renderCart();
-}
-
-function removeItem(index) {
-    if (confirm("Remover este produto?")) {
-        cart.splice(index, 1);
-        renderCart();
-    }
-}
-
-function editItem(index) {
-    let novaQtd = prompt("Nova quantidade:", cart[index].qtd);
-
-    if (novaQtd !== null) {
-        novaQtd = parseInt(novaQtd);
-
-        if (!isNaN(novaQtd) && novaQtd > 0) {
-            cart[index].qtd = novaQtd;
+        function increaseQty(index) {
+            cart[index].qtd++;
             renderCart();
-        } else {
-            alert("Quantidade inválida!");
         }
-    }
-}
-</script>
+
+        function decreaseQty(index) {
+            if (cart[index].qtd > 1) {
+                cart[index].qtd--;
+            } else {
+                removeItem(index);
+            }
+            renderCart();
+        }
+
+        function removeItem(index) {
+            if (confirm("Remover este produto?")) {
+                cart.splice(index, 1);
+                renderCart();
+            }
+        }
+
+        function editItem(index) {
+            let novaQtd = prompt("Nova quantidade:", cart[index].qtd);
+
+            if (novaQtd !== null) {
+                novaQtd = parseInt(novaQtd);
+
+                if (!isNaN(novaQtd) && novaQtd > 0) {
+                    cart[index].qtd = novaQtd;
+                    renderCart();
+                } else {
+                    alert("Quantidade inválida!");
+                }
+            }
+        }
+    </script>
 
 </body>
+
 </html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Configurações Gerais</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1><i class="fas fa-cogs me-2"></i>Parâmetros Gerais</h1>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    Configurações actualizadas com sucesso!
+                </div>
+
+                <div class="card card-outline card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Preferências do Sistema</h3>
+                    </div>
+                    <form th:action="@{/configuracoes/geral/salvar}" th:object="${sistema}" method="post">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>Nome do Sistema</label>
+                                    <input type="text" class="form-control" th:field="*{nome}">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Modo de Visualização (Tema)</label>
+                                    <select class="form-select" th:field="*{tema}" id="temaSelector">
+                                        <option value="light">Modo Claro (Padrão)</option>
+                                        <option value="dark">Modo Escuro</option>
+                                    </select>
+                                    <small class="text-muted">A alteração será aplicada globalmente após salvar.</small>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="form-group col-md-6">
+                                    <label>Email de Suporte</label>
+                                    <input type="email" class="form-control" th:field="*{emailSuporte}">
+                                </div>
+                                <div class="form-group col-md-6 mt-4">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="backup"
+                                            th:field="*{backup}">
+                                        <label class="custom-control-label" for="backup">Backup Automático
+                                            Diário</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Aplicar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+    <script>
+        // Pré-visualização imediata ao mudar o select (opcional)
+        document.getElementById('temaSelector').addEventListener('change', function () {
+            if (this.value === 'dark') {
+                document.body.classList.add('dark-mode');
+                const sidebar = document.querySelector('.main-sidebar');
+                if (sidebar) sidebar.classList.replace('sidebar-light-primary', 'sidebar-dark-primary');
+            } else {
+                document.body.classList.remove('dark-mode');
+                const sidebar = document.querySelector('.main-sidebar');
+                if (sidebar) sidebar.classList.replace('sidebar-dark-primary', 'sidebar-light-primary');
+            }
+        });
+    </script>
+</body>
+
+</html>

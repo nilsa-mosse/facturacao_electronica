@@ -1,74 +1,89 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Produtos com Estoque Baixo</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous">
     <style>
-        body { background: #f8f9fa; }
+        body {
+            background: #f8f9fa;
+        }
+
         .card {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
             border-radius: 12px;
         }
+
         .table thead th {
             background: #dc3545;
             color: #fff;
             font-weight: 600;
         }
-        .table-striped > tbody > tr:nth-of-type(odd) {
+
+        .table-striped>tbody>tr:nth-of-type(odd) {
             background-color: #f2f2f2;
         }
+
         .badge-estoque {
             font-size: 1rem;
             background: #ffc107;
             color: #212529;
         }
+
         .header-icon {
             color: #dc3545;
             margin-right: 10px;
         }
     </style>
 </head>
-<body>
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card p-4">
-                <div class="d-flex align-items-center mb-4">
-                    <i class="fas fa-exclamation-triangle fa-2x header-icon"></i>
-                    <h2 class="mb-0">Produtos com Estoque Baixo</h2>
-                </div>
-                <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3">
-                    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
-                </a>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped align-middle">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Quantidade em Estoque</th>
-                                <th>Preço</th>
-                                <th>Código de Barra</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="produto : ${produtosEstoqueBaixo}">
-                                <td th:text="${produto.nome}">Nome</td>
-                                <td>
-                                    <span class="badge badge-estoque" th:text="${produto.quantidadeEstoque}">0</span>
-                                </td>
-                                <td th:text="${#numbers.formatDecimal(produto.preco, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">0,00 Kz</td>
-                                <td th:text="${produto.codigoBarra}">-</td>
-                            </tr>
-                            <tr th:if="${produtosEstoqueBaixo.size() == 0}">
-                                <td colspan="4" class="text-center">Nenhum produto com estoque baixo.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fas fa-exclamation-triangle fa-2x header-icon"></i>
+                        <h2 class="mb-0">Produtos com Estoque Baixo</h2>
+                    </div>
+                    <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3">
+                        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                    </a>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Quantidade em Estoque</th>
+                                    <th>Preço</th>
+                                    <th>Código de Barra</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="produto : ${produtosEstoqueBaixo}">
+                                    <td th:text="${produto.nome}">Nome</td>
+                                    <td>
+                                        <span class="badge badge-estoque"
+                                            th:text="${produto.quantidadeEstoque}">0</span>
+                                    </td>
+                                    <td
+                                        th:text="${#numbers.formatDecimal(produto.preco, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">
+                                        0,00 Kz</td>
+                                    <td th:text="${produto.codigoBarra}">-</td>
+                                </tr>
+                                <tr th:if="${produtosEstoqueBaixo.size() == 0}">
+                                    <td colspan="4" class="text-center">Nenhum produto com estoque baixo.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

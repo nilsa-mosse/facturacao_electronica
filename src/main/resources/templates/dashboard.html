@@ -1,330 +1,342 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Dashboard</title>
     <!-- Adding Bootstrap and custom CSS -->
-  
-  !-- Bootstrap CSS -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+
+    !-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
         crossorigin="anonymous">
 
-  <!-- AdminLTE CSS -->
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
+    <!-- AdminLTE CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
         crossorigin="anonymous">
 
-  <!-- Font Awesome CSS -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous">
-    
+
 
     <style>
-    /* Ajuste para o menu lateral */
-    .main-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 250px;
-        background-color: #343a40;
-        color: #fff;
-        z-index: 1000;
-    }
+        /* Ajuste para o menu lateral */
+        .main-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 250px;
+            background-color: #343a40;
+            color: #fff;
+            z-index: 1000;
+        }
 
-    .main-sidebar .nav-sidebar > .nav-item > .nav-link {
-        color: #c2c7d0;
-    }
+        .main-sidebar .nav-sidebar>.nav-item>.nav-link {
+            color: #c2c7d0;
+        }
 
-    .main-sidebar .nav-sidebar > .nav-item > .nav-link.active {
-        background-color: #007bff;
-        color: #fff;
-    }
+        .main-sidebar .nav-sidebar>.nav-item>.nav-link.active {
+            background-color: #007bff;
+            color: #fff;
+        }
 
-    .main-sidebar .user-panel {
-        background-color: #495057;
-        padding: 10px;
-        border-bottom: 1px solid #4b545c;
-    }
+        .main-sidebar .user-panel {
+            background-color: #495057;
+            padding: 10px;
+            border-bottom: 1px solid #4b545c;
+        }
 
-    .content-wrapper {
-        margin-left: 250px;
-        padding: 20px;
-    }
+        .content-wrapper {
+            margin-left: 250px;
+            padding: 20px;
+        }
 
-    /* Estilização adicional para o menu */
-    .main-sidebar {
-        background-color: #2c3e50;
-        color: #ecf0f1;
-    }
+        /* Estilização adicional para o menu */
+        .main-sidebar {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
 
-    .main-sidebar .nav-sidebar > .nav-item > .nav-link {
-        color: #bdc3c7;
-        transition: background-color 0.3s, color 0.3s;
-    }
+        .main-sidebar .nav-sidebar>.nav-item>.nav-link {
+            color: #bdc3c7;
+            transition: background-color 0.3s, color 0.3s;
+        }
 
-    .main-sidebar .nav-sidebar > .nav-item > .nav-link:hover {
-        background-color: #34495e;
-        color: #ffffff;
-    }
+        .main-sidebar .nav-sidebar>.nav-item>.nav-link:hover {
+            background-color: #34495e;
+            color: #ffffff;
+        }
 
-    .main-sidebar .nav-sidebar > .nav-item > .nav-link.active {
-        background-color: #2980b9;
-        color: #ffffff;
-    }
+        .main-sidebar .nav-sidebar>.nav-item>.nav-link.active {
+            background-color: #2980b9;
+            color: #ffffff;
+        }
 
-    .main-sidebar .user-panel {
-        background-color: #34495e;
-        padding: 10px;
-        border-bottom: 1px solid #4b545c;
-    }
+        .main-sidebar .user-panel {
+            background-color: #34495e;
+            padding: 10px;
+            border-bottom: 1px solid #4b545c;
+        }
     </style>
 </head>
-<body>
+
+<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <!-- Including the menu -->
     <aside th:replace="menu :: sidebar"></aside>
 
-<main class="py-4">
-<div class="content-wrapper">
-    <div class="container-fluid px-4">
-        <h3 class="fw-bold mb-4">Dashboard - Visão Geral</h3>
+    <main class="py-4">
+        <div class="content-wrapper">
+            <div class="container-fluid px-4">
+                <h3 class="fw-bold mb-4">Dashboard - Visão Geral</h3>
 
-        <!-- Indicadores principais -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <a th:href="@{/dashboard/vendas-dia}" style="text-decoration:none;">
-                <div class="card text-white bg-success mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Vendas do Dia</h5>
-                        <p class="card-text display-6" th:text="${vendasDia}">0</p>
+                <!-- Indicadores principais -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <a th:href="@{/dashboard/vendas-dia}" style="text-decoration:none;">
+                            <div class="card text-white bg-success mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Vendas do Dia</h5>
+                                    <p class="card-text display-6" th:text="${vendasDia}">0</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a th:href="@{/dashboard/receita-mensal}" style="text-decoration:none;">
+                            <div class="card text-white bg-primary mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Receita Mensal</h5>
+                                    <p class="card-text display-6"
+                                        th:text="${#numbers.formatDecimal(receitaMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
+                                        Kz 0,00</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-white bg-warning mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Faturas Pendentes</h5>
+                                <p class="card-text display-6" th:text="${faturasPendentes}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <a th:href="@{/dashboard/estoque-baixo}" style="text-decoration:none;">
+                            <div class="card text-white bg-danger mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Estoque Baixo</h5>
+                                    <p class="card-text display-6" th:text="${produtosEstoqueBaixo.size()}">0</p>
+                                </div>
+                            </div>
+                        </a>
                     </div>
                 </div>
-                </a>
-            </div>
-            <div class="col-md-3">
-                <a th:href="@{/dashboard/receita-mensal}" style="text-decoration:none;">
-                <div class="card text-white bg-primary mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Receita Mensal</h5>
-                        <p class="card-text display-6" th:text="${#numbers.formatDecimal(receitaMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}" >Kz 0,00</p>
+
+                <!-- Gráfico de vendas -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">Vendas nos últimos 30 dias</div>
+                            <div class="card-body">
+                                <canvas id="graficoVendas" height="100"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header">Top 10 de Produtos Mais Vendidos</div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                                        th:each="produto : ${produtosMaisVendidos}">
+                                        <span>
+                                            <i class="fa fa-cube text-success me-2"></i>
+                                            <span th:text="${produto.nome}">Produto Exemplo</span>
+                                        </span>
+                                        <span class="badge bg-success rounded-pill"
+                                            th:text="${produto.quantidadeVendida}">0</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                </a>
-            </div>
-            <div class="col-md-3">
-                <div class="card text-white bg-warning mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Faturas Pendentes</h5>
-                        <p class="card-text display-6" th:text="${faturasPendentes}">0</p>
+
+                <!-- Alertas e pendências -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-danger text-white">Alertas/Pendências</div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Descrição</th>
+                                            <th>Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="alerta : ${alertas}">
+                                            <td th:text="${alerta.tipo}">Estoque</td>
+                                            <td th:text="${alerta.descricao}">Produto X com estoque baixo</td>
+                                            <td><a th:href="${alerta.link}" class="btn btn-sm btn-danger">Ver</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Clientes e faturação -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header">Clientes Ativos</div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item" th:each="cliente : ${clientesAtivos}"
+                                        th:text="${cliente.nome}">Cliente Exemplo</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header">Faturas Recentes</div>
+                            <div class="card-body">
+                                <ul class="list-group">
+                                    <li class="list-group-item" th:each="fatura : ${faturasRecentes}"
+                                        th:text="${fatura.numero}">FAT-0001</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <a th:href="@{/dashboard/estoque-baixo}" style="text-decoration:none;">
-                <div class="card text-white bg-danger mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Estoque Baixo</h5>
-                        <p class="card-text display-6" th:text="${produtosEstoqueBaixo.size()}">0</p>
-                    </div>
-                </div>
-                </a>
             </div>
         </div>
+    </main>
 
-        <!-- Gráfico de vendas -->
-        <div class="row mb-4">
-            <div class="col-md-8">
-                <div class="card mb-3">
-                    <div class="card-header">Vendas nos últimos 30 dias</div>
-                    <div class="card-body">
-                        <canvas id="graficoVendas" height="100"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">Top 10 de Produtos Mais Vendidos</div>
-                    <div class="card-body">
-                        <ul class="list-group">
-                            <li class="list-group-item d-flex justify-content-between align-items-center" th:each="produto : ${produtosMaisVendidos}">
-                                <span>
-                                    <i class="fa fa-cube text-success me-2"></i>
-                                    <span th:text="${produto.nome}">Produto Exemplo</span>
-                                </span>
-                                <span class="badge bg-success rounded-pill" th:text="${produto.quantidadeVendida}">0</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Adding JavaScript libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-        <!-- Alertas e pendências -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card mb-3">
-                    <div class="card-header bg-danger text-white">Alertas/Pendências</div>
-                    <div class="card-body">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr><th>Tipo</th><th>Descrição</th><th>Ação</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="alerta : ${alertas}">
-                                    <td th:text="${alerta.tipo}">Estoque</td>
-                                    <td th:text="${alerta.descricao}">Produto X com estoque baixo</td>
-                                    <td><a th:href="${alerta.link}" class="btn btn-sm btn-danger">Ver</a></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
+    <!-- jQuery primeiro -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
 
-        <!-- Clientes e faturação -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card mb-3">
-                    <div class="card-header">Clientes Ativos</div>
-                    <div class="card-body">
-                        <ul class="list-group">
-                            <li class="list-group-item" th:each="cliente : ${clientesAtivos}" th:text="${cliente.nome}">Cliente Exemplo</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card mb-3">
-                    <div class="card-header">Faturas Recentes</div>
-                    <div class="card-body">
-                        <ul class="list-group">
-                            <li class="list-group-item" th:each="fatura : ${faturasRecentes}" th:text="${fatura.numero}">FAT-0001</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-</main>
+    <!-- Bootstrap bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Adding JavaScript libraries -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FontAwesome (opcional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"
+        crossorigin="anonymous"></script>
 
-<!-- jQuery primeiro -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
+    <!-- AdminLTE -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>>
 
-<!-- Bootstrap bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- FontAwesome (opcional) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js" crossorigin="anonymous"></script>
-
-<!-- AdminLTE -->
-<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-<script>
-// Gráfico de vendas dos últimos 30 dias - visual mais fácil de compreender
-var vendasUltimos30Dias = /*[[${vendasUltimos30Dias}]]*/ {};
-var labels = Object.keys(vendasUltimos30Dias).map(function(dateStr) {
-    // Mostra apenas dia/mês para facilitar leitura
-    var d = new Date(dateStr);
-    return (d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth()+1).toString().padStart(2, '0'));
-});
-var data = Object.values(vendasUltimos30Dias);
-var ctx = document.getElementById('graficoVendas').getContext('2d');
-var graficoVendas = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: labels,
-        datasets: [{
-            label: 'Qtde de Vendas',
-            data: data,
-            backgroundColor: 'rgba(54, 162, 235, 0.7)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            datalabels: {
-                anchor: 'end',
-                align: 'top',
-                color: '#222',
-                font: { weight: 'bold' },
-                formatter: function(value) { return value > 0 ? value : ''; }
-            }
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                display: true,
-                position: 'top',
-                labels: {
-                    color: '#222',
-                    font: { size: 14, weight: 'bold' }
-                }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script>
+        // Gráfico de vendas dos últimos 30 dias - visual mais fácil de compreender
+        var vendasUltimos30Dias = /*[[${vendasUltimos30Dias}]]*/ {};
+        var labels = Object.keys(vendasUltimos30Dias).map(function (dateStr) {
+            // Mostra apenas dia/mês para facilitar leitura
+            var d = new Date(dateStr);
+            return (d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0'));
+        });
+        var data = Object.values(vendasUltimos30Dias);
+        var ctx = document.getElementById('graficoVendas').getContext('2d');
+        var graficoVendas = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Qtde de Vendas',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#222',
+                        font: { weight: 'bold' },
+                        formatter: function (value) { return value > 0 ? value : ''; }
+                    }
+                }]
             },
-            tooltip: {
-                enabled: true,
-                callbacks: {
-                    title: function(context) {
-                        return 'Dia: ' + context[0].label;
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#222',
+                            font: { size: 14, weight: 'bold' }
+                        }
                     },
-                    label: function(context) {
-                        return 'Vendas: ' + context.parsed.y;
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            title: function (context) {
+                                return 'Dia: ' + context[0].label;
+                            },
+                            label: function (context) {
+                                return 'Vendas: ' + context.parsed.y;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: true
+                    },
+                    title: {
+                        display: true,
+                        text: 'Vendas diárias nos últimos 30 dias',
+                        font: { size: 18 }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Dia/Mês',
+                            font: { size: 14, weight: 'bold' }
+                        },
+                        ticks: {
+                            color: '#222',
+                            font: { size: 12 }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Quantidade de Vendas',
+                            font: { size: 14, weight: 'bold' }
+                        },
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: '#222',
+                            font: { size: 12 }
+                        }
                     }
                 }
             },
-            datalabels: {
-                display: true
-            },
-            title: {
-                display: true,
-                text: 'Vendas diárias nos últimos 30 dias',
-                font: { size: 18 }
-            }
-        },
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Dia/Mês',
-                    font: { size: 14, weight: 'bold' }
-                },
-                ticks: {
-                    color: '#222',
-                    font: { size: 12 }
-                }
-            },
-            y: {
-                title: {
-                    display: true,
-                    text: 'Quantidade de Vendas',
-                    font: { size: 14, weight: 'bold' }
-                },
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1,
-                    color: '#222',
-                    font: { size: 12 }
-                }
-            }
-        }
-    },
-    plugins: [ChartDataLabels]
-});
+            plugins: [ChartDataLabels]
+        });
 
-function exportarGrafico() {
-    var link = document.createElement('a');
-    link.href = graficoVendas.toBase64Image();
-    link.download = 'vendas_ultimos_30_dias.png';
-    link.click();
-}
-</script>
-<button class="btn btn-outline-primary mt-2" onclick="exportarGrafico()"><i class="fa fa-download"></i> Exportar Gráfico</button>
+        function exportarGrafico() {
+            var link = document.createElement('a');
+            link.href = graficoVendas.toBase64Image();
+            link.download = 'vendas_ultimos_30_dias.png';
+            link.click();
+        }
+    </script>
+    <button class="btn btn-outline-primary mt-2" onclick="exportarGrafico()"><i class="fa fa-download"></i> Exportar
+        Gráfico</button>
 </body>
+
 </html>

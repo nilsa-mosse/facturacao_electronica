@@ -16,7 +16,7 @@
         @media (max-width: 900px) { .content-wrapper { margin-left: 0; padding: 10px; } .main-sidebar { display: none; } }
     </style>
 </head>
-<body>
+<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <aside th:replace="menu :: sidebar"></aside>
     <div class="content-wrapper">
         <div class="container">

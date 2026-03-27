@@ -1,97 +1,103 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="layout :: head"></head>
-<body>
-<main class="py-4">
-<div class="container-fluid px-4">
-    <h3 class="fw-bold mb-4">Dashboard - Configurações</h3>
 
-    <!-- Preferências do usuário -->
-    <div class="card mb-4">
-        <div class="card-header">Preferências do Usuário</div>
-        <div class="card-body">
-            <form>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Nome</label>
-                        <input type="text" name="nome" class="form-control" th:value="${usuario.nome}">
-                    </div>
-                    <div class="col-md-6">
-                        <label>E-mail</label>
-                        <input type="email" name="email" class="form-control" th:value="${usuario.email}">
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Idioma</label>
-                        <select name="idioma" class="form-select">
-                            <option value="pt" th:selected="${usuario.idioma == 'pt'}">Português</option>
-                            <option value="en" th:selected="${usuario.idioma == 'en'}">Inglês</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Atualizar Senha</label>
-                        <input type="password" name="senha" class="form-control" placeholder="Nova senha">
-                    </div>
-                </div>
-                <button class="btn btn-primary">Salvar Preferências</button>
-            </form>
-        </div>
-    </div>
+<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <main class="py-4">
+        <div class="container-fluid px-4">
+            <h3 class="fw-bold mb-4">Dashboard - Configurações</h3>
 
-    <!-- Parâmetros do sistema -->
-    <div class="card mb-4">
-        <div class="card-header">Parâmetros do Sistema</div>
-        <div class="card-body">
-            <form>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>Nome do Sistema</label>
-                        <input type="text" name="nomeSistema" class="form-control" th:value="${sistema.nome}">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Versão</label>
-                        <input type="text" name="versao" class="form-control" th:value="${sistema.versao}" readonly>
-                    </div>
+            <!-- Preferências do usuário -->
+            <div class="card mb-4">
+                <div class="card-header">Preferências do Usuário</div>
+                <div class="card-body">
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Nome</label>
+                                <input type="text" name="nome" class="form-control" th:value="${usuario.nome}">
+                            </div>
+                            <div class="col-md-6">
+                                <label>E-mail</label>
+                                <input type="email" name="email" class="form-control" th:value="${usuario.email}">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Idioma</label>
+                                <select name="idioma" class="form-select">
+                                    <option value="pt" th:selected="${usuario.idioma == 'pt'}">Português</option>
+                                    <option value="en" th:selected="${usuario.idioma == 'en'}">Inglês</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Atualizar Senha</label>
+                                <input type="password" name="senha" class="form-control" placeholder="Nova senha">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary">Salvar Preferências</button>
+                    </form>
                 </div>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>E-mail de suporte</label>
-                        <input type="email" name="emailSuporte" class="form-control" th:value="${sistema.emailSuporte}">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Backup automático</label>
-                        <select name="backup" class="form-select">
-                            <option value="true" th:selected="${sistema.backup}">Ativado</option>
-                            <option value="false" th:selected="${!sistema.backup}">Desativado</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn btn-success">Salvar Parâmetros</button>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <!-- Integrações -->
-    <div class="card mb-4">
-        <div class="card-header">Integrações</div>
-        <div class="card-body">
-            <form>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label>API AGT</label>
-                        <input type="text" name="apiAgt" class="form-control" th:value="${integracao.apiAgt}">
-                    </div>
-                    <div class="col-md-6">
-                        <label>Token AGT</label>
-                        <input type="text" name="tokenAgt" class="form-control" th:value="${integracao.tokenAgt}">
-                    </div>
+            <!-- Parâmetros do sistema -->
+            <div class="card mb-4">
+                <div class="card-header">Parâmetros do Sistema</div>
+                <div class="card-body">
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>Nome do Sistema</label>
+                                <input type="text" name="nomeSistema" class="form-control" th:value="${sistema.nome}">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Versão</label>
+                                <input type="text" name="versao" class="form-control" th:value="${sistema.versao}"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>E-mail de suporte</label>
+                                <input type="email" name="emailSuporte" class="form-control"
+                                    th:value="${sistema.emailSuporte}">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Backup automático</label>
+                                <select name="backup" class="form-select">
+                                    <option value="true" th:selected="${sistema.backup}">Ativado</option>
+                                    <option value="false" th:selected="${!sistema.backup}">Desativado</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-success">Salvar Parâmetros</button>
+                    </form>
                 </div>
-                <button class="btn btn-info">Salvar Integrações</button>
-            </form>
+            </div>
+
+            <!-- Integrações -->
+            <div class="card mb-4">
+                <div class="card-header">Integrações</div>
+                <div class="card-body">
+                    <form>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label>API AGT</label>
+                                <input type="text" name="apiAgt" class="form-control" th:value="${integracao.apiAgt}">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Token AGT</label>
+                                <input type="text" name="tokenAgt" class="form-control"
+                                    th:value="${integracao.tokenAgt}">
+                            </div>
+                        </div>
+                        <button class="btn btn-info">Salvar Integrações</button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-</main>
+    </main>
 </body>
+
 </html>

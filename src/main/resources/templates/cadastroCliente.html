@@ -78,7 +78,7 @@
 }
     </style>
 </head>
-<body>
+<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <!-- Menu lateral -->
     <aside th:replace="menu :: sidebar"></aside>
     <div class="content-wrapper">
