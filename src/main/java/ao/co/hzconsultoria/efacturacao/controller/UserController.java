@@ -1,8 +1,6 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.model.User;
-import ao.co.hzconsultoria.efacturacao.model.Sistema;
-import ao.co.hzconsultoria.efacturacao.model.Integracao;
 import ao.co.hzconsultoria.efacturacao.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

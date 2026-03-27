@@ -1,50 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <title>Devoluções</title>
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
-    <!-- AdminLTE CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background: #f4f6f9;
-        }
-
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-            margin-bottom: 24px;
-        }
-
-        .card-header {
-            background: #0d6efd;
-            color: #fff;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .table th,
-        .table td {
-            vertical-align: middle;
-        }
-
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #e9ecef;
-        }
-
-        .icon {
-            color: #0d6efd;
-            margin-right: 8px;
-        }
-
-        .badge {
-            font-size: 0.9em;
-        }
-    </style>
-</head>
+<head th:replace="menu :: head"></head>
 
 <body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
 
@@ -100,9 +57,7 @@
     </div>
 
     <!-- JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <!-- Scripts already loaded in menu :: head -->
 </body>
 
 </html>

@@ -1,23 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <title>Dashboard</title>
-    <!-- Adding Bootstrap and custom CSS -->
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-        crossorigin="anonymous">
-
-    <!-- AdminLTE CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css"
-        crossorigin="anonymous">
-
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        crossorigin="anonymous">
-
-
-</head>
+<head th:replace="menu :: head"></head>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <div class="wrapper">
@@ -34,39 +18,39 @@
 
                     <!-- Indicadores principais - 1ª Linha -->
                     <div class="row mb-4">
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box bg-success shadow-sm">
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-success shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold">Vendas Hoje</span>
-                                    <span class="info-box-number h5 mb-0" th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box bg-primary shadow-sm">
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-primary shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold">Vendas Mês</span>
-                                    <span class="info-box-number h5 mb-0" th:text="${'Kz ' + #numbers.formatDecimal(vendasMes, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(vendasMes, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box bg-warning shadow-sm">
-                                <span class="info-box-icon"><i class="fas fa-percent text-white"></i></span>
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-warning shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-percent"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold text-white">IVA</span>
-                                    <span class="info-box-number h5 mb-0 text-white" th:text="${'Kz ' + #numbers.formatDecimal(totalIva, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                    <span class="info-box-text fw-bold">IVA</span>
+                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(totalIva, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box bg-danger shadow-sm">
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-danger shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-file-invoice"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold">Facturas</span>
-                                    <span class="info-box-number h5 mb-0" th:text="${totalFacturas}">0</span>
+                                    <span class="info-box-number" th:text="${totalFacturas}">0</span>
                                 </div>
                             </div>
                         </div>
@@ -74,39 +58,39 @@
 
                     <!-- Indicadores principais - 2ª Linha -->
                     <div class="row mb-4">
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box bg-info shadow-sm">
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-info shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold">Pagamentos</span>
-                                    <span class="info-box-number h5 mb-0" th:text="${totalPagamentos}">0</span>
+                                    <span class="info-box-number" th:text="${totalPagamentos}">0</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box bg-secondary shadow-sm">
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-secondary shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold">Clientes</span>
-                                    <span class="info-box-number h5 mb-0" th:text="${totalClientes}">0</span>
+                                    <span class="info-box-number" th:text="${totalClientes}">0</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box shadow-sm" style="background-color: #fd7e14; color: white;">
-                                <span class="info-box-icon"><i class="fas fa-clock text-white"></i></span>
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-orange shadow-sm">
+                                <span class="info-box-icon"><i class="fas fa-clock"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold">Pendentes</span>
-                                    <span class="info-box-number h5 mb-0" th:text="${totalPendentes}">0</span>
+                                    <span class="info-box-number" th:text="${totalPendentes}">0</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12">
-                            <div class="info-box bg-dark shadow-sm">
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-dark shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold">Lucros</span>
-                                    <span class="info-box-number h5 mb-0" th:text="${'Kz ' + #numbers.formatDecimal(lucroMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(lucroMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
                         </div>
@@ -200,21 +184,8 @@
         </main>
     </div>
 
-    <!-- Adding JavaScript libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- jQuery primeiro -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js" crossorigin="anonymous"></script>
-
-    <!-- Bootstrap bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- FontAwesome (opcional) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"
-        crossorigin="anonymous"></script>
-
     <!-- AdminLTE -->
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>>
+    <!-- Scripts already loaded in menu :: head -->
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
