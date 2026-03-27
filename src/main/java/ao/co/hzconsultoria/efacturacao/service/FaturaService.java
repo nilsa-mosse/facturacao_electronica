@@ -3,9 +3,9 @@ package ao.co.hzconsultoria.efacturacao.service;
 import ao.co.hzconsultoria.efacturacao.model.Fatura;
 import ao.co.hzconsultoria.efacturacao.model.Carrinho;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
-import ao.co.hzconsultoria.efacturacao.model.Produto;
+
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
-import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
+
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.PdfPTable;
@@ -32,8 +32,7 @@ import java.awt.image.BufferedImage;
 public class FaturaService {
     @Autowired
     private FaturaRepository faturaRepository;
-    @Autowired
-    private ProdutoRepository produtoRepository;
+
 
     public Fatura emitirFatura(Compra compra) {
         Fatura fatura = new Fatura();

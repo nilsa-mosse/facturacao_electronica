@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestão de Produtos</title>
 
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
     crossorigin="anonymous">
 
@@ -19,59 +18,8 @@
     crossorigin="anonymous">
 
   <style>
-    /* Sidebar fixa no desktop e responsiva no mobile */
-    .main-sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 250px;
-      background-color: #343a40;
-      color: #fff;
-      z-index: 1000;
-      transition: all 0.3s;
-    }
-
-    .main-sidebar .nav-sidebar>.nav-item>.nav-link {
-      color: #c2c7d0;
-    }
-
-    .main-sidebar .nav-sidebar>.nav-item>.nav-link.active {
-      background-color: #007bff;
-      color: #fff;
-    }
-
-    .main-sidebar .user-panel {
-      background-color: #495057;
-      padding: 10px;
-      border-bottom: 1px solid #4b545c;
-    }
-
-    /* Conteúdo principal */
-    .content-wrapper {
-      margin-left: 250px;
-      padding: 20px;
-      transition: all 0.3s;
-    }
-
     /* Responsivo */
     @media (max-width: 768px) {
-      .content-wrapper {
-        margin-left: 0;
-        padding: 10px;
-      }
-
-      .main-sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-      }
-
-      .main-sidebar .nav-sidebar {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-      }
 
       .table {
         font-size: 0.9rem;
@@ -100,158 +48,163 @@
   </style>
 </head>
 
-<body class="hold-transition sidebar-mini" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+  <div class="wrapper">
+    <!-- Topbar-->
+    <nav th:replace="menu :: topbar"></nav>
 
-  <!-- Sidebar -->
-  <aside th:replace="menu :: sidebar" class="main-sidebar"></aside>
+    <!-- Sidebar -->
+    <aside th:replace="menu :: sidebar" class="main-sidebar"></aside>
 
-  <!-- Conteúdo principal -->
-  <div class="content-wrapper">
+    <!-- Conteúdo principal -->
+    <div class="content-wrapper">
 
-    <div class="container-fluid px-4">
+      <div class="container-fluid px-4">
 
-      <!-- Cabeçalho -->
-      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-        <h3 class="fw-bold mb-2 mb-md-0">📦 Gestão de Produtos</h3>
-        <a href="/produtos/novo" class="btn btn-primary shadow-sm">+ Novo Produto</a>
-      </div>
-
-      <!-- Filtros -->
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body">
-          <form th:action="@{/produtos/listar}" method="get">
-            <div class="row g-3">
-
-              <div class="col-md-5">
-                <div class="input-group">
-                  <span class="input-group-text bg-white">🔎</span>
-                  <input type="text" name="busca" class="form-control" placeholder="Buscar produtos..."
-                    th:value="${busca}">
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <select name="cat" class="form-select">
-                  <option value="" th:selected="${categoriaSelecionada == null}">Todas categorias</option>
-                  <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
-                    th:selected="${catObj.id == categoriaSelecionada}">
-                  </option>
-                </select>
-              </div>
-
-              <div class="col-md-3 d-grid">
-                <button class="btn btn-dark">Filtrar</button>
-              </div>
-
-            </div>
-          </form>
+        <!-- Cabeçalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+          <h3 class="fw-bold mb-2 mb-md-0">📦 Gestão de Produtos</h3>
+          <a href="/produtos/novo" class="btn btn-primary shadow-sm">+ Novo Produto</a>
         </div>
-      </div>
 
-      <!-- Tabela -->
-      <div class="card shadow-sm border-0">
-        <div class="card-body p-0 table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Produto</th>
-                <th>Categoria</th>
-                <th>Código</th>
-                <th>Preço</th>
-                <th>Stock</th>
-                <th>IVA (%)</th>
-                <th class="text-end">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="tabela-produtos">
-              <tr th:each="produto : ${produtos}" th:id="'produto-' + ${produto.id}">
-                <td>
-                  <div class="d-flex align-items-center gap-3">
-                    <img th:if="${produto.imagemBlob != null}" th:src="@{/produto/imagem/{id}(id=${produto.id})}"
-                      class="product-img">
-                    <div>
-                      <div class="fw-semibold" th:text="${produto.nome}"></div>
-                      <small class="text-muted" th:text="${produto.descricao}"></small>
-                    </div>
-                  </div>
-                </td>
-                <td th:text="${produto.categoria != null ? produto.categoria.nome : 'Sem categoria'}"></td>
-                <td th:text="${produto.codigoBarra}"></td>
-                <td><span class="badge bg-success" th:text="${produto.preco} + ' Kz'"></span></td>
-                <td>
-                  <span class="badge" th:classappend="${produto.quantidadeEstoque < 5} ? 'bg-danger' : 'bg-primary'"
-                    th:text="${produto.quantidadeEstoque}"></span>
-                </td>
-                <td th:text="${produto.ivaPercentual != null ? produto.ivaPercentual + '%': '-'}"></td>
-                <td class="text-end">
-                  <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                    th:data-bs-target="${'#detalhesModal_' + produto.id}">✏️</button>
-                  <button class="btn btn-sm btn-outline-danger"
-                    th:onclick="|apagarProduto('${produto.id}')|">🗑️</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- MODAIS (Edit Produto) -->
-  <div th:each="produto : ${produtos}">
-    <div class="modal fade" th:id="${'detalhesModal_' + produto.id}">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data"
-            onsubmit="return atualizarProdutos(event, this)">
-            <div class="modal-header">
-              <h5 class="modal-title">Editar Produto</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-              <input type="hidden" name="id" th:value="${produto.id}">
+        <!-- Filtros -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-body">
+            <form th:action="@{/produtos/listar}" method="get">
               <div class="row g-3">
-                <div class="col-md-6">
-                  <label>Nome</label>
-                  <input type="text" name="nome" class="form-control" th:value="${produto.nome}" required>
+
+                <div class="col-md-5">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white">🔎</span>
+                    <input type="text" name="busca" class="form-control" placeholder="Buscar produtos..."
+                      th:value="${busca}">
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <label>Preço</label>
-                  <input type="number" name="preco" class="form-control" th:value="${produto.preco}" required>
-                </div>
-                <div class="col-md-12">
-                  <label>Descrição</label>
-                  <textarea name="descricao" class="form-control" rows="2" th:text="${produto.descricao}"
-                    required></textarea>
-                </div>
-                <div class="col-md-6">
-                  <label>Categoria</label>
-                  <select name="categoriaId" class="form-select" required>
+
+                <div class="col-md-4">
+                  <select name="cat" class="form-select">
+                    <option value="" th:selected="${categoriaSelecionada == null}">Todas categorias</option>
                     <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
-                      th:selected="${produto.categoria != null && produto.categoria.id == catObj.id}"></option>
+                      th:selected="${catObj.id == categoriaSelecionada}">
+                    </option>
                   </select>
                 </div>
-                <div class="col-md-6">
-                  <label>Stock</label>
-                  <input type="number" name="quantidadeEstoque" class="form-control"
-                    th:value="${produto.quantidadeEstoque}" required>
+
+                <div class="col-md-3 d-grid">
+                  <button class="btn btn-dark">Filtrar</button>
                 </div>
-                <div class="col-md-6">
-                  <label>Código de Barra</label>
-                  <input type="text" name="codigoBarra" class="form-control" th:value="${produto.codigoBarra}" required>
-                </div>
-                <div class="col-md-6">
-                  <label>Imagem</label>
-                  <input type="file" name="imagem" class="form-control">
+
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0 table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Produto</th>
+                  <th>Categoria</th>
+                  <th>Código</th>
+                  <th>Preço</th>
+                  <th>Stock</th>
+                  <th>IVA (%)</th>
+                  <th class="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-produtos">
+                <tr th:each="produto : ${produtos}" th:id="'produto-' + ${produto.id}">
+                  <td>
+                    <div class="d-flex align-items-center gap-3">
+                      <img th:if="${produto.imagemBlob != null}" th:src="@{/produto/imagem/{id}(id=${produto.id})}"
+                        class="product-img">
+                      <div>
+                        <div class="fw-semibold" th:text="${produto.nome}"></div>
+                        <small class="text-muted" th:text="${produto.descricao}"></small>
+                      </div>
+                    </div>
+                  </td>
+                  <td th:text="${produto.categoria != null ? produto.categoria.nome : 'Sem categoria'}"></td>
+                  <td th:text="${produto.codigoBarra}"></td>
+                  <td><span class="badge bg-success" th:text="${produto.preco} + ' Kz'"></span></td>
+                  <td>
+                    <span class="badge" th:classappend="${produto.quantidadeEstoque < 5} ? 'bg-danger' : 'bg-primary'"
+                      th:text="${produto.quantidadeEstoque}"></span>
+                  </td>
+                  <td th:text="${produto.ivaPercentual != null ? produto.ivaPercentual + '%': '-'}"></td>
+                  <td class="text-end">
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                      th:data-bs-target="${'#detalhesModal_' + produto.id}">✏️</button>
+                    <button class="btn btn-sm btn-outline-danger"
+                      th:onclick="|apagarProduto('${produto.id}')|">🗑️</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MODAIS (Edit Produto) -->
+    <div th:each="produto : ${produtos}">
+      <div class="modal fade" th:id="${'detalhesModal_' + produto.id}">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data"
+              onsubmit="return atualizarProdutos(event, this)">
+              <div class="modal-header">
+                <h5 class="modal-title">Editar Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <input type="hidden" name="id" th:value="${produto.id}">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label>Nome</label>
+                    <input type="text" name="nome" class="form-control" th:value="${produto.nome}" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Preço</label>
+                    <input type="number" name="preco" class="form-control" th:value="${produto.preco}" required>
+                  </div>
+                  <div class="col-md-12">
+                    <label>Descrição</label>
+                    <textarea name="descricao" class="form-control" rows="2" th:text="${produto.descricao}"
+                      required></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Categoria</label>
+                    <select name="categoriaId" class="form-select" required>
+                      <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
+                        th:selected="${produto.categoria != null && produto.categoria.id == catObj.id}"></option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Stock</label>
+                    <input type="number" name="quantidadeEstoque" class="form-control"
+                      th:value="${produto.quantidadeEstoque}" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Código de Barra</label>
+                    <input type="text" name="codigoBarra" class="form-control" th:value="${produto.codigoBarra}"
+                      required>
+                  </div>
+                  <div class="col-md-6">
+                    <label>Imagem</label>
+                    <input type="file" name="imagem" class="form-control">
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-success">Salvar</button>
-              <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            </div>
-          </form>
+              <div class="modal-footer">
+                <button class="btn btn-success">Salvar</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

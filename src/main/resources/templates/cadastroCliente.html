@@ -13,72 +13,14 @@
     <link rel="stylesheet" href="/assets/bootstrap.min.css">
 
  <style>
-  /* ===== DARK SIDEBAR MODERNA ===== */
-.main-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 250px;
-    background: #1e1e2f; /* fundo escuro moderno */
-    color: #cbd5e1;
-    z-index: 1000;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-}
 
-/* Área do usuário */
-.main-sidebar .user-panel {
-    background: #111827;
-    padding: 15px;
-    border-bottom: 1px solid #2d3748;
-}
-
-/* Links */
-.main-sidebar .nav-sidebar > .nav-item > .nav-link {
-    color: #cbd5e1;
-    border-radius: 8px;
-    margin: 5px 10px;
-    transition: all 0.3s ease;
-}
-
-/* Hover */
-.main-sidebar .nav-sidebar > .nav-item > .nav-link:hover {
-    background: #4e73df;
-    color: #fff;
-    padding-left: 20px;
-}
-
-/* Link ativo */
-.main-sidebar .nav-sidebar > .nav-item > .nav-link.active {
-    background: #1cc88a;
-    color: #fff;
-}
-
-/* Ícones */
-.main-sidebar .nav-icon {
-    color: #94a3b8;
-}
-
-/* Texto do menu */
-.main-sidebar .nav-sidebar .nav-link p {
-    font-weight: 500;
-}
-
-/* Submenu */
-.nav-treeview {
-    background: #111827;
-    border-left: 2px solid #4e73df;
-}
-
-
-/* Efeito de brilho ao passar no menu */
-.main-sidebar .nav-sidebar > .nav-item > .nav-link:hover i {
-    color: #fff;
-    transform: scale(1.1);
-}
     </style>
 </head>
-<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+    <!-- Top Navbar -->
+    <nav th:replace="menu :: topbar"></nav>
+
     <!-- Menu lateral -->
     <aside th:replace="menu :: sidebar"></aside>
     <div class="content-wrapper">
@@ -127,7 +69,9 @@
             </div>
         </div>
     </div>
+    </div>
     <script src="/assets/jquery-3.6.0.min.js"></script>
     <script src="/assets/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
 </body>
 </html>
