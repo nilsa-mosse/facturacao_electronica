@@ -10,19 +10,26 @@
         <section class="content py-4">
             <div class="container-fluid">
                 <div class="card">
-                    <div class="card-header">Lista de Clientes</div>
+                    <div class="card-header" th:text="#{listagem.clientes.titulo}">Lista de Clientes</div>
         <div class="card-body">
+             <!-- Alerta de Mensagem -->
+             <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                 <i class="fas fa-check-circle me-2"></i>
+                 <span th:text="${mensagem}">Mensagem de sucesso</span>
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+             </div>
+
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle mb-3">
                     <thead class="table-light">
                         <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>NIF</th>
-                            <th>Email</th>
-                            <th>Telefone</th>
-                            <th>Endereço</th>
-                            <th>Ações</th>
+                            <th th:text="#{column.id}">ID</th>
+                            <th th:text="#{column.nome}">Nome</th>
+                            <th th:text="#{column.nif}">NIF</th>
+                            <th th:text="#{column.email}">Email</th>
+                            <th th:text="#{column.telefone}">Telefone</th>
+                            <th th:text="#{column.endereco}">Endereço</th>
+                            <th th:text="#{column.acoes}">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -36,9 +43,9 @@
                             <td>
                                 <div class="btn-group">
                                     <a th:href="@{'/clientes/editar/' + ${cliente.id}}"
-                                        class="btn btn-warning btn-sm"><i class="fas fa-edit me-1"></i>Editar</a>
+                                        class="btn btn-warning btn-sm"><i class="fas fa-edit me-1"></i><span th:text="#{form.editar}">Editar</span></a>
                                     <a th:href="@{'/clientes/delete/' + ${cliente.id}}" class="btn btn-danger btn-sm"><i
-                                            class="fas fa-trash me-1"></i>Excluir</a>
+                                            class="fas fa-trash me-1"></i><span th:text="#{form.excluir}">Excluir</span></a>
                                 </div>
                             </td>
                         </tr>
@@ -47,8 +54,7 @@
             </div>
 
             <div class="text-center mt-3">
-                <a th:href="@{/clientes/adicionar}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Cadastrar
-                    Novo Cliente</a>
+                <a th:href="@{/clientes/adicionar}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> <span th:text="#{listagem.clientes.novo}">Cadastrar Novo Cliente</span></a>
             </div>
         </div>
                 </div>

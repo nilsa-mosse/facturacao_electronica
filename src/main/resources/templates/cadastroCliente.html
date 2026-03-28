@@ -14,37 +14,37 @@
                 <div class="col-md-8 col-lg-6">
                     <div class="card p-4">
                         <div class="card-header">
-                            <h3><i class="fas fa-user-plus"></i> Cadastro de Cliente</h3>
-                            <p class="text-muted">Preencha os dados abaixo</p>
+                            <h3 th:text="#{cliente.cadastro.titulo}"><i class="fas fa-user-plus"></i> Cadastro de Cliente</h3>
+                            <p class="text-muted" th:text="#{cliente.placeholder.dados}">Preencha os dados abaixo</p>
                         </div>
                         <div class="card-body">
                             <form th:action="@{/clientes/adicionar}" method="post">
                                 <div class="form-group">
                                     <i class="fas fa-user"></i>
-                                    <input type="text" class="form-control" name="nome" placeholder="Nome do cliente" required>
+                                    <input type="text" class="form-control" name="nome" th:placeholder="#{cliente.nome}" required>
                                 </div>
                                 <div class="form-group">
                                     <i class="fas fa-address-card"></i>
-                                    <input type="text" class="form-control" name="nif" placeholder="NIF" required>
+                                    <input type="text" class="form-control" name="nif" th:placeholder="#{cliente.nif}" required>
                                 </div>
                                 <div class="form-group">
                                     <i class="fas fa-envelope"></i>
-                                    <input type="email" class="form-control" name="email" placeholder="Email" required>
+                                    <input type="email" class="form-control" name="email" th:placeholder="#{cliente.email}" required>
                                 </div>
                                 <div class="form-group">
                                     <i class="fas fa-phone"></i>
-                                    <input type="text" class="form-control" name="telefone" placeholder="Telefone" required>
+                                    <input type="text" class="form-control" name="telefone" th:placeholder="#{cliente.telefone}" required>
                                 </div>
                                 <div class="form-group">
                                     <i class="fas fa-location-dot"></i>
-                                    <textarea class="form-control" name="endereco" rows="3" placeholder="Endereço" required></textarea>
+                                    <textarea class="form-control" name="endereco" rows="3" th:placeholder="#{cliente.endereco}" required></textarea>
                                 </div>
                                 <div class="d-flex justify-content-between mt-4">
                                     <a th:href="@{/clientes/listar}" class="btn btn-secondary btn-custom">
-                                        <i class="fas fa-xmark"></i> Cancelar
+                                        <i class="fas fa-xmark"></i> <span th:text="#{form.cancelar}">Cancelar</span>
                                     </a>
                                     <button type="submit" class="btn btn-primary btn-custom">
-                                        <i class="fas fa-floppy-disk"></i> Salvar
+                                        <i class="fas fa-floppy-disk"></i> <span th:text="#{form.salvar}">Salvar</span>
                                     </button>
                                 </div>
                             </form>

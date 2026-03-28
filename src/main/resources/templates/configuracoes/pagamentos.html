@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1><i class="fas fa-credit-card me-2"></i>Métodos de Pagamento</h1>
+                            <h1><i class="fas fa-credit-card me-2"></i><span th:text="#{config.pagamentos.titulo}">Métodos de Pagamento</span></h1>
                         </div>
                     </div>
                 </div>
@@ -21,29 +21,26 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                     <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Sucesso!</strong> Método de pagamento salvo correctamente.
-                    </div>
-                    <div th:if="${param.deleted}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Eliminado!</strong> Método de pagamento removido com sucesso.
+                        <i class="fas fa-check-circle me-1"></i>
+                        <span th:text="${mensagem}">Método de pagamento salvo correctamente.</span>
                     </div>
 
                     <!-- Tabela de Métodos de Pagamento -->
                     <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Métodos de Pagamento Registados</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.pagamentos.registados}">Métodos de Pagamento Registados</h3>
                         </div>
                         <div class="card-body table-responsive p-0">
                             <table class="table table-hover table-striped table-valign-middle">
-                                <thead>
+                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Nome</th>
-                                        <th>Código AGT</th>
-                                        <th>Estado</th>
-                                        <th>Acções</th>
+                                        <th th:text="#{produto.label.nome}">Nome</th>
+                                        <th th:text="#{config.impostos.codigo_agt}">Código AGT</th>
+                                        <th th:text="#{config.series.estado}">Estado</th>
+                                        <th th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -52,14 +49,14 @@
                                         <td th:text="${mp.nome}">Numerário</td>
                                         <td><span class="badge bg-info" th:text="${mp.codigoAgt}">NU</span></td>
                                         <td>
-                                            <span class="badge"
+                                             <span class="badge"
                                                 th:classappend="${mp.activo ? 'bg-success' : 'bg-danger'}"
-                                                th:text="${mp.activo ? 'Activo' : 'Inactivo'}">Activo</span>
+                                                th:text="${mp.activo ? #messages.msg('config.series.activa') : #messages.msg('config.series.inactiva')}">Activo</span>
                                         </td>
                                         <td>
-                                            <a th:href="@{'/configuracoes/pagamentos/eliminar/' + ${mp.id}}"
+                                             <a th:href="@{'/configuracoes/pagamentos/eliminar/' + ${mp.id}}"
                                                 class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Tem certeza que deseja eliminar este método?')">
+                                                th:onclick="return confirm([[#{config.pagamentos.confirmar_eliminar}]])">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
@@ -71,19 +68,18 @@
 
                     <!-- Formulário Novo Método -->
                     <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">Adicionar Novo Método de Pagamento</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.pagamentos.novo}">Adicionar Novo Método de Pagamento</h3>
                         </div>
                         <form th:action="@{/configuracoes/pagamentos/salvar}" th:object="${novoMetodo}" method="post">
                             <div class="card-body">
-                                <div class="row">
+                                 <div class="row">
                                     <div class="form-group col-md-4">
-                                        <label>Nome</label>
-                                        <input type="text" class="form-control" th:field="*{nome}"
-                                            placeholder="Ex: Numerário, Transferência Bancária" required>
+                                        <label th:text="#{produto.label.nome}">Nome</label>
+                                        <input type="text" class="form-control" th:field="*{nome}" required>
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Código AGT</label>
+                                        <label th:text="#{config.impostos.codigo_agt}">Código AGT</label>
                                         <select class="form-select" th:field="*{codigoAgt}">
                                             <option value="NU">NU - Numerário</option>
                                             <option value="CC">CC - Cartão de Crédito</option>
@@ -96,17 +92,17 @@
                                         </select>
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Estado</label>
+                                        <label th:text="#{config.series.estado}">Estado</label>
                                         <select class="form-select" th:field="*{activo}">
-                                            <option value="true">Activo</option>
-                                            <option value="false">Inactivo</option>
+                                            <option value="true" th:text="#{config.series.activa}">Activo</option>
+                                            <option value="false" th:text="#{config.series.inactiva}">Inactivo</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Salvar
-                                    Método</button>
+                             <div class="card-footer">
+                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i><span th:text="#{config.pagamentos.btn.salvar}">Salvar
+                                    Método</span></button>
                             </div>
                         </form>
                     </div>

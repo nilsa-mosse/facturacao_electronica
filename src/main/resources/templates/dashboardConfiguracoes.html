@@ -6,60 +6,60 @@
 <body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <main class="py-4">
         <div class="container-fluid px-4">
-            <h3 class="fw-bold mb-4">Dashboard - Configurações</h3>
+             <h3 class="fw-bold mb-4" th:text="#{dashboard.config.titulo}">Dashboard - Configurações</h3>
 
             <!-- Preferências do usuário -->
             <div class="card mb-4">
-                <div class="card-header">Preferências do Usuário</div>
+                 <div class="card-header" th:text="#{dashboard.config.user_prefs}">Preferências do Usuário</div>
                 <div class="card-body">
                     <form>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label>Nome</label>
+                                 <label th:text="#{clientes.col.nome}">Nome</label>
                                 <input type="text" name="nome" class="form-control" th:value="${usuario.nome}">
                             </div>
                             <div class="col-md-6">
-                                <label>E-mail</label>
+                                 <label th:text="#{clientes.col.email}">E-mail</label>
                                 <input type="email" name="email" class="form-control" th:value="${usuario.email}">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label>Idioma</label>
+                                 <label th:text="#{menu.idioma}">Idioma</label>
                                 <select name="idioma" class="form-select">
-                                    <option value="pt" th:selected="${usuario.idioma == 'pt'}">Português</option>
-                                    <option value="en" th:selected="${usuario.idioma == 'en'}">Inglês</option>
+                                     <option value="pt" th:selected="${usuario.idioma == 'pt'}" th:text="#{idioma.pt}">Português</option>
+                                    <option value="en" th:selected="${usuario.idioma == 'en'}" th:text="#{idioma.en}">Inglês</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label>Atualizar Senha</label>
+                                 <label th:text="#{config.utilizadores.col.senha}">Atualizar Senha</label>
                                 <input type="password" name="senha" class="form-control" placeholder="Nova senha">
                             </div>
                         </div>
-                        <button class="btn btn-primary">Salvar Preferências</button>
+                         <button class="btn btn-primary" th:text="#{dashboard.config.btn.save_prefs}">Salvar Preferências</button>
                     </form>
                 </div>
             </div>
 
             <!-- Parâmetros do sistema -->
             <div class="card mb-4">
-                <div class="card-header">Parâmetros do Sistema</div>
+                 <div class="card-header" th:text="#{dashboard.config.sys_params}">Parâmetros do Sistema</div>
                 <div class="card-body">
                     <form>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label>Nome do Sistema</label>
+                                 <label th:text="#{dashboard.config.sys_params}">Nome do Sistema</label>
                                 <input type="text" name="nomeSistema" class="form-control" th:value="${sistema.nome}">
                             </div>
                             <div class="col-md-6">
-                                <label>Versão</label>
+                                 <label th:text="#{config.agt.comun.col.versao}">Versão</label>
                                 <input type="text" name="versao" class="form-control" th:value="${sistema.versao}"
                                     readonly>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label>E-mail de suporte</label>
+                                 <label th:text="#{clientes.col.email}">E-mail de suporte</label>
                                 <input type="email" name="emailSuporte" class="form-control"
                                     th:value="${sistema.emailSuporte}">
                             </div>
@@ -71,14 +71,14 @@
                                 </select>
                             </div>
                         </div>
-                        <button class="btn btn-success">Salvar Parâmetros</button>
+                         <button class="btn btn-success" th:text="#{dashboard.config.btn.save_params}">Salvar Parâmetros</button>
                     </form>
                 </div>
             </div>
 
             <!-- Integrações -->
             <div class="card mb-4">
-                <div class="card-header">Integrações</div>
+                 <div class="card-header" th:text="#{dashboard.config.integrations}">Integrações</div>
                 <div class="card-body">
                     <form>
                         <div class="row mb-3">
@@ -92,7 +92,7 @@
                                     th:value="${integracao.tokenAgt}">
                             </div>
                         </div>
-                        <button class="btn btn-info">Salvar Integrações</button>
+                         <button class="btn btn-info" th:text="#{dashboard.config.btn.save_integrations}">Salvar Integrações</button>
                     </form>
                 </div>
             </div>

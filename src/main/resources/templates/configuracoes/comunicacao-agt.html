@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1><i class="fas fa-server me-2"></i>Comunicação AGT</h1>
+                            <h1><i class="fas fa-server me-2"></i><span th:text="#{config.agt.titulo}">Comunicação AGT</span></h1>
                         </div>
                     </div>
                 </div>
@@ -21,27 +21,28 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                     <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Sucesso!</strong> Configurações de comunicação AGT salvas correctamente.
+                        <i class="fas fa-check-circle me-1"></i>
+                        <span th:text="${mensagem}">Configurações de comunicação AGT salvas correctamente.</span>
                     </div>
 
                     <!-- Configurações da API AGT -->
                     <div class="card card-outline card-dark">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-plug me-2"></i>Configurações da API AGT</h3>
+                             <h3 class="card-title"><i class="fas fa-plug me-2"></i><span th:text="#{config.agt.subtitulo}">Configurações da API AGT</span></h3>
                         </div>
                         <form th:action="@{/configuracoes/comunicacao-agt/salvar}" th:object="${config}" method="post">
                             <input type="hidden" th:field="*{id}" />
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="form-group col-md-6">
-                                        <label>URL da API AGT</label>
+                                     <div class="form-group col-md-6">
+                                        <label th:text="#{config.agt.url}">URL da API AGT</label>
                                         <input type="url" class="form-control" th:field="*{urlApi}" id="urlApi"
                                             placeholder="https://api.agt.minfin.gov.ao/v1/facturas">
                                     </div>
                                     <div class="form-group col-md-6">
-                                        <label>Token de Autenticação</label>
+                                        <label th:text="#{config.agt.token}">Token de Autenticação</label>
                                         <div class="input-group">
                                             <input type="password" class="form-control" th:field="*{token}"
                                                 id="tokenField" placeholder="Chave de autenticação fornecida pela AGT">
@@ -53,31 +54,29 @@
                                     </div>
                                 </div>
                                 <div class="row mt-3">
-                                    <div class="form-group col-md-4">
-                                        <label>Modo de Operação</label>
+                                     <div class="form-group col-md-4">
+                                        <label th:text="#{config.agt.modo}">Modo de Operação</label>
                                         <select class="form-select" th:field="*{modo}">
-                                            <option value="HOMOLOGACAO">Homologação (Testes)</option>
-                                            <option value="PRODUCAO">Produção</option>
+                                            <option value="HOMOLOGACAO" th:text="#{config.agt.modo.homologacao}">Homologação (Testes)</option>
+                                            <option value="PRODUCAO" th:text="#{config.agt.modo.producao}">Produção</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-4">
-                                        <label>NIF do Certificado</label>
-                                        <input type="text" class="form-control" th:field="*{nifCertificado}"
-                                            placeholder="NIF associado ao certificado digital">
+                                     <div class="form-group col-md-4">
+                                        <label th:text="#{config.agt.nif_certificado}">NIF do Certificado</label>
+                                        <input type="text" class="form-control" th:field="*{nifCertificado}">
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Tentativas de Reenvio</label>
-                                        <input type="number" class="form-control" th:field="*{tentativasReenvio}"
-                                            min="1" max="10">
+                                        <label th:text="#{config.agt.tentativas}">Tentativas de Reenvio</label>
+                                        <input type="number" class="form-control" th:field="*{tentativasReenvio}">
                                     </div>
                                 </div>
                                 <div class="row mt-3">
-                                    <div class="form-group col-md-4">
-                                        <label>Reenvio Automático</label>
+                                     <div class="form-group col-md-4">
+                                        <label th:text="#{config.agt.reenvio}">Reenvio Automático</label>
                                         <div class="custom-control custom-switch mt-2">
                                             <input type="checkbox" class="custom-control-input" id="reenvio"
                                                 th:field="*{reenvioAutomatico}">
-                                            <label class="custom-control-label" for="reenvio">Reenviar automaticamente
+                                            <label class="custom-control-label" for="reenvio" th:text="#{config.agt.reenvio.label}">Reenviar automaticamente
                                                 facturas rejeitadas</label>
                                         </div>
                                     </div>
@@ -85,30 +84,26 @@
 
                                 <!-- Info Box sobre o Modo -->
                                 <div class="row mt-4">
-                                    <div class="col-md-6">
+                                     <div class="col-md-6">
                                         <div class="callout callout-warning">
-                                            <h5><i class="fas fa-exclamation-triangle me-1"></i>Modo Homologação</h5>
-                                            <p>Use este modo para testes. As facturas não serão registadas oficialmente
-                                                na
-                                                AGT.</p>
+                                            <h5><i class="fas fa-exclamation-triangle me-1"></i><span th:text="#{config.agt.homologacao.titulo}">Modo Homologação</span></h5>
+                                            <p th:text="#{config.agt.homologacao.desc}">Use este modo para testes. As facturas não serão registadas oficialmente na AGT.</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="callout callout-success">
-                                            <h5><i class="fas fa-check-circle me-1"></i>Modo Produção</h5>
-                                            <p>Todas as facturas enviadas serão registadas oficialmente. Verifique os
-                                                dados
-                                                antes de activar.</p>
+                                            <h5><i class="fas fa-check-circle me-1"></i><span th:text="#{config.agt.producao.titulo}">Modo Produção</span></h5>
+                                            <p th:text="#{config.agt.producao.desc}">Todas as facturas enviadas serão registadas oficialmente. Verifique os dados antes de activar.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-dark"><i class="fas fa-save me-1"></i>Salvar
-                                    Configurações AGT</button>
+                             <div class="card-footer">
+                                <button type="submit" class="btn btn-dark"><i class="fas fa-save me-1"></i><span th:text="#{config.agt.btn.salvar}">Salvar
+                                    Configurações AGT</span></button>
                                 <button type="button" class="btn btn-outline-info ms-2" id="btnTestar"
                                     onclick="testarConexao()">
-                                    <i class="fas fa-wifi me-1"></i>Testar Conexão
+                                    <i class="fas fa-wifi me-1"></i><span th:text="#{config.agt.btn.testar}">Testar Conexão</span>
                                 </button>
                             </div>
                         </form>
@@ -144,17 +139,17 @@
             var btnTestar = document.getElementById('btnTestar');
             var resultadoDiv = document.getElementById('resultadoTeste');
 
-            if (!urlApi || urlApi.trim() === '') {
+             if (!urlApi || urlApi.trim() === '') {
                 resultadoDiv.innerHTML = '<div class="alert alert-danger mt-3">' +
-                    '<i class="fas fa-times-circle me-2"></i>Por favor, preencha a URL da API antes de testar.</div>';
+                    '<i class="fas fa-times-circle me-2"></i>[[#{config.agt.teste.falha_url}]]</div>';
                 return;
             }
 
-            // Mostrar loading
+             // Mostrar loading
             btnTestar.disabled = true;
-            btnTestar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>A testar...';
+            btnTestar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>[[#{config.agt.teste.loading}]]';
             resultadoDiv.innerHTML = '<div class="alert alert-info mt-3">' +
-                '<i class="fas fa-spinner fa-spin me-2"></i>A estabelecer conexão com o servidor AGT...</div>';
+                '<i class="fas fa-spinner fa-spin me-2"></i>[[#{config.agt.teste.processando}]]</div>';
 
             fetch('/configuracoes/comunicacao-agt/testar', {
                 method: 'POST',
@@ -166,14 +161,14 @@
                     var alertClass = data.sucesso ? 'alert-success' : 'alert-danger';
                     var icon = data.sucesso ? 'fa-check-circle' : 'fa-times-circle';
 
-                    var html = '<div class="alert ' + alertClass + ' mt-3">';
-                    html += '<h5><i class="fas ' + icon + ' me-2"></i>' + (data.sucesso ? 'Conexão bem-sucedida!' : 'Falha na conexão') + '</h5>';
-                    html += '<p class="mb-1"><strong>Mensagem:</strong> ' + data.mensagem + '</p>';
+                     var html = '<div class="alert ' + alertClass + ' mt-3">';
+                    html += '<h5><i class="fas ' + icon + ' me-2"></i>' + (data.sucesso ? '[[#{config.agt.teste.sucesso}]]' : '[[#{config.agt.teste.falha}]]') + '</h5>';
+                    html += '<p class="mb-1"><strong>[[#{config.agt.teste.msg}]]:</strong> ' + data.mensagem + '</p>';
                     if (data.codigoHttp) {
-                        html += '<p class="mb-1"><strong>Código HTTP:</strong> <span class="badge bg-secondary">' + data.codigoHttp + '</span></p>';
+                        html += '<p class="mb-1"><strong>[[#{config.agt.teste.http}]]:</strong> <span class="badge bg-secondary">' + data.codigoHttp + '</span></p>';
                     }
                     if (data.tempoMs !== undefined) {
-                        html += '<p class="mb-0"><strong>Tempo de resposta:</strong> ' + data.tempoMs + ' ms</p>';
+                        html += '<p class="mb-0"><strong>[[#{config.agt.teste.tempo}]]:</strong> ' + data.tempoMs + ' ms</p>';
                     }
                     html += '</div>';
 
@@ -183,9 +178,9 @@
                     resultadoDiv.innerHTML = '<div class="alert alert-danger mt-3">' +
                         '<i class="fas fa-exclamation-triangle me-2"></i>Erro ao comunicar com o servidor local: ' + error.message + '</div>';
                 })
-                .finally(function () {
+                 .finally(function () {
                     btnTestar.disabled = false;
-                    btnTestar.innerHTML = '<i class="fas fa-wifi me-1"></i>Testar Conexão';
+                    btnTestar.innerHTML = '<i class="fas fa-wifi me-1"></i>[[#{config.agt.btn.testar}]]';
                 });
         }
     </script>

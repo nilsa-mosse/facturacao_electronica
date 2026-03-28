@@ -5,6 +5,8 @@ import ao.co.hzconsultoria.efacturacao.model.Produto;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -26,6 +29,9 @@ public class ProdutoController {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @GetMapping("/cadastroProduto")
     public String cadastroProduto(Model model) {
@@ -61,7 +67,7 @@ public class ProdutoController {
             produto.setImagem("/produto/imagem/" + produto.getId()); // Caminho correto
             produtoRepository.save(produto); // Salva novamente com imagem
         }
-        model.addAttribute("mensagem", "Produto cadastrado com sucesso!");
+        model.addAttribute("mensagem", messageSource.getMessage("msg.produto.salvo", null, LocaleContextHolder.getLocale()));
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
         return "cadastroProduto";
@@ -96,7 +102,7 @@ public class ProdutoController {
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam(value = "imagem", required = false) MultipartFile imagem,
             @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
-            Model model) throws IOException {
+            RedirectAttributes redirectAttributes) throws IOException {
 
         // Buscar o produto pelo ID
         Produto produto = produtoRepository.findById(id)
@@ -123,13 +129,15 @@ public class ProdutoController {
         // Salvar alterações no banco
         produtoRepository.save(produto);
 
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.produto.atualizado", null, LocaleContextHolder.getLocale()));
         // Redirecionar para a listagem com os dados atualizados
         return "redirect:/produtos/listar";
     }
 
     @GetMapping("/produtos/apagar/{id}")
-    public String apagarProduto(@PathVariable Long id) {
+    public String apagarProduto(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         produtoRepository.deleteById(id);
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
         return "redirect:/produtos/listar";
     }
 }

@@ -17,21 +17,21 @@
                     <div class="col-lg-10">
                         <div class="card p-4">
                             <div class="d-flex align-items-center mb-4">
-                                <i class="fas fa-exclamation-triangle fa-2x header-icon"></i>
-                                <h2 class="mb-0">Produtos com Estoque Baixo</h2>
+                                 <i class="fas fa-exclamation-triangle fa-2x header-icon"></i>
+                                <h2 class="mb-0" th:text="#{dashboard.estoque.titulo}">Produtos com Stock Baixo</h2>
                             </div>
-                            <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3"
+                             <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3"
                                 style="width: fit-content;">
-                                <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                                <i class="fas fa-arrow-left"></i> <span th:text="#{btn.voltar}">Voltar</span>
                             </a>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped align-middle">
                                     <thead>
-                                        <tr>
-                                            <th>Nome</th>
-                                            <th>Quantidade em Estoque</th>
-                                            <th>Preço</th>
-                                            <th>Código de Barra</th>
+                                         <tr>
+                                            <th th:text="#{produtos.col.nome}">Nome</th>
+                                            <th th:text="#{produtos.col.quantidade}">Quantidade em Estoque</th>
+                                            <th th:text="#{produtos.col.preco}">Preço</th>
+                                            <th th:text="#{produtos.col.cod_barras}">Código de Barra</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -46,8 +46,8 @@
                                                 0,00 Kz</td>
                                             <td th:text="${produto.codigoBarra}">-</td>
                                         </tr>
-                                        <tr th:if="${produtosEstoqueBaixo.size() == 0}">
-                                            <td colspan="4" class="text-center">Nenhum produto com estoque baixo.</td>
+                                         <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
+                                            <td colspan="4" class="text-center" th:text="#{clientes.historico.vazio}">Nenhum produto com estoque baixo.</td>
                                         </tr>
                                     </tbody>
                                 </table>

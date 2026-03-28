@@ -10,7 +10,7 @@
                 <div class="container-fluid">
                     <div class="card form-card">
                         <div class="form-card-header">
-                            <h3 class="fw-bold mb-0">Cadastro de Despesa</h3>
+                            <h3 class="fw-bold mb-0" th:text="#{despesas.cadastro.titulo}">Cadastro de Despesa</h3>
                         </div>
                         <div class="card-body p-4">
                             <form th:action="${despesa.id == null} ? @{/despesas/adicionar} : @{/despesas/atualizar}" 
@@ -18,24 +18,24 @@
                                 <input type="hidden" th:field="*{id}" />
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Descrição</label>
-                                    <input type="text" class="form-control" th:field="*{descricao}" placeholder="Ex: Renda Mensal, Energia, Salários..." required>
+                                    <label class="form-label fw-bold" th:text="#{despesas.col.descricao}">Descrição</label>
+                                    <input type="text" class="form-control" th:field="*{descricao}" th:placeholder="#{produto.placeholder.descricao}" required>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Valor (Kz)</label>
+                                        <label class="form-label fw-bold" th:text="#{despesas.label.valor}">Valor (Kz)</label>
                                         <input type="number" step="0.01" class="form-control" th:field="*{valor}" placeholder="0.00" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Data</label>
+                                        <label class="form-label fw-bold" th:text="#{despesas.label.data}">Data</label>
                                         <input type="date" class="form-control" th:field="*{dataDespesa}" required>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Categoria</label>
+                                        <label class="form-label fw-bold" th:text="#{despesas.label.categoria}">Categoria</label>
                                         <select class="form-select" th:field="*{categoria}">
                                             <option value="Operacional">Operacional</option>
                                             <option value="Administrativa">Administrativa</option>
@@ -45,22 +45,22 @@
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold">Estado</label>
+                                        <label class="form-label fw-bold" th:text="#{despesas.label.status}">Estado</label>
                                         <select class="form-select" th:field="*{status}">
-                                            <option value="PENDENTE">Pendente</option>
-                                            <option value="PAGO">Pago</option>
+                                            <option value="PENDENTE" th:text="#{despesas.status.pendente}">Pendente</option>
+                                            <option value="PAGO" th:text="#{despesas.status.pago}">Pago</option>
                                         </select>
                                     </div>
                                 </div>
 
-                                <div class="d-grid gap-2 mt-4">
-                                    <button type="submit" class="btn btn-danger py-2 fw-bold">
-                                        <i class="fas fa-save me-1"></i> Salvar Despesa
-                                    </button>
-                                    <a th:href="@{/despesas/listar}" class="btn btn-outline-secondary">
-                                        Cancelar
-                                    </a>
-                                </div>
+                                 <div class="d-grid gap-2 mt-4">
+                                     <button type="submit" class="btn btn-danger py-2 fw-bold">
+                                         <i class="fas fa-save me-1"></i> <span th:text="#{form.salvar}">Salvar Despesa</span>
+                                     </button>
+                                     <a th:href="@{/despesas/listar}" class="btn btn-outline-secondary" th:text="#{form.cancelar}">
+                                         Cancelar
+                                     </a>
+                                 </div>
                             </form>
                         </div>
                     </div>

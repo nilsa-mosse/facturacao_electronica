@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1><i class="fas fa-percent me-2"></i>Impostos e Taxas</h1>
+                            <h1><i class="fas fa-percent me-2"></i><span th:text="#{config.impostos.titulo}">Impostos e Taxas</span></h1>
                         </div>
                     </div>
                 </div>
@@ -21,31 +21,28 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                     <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Sucesso!</strong> Imposto salvo correctamente.
-                    </div>
-                    <div th:if="${param.deleted}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Eliminado!</strong> Imposto removido com sucesso.
+                        <i class="fas fa-check-circle me-1"></i>
+                        <span th:text="${mensagem}">Imposto salvo correctamente.</span>
                     </div>
 
                     <!-- Tabela de Impostos -->
                     <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Impostos Configurados</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.impostos.configurados}">Impostos Configurados</h3>
                         </div>
                         <div class="card-body table-responsive p-0">
                             <table class="table table-hover table-striped table-valign-middle">
-                                <thead>
+                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Nome</th>
-                                        <th>Tipo</th>
-                                        <th>Percentagem</th>
-                                        <th>Código AGT</th>
-                                        <th>Motivo de Isenção</th>
-                                        <th>Acções</th>
+                                        <th th:text="#{produto.label.nome}">Nome</th>
+                                        <th th:text="#{financeiro.col.tipo}">Tipo</th>
+                                        <th th:text="#{config.impostos.percentagem}">Percentagem</th>
+                                        <th th:text="#{config.impostos.codigo_agt}">Código AGT</th>
+                                        <th th:text="#{config.impostos.motivo_isencao}">Motivo de Isenção</th>
+                                        <th th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -58,9 +55,9 @@
                                         <td th:text="${imp.codigoAgt}">NOR</td>
                                         <td th:text="${imp.motivoIsencao != null ? imp.motivoIsencao : '—'}">—</td>
                                         <td>
-                                            <a th:href="@{'/configuracoes/impostos/eliminar/' + ${imp.id}}"
+                                             <a th:href="@{'/configuracoes/impostos/eliminar/' + ${imp.id}}"
                                                 class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Tem certeza que deseja eliminar este imposto?')">
+                                                th:onclick="return confirm([[#{config.impostos.confirmar_eliminar}]])">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
@@ -72,19 +69,19 @@
 
                     <!-- Formulário Novo Imposto -->
                     <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">Adicionar Novo Imposto</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.impostos.novo}">Adicionar Novo Imposto</h3>
                         </div>
                         <form th:action="@{/configuracoes/impostos/salvar}" th:object="${novoImposto}" method="post">
                             <div class="card-body">
-                                <div class="row">
+                                 <div class="row">
                                     <div class="form-group col-md-4">
-                                        <label>Nome do Imposto</label>
+                                        <label th:text="#{config.impostos.label.nome}">Nome do Imposto</label>
                                         <input type="text" class="form-control" th:field="*{nome}"
-                                            placeholder="Ex: IVA Normal" required>
+                                            th:placeholder="#{produto.placeholder.nome}" required>
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Tipo</label>
+                                        <label th:text="#{financeiro.col.tipo}">Tipo</label>
                                         <select class="form-select" th:field="*{tipo}">
                                             <option value="IVA">IVA</option>
                                             <option value="IS">Imposto de Selo</option>
@@ -93,27 +90,26 @@
                                         </select>
                                     </div>
                                     <div class="form-group col-md-4">
-                                        <label>Percentagem (%)</label>
+                                        <label th:text="#{config.impostos.percentagem}">Percentagem (%)</label>
                                         <input type="number" step="0.01" class="form-control" th:field="*{percentagem}"
-                                            placeholder="Ex: 14.00" required>
+                                            placeholder="14.00" required>
                                     </div>
                                 </div>
-                                <div class="row mt-3">
+                                 <div class="row mt-3">
                                     <div class="form-group col-md-4">
-                                        <label>Código AGT</label>
+                                        <label th:text="#{config.impostos.codigo_agt}">Código AGT</label>
                                         <input type="text" class="form-control" th:field="*{codigoAgt}"
-                                            placeholder="Ex: NOR, ISE, RED">
+                                            placeholder="NOR, ISE, RED">
                                     </div>
                                     <div class="form-group col-md-8">
-                                        <label>Motivo de Isenção (se aplicável)</label>
-                                        <input type="text" class="form-control" th:field="*{motivoIsencao}"
-                                            placeholder="Ex: Artigo 12.º do CIVA">
+                                        <label th:text="#{config.impostos.motivo_isencao}">Motivo de Isenção (se aplicável)</label>
+                                        <input type="text" class="form-control" th:field="*{motivoIsencao}">
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Salvar
-                                    Imposto</button>
+                             <div class="card-footer">
+                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i><span th:text="#{config.impostos.btn.salvar}">Salvar
+                                    Imposto</span></button>
                             </div>
                         </form>
                     </div>

@@ -3,10 +3,13 @@ package ao.co.hzconsultoria.efacturacao.controller;
 import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -32,6 +35,8 @@ public class ConfiguracaoController {
     private MetodoPagamentoRepository metodoPagamentoRepository;
     @Autowired
     private ConfiguracaoAGTRepository configuracaoAGTRepository;
+    @Autowired
+    private MessageSource messageSource;
 
     // ─── Dados da Empresa ────────────────────────────────────────────────────
     @GetMapping("/empresa")
@@ -42,9 +47,10 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/empresa/salvar")
-    public String salvarEmpresa(@ModelAttribute Empresa empresa) {
+    public String salvarEmpresa(@ModelAttribute Empresa empresa, RedirectAttributes redirectAttributes) {
         empresaRepository.save(empresa);
-        return "redirect:/configuracoes/empresa?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/empresa";
     }
 
     // ─── Utilizadores e Perfis ───────────────────────────────────────────────
@@ -56,15 +62,17 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/utilizadores/salvar")
-    public String salvarUsuario(@ModelAttribute User user) {
+    public String salvarUsuario(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         userRepository.save(user);
-        return "redirect:/configuracoes/utilizadores?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/utilizadores";
     }
 
     @GetMapping("/utilizadores/eliminar/{id}")
-    public String eliminarUsuario(@PathVariable Long id) {
+    public String eliminarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         userRepository.deleteById(id);
-        return "redirect:/configuracoes/utilizadores?deleted";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/utilizadores";
     }
 
     // ─── Impostos e Taxas ────────────────────────────────────────────────────
@@ -76,15 +84,17 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/impostos/salvar")
-    public String salvarImposto(@ModelAttribute Imposto imposto) {
+    public String salvarImposto(@ModelAttribute Imposto imposto, RedirectAttributes redirectAttributes) {
         impostoRepository.save(imposto);
-        return "redirect:/configuracoes/impostos?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/impostos";
     }
 
     @GetMapping("/impostos/eliminar/{id}")
-    public String eliminarImposto(@PathVariable Long id) {
+    public String eliminarImposto(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         impostoRepository.deleteById(id);
-        return "redirect:/configuracoes/impostos?deleted";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/impostos";
     }
 
     // ─── Séries de Facturação ────────────────────────────────────────────────
@@ -96,15 +106,17 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/series/salvar")
-    public String salvarSerie(@ModelAttribute Serie serie) {
+    public String salvarSerie(@ModelAttribute Serie serie, RedirectAttributes redirectAttributes) {
         serieRepository.save(serie);
-        return "redirect:/configuracoes/series?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/series";
     }
 
     @GetMapping("/series/eliminar/{id}")
-    public String eliminarSerie(@PathVariable Long id) {
+    public String eliminarSerie(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         serieRepository.deleteById(id);
-        return "redirect:/configuracoes/series?deleted";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/series";
     }
 
     // ─── Moedas e Câmbios ────────────────────────────────────────────────────
@@ -116,15 +128,17 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/moedas/salvar")
-    public String salvarMoeda(@ModelAttribute Moeda moeda) {
+    public String salvarMoeda(@ModelAttribute Moeda moeda, RedirectAttributes redirectAttributes) {
         moedaRepository.save(moeda);
-        return "redirect:/configuracoes/moedas?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/moedas";
     }
 
     @GetMapping("/moedas/eliminar/{id}")
-    public String eliminarMoeda(@PathVariable Long id) {
+    public String eliminarMoeda(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         moedaRepository.deleteById(id);
-        return "redirect:/configuracoes/moedas?deleted";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/moedas";
     }
 
     // ─── Métodos de Pagamento ────────────────────────────────────────────────
@@ -136,15 +150,17 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/pagamentos/salvar")
-    public String salvarPagamento(@ModelAttribute MetodoPagamento metodo) {
+    public String salvarPagamento(@ModelAttribute MetodoPagamento metodo, RedirectAttributes redirectAttributes) {
         metodoPagamentoRepository.save(metodo);
-        return "redirect:/configuracoes/pagamentos?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/pagamentos";
     }
 
     @GetMapping("/pagamentos/eliminar/{id}")
-    public String eliminarPagamento(@PathVariable Long id) {
+    public String eliminarPagamento(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         metodoPagamentoRepository.deleteById(id);
-        return "redirect:/configuracoes/pagamentos?deleted";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/pagamentos";
     }
 
     // ─── Comunicação AGT ─────────────────────────────────────────────────────
@@ -156,9 +172,10 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/comunicacao-agt/salvar")
-    public String salvarComunicacaoAgt(@ModelAttribute ConfiguracaoAGT config) {
+    public String salvarComunicacaoAgt(@ModelAttribute ConfiguracaoAGT config, RedirectAttributes redirectAttributes) {
         configuracaoAGTRepository.save(config);
-        return "redirect:/configuracoes/comunicacao-agt?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/comunicacao-agt";
     }
 
     @PostMapping("/comunicacao-agt/testar")
@@ -170,7 +187,7 @@ public class ConfiguracaoController {
 
         if (urlApi == null || urlApi.trim().isEmpty()) {
             resultado.put("sucesso", false);
-            resultado.put("mensagem", "A URL da API não foi preenchida.");
+            resultado.put("mensagem", messageSource.getMessage("config.agt.teste.falha_url", null, LocaleContextHolder.getLocale()));
             return ResponseEntity.badRequest().body(resultado);
         }
 
@@ -196,13 +213,13 @@ public class ConfiguracaoController {
 
             if (codigoHttp >= 200 && codigoHttp < 300) {
                 resultado.put("sucesso", true);
-                resultado.put("mensagem", "Conexão estabelecida com sucesso! (HTTP " + codigoHttp + ")");
+                resultado.put("mensagem", messageSource.getMessage("config.agt.teste.sucesso", null, LocaleContextHolder.getLocale()) + " (HTTP " + codigoHttp + ")");
             } else if (codigoHttp == 401 || codigoHttp == 403) {
                 resultado.put("sucesso", false);
-                resultado.put("mensagem", "Servidor acessível, mas o token foi rejeitado. (HTTP " + codigoHttp + ")");
+                resultado.put("mensagem", messageSource.getMessage("config.agt.teste.falha_token", null, LocaleContextHolder.getLocale()) + " (HTTP " + codigoHttp + ")");
             } else {
                 resultado.put("sucesso", false);
-                resultado.put("mensagem", "Servidor respondeu com código HTTP " + codigoHttp + ".");
+                resultado.put("mensagem", messageSource.getMessage("config.agt.teste.falha_geral", null, LocaleContextHolder.getLocale()) + " (HTTP " + codigoHttp + ")");
             }
 
             conn.disconnect();
@@ -241,8 +258,9 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/geral/salvar")
-    public String salvarGeral(@ModelAttribute Sistema sistema) {
+    public String salvarSistema(@ModelAttribute Sistema sistema, RedirectAttributes redirectAttributes) {
         sistemaConfig = sistema;
-        return "redirect:/configuracoes/geral?success";
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/geral";
     }
 }

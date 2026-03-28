@@ -13,8 +13,8 @@
             <!-- PRODUTOS -->
             <div class="col-md-8">
                 <div class="d-flex justify-content-between mb-3">
-                    <h4><i class="fas fa-box"></i> Produtos</h4>
-                    <input type="text" id="search" class="form-control w-50" placeholder="Pesquisar...">
+                    <h4 th:text="#{pos.titulo.produtos}"><i class="fas fa-box"></i> Produtos</h4>
+                    <input type="text" id="search" class="form-control w-50" th:placeholder="#{pos.procurar}">
                 </div>
 
                 <div class="row" id="productList">
@@ -34,7 +34,7 @@
                             <button class="btn btn-primary btn-sm"
                                 th:attr="data-id=${produto.id},data-nome=${produto.nome},data-preco=${produto.preco},data-iva=${produto.ivaPercentual}"
                                 onclick="addToCart(this)">
-                                <i class="fas fa-cart-plus"></i> Adicionar
+                                <i class="fas fa-cart-plus"></i> <span th:text="#{pos.btn.adicionar}">Adicionar</span>
                             </button>
                         </div>
                     </div>
@@ -46,15 +46,15 @@
             <div class="col-md-4">
                 <div class="cart-box">
 
-                    <h4><i class="fas fa-shopping-cart"></i> Carrinho</h4>
+                    <h4 th:text="#{pos.carrinho.titulo}"><i class="fas fa-shopping-cart"></i> Carrinho</h4>
 
                     <table class="table table-sm mt-3" id="cartTable">
                         <thead>
                             <tr>
-                                <th>Produto</th>
-                                <th>Qtd</th>
-                                <th>Total</th>
-                                <th>Ações</th>
+                                <th th:text="#{pos.cart.produto}">Produto</th>
+                                <th th:text="#{pos.cart.qtd}">Qtd</th>
+                                <th th:text="#{pos.cart.total}">Total</th>
+                                <th th:text="#{pos.cart.acoes}">Ações</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -62,26 +62,26 @@
 
                     <div class="total-box text-end">
                         <button type="button" class="btn btn-warning mb-2" id="calcularImpostos">
-                            <i class="fas fa-calculator"></i> Calcular Impostos
+                            <i class="fas fa-calculator"></i> <span th:text="#{pos.calc.impostos}">Calcular Impostos</span>
                         </button>
                         <div id="impostosBox" class="mb-2 d-none">
-                            <div>IVA: <span id="valorIva">0</span> Kz</div>
-                            <div>Total sem imposto: <span id="totalSemImposto">0</span> Kz</div>
-                            <div class="fw-bold">Total Final: <span id="totalFinal">0</span> Kz</div>
+                            <div><span th:text="#{pos.iva}">IVA</span>: <span id="valorIva">0</span> Kz</div>
+                            <div><span th:text="#{pos.total.sem_imposto}">Total sem imposto</span>: <span id="totalSemImposto">0</span> Kz</div>
+                            <div class="fw-bold"><span th:text="#{pos.total.final}">Total Final</span>: <span id="totalFinal">0</span> Kz</div>
                         </div>
-                        Total: <span id="total">0</span> Kz
+                        <span th:text="#{pos.total}">Total</span>: <span id="total">0</span> Kz
                     </div>
 
                     <form method="post">
                         <input type="hidden" id="itensInput">
 
                         <button type="button" id="finalizarCompra" class="btn btn-success w-100 mt-3">
-                            <i class="fas fa-check"></i> Finalizar Compra
+                            <i class="fas fa-check"></i> <span th:text="#{pos.btn.finalizar}">Finalizar Compra</span>
                         </button>
                     </form>
 
                     <div id="pdfLinkBox" class="alert alert-success mt-3 d-none">
-                        Fatura gerada! <a id="pdfLink" href="#" target="_blank" class="fw-bold">Baixar PDF da Fatura</a>
+                        <span th:text="#{pos.fatura.gerada}">Fatura gerada!</span> <a id="pdfLink" href="#" target="_blank" class="fw-bold" th:text="#{pos.fatura.baixar}">Baixar PDF da Fatura</a>
                     </div>
 
                 </div>
@@ -129,7 +129,8 @@
 
                 let ivaInfo = '';
                 if (item.ivaPercentual && item.ivaPercentual > 0) {
-                    ivaInfo = `<span class='badge bg-info ms-1'>IVA: ${item.ivaPercentual}%</span>`;
+                    const ivaLabel = /*[[#{pos.iva}]]*/ 'IVA';
+                    ivaInfo = `<span class='badge bg-info ms-1'>${ivaLabel} ${item.ivaPercentual}%</span>`;
                 }
 
                 tbody.append(`
@@ -213,9 +214,9 @@
         }
 
         $(document).ready(function () {
-            $('#finalizarCompra').click(function () {
+             $('#finalizarCompra').click(function () {
                 if (cart.length === 0) {
-                    alert("Carrinho vazio!");
+                    alert(/*[[#{pos.msg.carrinho_vazio}]]*/ 'Carrinho vazio!');
                     return;
                 }
                 // Monta objeto Compra
@@ -233,8 +234,8 @@
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(compra),
-                    success: function (pdfPath) {
-                        alert('Compra finalizada!');
+                     success: function (pdfPath) {
+                        alert(/*[[#{pos.msg.sucesso}]]*/ 'Compra finalizada!');
                         cart = [];
                         renderCart();
                         if (pdfPath) {
@@ -243,7 +244,8 @@
                         }
                     },
                     error: function (xhr) {
-                        alert('Erro ao finalizar compra: ' + (xhr.responseText || 'Erro desconhecido'));
+                        const errorMsg = /*[[#{pos.msg.erro_finalizar}]]*/ 'Erro ao finalizar compra';
+                        alert(errorMsg + ': ' + (xhr.responseText || 'Error'));
                     }
                 });
             });
@@ -273,7 +275,7 @@
                             return; // Filtra os produtos na atualização automática
                         }
                         
-                        let ivaBadge = produto.ivaPercentual ? `<p class='mb-1'><span class='badge bg-info'>IVA: ${produto.ivaPercentual}%</span></p>` : '';
+                         const btnLabel = /*[[#{pos.btn.adicionar}]]*/ 'Adicionar';
                         productList.append(`
                     <div class="col-md-4 mb-3">
                         <div class="card card-product text-center p-2">
@@ -282,7 +284,7 @@
                             <p class="text-success fw-bold mb-0">${produto.preco} Kz</p>
                             ${ivaBadge}
                             <button class="btn btn-primary btn-sm" data-id="${produto.id}" data-nome="${produto.nome}" data-preco="${produto.preco}" data-iva="${produto.ivaPercentual || ''}" onclick="addToCart(this)">
-                                <i class="fas fa-cart-plus"></i> Adicionar
+                                <i class="fas fa-cart-plus"></i> ${btnLabel}
                             </button>
                         </div>
                     </div>
@@ -317,15 +319,15 @@
             renderCart();
         }
 
-        function removeItem(index) {
-            if (confirm("Remover este produto?")) {
+         function removeItem(index) {
+            if (confirm(/*[[#{pos.msg.confirmar_remover}]]*/ 'Remover este produto?')) {
                 cart.splice(index, 1);
                 renderCart();
             }
         }
 
         function editItem(index) {
-            let novaQtd = prompt("Nova quantidade:", cart[index].qtd);
+            let novaQtd = prompt(/*[[#{pos.msg.nova_quantidade}]]*/ 'Nova quantidade:', cart[index].qtd);
 
             if (novaQtd !== null) {
                 novaQtd = parseInt(novaQtd);
@@ -334,7 +336,7 @@
                     cart[index].qtd = novaQtd;
                     renderCart();
                 } else {
-                    alert("Quantidade inválida!");
+                    alert(/*[[#{pos.msg.quantidade_invalida}]]*/ 'Quantidade inválida!');
                 }
             }
         }

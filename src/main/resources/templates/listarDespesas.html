@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="fw-bold">Gestão de Despesas</h1>
+                            <h1 class="fw-bold" th:text="#{despesas.gestao.titulo}">Gestão de Despesas</h1>
                         </div>
                     </div>
                 </div>
@@ -22,26 +22,33 @@
             <section class="content">
                 <div class="container-fluid">
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h3 class="card-title">Listagem de Despesas</h3>
+                         <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title" th:text="#{despesas.listagem.titulo}">Listagem de Despesas</h3>
                             <div class="card-tools ms-auto">
                                 <a th:href="@{/despesas/adicionar}" class="btn btn-light btn-sm text-danger fw-bold">
-                                    <i class="fas fa-plus me-1"></i> Nova Despesa
+                                    <i class="fas fa-plus me-1"></i> <span th:text="#{despesas.btn.novo}">Nova Despesa</span>
                                 </a>
                             </div>
                         </div>
-                        <div class="card-body">
+                         <div class="card-body">
+                             <!-- Alerta de Mensagem -->
+                             <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                 <i class="fas fa-check-circle me-2"></i>
+                                 <span th:text="${mensagem}">Mensagem de sucesso</span>
+                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                             </div>
+
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Descrição</th>
-                                            <th>Valor (Kz)</th>
-                                            <th>Data</th>
-                                            <th>Categoria</th>
-                                            <th>Estado</th>
-                                            <th class="text-center">Ações</th>
+                                            <th th:text="#{column.id}">ID</th>
+                                            <th th:text="#{despesas.col.descricao}">Descrição</th>
+                                            <th th:text="#{despesas.col.valor}">Valor (Kz)</th>
+                                            <th th:text="#{despesas.label.data}">Data</th>
+                                            <th th:text="#{despesas.label.categoria}">Categoria</th>
+                                            <th th:text="#{despesas.col.estado}">Estado</th>
+                                            <th class="text-center" th:text="#{column.acoes}">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -52,22 +59,23 @@
                                             <td th:text="${despesa.dataDespesa}"></td>
                                             <td th:text="${despesa.categoria}"></td>
                                             <td>
-                                                <span class="badge bg-success" th:if="${despesa.status == 'PAGO'}">Pago</span>
-                                                <span class="badge bg-warning" th:if="${despesa.status == 'PENDENTE'}">Pendente</span>
+                                                <span class="badge bg-success" th:if="${despesa.status == 'PAGO'}" th:text="#{despesas.status.pago}">Pago</span>
+                                                <span class="badge bg-warning" th:if="${despesa.status == 'PENDENTE'}" th:text="#{despesas.status.pendente}">Pendente</span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group">
                                                     <a th:href="@{'/despesas/editar/' + ${despesa.id}}" class="btn btn-outline-primary btn-sm">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a th:href="@{'/despesas/excluir/' + ${despesa.id}}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Deseja excluir esta despesa?')">
+                                                    <a th:href="@{'/despesas/excluir/' + ${despesa.id}}" class="btn btn-outline-danger btn-sm"
+                                                       th:onclick="return confirm([[#{despesas.confirmar_excluir}]])">
                                                         <i class="fas fa-trash"></i>
                                                     </a>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr th:if="${#lists.isEmpty(despesas)}">
-                                            <td colspan="7" class="text-center py-4 bg-light">Nenhuma despesa registrada.</td>
+                                            <td colspan="7" class="text-center py-4 bg-light" th:text="#{despesas.msg.nenhuma}">Nenhuma despesa registrada.</td>
                                         </tr>
                                     </tbody>
                                 </table>

@@ -17,22 +17,22 @@
 
         <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-          <h3 class="fw-bold mb-2 mb-md-0">Dashboard - Relatórios</h3>
+          <h3 class="fw-bold mb-2 mb-md-0" th:text="#{dashboard.relatorios.titulo}">Dashboard - Relatórios</h3>
         </div>
 
         <!-- Filtros -->
         <form class="mb-4">
           <div class="row g-3">
             <div class="col-md-3">
-              <label>Data Inicial</label>
+              <label th:text="#{dashboard.relat.filtro.data_inicial}">Data Inicial</label>
               <input type="date" name="dataInicial" class="form-control">
             </div>
             <div class="col-md-3">
-              <label>Data Final</label>
+              <label th:text="#{dashboard.relat.filtro.data_final}">Data Final</label>
               <input type="date" name="dataFinal" class="form-control">
             </div>
             <div class="col-md-3">
-              <label>Tipo de Relatório</label>
+              <label th:text="#{dashboard.relat.filtro.tipo}">Tipo de Relatório</label>
               <select name="tipoRelatorio" class="form-select">
                 <option value="vendas">Vendas</option>
                 <option value="faturacao">Faturação</option>
@@ -41,7 +41,7 @@
               </select>
             </div>
             <div class="col-md-3 d-grid align-self-end">
-              <button class="btn btn-primary">Gerar Relatório</button>
+               <button class="btn btn-primary" th:text="#{dashboard.relat.btn.gerar}">Gerar Relatório</button>
             </div>
           </div>
         </form>
@@ -52,14 +52,14 @@
           <!-- Vendas -->
           <div class="col-lg-6 col-md-12">
             <div class="card shadow-sm">
-              <div class="card-header">Relatório de Vendas</div>
+               <div class="card-header" th:text="#{dashboard.relat.vendas.titulo}">Relatório de Vendas</div>
               <div class="card-body table-responsive">
                 <table class="table table-sm table-hover mb-2">
                   <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th>Valor</th>
-                      <th>Cliente</th>
+                     <tr>
+                      <th th:text="#{vendas.col.data}">Data</th>
+                      <th th:text="#{produtos.col.preco}">Valor</th>
+                      <th th:text="#{clientes.col.nome}">Cliente</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -70,8 +70,8 @@
                     </tr>
                   </tbody>
                 </table>
-                <a href="#" class="btn btn-success btn-sm me-1">Exportar PDF</a>
-                <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                 <a href="#" class="btn btn-success btn-sm me-1" th:text="#{dashboard.relat.btn.export_pdf}">Exportar PDF</a>
+                <a href="#" class="btn btn-info btn-sm" th:text="#{dashboard.relat.btn.export_excel}">Exportar Excel</a>
               </div>
             </div>
           </div>
@@ -79,14 +79,14 @@
           <!-- Faturação -->
           <div class="col-lg-6 col-md-12">
             <div class="card shadow-sm">
-              <div class="card-header">Relatório de Faturação</div>
+               <div class="card-header" th:text="#{dashboard.relat.faturacao.titulo}">Relatório de Faturação</div>
               <div class="card-body table-responsive">
                 <table class="table table-sm table-hover mb-2">
                   <thead>
-                    <tr>
-                      <th>Nº Fatura</th>
-                      <th>Data</th>
-                      <th>Valor</th>
+                     <tr>
+                      <th th:text="#{vendas.col.id}">Nº Fatura</th>
+                      <th th:text="#{vendas.col.data}">Data</th>
+                      <th th:text="#{produtos.col.preco}">Valor</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -99,8 +99,8 @@
                     </tr>
                   </tbody>
                 </table>
-                <a href="#" class="btn btn-success btn-sm me-1">Exportar PDF</a>
-                <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                 <a href="#" class="btn btn-success btn-sm me-1" th:text="#{dashboard.relat.btn.export_pdf}">Exportar PDF</a>
+                <a href="#" class="btn btn-info btn-sm" th:text="#{dashboard.relat.btn.export_excel}">Exportar Excel</a>
               </div>
             </div>
           </div>
@@ -108,14 +108,14 @@
           <!-- Clientes -->
           <div class="col-lg-6 col-md-12">
             <div class="card shadow-sm">
-              <div class="card-header">Relatório de Clientes</div>
+               <div class="card-header" th:text="#{dashboard.relat.clientes.titulo}">Relatório de Clientes</div>
               <div class="card-body table-responsive">
                 <table class="table table-sm table-hover mb-2">
                   <thead>
-                    <tr>
-                      <th>Cliente</th>
-                      <th>Compras</th>
-                      <th>Valor Total</th>
+                     <tr>
+                      <th th:text="#{clientes.col.nome}">Cliente</th>
+                      <th th:text="#{vendas.col.itens}">Compras</th>
+                      <th th:text="#{vendas.col.total}">Valor Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -126,8 +126,8 @@
                     </tr>
                   </tbody>
                 </table>
-                <a href="#" class="btn btn-success btn-sm me-1">Exportar PDF</a>
-                <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                 <a href="#" class="btn btn-success btn-sm me-1" th:text="#{dashboard.relat.btn.export_pdf}">Exportar PDF</a>
+                <a href="#" class="btn btn-info btn-sm" th:text="#{dashboard.relat.btn.export_excel}">Exportar Excel</a>
               </div>
             </div>
           </div>
@@ -135,14 +135,14 @@
           <!-- Produtos -->
           <div class="col-lg-6 col-md-12">
             <div class="card shadow-sm">
-              <div class="card-header">Relatório de Produtos</div>
+               <div class="card-header" th:text="#{dashboard.relat.produtos.titulo}">Relatório de Produtos</div>
               <div class="card-body table-responsive">
                 <table class="table table-sm table-hover mb-2">
                   <thead>
-                    <tr>
-                      <th>Produto</th>
-                      <th>Vendas</th>
-                      <th>Estoque</th>
+                     <tr>
+                      <th th:text="#{produtos.col.nome}">Produto</th>
+                      <th th:text="#{menu.vendas}">Vendas</th>
+                      <th th:text="#{produtos.col.quantidade}">Estoque</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -153,8 +153,8 @@
                     </tr>
                   </tbody>
                 </table>
-                <a href="#" class="btn btn-success btn-sm me-1">Exportar PDF</a>
-                <a href="#" class="btn btn-info btn-sm">Exportar Excel</a>
+                 <a href="#" class="btn btn-success btn-sm me-1" th:text="#{dashboard.relat.btn.export_pdf}">Exportar PDF</a>
+                <a href="#" class="btn btn-info btn-sm" th:text="#{dashboard.relat.btn.export_excel}">Exportar Excel</a>
               </div>
             </div>
           </div>

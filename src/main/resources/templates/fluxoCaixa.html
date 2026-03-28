@@ -10,7 +10,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i> Fluxo de Caixa</h1>
+                             <h1 class="fw-bold"><i class="fas fa-file-invoice-dollar me-2"></i> <span th:text="#{financeiro.fluxo_caixa.titulo}">Fluxo de Caixa</span></h1>
                         </div>
                     </div>
                 </div>
@@ -22,22 +22,22 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-body">
                             <form th:action="@{/financeiro/fluxo-caixa}" method="GET" class="row g-3 align-items-end">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Data Início</label>
-                                    <input type="date" name="inicio" th:value="${inicio}" class="form-control">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Data Fim</label>
-                                    <input type="date" name="fim" th:value="${fim}" class="form-control">
-                                </div>
-                                <div class="col-md-4 d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary flex-grow-1">
-                                        <i class="fas fa-filter me-1"></i> Filtrar
-                                    </button>
-                                    <a th:href="@{/financeiro/fluxo-caixa/pdf(inicio=${inicio}, fim=${fim})}" class="btn btn-danger">
-                                        <i class="fas fa-file-pdf me-1"></i> PDF
-                                    </a>
-                                </div>
+                                 <div class="col-md-4">
+                                     <label class="form-label fw-bold" th:text="#{financeiro.label.inicio}">Data Início</label>
+                                     <input type="date" name="inicio" th:value="${inicio}" class="form-control">
+                                 </div>
+                                 <div class="col-md-4">
+                                     <label class="form-label fw-bold" th:text="#{financeiro.label.fim}">Data Fim</label>
+                                     <input type="date" name="fim" th:value="${fim}" class="form-control">
+                                 </div>
+                                 <div class="col-md-4 d-flex gap-2">
+                                     <button type="submit" class="btn btn-primary flex-grow-1">
+                                         <i class="fas fa-filter me-1"></i> <span th:text="#{financeiro.btn.filtrar}">Filtrar</span>
+                                     </button>
+                                     <a th:href="@{/financeiro/fluxo-caixa/pdf(inicio=${inicio}, fim=${fim})}" class="btn btn-danger">
+                                         <i class="fas fa-file-pdf me-1"></i> PDF
+                                     </a>
+                                 </div>
                             </form>
                         </div>
                     </div>
@@ -47,9 +47,9 @@
                         <div class="col-md-4">
                             <div class="small-box bg-success shadow-sm summary-card">
                                 <div class="inner">
-                                    <h4 th:text="${'Kz ' + #numbers.formatDecimal(totalEntradas, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
-                                        Kz 0,00</h4>
-                                    <p class="fw-bold">Total de Entradas</p>
+                                     <h4 th:text="${'Kz ' + #numbers.formatDecimal(totalEntradas, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
+                                         Kz 0,00</h4>
+                                     <p class="fw-bold" th:text="#{financeiro.total_entradas}">Total de Entradas</p>
                                 </div>
                                 <div class="icon">
                                     <i class="fas fa-arrow-up"></i>
@@ -59,9 +59,9 @@
                         <div class="col-md-4">
                             <div class="small-box bg-danger shadow-sm summary-card">
                                 <div class="inner">
-                                    <h4 th:text="${'Kz ' + #numbers.formatDecimal(totalSaidas, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
-                                        Kz 0,00</h4>
-                                    <p class="fw-bold">Total de Saídas</p>
+                                     <h4 th:text="${'Kz ' + #numbers.formatDecimal(totalSaidas, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
+                                         Kz 0,00</h4>
+                                     <p class="fw-bold" th:text="#{financeiro.total_saidas}">Total de Saídas</p>
                                 </div>
                                 <div class="icon">
                                     <i class="fas fa-arrow-down"></i>
@@ -72,9 +72,9 @@
                             <div class="small-box shadow-sm summary-card" 
                                  th:classappend="${saldoConsolidado >= 0 ? 'bg-info' : 'bg-warning'}">
                                 <div class="inner">
-                                    <h4 th:text="${'Kz ' + #numbers.formatDecimal(saldoConsolidado, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
-                                        Kz 0,00</h4>
-                                    <p class="fw-bold">Saldo Consolidado</p>
+                                     <h4 th:text="${'Kz ' + #numbers.formatDecimal(saldoConsolidado, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
+                                         Kz 0,00</h4>
+                                     <p class="fw-bold" th:text="#{financeiro.saldo_consolidado}">Saldo Consolidado</p>
                                 </div>
                                 <div class="icon">
                                     <i class="fas fa-balance-scale"></i>
@@ -85,41 +85,41 @@
 
                     <!-- Tabela de Movimentações -->
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-white py-3">
-                            <h3 class="card-title fw-bold">Extrato de Movimentações</h3>
-                        </div>
+                         <div class="card-header bg-white py-3">
+                             <h3 class="card-title fw-bold" th:text="#{financeiro.extrato.titulo}">Extrato de Movimentações</h3>
+                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>Data / Hora</th>
-                                            <th>Descrição</th>
-                                            <th>Categoria</th>
-                                            <th>Tipo</th>
-                                            <th class="text-end pe-4">Valor (Kz)</th>
-                                        </tr>
+                                         <tr>
+                                             <th th:text="#{financeiro.col.data_hora}">Data / Hora</th>
+                                             <th th:text="#{despesas.col.descricao}">Descrição</th>
+                                             <th th:text="#{despesas.label.categoria}">Categoria</th>
+                                             <th th:text="#{financeiro.col.tipo}">Tipo</th>
+                                             <th class="text-end pe-4" th:text="#{despesas.col.valor}">Valor (Kz)</th>
+                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr th:each="mov : ${movimentacoes}">
                                             <td th:text="${#temporals.format(mov.data, 'dd/MM/yyyy HH:mm')}"></td>
                                             <td th:text="${mov.descricao}"></td>
                                             <td th:text="${mov.categoria}"></td>
-                                            <td>
-                                                <span class="badge px-3 py-2" 
-                                                      th:classappend="${mov.tipo == 'ENTRADA' ? 'badge-entrada' : 'badge-saida'}"
-                                                      th:text="${mov.tipo}"></span>
-                                            </td>
+                                             <td>
+                                                 <span class="badge px-3 py-2" 
+                                                       th:classappend="${mov.tipo == 'ENTRADA' ? 'badge-entrada' : 'badge-saida'}"
+                                                       th:text="${mov.tipo == 'ENTRADA' ? #messages.msg('financeiro.tipo.entrada') : #messages.msg('financeiro.tipo.saida')}"></span>
+                                             </td>
                                             <td class="text-end pe-4 fw-bold"
                                                 th:classappend="${mov.tipo == 'ENTRADA' ? 'text-entrada' : 'text-saida'}"
                                                 th:text="${(mov.tipo == 'SAIDA' ? '- ' : '+ ') + #numbers.formatDecimal(mov.valor, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">
                                             </td>
                                         </tr>
-                                        <tr th:if="${#lists.isEmpty(movimentacoes)}">
-                                            <td colspan="5" class="text-center py-5 bg-light">
-                                                <i class="fas fa-info-circle me-2"></i>Nenhuma movimentação financeira registrada.
-                                            </td>
-                                        </tr>
+                                         <tr th:if="${#lists.isEmpty(movimentacoes)}">
+                                             <td colspan="5" class="text-center py-5 bg-light">
+                                                 <i class="fas fa-info-circle me-2"></i><span th:text="#{financeiro.msg.nenhuma}">Nenhuma movimentação financeira registrada.</span>
+                                             </td>
+                                         </tr>
                                     </tbody>
                                 </table>
                             </div>

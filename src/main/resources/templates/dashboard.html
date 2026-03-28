@@ -14,7 +14,7 @@
         <main class="py-4">
             <div class="content-wrapper">
                 <div class="container-fluid px-4">
-                    <h3 class="fw-bold mb-4">Dashboard - Visão Geral</h3>
+                    <h3 class="fw-bold mb-4" th:text="#{dashboard.titulo}">Dashboard - Visão Geral</h3>
 
                     <!-- Indicadores principais - 1ª Linha -->
                     <div class="row mb-4">
@@ -22,7 +22,7 @@
                             <div class="premium-card grad-success shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Vendas Hoje</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_hoje}">Vendas Hoje</span>
                                     <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
@@ -31,7 +31,7 @@
                             <div class="premium-card grad-primary shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Vendas Mês</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_mes}">Vendas Mês</span>
                                     <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(vendasMes, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
@@ -40,7 +40,7 @@
                             <div class="premium-card grad-warning shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-percent"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">IVA</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.iva}">IVA</span>
                                     <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(totalIva, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                             <div class="premium-card grad-danger shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-file-invoice"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Facturas</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.facturas}">Facturas</span>
                                     <span class="info-box-number" th:text="${totalFacturas}">0</span>
                                 </div>
                             </div>
@@ -62,7 +62,7 @@
                             <div class="premium-card grad-info shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Pagamentos</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.pagamentos}">Pagamentos</span>
                                     <span class="info-box-number" th:text="${totalPagamentos}">0</span>
                                 </div>
                             </div>
@@ -71,7 +71,7 @@
                             <div class="premium-card grad-secondary shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Clientes</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.clientes}">Clientes</span>
                                     <span class="info-box-number" th:text="${totalClientes}">0</span>
                                 </div>
                             </div>
@@ -80,7 +80,7 @@
                             <div class="premium-card grad-orange shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-clock"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Pendentes</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.pendentes}">Pendentes</span>
                                     <span class="info-box-number" th:text="${totalPendentes}">0</span>
                                 </div>
                             </div>
@@ -89,7 +89,7 @@
                             <div class="premium-card grad-dark shadow-sm">
                                 <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Lucros</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.lucros}">Lucros</span>
                                     <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(lucroMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
                                 </div>
                             </div>

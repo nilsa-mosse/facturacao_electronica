@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1><i class="fas fa-users-cog me-2"></i>Utilizadores e Perfis</h1>
+                            <h1><i class="fas fa-users-cog me-2"></i><span th:text="#{config.utilizadores.titulo}">Utilizadores e Perfis</span></h1>
                         </div>
                     </div>
                 </div>
@@ -21,28 +21,25 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                     <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Sucesso!</strong> Operação realizada correctamente.
-                    </div>
-                    <div th:if="${param.deleted}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Eliminado!</strong> Utilizador removido com sucesso.
+                        <i class="fas fa-check-circle me-1"></i>
+                        <span th:text="${mensagem}">Operação realizada correctamente.</span>
                     </div>
 
                     <!-- Tabela de Utilizadores -->
                     <div class="card card-outline card-dark">
-                        <div class="card-header border-0">
-                            <h3 class="card-title">Listagem de Utilizadores</h3>
+                         <div class="card-header border-0">
+                            <h3 class="card-title" th:text="#{config.utilizadores.listagem}">Listagem de Utilizadores</h3>
                         </div>
                         <div class="card-body table-responsive p-0">
                             <table class="table table-striped table-valign-middle">
-                                <thead>
+                                 <thead>
                                     <tr>
-                                        <th>Nome</th>
-                                        <th>Login</th>
-                                        <th>Perfil (Role)</th>
-                                        <th>Acções</th>
+                                        <th th:text="#{config.utilizadores.nome}">Nome</th>
+                                        <th th:text="#{config.utilizadores.login}">Login</th>
+                                        <th th:text="#{config.utilizadores.perfil}">Perfil (Role)</th>
+                                        <th th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -55,9 +52,9 @@
                                                 th:text="${u.role}">ADMIN</span>
                                         </td>
                                         <td>
-                                            <a th:href="@{'/configuracoes/utilizadores/eliminar/' + ${u.id}}"
+                                             <a th:href="@{'/configuracoes/utilizadores/eliminar/' + ${u.id}}"
                                                 class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Tem certeza que deseja eliminar este utilizador?')">
+                                                th:onclick="return confirm([[#{config.utilizadores.confirmar_eliminar}]])">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
@@ -69,27 +66,27 @@
 
                     <!-- Formulário Novo Utilizador -->
                     <div class="card card-outline card-secondary">
-                        <div class="card-header">
-                            <h3 class="card-title">Novo Utilizador</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.utilizadores.novo}">Novo Utilizador</h3>
                         </div>
                         <form th:action="@{/configuracoes/utilizadores/salvar}" th:object="${novoUsuario}"
                             method="post">
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="form-group col-md-3">
-                                        <label>Nome Completo</label>
+                                     <div class="form-group col-md-3">
+                                        <label th:text="#{config.utilizadores.nome}">Nome Completo</label>
                                         <input type="text" class="form-control" th:field="*{nome}" required>
                                     </div>
                                     <div class="form-group col-md-3">
-                                        <label>Login de Acesso</label>
+                                        <label th:text="#{config.utilizadores.login}">Login de Acesso</label>
                                         <input type="text" class="form-control" th:field="*{login}" required>
                                     </div>
                                     <div class="form-group col-md-3">
-                                        <label>Palavra-passe</label>
+                                        <label th:text="#{config.utilizadores.senha}">Palavra-passe</label>
                                         <input type="password" class="form-control" th:field="*{senha}" required>
                                     </div>
                                     <div class="form-group col-md-3">
-                                        <label>Perfil (Role)</label>
+                                        <label th:text="#{config.utilizadores.perfil}">Perfil (Role)</label>
                                         <select class="form-select" th:field="*{role}">
                                             <option value="ADMIN">ADMIN</option>
                                             <option value="OPERADOR">OPERADOR</option>
@@ -98,10 +95,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
+                             <div class="card-footer">
                                 <button type="submit" class="btn btn-secondary"><i
-                                        class="fas fa-save me-1"></i>Adicionar
-                                    Utilizador</button>
+                                        class="fas fa-save me-1"></i><span th:text="#{config.utilizadores.btn.adicionar}">Adicionar
+                                    Utilizador</span></button>
                             </div>
                         </form>
                     </div>

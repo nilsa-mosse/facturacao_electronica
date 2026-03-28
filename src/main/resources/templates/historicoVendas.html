@@ -16,38 +16,39 @@
                         <div class="erp-toolbar mb-4">
                             <form th:action="@{/historico-vendas}" method="get"
                                 class="d-flex flex-wrap gap-3 w-100 align-items-center">
-                                <div class="input-group">
+                                 <div class="input-group">
                                     <span class="input-group-text bg-light"><i class="fa fa-calendar"></i></span>
                                     <input type="date" name="dataInicio" th:value="${dataInicio}" class="form-control"
-                                        placeholder="Data início">
+                                        th:placeholder="#{vendas.filtro.data_inicio}">
                                 </div>
-                                <div class="input-group">
+                                 <div class="input-group">
                                     <span class="input-group-text bg-light"><i class="fa fa-calendar"></i></span>
                                     <input type="date" name="dataFim" th:value="${dataFim}" class="form-control"
-                                        placeholder="Data fim">
+                                        th:placeholder="#{vendas.filtro.data_fim}">
                                 </div>
-                                <div class="input-group flex-grow-1">
+                                 <div class="input-group flex-grow-1">
                                     <span class="input-group-text bg-light"><i class="fa fa-search"></i></span>
                                     <input type="text" name="pesquisa" th:value="${pesquisa}" class="form-control"
-                                        placeholder="Pesquisar produto ou ID">
+                                        th:placeholder="#{vendas.filtro.pesquisar}">
                                 </div>
-                                <button type="submit" class="btn btn-success"><i class="fas fa-filter"></i>
-                                    Filtrar</button>
+                                 <button type="submit" class="btn btn-success"><i class="fas fa-filter"></i>
+                                    <span th:text="#{btn.filtrar}">Filtrar</span></button>
                             </form>
                         </div>
                         <div class="card">
                             <div class="card-header d-flex align-items-center">
-                                <i class="fas fa-history fa-lg icon"></i>
-                                <h3 class="mb-0">Histórico de Vendas</h3>
+                                 <i class="fas fa-history fa-lg icon"></i>
+                                <h3 class="mb-0" th:text="#{vendas.historico.titulo}">Histórico de Vendas</h3>
                             </div>
                             <div class="card-body">
                                 <table class="table table-bordered table-striped table-hover">
                                     <thead class="table-success">
+                                     <thead class="table-success">
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Data</th>
-                                            <th>Total</th>
-                                            <th>Itens</th>
+                                            <th th:text="#{vendas.col.id}">ID</th>
+                                            <th th:text="#{vendas.col.data}">Data</th>
+                                            <th th:text="#{vendas.col.total}">Total</th>
+                                            <th th:text="#{vendas.col.itens}">Itens</th>
                                         </tr>
                                     </thead>
                                     <tbody>

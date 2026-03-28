@@ -15,8 +15,15 @@
 
         <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-          <h3 class="fw-bold mb-2 mb-md-0">📦 Gestão de Produtos</h3>
-          <a href="/produtos/novo" class="btn btn-primary shadow-sm">+ Novo Produto</a>
+          <h3 class="fw-bold mb-2 mb-md-0" th:text="#{produtos.gestao.titulo}">📦 Gestão de Produtos</h3>
+          <a href="/produtos/novo" class="btn btn-primary shadow-sm" th:text="#{produtos.btn.novo}">+ Novo Produto</a>
+        </div>
+
+        <!-- Alerta de Mensagem -->
+        <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${mensagem}">Mensagem de sucesso</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
         <!-- Filtros -->
@@ -28,14 +35,14 @@
                 <div class="col-md-5">
                   <div class="input-group">
                     <span class="input-group-text bg-white">🔎</span>
-                    <input type="text" name="busca" class="form-control" placeholder="Buscar produtos..."
+                    <input type="text" name="busca" class="form-control" th:placeholder="#{produtos.filtro.pesquisar}"
                       th:value="${busca}">
                   </div>
                 </div>
 
                 <div class="col-md-4">
                   <select name="cat" class="form-select">
-                    <option value="" th:selected="${categoriaSelecionada == null}">Todas categorias</option>
+                    <option value="" th:selected="${categoriaSelecionada == null}" th:text="#{produtos.filtro.todas_categorias}">Todas categorias</option>
                     <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
                       th:selected="${catObj.id == categoriaSelecionada}">
                     </option>
@@ -43,7 +50,7 @@
                 </div>
 
                 <div class="col-md-3 d-grid">
-                  <button class="btn btn-dark">Filtrar</button>
+                  <button class="btn btn-dark" th:text="#{produtos.filtro.btn}">Filtrar</button>
                 </div>
 
               </div>
@@ -56,14 +63,14 @@
           <div class="card-body p-0 table-responsive">
             <table class="table table-hover align-middle mb-0">
               <thead class="table-light">
-                <tr>
-                  <th>Produto</th>
-                  <th>Categoria</th>
-                  <th>Código</th>
-                  <th>Preço</th>
-                  <th>Stock</th>
-                  <th>IVA (%)</th>
-                  <th class="text-end">Ações</th>
+                 <tr>
+                  <th th:text="#{pos.cart.produto}">Produto</th>
+                  <th th:text="#{column.categoria}">Categoria</th>
+                  <th th:text="#{listagem.produtos.sku}">Código</th>
+                  <th th:text="#{column.preco}">Preço</th>
+                  <th th:text="#{column.estoque}">Stock</th>
+                  <th th:text="#{produto.iva}">IVA (%)</th>
+                  <th class="text-end" th:text="#{column.acoes}">Ações</th>
                 </tr>
               </thead>
               <tbody id="tabela-produtos">
@@ -78,7 +85,7 @@
                       </div>
                     </div>
                   </td>
-                  <td th:text="${produto.categoria != null ? produto.categoria.nome : 'Sem categoria'}"></td>
+                   <td th:text="${produto.categoria != null ? produto.categoria.nome : #messages.msg('produtos.tabela.sem_categoria')}"></td>
                   <td th:text="${produto.codigoBarra}"></td>
                   <td><span class="badge bg-success" th:text="${produto.preco} + ' Kz'"></span></td>
                   <td>
@@ -108,8 +115,8 @@
           <div class="modal-content">
             <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data"
               onsubmit="return atualizarProdutos(event, this)">
-              <div class="modal-header">
-                <h5 class="modal-title">Editar Produto</h5>
+               <div class="modal-header">
+                <h5 class="modal-title" th:text="#{produto.editar.titulo}">Editar Produto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body">
@@ -140,20 +147,20 @@
                     <input type="number" name="quantidadeEstoque" class="form-control"
                       th:value="${produto.quantidadeEstoque}" required>
                   </div>
-                  <div class="col-md-6">
-                    <label>Código de Barra</label>
+                   <div class="col-md-6">
+                    <label th:text="#{produto.codigo_barra}">Código de Barra</label>
                     <input type="text" name="codigoBarra" class="form-control" th:value="${produto.codigoBarra}"
                       required>
                   </div>
                   <div class="col-md-6">
-                    <label>Imagem</label>
+                    <label th:text="#{produto.imagem}">Imagem</label>
                     <input type="file" name="imagem" class="form-control">
                   </div>
                 </div>
               </div>
-              <div class="modal-footer">
-                <button class="btn btn-success">Salvar</button>
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+               <div class="modal-footer">
+                <button class="btn btn-success" th:text="#{form.salvar}">Salvar</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{form.fechar}">Fechar</button>
               </div>
             </form>
           </div>
@@ -168,15 +175,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"
     crossorigin="anonymous"></script>
 
-  <script>
+   <script th:inline="javascript">
     function apagarProduto(id) {
-      if (confirm('Deseja realmente apagar este produto?')) {
+      if (confirm([[#{msg.confirmar_excluir}]])) {
         fetch('/produtos/apagar/' + id)
           .then(response => {
             if (response.redirected || response.ok) {
               window.location.replace('/produtos/listar');
             } else {
-              alert('Erro ao apagar produto.');
+              alert([[#{msg.erro_excluir}]]);
             }
           });
       }
@@ -190,7 +197,7 @@
           if (response.redirected || response.ok) {
             window.location.replace('/produtos/listar');
           } else {
-            alert('Erro ao salvar alterações.');
+            alert([[#{msg.erro_salvar}]]);
           }
         });
       return false;

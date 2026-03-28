@@ -10,23 +10,24 @@
                 <div class="card p-4">
                     <div class="d-flex align-items-center mb-4">
                         <i class="fas fa-coins fa-2x header-icon"></i>
-                        <h2 class="mb-0">Receita Mensal
+                        <h2 class="mb-0">
+                            <span th:text="#{dashboard.receita_mes.titulo}">Receita do Mês</span>
                             <span class="badge badge-total"
                                 th:text="${#numbers.formatDecimal(#aggregates.sum(vendasDoMes.![total]), 1, 'COMMA', 2, 'POINT')}">0,00
                                 Kz</span>
 
                         </h2>
                     </div>
-                    <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3">
-                        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                     <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3">
+                        <i class="fas fa-arrow-left"></i> <span th:text="#{btn.voltar}">Voltar</span>
                     </a>
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped align-middle">
                             <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Data</th>
-                                    <th>Total</th>
+                                 <tr>
+                                    <th th:text="#{vendas.col.id}">ID</th>
+                                    <th th:text="#{vendas.col.data}">Data</th>
+                                    <th th:text="#{vendas.col.total}">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -38,8 +39,8 @@
                                         th:text="${#numbers.formatDecimal(venda.total, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">
                                         0,00 Kz</td>
                                 </tr>
-                                <tr th:if="${vendasDoMes.size() == 0}">
-                                    <td colspan="3" class="text-center">Nenhuma venda realizada neste mês.</td>
+                                 <tr th:if="${#lists.isEmpty(vendasDoMes)}">
+                                    <td colspan="3" class="text-center" th:text="#{clientes.historico.vazio}">Nenhuma venda realizada neste mês.</td>
                                 </tr>
                             </tbody>
                         </table>

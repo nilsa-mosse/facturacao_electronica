@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1><i class="fas fa-coins me-2"></i>Moedas e Câmbios</h1>
+                            <h1><i class="fas fa-coins me-2"></i><span th:text="#{config.moedas.titulo}">Moedas e Câmbios</span></h1>
                         </div>
                     </div>
                 </div>
@@ -21,30 +21,27 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                     <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Sucesso!</strong> Moeda salva correctamente.
-                    </div>
-                    <div th:if="${param.deleted}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Eliminada!</strong> Moeda removida com sucesso.
+                        <i class="fas fa-check-circle me-1"></i>
+                        <span th:text="${mensagem}">Moeda salva correctamente.</span>
                     </div>
 
                     <!-- Tabela de Moedas -->
                     <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Moedas Registadas</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.moedas.registadas}">Moedas Registadas</h3>
                         </div>
                         <div class="card-body table-responsive p-0">
                             <table class="table table-hover table-striped table-valign-middle">
-                                <thead>
+                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Sigla</th>
-                                        <th>Nome</th>
-                                        <th>Taxa de Câmbio</th>
-                                        <th>Padrão</th>
-                                        <th>Acções</th>
+                                        <th th:text="#{config.moedas.sigla}">Sigla</th>
+                                        <th th:text="#{produto.label.nome}">Nome</th>
+                                        <th th:text="#{config.moedas.cambio}">Taxa de Câmbio</th>
+                                        <th th:text="#{config.moedas.padrao}">Padrão</th>
+                                        <th th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -54,14 +51,14 @@
                                         <td th:text="${m.nome}">Kwanza</td>
                                         <td th:text="${m.taxaCambio}">1.0000</td>
                                         <td>
-                                            <span class="badge"
+                                             <span class="badge"
                                                 th:classappend="${m.padrao ? 'bg-success' : 'bg-secondary'}"
-                                                th:text="${m.padrao ? 'Sim' : 'Não'}">Sim</span>
+                                                th:text="${m.padrao ? #messages.msg('config.moedas.sim') : #messages.msg('config.moedas.nao')}">Sim</span>
                                         </td>
                                         <td>
-                                            <a th:href="@{'/configuracoes/moedas/eliminar/' + ${m.id}}"
+                                             <a th:href="@{'/configuracoes/moedas/eliminar/' + ${m.id}}"
                                                 class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Tem certeza que deseja eliminar esta moeda?')">
+                                                th:onclick="return confirm([[#{config.moedas.confirmar_eliminar}]])">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
@@ -73,39 +70,37 @@
 
                     <!-- Formulário Nova Moeda -->
                     <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">Adicionar Nova Moeda</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.moedas.novo}">Adicionar Nova Moeda</h3>
                         </div>
                         <form th:action="@{/configuracoes/moedas/salvar}" th:object="${novaMoeda}" method="post">
                             <div class="card-body">
-                                <div class="row">
+                                 <div class="row">
                                     <div class="form-group col-md-3">
-                                        <label>Sigla</label>
+                                        <label th:text="#{config.moedas.sigla}">Sigla</label>
                                         <input type="text" class="form-control" th:field="*{sigla}"
-                                            placeholder="Ex: AOA, USD, EUR" maxlength="10" required>
+                                            placeholder="AOA, USD" maxlength="10" required>
                                     </div>
                                     <div class="form-group col-md-3">
-                                        <label>Nome</label>
-                                        <input type="text" class="form-control" th:field="*{nome}"
-                                            placeholder="Ex: Kwanza Angolano" required>
+                                        <label th:text="#{produto.label.nome}">Nome</label>
+                                        <input type="text" class="form-control" th:field="*{nome}" required>
                                     </div>
                                     <div class="form-group col-md-3">
-                                        <label>Taxa de Câmbio</label>
-                                        <input type="number" step="0.0001" class="form-control" th:field="*{taxaCambio}"
-                                            placeholder="Ex: 1.0000" required>
+                                        <label th:text="#{config.moedas.cambio}">Taxa de Câmbio</label>
+                                        <input type="number" step="0.0001" class="form-control" th:field="*{taxaCambio}" required>
                                     </div>
                                     <div class="form-group col-md-3">
-                                        <label>Moeda Padrão?</label>
+                                        <label th:text="#{config.moedas.padrao}">Moeda Padrão?</label>
                                         <select class="form-select" th:field="*{padrao}">
-                                            <option value="false">Não</option>
-                                            <option value="true">Sim</option>
+                                            <option value="false" th:text="#{config.moedas.nao}">Não</option>
+                                            <option value="true" th:text="#{config.moedas.sim}">Sim</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Salvar
-                                    Moeda</button>
+                             <div class="card-footer">
+                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i><span th:text="#{config.moedas.btn.salvar}">Salvar
+                                    Moeda</span></button>
                             </div>
                         </form>
                     </div>

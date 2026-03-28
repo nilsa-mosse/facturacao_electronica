@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1><i class="fas fa-layer-group me-2"></i>Séries de Facturação</h1>
+                            <h1><i class="fas fa-layer-group me-2"></i><span th:text="#{config.series.titulo}">Séries de Facturação</span></h1>
                         </div>
                     </div>
                 </div>
@@ -21,31 +21,28 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                     <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Sucesso!</strong> Série salva correctamente.
-                    </div>
-                    <div th:if="${param.deleted}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <strong>Eliminada!</strong> Série removida com sucesso.
+                        <i class="fas fa-check-circle me-1"></i>
+                        <span th:text="${mensagem}">Série salva correctamente.</span>
                     </div>
 
                     <!-- Tabela de Séries -->
                     <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Séries Registadas</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.series.registadas}">Séries Registadas</h3>
                         </div>
                         <div class="card-body table-responsive p-0">
                             <table class="table table-hover table-striped table-valign-middle">
-                                <thead>
+                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Prefixo</th>
-                                        <th>Descrição</th>
-                                        <th>Ano</th>
-                                        <th>Próximo Nº</th>
-                                        <th>Estado</th>
-                                        <th>Acções</th>
+                                        <th th:text="#{config.series.prefixo}">Prefixo</th>
+                                        <th th:text="#{despesas.col.descricao}">Descrição</th>
+                                        <th th:text="#{config.series.ano}">Ano</th>
+                                        <th th:text="#{config.series.proximo_n}">Próximo Nº</th>
+                                        <th th:text="#{config.series.estado}">Estado</th>
+                                        <th th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -56,14 +53,14 @@
                                         <td th:text="${s.ano}">2026</td>
                                         <td><span class="badge bg-secondary" th:text="${s.proximoNumero}">1</span></td>
                                         <td>
-                                            <span class="badge"
+                                             <span class="badge"
                                                 th:classappend="${s.activo ? 'bg-success' : 'bg-danger'}"
-                                                th:text="${s.activo ? 'Activa' : 'Inactiva'}">Activa</span>
+                                                th:text="${s.activo ? #messages.msg('config.series.activa') : #messages.msg('config.series.inactiva')}">Activa</span>
                                         </td>
                                         <td>
-                                            <a th:href="@{'/configuracoes/series/eliminar/' + ${s.id}}"
+                                             <a th:href="@{'/configuracoes/series/eliminar/' + ${s.id}}"
                                                 class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Tem certeza que deseja eliminar esta série?')">
+                                                th:onclick="return confirm([[#{config.series.confirmar_eliminar}]])">
                                                 <i class="fas fa-trash"></i>
                                             </a>
                                         </td>
@@ -75,44 +72,43 @@
 
                     <!-- Formulário Nova Série -->
                     <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">Adicionar Nova Série</h3>
+                         <div class="card-header">
+                            <h3 class="card-title" th:text="#{config.series.novo}">Adicionar Nova Série</h3>
                         </div>
                         <form th:action="@{/configuracoes/series/salvar}" th:object="${novaSerie}" method="post">
                             <div class="card-body">
-                                <div class="row">
+                                 <div class="row">
                                     <div class="form-group col-md-3">
-                                        <label>Prefixo</label>
+                                        <label th:text="#{config.series.prefixo}">Prefixo</label>
                                         <input type="text" class="form-control" th:field="*{prefixo}"
-                                            placeholder="Ex: FT, FR, NC" required>
+                                            placeholder="Ex: FT, NC" required>
                                     </div>
                                     <div class="form-group col-md-3">
-                                        <label>Descrição</label>
-                                        <input type="text" class="form-control" th:field="*{descricao}"
-                                            placeholder="Ex: Factura, Factura/Recibo">
+                                        <label th:text="#{despesas.col.descricao}">Descrição</label>
+                                        <input type="text" class="form-control" th:field="*{descricao}">
                                     </div>
                                     <div class="form-group col-md-2">
-                                        <label>Ano</label>
+                                        <label th:text="#{config.series.ano}">Ano</label>
                                         <input type="number" class="form-control" th:field="*{ano}" placeholder="2026"
                                             required>
                                     </div>
                                     <div class="form-group col-md-2">
-                                        <label>Nº Inicial</label>
+                                        <label th:text="#{config.series.proximo_n}">Nº Inicial</label>
                                         <input type="number" class="form-control" th:field="*{proximoNumero}" value="1"
                                             required>
                                     </div>
                                     <div class="form-group col-md-2">
-                                        <label>Estado</label>
+                                        <label th:text="#{config.series.estado}">Estado</label>
                                         <select class="form-select" th:field="*{activo}">
-                                            <option value="true">Activa</option>
-                                            <option value="false">Inactiva</option>
+                                            <option value="true" th:text="#{config.series.activa}">Activa</option>
+                                            <option value="false" th:text="#{config.series.inactiva}">Inactiva</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i>Salvar
-                                    Série</button>
+                             <div class="card-footer">
+                                <button type="submit" class="btn btn-success"><i class="fas fa-save me-1"></i><span th:text="#{config.series.btn.salvar}">Salvar
+                                    Série</span></button>
                             </div>
                         </form>
                     </div>

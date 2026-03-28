@@ -11,14 +11,14 @@
         <div class="content-wrapper">
             <main class="py-4">
                 <div class="container-fluid px-4">
-                    <h3 class="fw-bold mb-4">Dashboard - Estatísticas</h3>
+                    <h3 class="fw-bold mb-4" th:text="#{dashboard.estatisticas.titulo}">Dashboard - Estatísticas</h3>
 
                     <!-- Indicadores principais -->
                     <div class="row mb-4">
                         <div class="col-md-3">
                             <div class="card text-white bg-success mb-3">
                                 <div class="card-body">
-                                    <h5 class="card-title">Vendas Totais</h5>
+                                     <h5 class="card-title" th:text="#{dashboard.stats.vendas_totais}">Vendas Totais</h5>
                                     <p class="card-text display-6" th:text="${vendasTotais}">0</p>
                                 </div>
                             </div>
@@ -26,7 +26,7 @@
                         <div class="col-md-3">ola
                             <div class="card text-white bg-primary mb-3">
                                 <div class="card-body">
-                                    <h5 class="card-title">Receita Total</h5>
+                                     <h5 class="card-title" th:text="#{dashboard.stats.receita_total}">Receita Total</h5>
                                     <p class="card-text display-6" th:text="${receitaTotal}">0</p>
                                 </div>
                             </div>
@@ -34,7 +34,7 @@
                         <div class="col-md-3">
                             <div class="card text-white bg-warning mb-3">
                                 <div class="card-body">
-                                    <h5 class="card-title">Clientes Ativos</h5>
+                                     <h5 class="card-title" th:text="#{dashboard.stats.clientes_ativos}">Clientes Ativos</h5>
                                     <p class="card-text display-6" th:text="${clientesAtivosCount}">0</p>
                                 </div>
                             </div>
@@ -42,7 +42,7 @@
                         <div class="col-md-3">
                             <div class="card text-white bg-danger mb-3">
                                 <div class="card-body">
-                                    <h5 class="card-title">Produtos Vendidos</h5>
+                                     <h5 class="card-title" th:text="#{dashboard.stats.produtos_vendidos}">Produtos Vendidos</h5>
                                     <p class="card-text display-6" th:text="${produtosVendidosCount}">0</p>
                                 </div>
                             </div>
@@ -53,7 +53,7 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card mb-3">
-                                <div class="card-header">Vendas por mês (últimos 12 meses)</div>
+                                 <div class="card-header" th:text="#{dashboard.stats.vendas_por_mes}">Vendas por mês (últimos 12 meses)</div>
                                 <div class="card-body">
                                     <canvas id="graficoVendasMes" height="120"></canvas>
                                 </div>
@@ -61,7 +61,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="card mb-3">
-                                <div class="card-header">Receita por mês (últimos 12 meses)</div>
+                                 <div class="card-header" th:text="#{dashboard.stats.receita_por_mes}">Receita por mês (últimos 12 meses)</div>
                                 <div class="card-body">
                                     <canvas id="graficoReceitaMes" height="120"></canvas>
                                 </div>
@@ -72,13 +72,14 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card mb-3">
-                                <div class="card-header">Produtos mais vendidos</div>
+                                 <div class="card-header" th:text="#{dashboard.stats.produtos_top}">Produtos mais vendidos</div>
                                 <div class="card-body">
                                     <table class="table table-sm">
                                         <thead>
+                                             <thead>
                                             <tr>
-                                                <th>Produto</th>
-                                                <th>Quantidade</th>
+                                                <th th:text="#{produtos.col.nome}">Produto</th>
+                                                <th th:text="#{produtos.col.quantidade}">Quantidade</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -93,13 +94,14 @@
                         </div>
                         <div class="col-md-6">
                             <div class="card mb-3">
-                                <div class="card-header">Clientes com mais compras</div>
+                                 <div class="card-header" th:text="#{dashboard.stats.clientes_top}">Clientes com mais compras</div>
                                 <div class="card-body">
                                     <table class="table table-sm">
                                         <thead>
+                                             <thead>
                                             <tr>
-                                                <th>Cliente</th>
-                                                <th>Compras</th>
+                                                <th th:text="#{clientes.col.nome}">Cliente</th>
+                                                <th th:text="#{vendas.col.itens}">Compras</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -118,21 +120,21 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card mb-3">
-                                <div class="card-header">Comparativo: Vendas mês atual vs. anterior</div>
+                                 <div class="card-header" th:text="#{dashboard.stats.comparativo_vendas}">Comparativo: Vendas mês atual vs. anterior</div>
                                 <div class="card-body">
-                                    <p>Mês atual: <span th:text="${vendasMesAtual}">0</span></p>
-                                    <p>Mês anterior: <span th:text="${vendasMesAnterior}">0</span></p>
-                                    <p>Variação: <span th:text="${variacaoVendas}">0%</span></p>
+                                     <p><span th:text="#{dashboard.stats.mes_atual}">Mês atual</span>: <span th:text="${vendasMesAtual}">0</span></p>
+                                    <p><span th:text="#{dashboard.stats.mes_anterior}">Mês anterior</span>: <span th:text="${vendasMesAnterior}">0</span></p>
+                                    <p><span th:text="#{dashboard.stats.variacao}">Variação</span>: <span th:text="${variacaoVendas}">0%</span></p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="card mb-3">
-                                <div class="card-header">Comparativo: Receita mês atual vs. anterior</div>
+                                 <div class="card-header" th:text="#{dashboard.stats.comparativo_receita}">Comparativo: Receita mês atual vs. anterior</div>
                                 <div class="card-body">
-                                    <p>Mês atual: <span th:text="${receitaMesAtual}">0</span></p>
-                                    <p>Mês anterior: <span th:text="${receitaMesAnterior}">0</span></p>
-                                    <p>Variação: <span th:text="${variacaoReceita}">0%</span></p>
+                                     <p><span th:text="#{dashboard.stats.mes_atual}">Mês atual</span>: <span th:text="${receitaMesAtual}">0</span></p>
+                                    <p><span th:text="#{dashboard.stats.mes_anterior}">Mês anterior</span>: <span th:text="${receitaMesAnterior}">0</span></p>
+                                    <p><span th:text="#{dashboard.stats.variacao}">Variação</span>: <span th:text="${variacaoReceita}">0%</span></p>
                                 </div>
                             </div>
                         </div>
@@ -142,7 +144,7 @@
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <div class="card mb-3">
-                                <div class="card-header">Novos clientes por mês (últimos 12 meses)</div>
+                                 <div class="card-header" th:text="#{dashboard.stats.novos_clientes}">Novos clientes por mês (últimos 12 meses)</div>
                                 <div class="card-body">
                                     <canvas id="graficoClientesMes" height="120"></canvas>
                                 </div>
