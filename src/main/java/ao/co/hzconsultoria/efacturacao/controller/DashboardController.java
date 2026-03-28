@@ -42,6 +42,30 @@ public class DashboardController {
 
     @GetMapping("/dashboard/estatisticas")
     public String estatisticas(Model model) {
+        // KPI Cards
+        model.addAttribute("vendasTotais", dashboardService.getVendasTotaisMes());
+        model.addAttribute("receitaTotal", String.format("%.2f Kz", dashboardService.getReceitaMensal()));
+        model.addAttribute("clientesAtivosCount", dashboardService.getTotalClientes());
+        model.addAttribute("produtosVendidosCount", dashboardService.getProdutosVendidosCount());
+
+        // Top Tables
+        model.addAttribute("produtosMaisVendidos", dashboardService.getProdutosMaisVendidos(10));
+        model.addAttribute("clientesTopCompras", dashboardService.getClientesTopCompras(10));
+
+        // Comparativos Mês Atual vs Anterior
+        model.addAttribute("vendasMesAtual", dashboardService.getVendasTotaisMes());
+        model.addAttribute("vendasMesAnterior", dashboardService.getVendasMesAnterior());
+        model.addAttribute("variacaoVendas", dashboardService.getVariacaoVendas());
+        model.addAttribute("receitaMesAtual", String.format("%.2f Kz", dashboardService.getReceitaMensal()));
+        model.addAttribute("receitaMesAnterior", String.format("%.2f Kz", dashboardService.getReceitaMesAnterior()));
+        model.addAttribute("variacaoReceita", dashboardService.getVariacaoReceita());
+
+        // Dados para Gráficos (serializados como JSON para Chart.js)
+        model.addAttribute("graficoMesesLabels", dashboardService.getUltimos12MesesLabels());
+        model.addAttribute("graficoVendasData", dashboardService.getVendasPorMes());
+        model.addAttribute("graficoReceitaData", dashboardService.getReceitaPorMes());
+        model.addAttribute("graficoClientesData", dashboardService.getNovoClientesPorMes());
+
         return "dashboardEstatisticas";
     }
 

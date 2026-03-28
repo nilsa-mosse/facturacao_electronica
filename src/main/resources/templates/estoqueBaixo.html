@@ -15,42 +15,51 @@
             <div class="container py-5">
                 <div class="row justify-content-center">
                     <div class="col-lg-10">
-                        <div class="card p-4">
-                            <div class="d-flex align-items-center mb-4">
-                                 <i class="fas fa-exclamation-triangle fa-2x header-icon"></i>
-                                <h2 class="mb-0" th:text="#{dashboard.estoque.titulo}">Produtos com Stock Baixo</h2>
+                        <div class="card shadow-lg border-0 overflow-hidden">
+                            <div class="grad-danger p-4 text-white">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                                    <h2 class="mb-0 fw-bold" th:text="#{dashboard.estoque.titulo}">Produtos com Stock Baixo</h2>
+                                </div>
                             </div>
-                             <a th:href="@{/dashboard}" class="btn btn-outline-secondary mb-3"
-                                style="width: fit-content;">
-                                <i class="fas fa-arrow-left"></i> <span th:text="#{btn.voltar}">Voltar</span>
-                            </a>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped align-middle">
-                                    <thead>
-                                         <tr>
-                                            <th th:text="#{produtos.col.nome}">Nome</th>
-                                            <th th:text="#{produtos.col.quantidade}">Quantidade em Estoque</th>
-                                            <th th:text="#{produtos.col.preco}">Preço</th>
-                                            <th th:text="#{produtos.col.cod_barras}">Código de Barra</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="produto : ${produtosEstoqueBaixo}">
-                                            <td th:text="${produto.nome}">Nome</td>
-                                            <td>
-                                                <span class="badge badge-estoque"
-                                                    th:text="${produto.quantidadeEstoque}">0</span>
-                                            </td>
-                                            <td
-                                                th:text="${#numbers.formatDecimal(produto.preco, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">
-                                                0,00 Kz</td>
-                                            <td th:text="${produto.codigoBarra}">-</td>
-                                        </tr>
-                                         <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
-                                            <td colspan="4" class="text-center" th:text="#{clientes.historico.vazio}">Nenhum produto com estoque baixo.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            
+                            <div class="card-body p-4">
+                                <div class="mb-4">
+                                    <a th:href="@{/dashboard}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i> <span th:text="#{btn.voltar}">Voltar</span>
+                                    </a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="bg-light text-muted">
+                                            <tr>
+                                                <th class="border-0 ps-4" th:text="#{produtos.col.nome}">Nome</th>
+                                                <th class="border-0 text-center" th:text="#{produtos.col.quantidade}">Stock</th>
+                                                <th class="border-0" th:text="#{produtos.col.preco}">Preço</th>
+                                                <th class="border-0" th:text="#{produtos.col.cod_barras}">Cód. Barras</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="produto : ${produtosEstoqueBaixo}">
+                                                <td class="ps-4 fw-bold" th:text="${produto.nome}">Nome</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-soft-danger text-danger px-3 py-2"
+                                                        th:text="${produto.quantidadeEstoque}">0</span>
+                                                </td>
+                                                <td
+                                                    th:text="${#numbers.formatDecimal(produto.preco, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">
+                                                    0,00 Kz</td>
+                                                <td class="text-muted" th:text="${produto.codigoBarra}">-</td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
+                                                <td colspan="4" class="text-center py-5 text-muted">
+                                                    <i class="fas fa-check-circle mb-3 fa-3x d-block text-success opacity-50"></i>
+                                                    <span th:text="#{clientes.historico.vazio}">Nenhum produto com estoque baixo.</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -308,6 +308,140 @@ public class DashboardService {
         return vendasDoMes;
     }
 
+    public long getVendasTotaisMes() {
+        return getComprasDoMes().size();
+    }
+
+    public long getProdutosVendidosCount() {
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        int mesAtual = hoje.getMonthValue();
+        int anoAtual = hoje.getYear();
+        long total = 0;
+        for (Compra compra : compraRepository.findAll()) {
+            if (compra.getDataCompra() != null) {
+                java.time.LocalDate data = compra.getDataCompra().toLocalDate();
+                if (data.getMonthValue() == mesAtual && data.getYear() == anoAtual && compra.getItens() != null) {
+                    total += compra.getItens().stream().mapToLong(i -> i.getQuantidade() != null ? i.getQuantidade() : 0).sum();
+                }
+            }
+        }
+        return total;
+    }
+
+    public long getVendasMesAnterior() {
+        java.time.LocalDate mesAnterior = java.time.LocalDate.now().minusMonths(1);
+        int mes = mesAnterior.getMonthValue();
+        int ano = mesAnterior.getYear();
+        return compraRepository.findAll().stream()
+            .filter(c -> c.getDataCompra() != null
+                && c.getDataCompra().toLocalDate().getMonthValue() == mes
+                && c.getDataCompra().toLocalDate().getYear() == ano)
+            .count();
+    }
+
+    public double getReceitaMesAnterior() {
+        java.time.LocalDate mesAnterior = java.time.LocalDate.now().minusMonths(1);
+        int mes = mesAnterior.getMonthValue();
+        int ano = mesAnterior.getYear();
+        return compraRepository.findAll().stream()
+            .filter(c -> c.getDataCompra() != null
+                && c.getDataCompra().toLocalDate().getMonthValue() == mes
+                && c.getDataCompra().toLocalDate().getYear() == ano)
+            .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
+            .sum();
+    }
+
+    public String getVariacaoVendas() {
+        long atual = getVendasTotaisMes();
+        long anterior = getVendasMesAnterior();
+        if (anterior == 0) return "+0%";
+        double variacao = ((double)(atual - anterior) / anterior) * 100;
+        return String.format("%+.1f%%", variacao);
+    }
+
+    public String getVariacaoReceita() {
+        double atual = getReceitaMensal();
+        double anterior = getReceitaMesAnterior();
+        if (anterior == 0) return "+0%";
+        double variacao = ((atual - anterior) / anterior) * 100;
+        return String.format("%+.1f%%", variacao);
+    }
+
+    public List<ClienteTopComprasDTO> getClientesTopCompras(int limite) {
+        // Since Compra has no direct client reference, we return a per-compra summary
+        List<ClienteTopComprasDTO> lista = new ArrayList<>();
+        List<Compra> compras = compraRepository.findAll();
+        for (Compra compra : compras) {
+            lista.add(new ClienteTopComprasDTO(compra.getId(), "Venda #" + compra.getId(), 1));
+        }
+        return lista.stream().limit(limite).collect(Collectors.toList());
+    }
+
+    public List<Long> getVendasPorMes() {
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        List<Long> resultado = new ArrayList<>();
+        for (int i = 11; i >= 0; i--) {
+            java.time.LocalDate mes = hoje.minusMonths(i);
+            int m = mes.getMonthValue();
+            int a = mes.getYear();
+            long count = compraRepository.findAll().stream()
+                .filter(c -> c.getDataCompra() != null
+                    && c.getDataCompra().toLocalDate().getMonthValue() == m
+                    && c.getDataCompra().toLocalDate().getYear() == a)
+                .count();
+            resultado.add(count);
+        }
+        return resultado;
+    }
+
+    public List<Double> getReceitaPorMes() {
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        List<Double> resultado = new ArrayList<>();
+        for (int i = 11; i >= 0; i--) {
+            java.time.LocalDate mes = hoje.minusMonths(i);
+            int m = mes.getMonthValue();
+            int a = mes.getYear();
+            double receita = compraRepository.findAll().stream()
+                .filter(c -> c.getDataCompra() != null
+                    && c.getDataCompra().toLocalDate().getMonthValue() == m
+                    && c.getDataCompra().toLocalDate().getYear() == a)
+                .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
+                .sum();
+            resultado.add(receita);
+        }
+        return resultado;
+    }
+
+    public List<Long> getNovoClientesPorMes() {
+        // Cliente model has no dataCadastro field - returning zeros
+        List<Long> resultado = new ArrayList<>();
+        for (int i = 0; i < 12; i++) resultado.add(0L);
+        return resultado;
+    }
+
+    public List<String> getUltimos12MesesLabels() {
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        List<String> labels = new ArrayList<>();
+        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("MMM/yy", java.util.Locale.forLanguageTag("pt"));
+        for (int i = 11; i >= 0; i--) {
+            labels.add(hoje.minusMonths(i).format(fmt));
+        }
+        return labels;
+    }
+
+    public static class ClienteTopComprasDTO {
+        private Long id;
+        private String nome;
+        private int totalCompras;
+        public ClienteTopComprasDTO(Long id, String nome, int totalCompras) {
+            this.id = id; this.nome = nome; this.totalCompras = totalCompras;
+        }
+        public Long getId() { return id; }
+        public String getNome() { return nome; }
+        public int getTotalCompras() { return totalCompras; }
+        public void setTotalCompras(int totalCompras) { this.totalCompras = totalCompras; }
+    }
+
     public static class ProdutoMaisVendidoDTO {
         private String nome;
         private int quantidadeVendida;

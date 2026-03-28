@@ -11,59 +11,73 @@
         <div class="content-wrapper">
             <main class="py-4">
                 <div class="container-fluid px-4">
-                    <h3 class="fw-bold mb-4" th:text="#{dashboard.estatisticas.titulo}">Dashboard - Estatísticas</h3>
+                    <h3 class="fw-bold mb-4">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        <span th:text="#{dashboard.estatisticas.titulo}">Dashboard - Estatísticas</span>
+                    </h3>
 
                     <!-- Indicadores principais -->
-                    <div class="row mb-4">
+                    <div class="row mb-5">
                         <div class="col-md-3">
-                            <div class="card text-white bg-success mb-3">
-                                <div class="card-body">
-                                     <h5 class="card-title" th:text="#{dashboard.stats.vendas_totais}">Vendas Totais</h5>
-                                    <p class="card-text display-6" th:text="${vendasTotais}">0</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">ola
-                            <div class="card text-white bg-primary mb-3">
-                                <div class="card-body">
-                                     <h5 class="card-title" th:text="#{dashboard.stats.receita_total}">Receita Total</h5>
-                                    <p class="card-text display-6" th:text="${receitaTotal}">0</p>
+                            <div class="premium-card grad-success shadow-sm mb-3">
+                                <span class="info-box-icon"><i class="fas fa-shopping-cart text-white"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold text-white"
+                                        th:text="#{dashboard.stats.vendas_totais}">Vendas Totais</span>
+                                    <span class="info-box-number text-white" th:text="${vendasTotais}">0</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card text-white bg-warning mb-3">
-                                <div class="card-body">
-                                     <h5 class="card-title" th:text="#{dashboard.stats.clientes_ativos}">Clientes Ativos</h5>
-                                    <p class="card-text display-6" th:text="${clientesAtivosCount}">0</p>
+                            <div class="premium-card grad-primary shadow-sm mb-3">
+                                <span class="info-box-icon"><i class="fas fa-dollar-sign text-white"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold text-white"
+                                        th:text="#{dashboard.stats.receita_total}">Receita Total</span>
+                                    <span class="info-box-number text-white" th:text="${receitaTotal}">0</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card text-white bg-danger mb-3">
-                                <div class="card-body">
-                                     <h5 class="card-title" th:text="#{dashboard.stats.produtos_vendidos}">Produtos Vendidos</h5>
-                                    <p class="card-text display-6" th:text="${produtosVendidosCount}">0</p>
+                            <div class="premium-card grad-warning shadow-sm mb-3">
+                                <span class="info-box-icon"><i class="fas fa-users text-white"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold text-dark"
+                                        th:text="#{dashboard.stats.clientes_ativos}">Clientes Ativos</span>
+                                    <span class="info-box-number text-dark" th:text="${clientesAtivosCount}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="premium-card grad-danger shadow-sm mb-3">
+                                <span class="info-box-icon"><i class="fas fa-boxes text-white"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold text-white"
+                                        th:text="#{dashboard.stats.produtos_vendidos}">Produtos Vendidos</span>
+                                    <span class="info-box-number text-white" th:text="${produtosVendidosCount}">0</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Gráficos -->
-                    <div class="row mb-4">
+                    <div class="row mb-5">
                         <div class="col-md-6">
-                            <div class="card mb-3">
-                                 <div class="card-header" th:text="#{dashboard.stats.vendas_por_mes}">Vendas por mês (últimos 12 meses)</div>
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white border-0 py-3 fw-bold"
+                                    th:text="#{dashboard.stats.vendas_por_mes}">Vendas por mês (últimos 12 meses)</div>
                                 <div class="card-body">
-                                    <canvas id="graficoVendasMes" height="120"></canvas>
+                                    <canvas id="graficoVendasMes" height="150"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card mb-3">
-                                 <div class="card-header" th:text="#{dashboard.stats.receita_por_mes}">Receita por mês (últimos 12 meses)</div>
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-white border-0 py-3 fw-bold"
+                                    th:text="#{dashboard.stats.receita_por_mes}">Receita por mês (últimos 12 meses)
+                                </div>
                                 <div class="card-body">
-                                    <canvas id="graficoReceitaMes" height="120"></canvas>
+                                    <canvas id="graficoReceitaMes" height="150"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -71,116 +85,139 @@
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="card mb-3">
-                                 <div class="card-header" th:text="#{dashboard.stats.produtos_top}">Produtos mais vendidos</div>
-                                <div class="card-body">
-                                    <table class="table table-sm">
-                                        <thead>
-                                             <thead>
-                                            <tr>
-                                                <th th:text="#{produtos.col.nome}">Produto</th>
-                                                <th th:text="#{produtos.col.quantidade}">Quantidade</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr th:each="produto : ${produtosMaisVendidos}">
-                                                <td th:text="${produto.nome}">Produto Exemplo</td>
-                                                <td th:text="${produto.quantidade}">0</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white border-0 py-3"
+                                    th:text="#{dashboard.stats.produtos_top}">Produtos mais vendidos</div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="ps-4" th:text="#{produtos.col.nome}">Produto</th>
+                                                    <th class="text-center" th:text="#{produtos.col.quantidade}">
+                                                        Quantidade</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="produto : ${produtosMaisVendidos}">
+                                                    <td class="ps-4">
+                                                        <i class="fas fa-cube text-muted me-2"></i>
+                                                        <span th:text="${produto.nome}">Produto Exemplo</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-light text-dark px-3 py-2"
+                                                            th:text="${produto.quantidadeVendida}">0</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card mb-3">
-                                 <div class="card-header" th:text="#{dashboard.stats.clientes_top}">Clientes com mais compras</div>
-                                <div class="card-body">
-                                    <table class="table table-sm">
-                                        <thead>
-                                             <thead>
-                                            <tr>
-                                                <th th:text="#{clientes.col.nome}">Cliente</th>
-                                                <th th:text="#{vendas.col.itens}">Compras</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr th:each="cliente : ${clientesTopCompras}">
-                                                <td th:text="${cliente.nome}">Cliente Exemplo</td>
-                                                <td th:text="${cliente.compras}">0</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white border-0 py-3"
+                                    th:text="#{dashboard.stats.clientes_top}">Clientes com mais compras</div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="ps-4" th:text="#{clientes.col.nome}">Cliente</th>
+                                                    <th class="text-center" th:text="#{vendas.col.itens}">Compras</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="cliente : ${clientesTopCompras}">
+                                                    <td class="ps-4">
+                                                        <i class="fas fa-user-circle text-muted me-2"></i>
+                                                        <span th:text="${cliente.nome}">Cliente Exemplo</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-soft-primary text-primary px-3 py-2"
+                                                            th:text="${cliente.totalCompras}">0</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Comparativos -->
-                    <div class="row mb-4">
+                    <div class="row mb-5">
                         <div class="col-md-6">
-                            <div class="card mb-3">
-                                 <div class="card-header" th:text="#{dashboard.stats.comparativo_vendas}">Comparativo: Vendas mês atual vs. anterior</div>
-                                <div class="card-body">
-                                     <p><span th:text="#{dashboard.stats.mes_atual}">Mês atual</span>: <span th:text="${vendasMesAtual}">0</span></p>
-                                    <p><span th:text="#{dashboard.stats.mes_anterior}">Mês anterior</span>: <span th:text="${vendasMesAnterior}">0</span></p>
-                                    <p><span th:text="#{dashboard.stats.variacao}">Variação</span>: <span th:text="${variacaoVendas}">0%</span></p>
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                    <h5 class="fw-bold text-muted mb-0" th:text="#{dashboard.stats.comparativo_vendas}">
+                                        Comparativo: Vendas</h5>
+                                </div>
+                                <div class="card-body px-4 pb-4">
+                                    <div class="d-flex align-items-end justify-content-between">
+                                        <div>
+                                            <h2 class="display-5 fw-bold mb-0" th:text="${vendasMesAtual}">0</h2>
+                                            <p class="text-muted small mb-0" th:text="#{dashboard.stats.mes_atual}">Mês
+                                                atual</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge p-2 mb-2"
+                                                th:classappend="${#strings.contains(variacaoVendas, '-') ? 'bg-soft-danger text-danger' : 'bg-soft-success text-success'}"
+                                                th:text="${variacaoVendas}">0%</div>
+                                            <p class="text-muted small mb-0">
+                                                <span th:text="#{dashboard.stats.mes_anterior}">Mes anterior</span>:
+                                                <span th:text="${vendasMesAnterior}">0</span>
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card mb-3">
-                                 <div class="card-header" th:text="#{dashboard.stats.comparativo_receita}">Comparativo: Receita mês atual vs. anterior</div>
-                                <div class="card-body">
-                                     <p><span th:text="#{dashboard.stats.mes_atual}">Mês atual</span>: <span th:text="${receitaMesAtual}">0</span></p>
-                                    <p><span th:text="#{dashboard.stats.mes_anterior}">Mês anterior</span>: <span th:text="${receitaMesAnterior}">0</span></p>
-                                    <p><span th:text="#{dashboard.stats.variacao}">Variação</span>: <span th:text="${variacaoReceita}">0%</span></p>
+                            <div class="card shadow-sm border-0 h-100">
+                                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                                    <h5 class="fw-bold text-muted mb-0"
+                                        th:text="#{dashboard.stats.comparativo_receita}">Comparativo: Receita</h5>
+                                </div>
+                                <div class="card-body px-4 pb-4">
+                                    <div class="d-flex align-items-end justify-content-between">
+                                        <div>
+                                            <h2 class="display-5 fw-bold mb-0" th:text="${receitaMesAtual}">0</h2>
+                                            <p class="text-muted small mb-0" th:text="#{dashboard.stats.mes_atual}">Mês
+                                                atual</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="badge p-2 mb-2"
+                                                th:classappend="${#strings.contains(variacaoReceita, '-') ? 'bg-soft-danger text-danger' : 'bg-soft-success text-success'}"
+                                                th:text="${variacaoReceita}">0%</div>
+                                            <p class="text-muted small mb-0">
+                                                <span th:text="#{dashboard.stats.mes_anterior}">Mes anterior</span>:
+                                                <span th:text="${receitaMesAnterior}">0</span>
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Gráfico de clientes por mês -->
-                    <div class="row mb-4">
+                    <div class="row mb-5">
                         <div class="col-md-12">
-                            <div class="card mb-3">
-                                 <div class="card-header" th:text="#{dashboard.stats.novos_clientes}">Novos clientes por mês (últimos 12 meses)</div>
-                                <div class="card-body">
-                                    <canvas id="graficoClientesMes" height="120"></canvas>
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-white border-0 py-3 fw-bold"
+                                    th:text="#{dashboard.stats.novos_clientes}">Novos clientes por mês (últimos 12
+                                    meses)</div>
+                                <div class="card-body px-4 pb-4">
+                                    <canvas id="graficoClientesMes" height="80"></canvas>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">Estatística 1</div>
-                                <div class="card-body">
-                                    <p>Conteúdo da estatística 1.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-header">Estatística 2</div>
-                                <div class="card-body">
-                                    <p>Conteúdo da estatística 2.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">Gráfico</div>
-                                <div class="card-body">
-                                    <canvas id="estatisticasGrafico"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </main>
         </div>
@@ -191,50 +228,64 @@
     <!-- jQuery primeiro -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Scripts already loaded via menu :: head -->
-    <script>
+    <script th:inline="javascript">
         // Gráfico de vendas por mês
         var ctxVendas = document.getElementById('graficoVendasMes').getContext('2d');
         var graficoVendasMes = new Chart(ctxVendas, {
             type: 'bar',
             data: {
-                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                labels: /*[[${graficoMesesLabels}]]*/[],
                 datasets: [{
                     label: 'Vendas',
-                    data: [120, 150, 180, 200, 170, 210, 190, 220, 230, 250, 240, 260],
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    data: /*[[${graficoVendasData}]]*/[],
+                    backgroundColor: '#1e7e34',
+                    borderRadius: 5
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
         });
         // Gráfico de receita por mês
         var ctxReceita = document.getElementById('graficoReceitaMes').getContext('2d');
         var graficoReceitaMes = new Chart(ctxReceita, {
             type: 'line',
             data: {
-                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                labels: /*[[${graficoMesesLabels}]]*/[],
                 datasets: [{
                     label: 'Receita',
-                    data: [1000, 1200, 1400, 1600, 1500, 1700, 1650, 1800, 1900, 2000, 2100, 2200],
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    fill: true
+                    data: /*[[${graficoReceitaData}]]*/[],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
         });
         // Gráfico de clientes por mês
         var ctxClientes = document.getElementById('graficoClientesMes').getContext('2d');
         var graficoClientesMes = new Chart(ctxClientes, {
             type: 'bar',
             data: {
-                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                labels: /*[[${graficoMesesLabels}]]*/[],
                 datasets: [{
                     label: 'Novos Clientes',
-                    data: [5, 8, 10, 12, 9, 11, 13, 14, 15, 16, 17, 18],
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                    data: /*[[${graficoClientesData}]]*/[],
+                    backgroundColor: '#fd7e14',
+                    borderRadius: 5
                 }]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
+            }
         });
         // Exemplo de gráfico
         var ctx = document.getElementById('estatisticasGrafico').getContext('2d');
