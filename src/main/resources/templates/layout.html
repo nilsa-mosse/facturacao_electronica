@@ -31,22 +31,49 @@
                         <li class="nav-item"><a th:href="@{/noticias}" class="nav-link">Notícias</a></li>
                         <li class="nav-item"><a th:href="@{/contato}" class="nav-link">Contato</a></li>
                     </ul>
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-language"></i>
-                                <span th:text="${#locale.language == 'pt' ? 'Português' : (#locale.language == 'en' ? 'English' : 'Français')}">Idioma</span>
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <!-- Idioma Dropdown -->
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-globe"></i>
+                                <span th:text="${#locale.language == 'pt' ? 'PT' : (#locale.language == 'en' ? 'EN' : 'FR')}">Idioma</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="langDropdown">
                                 <li><a class="dropdown-item" th:href="@{${#request.requestURI}(lang='pt')}">🇵🇹 Português</a></li>
                                 <li><a class="dropdown-item" th:href="@{${#request.requestURI}(lang='en')}">🇺🇸 English</a></li>
                                 <li><a class="dropdown-item" th:href="@{${#request.requestURI}(lang='fr')}">🇫🇷 Français</a></li>
                             </ul>
                         </li>
-                        <li class="nav-item"><a href="https://www.facebook.com/ncrangola" class="nav-link"
-                                target="_blank"><i class="fab fa-facebook"></i></a></li>
-                        <li class="nav-item"><a href="https://www.instagram.com/ncrangola" class="nav-link"
-                                target="_blank"><i class="fab fa-instagram"></i></a></li>
+
+                        <!-- User Dropdown & Logout -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle btn btn-light rounded-pill px-3 shadow-sm d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <span th:if="${#authentication != null}" th:text="${#authentication.name}" class="fw-bold fw-semibold">Usuário</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-2" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 1rem;">
+                                <li><a class="dropdown-item rounded-3 p-2 d-flex align-items-center" href="#"><i class="fas fa-user-gear me-2 text-muted"></i> A Minha Conta</a></li>
+                                <li><a class="dropdown-item rounded-3 p-2 d-flex align-items-center" href="#"><i class="fas fa-history me-2 text-muted"></i> Atividade</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form th:action="@{/logout}" method="post" id="logoutForm" class="d-none">
+                                        <!-- O token CSRF é injetado automaticamente pelo Thymeleaf se estiver configurado -->
+                                    </form>
+                                    <a class="dropdown-item rounded-3 p-2 d-flex align-items-center text-danger fw-bold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit();">
+                                        <i class="fas fa-arrow-right-from-bracket me-2"></i> Terminar Sessão
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <li class="nav-item ms-3 d-none d-lg-block">
+                            <a href="https://www.facebook.com/ncrangola" class="nav-link p-1" target="_blank"><i class="fab fa-facebook text-muted"></i></a>
+                        </li>
+                        <li class="nav-item d-none d-lg-block">
+                            <a href="https://www.instagram.com/ncrangola" class="nav-link p-1" target="_blank"><i class="fab fa-instagram text-muted"></i></a>
+                        </li>
                     </ul>
                 </div>
             </div>

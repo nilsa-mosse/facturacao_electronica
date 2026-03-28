@@ -45,13 +45,14 @@
     </ul>
 
     <!-- Right navbar links -->
-    <ul class="navbar-nav ms-auto">
+    <ul class="navbar-nav ms-auto align-items-center">
+      <!-- Language Dropdown -->
       <li class="nav-item dropdown">
-        <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+        <a class="nav-link d-flex align-items-center gap-1" data-bs-toggle="dropdown" href="#" aria-expanded="false">
           <i class="fas fa-language"></i>
-          <span class="d-none d-md-inline ms-1" th:text="${#locale.language == 'pt' ? 'Português' : (#locale.language == 'en' ? 'English' : 'Français')}">Idioma</span>
+          <span class="d-none d-md-inline ms-1" th:text="${#locale.language == 'pt' ? 'PT' : (#locale.language == 'en' ? 'EN' : 'FR')}">Idioma</span>
         </a>
-        <div class="dropdown-menu dropdown-menu-end p-0">
+        <div class="dropdown-menu dropdown-menu-end shadow-sm border-0">
           <a th:href="@{${#request.requestURI}(lang='pt')}" class="dropdown-item">
             <span class="me-2">🇵🇹</span> Português
           </a>
@@ -62,6 +63,16 @@
             <span class="me-2">🇫🇷</span> Français
           </a>
         </div>
+      </li>
+
+      <!-- Logout Option -->
+      <li class="nav-item ms-2">
+        <form th:action="@{/logout}" method="post" id="logoutFormMenu" class="d-none">
+        </form>
+        <a class="nav-link text-danger fw-bold d-flex align-items-center gap-2 px-3" href="javascript:void(0)" onclick="document.getElementById('logoutFormMenu').submit();" title="Sair do Sistema">
+          <i class="fas fa-power-off"></i>
+          <span class="d-none d-sm-inline">Sair</span>
+        </a>
       </li>
     </ul>
   </nav>
@@ -576,7 +587,16 @@
             </ul>
           </li>
           <!-- FINAL DO MENU 6. Configurações -->
-
+          <li class="nav-header mt-3">SISTEMA</li>
+          <li class="nav-item">
+            <a href="javascript:void(0)" class="nav-link text-danger" onclick="document.getElementById('logoutFormSidebar').submit();">
+              <i class="nav-icon fas fa-power-off"></i>
+              <p>Terminar Sessão</p>
+            </a>
+            <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none">
+                <!-- CSRF token will be automatically added by Thymeleaf -->
+            </form>
+          </li>
         </ul>
 
       </nav>

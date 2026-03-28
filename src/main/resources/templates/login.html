@@ -1,34 +1,379 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="layout :: head"></head>
+<head>
+    <title>Login - E-Facturação</title>
+    <th:block th:replace="layout :: head"></th:block>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-form: #f8fafc;
+        }
+
+        .dark-mode {
+            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --bg-form: #0f172a;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif !important;
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            background-color: var(--bg-form);
+        }
+
+        .login-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Hero Side */
+        .hero-side {
+            flex: 1.4;
+            position: relative;
+            background: url('/img/login_hero_billing.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 5rem;
+        }
+
+        .hero-side::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(225deg, rgba(79, 70, 229, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        .hero-features {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1.25rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            flex: 1;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .feature-item span {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Form Side */
+        .form-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2rem;
+            background-color: var(--bg-form);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 460px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 2.5rem;
+            padding: 3.5rem;
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .login-logo {
+            width: 70px;
+            height: 70px;
+            background: var(--primary-gradient);
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+
+        .form-desc {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+        }
+
+        /* Modern Inputs */
+        .input-group-modern {
+            position: relative;
+            margin-bottom: 1.75rem;
+        }
+
+        .input-group-modern i {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .input-group-modern input {
+            width: 100%;
+            padding: 1.1rem 1.1rem 1.1rem 3.75rem;
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 1.25rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+            color: #1e293b;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .input-group-modern input {
+            background: #1e293b;
+            color: white;
+            box-shadow: none;
+        }
+
+        .input-group-modern input:focus {
+            border-color: #6366f1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .dark-mode .input-group-modern input:focus {
+            background: #1e293b;
+        }
+
+        .input-group-modern input:focus + i {
+            color: #6366f1;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1.1rem;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 1.25rem;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 25px 30px -10px rgba(79, 70, 229, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .form-footer {
+            margin-top: 2.5rem;
+            text-align: center;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: none;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Animations */
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-100px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1100px) {
+            .hero-side { flex: 1; padding: 3rem; }
+            .hero-title { font-size: 3rem; }
+        }
+
+        @media (max-width: 992px) {
+            .hero-side { display: none; }
+            .form-side { flex: 1; min-height: 100vh; }
+            .login-card { padding: 2.5rem; }
+        }
+    </style>
+</head>
 
 <body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
-    <main class="py-4">
-        <div class="container col-md-4">
-            <div class="card mt-5">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4>Login do Sistema</h4>
-                </div>
-                <div class="card-body">
-                    <form th:action="@{/login}" method="post">
-                        <div class="mb-3">
-                            <label for="login" class="form-label">Usuário</label>
-                            <input type="text" id="login" name="username" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="senha" class="form-label">Senha</label>
-                            <input type="password" id="senha" name="password" class="form-control" required>
-                        </div>
-                        <button class="btn btn-primary w-100">Entrar</button>
-                        <div th:if="${param.error}" class="alert alert-danger mt-3">Usuário ou senha inválidos!</div>
-                        <div th:if="${param.logout}" class="alert alert-success mt-3">Logout realizado com sucesso!
-                        </div>
-                    </form>
+    <div class="login-wrapper">
+        <!-- Section Visual (Lado Esquerdo) -->
+        <div class="hero-side">
+            <div class="hero-content">
+                <h1 class="hero-title">Inovação e Rigor na sua Facturação</h1>
+                <p class="hero-subtitle">Controle as suas finanças com agilidade e inteligência. O futuro da gestão empresarial começa aqui.</p>
+                
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <i class="fas fa-shield-halved"></i>
+                        <span>100% Seguro</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bolt-lightning"></i>
+                        <span>Ultra Rápido</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Visão Total</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </main>
+
+        <!-- Section Formulário (Lado Direito) -->
+        <div class="form-side">
+            <div class="login-card">
+                <div class="login-logo">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                
+                <h2 class="form-title">Bem-vindo</h2>
+                <p class="form-desc">Introduza as suas credenciais para continuar.</p>
+
+                <form th:action="@{/login}" method="post">
+                    <!-- Mensagens de Feedback -->
+                    <div th:if="${param.error}" class="alert alert-danger mb-4 shadow-sm">
+                        <i class="fas fa-circle-exclamation"></i> Usuário ou senha incorretos.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-primary mb-4 shadow-sm">
+                        <i class="fas fa-circle-check"></i> Sessão encerrada com sucesso.
+                    </div>
+
+                    <!-- Campo Usuário -->
+                    <div class="input-group-modern">
+                        <input type="text" id="login" name="username" placeholder="Nome de Usuário" required autofocus autocomplete="username">
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                    <!-- Campo Senha -->
+                    <div class="input-group-modern">
+                        <input type="password" id="senha" name="password" placeholder="Palavra-passe" required autocomplete="current-password">
+                        <i class="fas fa-lock"></i>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+                        <div class="form-check custom-check">
+                            <input class="form-check-input" type="checkbox" id="remember" style="cursor: pointer;">
+                            <label class="form-check-label small text-muted" for="remember" style="cursor: pointer;">
+                                Manter sessão
+                            </label>
+                        </div>
+                        <a href="javascript:void(0)" class="small text-primary text-decoration-none fw-bold hover-underline">
+                            Recuperar senha?
+                        </a>
+                    </div>
+
+                    <button class="btn-login" type="submit">
+                        Aceder ao Painel
+                        <i class="fas fa-chevron-right ms-1"></i>
+                    </button>
+                    
+                    <div class="form-footer">
+                        <p class="small text-muted mb-0">
+                            &copy; 2026 E-Facturação. Todos os direitos reservados.
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
