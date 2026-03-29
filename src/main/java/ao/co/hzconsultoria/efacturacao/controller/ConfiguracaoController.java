@@ -38,6 +38,8 @@ public class ConfiguracaoController {
     @Autowired
     private ConfiguracaoAGTRepository configuracaoAGTRepository;
     @Autowired
+    private RegimeFiscalRepository regimeFiscalRepository;
+    @Autowired
     private MessageSource messageSource;
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.AgtService agtService;
@@ -47,13 +49,15 @@ public class ConfiguracaoController {
     public String empresa(Model model) {
         List<Empresa> empresas = empresaRepository.findAll();
         model.addAttribute("empresa", empresas.isEmpty() ? new Empresa() : empresas.get(0));
+        model.addAttribute("regimes", regimeFiscalRepository.findAll());
         return "configuracoes/empresa";
     }
 
     @PostMapping("/empresa/salvar")
     public String salvarEmpresa(@ModelAttribute Empresa empresa, RedirectAttributes redirectAttributes) {
         empresaRepository.save(empresa);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/empresa";
     }
 
@@ -68,14 +72,16 @@ public class ConfiguracaoController {
     @PostMapping("/utilizadores/salvar")
     public String salvarUsuario(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
         userRepository.save(user);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/utilizadores";
     }
 
     @GetMapping("/utilizadores/eliminar/{id}")
     public String eliminarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         userRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/utilizadores";
     }
 
@@ -90,14 +96,16 @@ public class ConfiguracaoController {
     @PostMapping("/impostos/salvar")
     public String salvarImposto(@ModelAttribute Imposto imposto, RedirectAttributes redirectAttributes) {
         impostoRepository.save(imposto);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/impostos";
     }
 
     @GetMapping("/impostos/eliminar/{id}")
     public String eliminarImposto(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         impostoRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/impostos";
     }
 
@@ -112,14 +120,16 @@ public class ConfiguracaoController {
     @PostMapping("/series/salvar")
     public String salvarSerie(@ModelAttribute Serie serie, RedirectAttributes redirectAttributes) {
         serieRepository.save(serie);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/series";
     }
 
     @GetMapping("/series/eliminar/{id}")
     public String eliminarSerie(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         serieRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/series";
     }
 
@@ -134,14 +144,16 @@ public class ConfiguracaoController {
     @PostMapping("/moedas/salvar")
     public String salvarMoeda(@ModelAttribute Moeda moeda, RedirectAttributes redirectAttributes) {
         moedaRepository.save(moeda);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/moedas";
     }
 
     @GetMapping("/moedas/eliminar/{id}")
     public String eliminarMoeda(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         moedaRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/moedas";
     }
 
@@ -156,14 +168,16 @@ public class ConfiguracaoController {
     @PostMapping("/pagamentos/salvar")
     public String salvarPagamento(@ModelAttribute MetodoPagamento metodo, RedirectAttributes redirectAttributes) {
         metodoPagamentoRepository.save(metodo);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/pagamentos";
     }
 
     @GetMapping("/pagamentos/eliminar/{id}")
     public String eliminarPagamento(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         metodoPagamentoRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/pagamentos";
     }
 
@@ -178,7 +192,8 @@ public class ConfiguracaoController {
     @PostMapping("/comunicacao-agt/salvar")
     public String salvarComunicacaoAgt(@ModelAttribute ConfiguracaoAGT config, RedirectAttributes redirectAttributes) {
         configuracaoAGTRepository.save(config);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/comunicacao-agt";
     }
 
@@ -186,12 +201,13 @@ public class ConfiguracaoController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> testarConexaoAgt(@RequestBody Map<String, String> payload) {
         String urlApi = payload.get("urlApi");
-        String token  = payload.get("token");
+        String token = payload.get("token");
 
         if (urlApi == null || urlApi.trim().isEmpty()) {
             Map<String, Object> err = new HashMap<>();
             err.put("sucesso", false);
-            err.put("mensagem", messageSource.getMessage("config.agt.teste.falha_url", null, LocaleContextHolder.getLocale()));
+            err.put("mensagem",
+                    messageSource.getMessage("config.agt.teste.falha_url", null, LocaleContextHolder.getLocale()));
             return ResponseEntity.badRequest().body(err);
         }
 
@@ -219,7 +235,8 @@ public class ConfiguracaoController {
     @PostMapping("/geral/salvar")
     public String salvarSistema(@ModelAttribute Sistema sistema, RedirectAttributes redirectAttributes) {
         sistemaConfig = sistema;
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/geral";
     }
 
@@ -229,6 +246,22 @@ public class ConfiguracaoController {
         model.addAttribute("impostos", impostoRepository.findAll());
         model.addAttribute("novoImposto", new Imposto());
         return "configuracoes/fiscais/impostos";
+    }
+ 
+    @PostMapping("/fiscais/impostos/salvar")
+    public String salvarImpostoFiscal(@ModelAttribute Imposto imposto, RedirectAttributes redirectAttributes) {
+        impostoRepository.save(imposto);
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/fiscais/impostos";
+    }
+ 
+    @GetMapping("/fiscais/impostos/eliminar/{id}")
+    public String eliminarImpostoFiscal(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        impostoRepository.deleteById(id);
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/fiscais/impostos";
     }
 
     @GetMapping("/fiscais/taxas")
@@ -241,21 +274,35 @@ public class ConfiguracaoController {
     @PostMapping("/fiscais/taxas/salvar")
     public String salvarTaxa(@ModelAttribute Taxa taxa, RedirectAttributes redirectAttributes) {
         taxaRepository.save(taxa);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/fiscais/taxas";
     }
 
     @GetMapping("/fiscais/taxas/eliminar/{id}")
     public String eliminarTaxa(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         taxaRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/fiscais/taxas";
     }
 
     @GetMapping("/fiscais/regime-fiscal")
     public String fiscaisRegime(Model model) {
+        // Semente inicial se a tabela estiver vazia
+        if (regimeFiscalRepository.count() == 0) {
+            regimeFiscalRepository.save(new RegimeFiscal("Regime Geral", "GERAL",
+                    "Para empresas com facturação superior a 250 Milhões de Kz.", "fas fa-balance-scale"));
+            regimeFiscalRepository.save(new RegimeFiscal("Regime Simplificado", "SIMPLIFICADO",
+                    "Para empresas com facturação entre 7.5 e 250 Milhões de Kz.", "fas fa-shield-alt"));
+            regimeFiscalRepository.save(new RegimeFiscal("Regime de Exclusão", "EXCLUSAO",
+                    "Para empresas com facturação inferior a 7.5 Milhões de Kz.", "fas fa-ban"));
+        }
+
         List<Empresa> empresas = empresaRepository.findAll();
         model.addAttribute("empresa", empresas.isEmpty() ? new Empresa() : empresas.get(0));
+        model.addAttribute("regimes", regimeFiscalRepository.findAll());
+        model.addAttribute("novoRegime", new RegimeFiscal());
         return "configuracoes/fiscais/regime_fiscal";
     }
 
@@ -271,6 +318,13 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/fiscais/regime-fiscal";
     }
 
+    @PostMapping("/fiscais/regime-fiscal/adicionar")
+    public String salvarNovoRegime(@ModelAttribute RegimeFiscal regimeFiscal, RedirectAttributes redirectAttributes) {
+        regimeFiscalRepository.save(regimeFiscal);
+        redirectAttributes.addFlashAttribute("mensagem", "Novo regime fiscal adicionado com sucesso!");
+        return "redirect:/configuracoes/fiscais/regime-fiscal";
+    }
+
     @GetMapping("/fiscais/retencoes")
     public String fiscaisRetencoes(Model model) {
         model.addAttribute("retencoes", retencaoRepository.findAll());
@@ -281,14 +335,16 @@ public class ConfiguracaoController {
     @PostMapping("/fiscais/retencoes/salvar")
     public String salvarRetencao(@ModelAttribute Retencao retencao, RedirectAttributes redirectAttributes) {
         retencaoRepository.save(retencao);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/fiscais/retencoes";
     }
 
     @GetMapping("/fiscais/retencoes/eliminar/{id}")
     public String eliminarRetencao(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         retencaoRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/fiscais/retencoes";
     }
 }

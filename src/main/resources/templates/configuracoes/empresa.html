@@ -62,12 +62,20 @@
                                          <input type="text" class="form-control" th:field="*{logotipo}">
                                      </div>
                                 </div>
-                                <div class="row mt-3">
-                                     <div class="form-group col-12">
-                                         <label th:text="#{config.empresa.endereco}">Endereço Completo</label>
-                                         <textarea class="form-control" th:field="*{endereco}" rows="2"></textarea>
-                                     </div>
-                                </div>
+                                 <div class="row mt-3">
+                                      <div class="form-group col-md-8">
+                                          <label th:text="#{config.empresa.endereco}">Endereço Completo</label>
+                                          <textarea class="form-control" th:field="*{endereco}" rows="2"></textarea>
+                                      </div>
+                                      <div class="form-group col-md-4">
+                                          <label>Regime Fiscal</label>
+                                          <select class="form-control select2" th:field="*{regimeFiscal}">
+                                              <option value="" disabled>Seleccione um regime...</option>
+                                              <option th:each="r : ${regimes}" th:value="${r.codigo}" th:text="${r.nome}"></option>
+                                          </select>
+                                          <small class="text-muted"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="text-info"><i class="fas fa-external-link-alt me-1"></i>Gerir Regimes</a></small>
+                                      </div>
+                                 </div>
                             </div>
                              <div class="card-footer">
                                 <button type="submit" class="btn btn-info"><i class="fas fa-save me-1"></i><span th:text="#{config.empresa.btn.actualizar}">Actualizar Empresa</span></button>

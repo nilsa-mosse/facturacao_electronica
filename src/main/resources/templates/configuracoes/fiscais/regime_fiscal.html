@@ -13,8 +13,16 @@
                 <div class="container-fluid">
                     <div class="row align-items-center">
                         <div class="col-sm-6">
-                            <h1 class="fw-bold"><i class="fas fa-gavel text-info me-2"></i><span th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</span></h1>
-                            <p class="text-muted mb-0" th:text="#{config.fiscais.regime.subtitulo}">Defina o enquadramento fiscal da sua empresa junto da AGT.</p>
+                            <h1 class="fw-bold"><i class="fas fa-gavel text-info me-2"></i><span
+                                    th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</span></h1>
+                            <p class="text-muted mb-0" th:text="#{config.fiscais.regime.subtitulo}">Defina o
+                                enquadramento fiscal da sua empresa junto da AGT.</p>
+                        </div>
+                        <div class="col-sm-6 text-end">
+                            <button type="button" class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal"
+                                data-bs-target="#modalNovoRegime">
+                                <i class="fas fa-plus me-2"></i> Novo Regime
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -22,7 +30,8 @@
 
             <section class="content">
                 <div class="container-fluid text-center">
-                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                    <div th:if="${mensagem}"
+                        class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
                         <i class="fas fa-check-circle me-2"></i>
                         <span th:text="${mensagem}">Actualização realizada com sucesso.</span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -30,33 +39,21 @@
 
                     <form th:action="@{/configuracoes/fiscais/regime-fiscal/salvar}" method="post">
                         <div class="row g-4 justify-content-center">
-                            <div class="col-md-3">
-                                <div class="card h-100 shadow-sm border-0 transition-hover p-4" th:classappend="${empresa.regimeFiscal == 'GERAL' ? 'bg-soft-primary border border-primary' : ''}">
-                                    <i class="fas fa-balance-scale fa-3x mb-3 text-primary"></i>
-                                    <h4 class="fw-bold" th:text="#{config.fiscais.regime.geral.titulo}">Regime Geral</h4>
-                                    <p class="small text-muted mb-0" th:text="#{config.fiscais.regime.geral.desc}">Para empresas com facturação superior a 250 Milhões de Kz.</p>
-                                    <button type="submit" name="regime" value="GERAL" class="btn btn-primary mt-3 w-100 fw-bold" th:disabled="${empresa.regimeFiscal == 'GERAL'}">
-                                        <span th:text="${empresa.regimeFiscal == 'GERAL' ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card h-100 shadow-sm border-0 transition-hover p-4" th:classappend="${empresa.regimeFiscal == 'SIMPLIFICADO' ? 'bg-soft-primary border border-primary' : ''}">
-                                    <i class="fas fa-shield-alt fa-3x text-info mb-3"></i>
-                                    <h4 class="fw-bold" th:text="#{config.fiscais.regime.simplificado.titulo}">Regime Simplificado</h4>
-                                    <p class="small text-muted mb-0" th:text="#{config.fiscais.regime.simplificado.desc}">Para empresas com facturação entre 7.5 e 250 Milhões de Kz.</p>
-                                    <button type="submit" name="regime" value="SIMPLIFICADO" class="btn btn-outline-info mt-3 w-100 fw-bold" th:disabled="${empresa.regimeFiscal == 'SIMPLIFICADO'}">
-                                        <span th:text="${empresa.regimeFiscal == 'SIMPLIFICADO' ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card h-100 shadow-sm border-0 transition-hover p-4" th:classappend="${empresa.regimeFiscal == 'EXCLUSAO' ? 'bg-soft-primary border border-primary' : ''}">
-                                    <i class="fas fa-ban fa-3x text-muted mb-3 opacity-50"></i>
-                                    <h4 class="fw-bold" th:text="#{config.fiscais.regime.exclusao.titulo}">Regime de Exclusão</h4>
-                                    <p class="small text-muted mb-0" th:text="#{config.fiscais.regime.exclusao.desc}">Para empresas com facturação inferior a 7.5 Milhões de Kz.</p>
-                                    <button type="submit" name="regime" value="EXCLUSAO" class="btn btn-outline-dark mt-3 w-100 fw-bold" th:disabled="${empresa.regimeFiscal == 'EXCLUSAO'}">
-                                        <span th:text="${empresa.regimeFiscal == 'EXCLUSAO' ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
+                            <!-- Loop Dinâmico de Regimes -->
+                            <div th:each="r : ${regimes}" class="col-md-3">
+                                <div class="card h-100 shadow-sm border-0 transition-hover p-4 cursor-pointer"
+                                    th:onclick="|document.getElementById('btn-select-' + ${r.id}).click()|"
+                                    th:classappend="${empresa.regimeFiscal == r.codigo ? 'bg-soft-primary border border-primary' : ''}">
+                                    <i
+                                        th:class="${r.icone + ' fa-3x mb-3 ' + (empresa.regimeFiscal == r.codigo ? 'text-primary' : 'text-muted opacity-50')}"></i>
+                                    <h4 class="fw-bold" th:text="${r.nome}">Regime</h4>
+                                    <p class="small text-muted mb-0" th:text="${r.descricao}">Descrição do regime.</p>
+                                    <button type="submit" name="regime" th:value="${r.codigo}"
+                                        th:id="|btn-select-${r.id}|" class="btn mt-3 w-100 fw-bold"
+                                        th:classappend="${empresa.regimeFiscal == r.codigo ? 'btn-primary' : 'btn-outline-secondary'}"
+                                        th:disabled="${empresa.regimeFiscal == r.codigo}">
+                                        <span
+                                            th:text="${empresa.regimeFiscal == r.codigo ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
                                     </button>
                                 </div>
                             </div>
@@ -64,12 +61,67 @@
                     </form>
 
                     <div class="card shadow-sm border-0 mt-5 p-4 border-start border-primary border-4 text-start">
-                        <h5 class="fw-bold"><i class="fas fa-info-circle me-2"></i><span th:text="#{config.fiscais.regime.info.titulo}">Informação Importante</span></h5>
-                        <p class="mb-0 text-muted small" th:text="#{config.fiscais.regime.info.desc}">A alteração do Regime Fiscal afecta directamente a obrigatoriedade de liquidação de IVA e a estrutura do ficheiro SAF-T AO exportado para a AGT. Certifique-se de que a sua empresa está qualificada para o regime seleccionado.</p>
+                        <h5 class="fw-bold"><i class="fas fa-info-circle me-2"></i><span
+                                th:text="#{config.fiscais.regime.info.titulo}">Informação Importante</span></h5>
+                        <p class="mb-0 text-muted small" th:text="#{config.fiscais.regime.info.desc}">A alteração do
+                            Regime Fiscal afecta directamente a obrigatoriedade de liquidação de IVA e a estrutura do
+                            ficheiro SAF-T AO exportado para a AGT. Certifique-se de que a sua empresa está qualificada
+                            para o regime seleccionado.</p>
                     </div>
                 </div>
             </section>
         </div>
     </div>
+
+    <!-- Modal Novo Regime -->
+    <div class="modal fade" id="modalNovoRegime" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2"></i> Adicionar Regime Fiscal</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form th:action="@{/configuracoes/fiscais/regime-fiscal/adicionar}" method="post"
+                    th:object="${novoRegime}">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nome do Regime</label>
+                            <input type="text" th:field="*{nome}" class="form-control"
+                                placeholder="Ex: Regime Transitório" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Código Identificador (Interno)</label>
+                            <input type="text" th:field="*{codigo}" class="form-control text-uppercase"
+                                placeholder="Ex: TRANSITORIO" required>
+                            <small class="text-muted">Utilize apenas letras maiúsculas sem espaços.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Descrição</label>
+                            <textarea th:field="*{descricao}" class="form-control" rows="3"
+                                placeholder="Breve explicação sobre o enquadramento..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ícone (FontAwesome)</label>
+                            <input type="text" th:field="*{icone}" class="form-control"
+                                placeholder="Ex: fas fa-landmark">
+                            <small class="text-muted">Consulte o <a href="https://fontawesome.com/icons"
+                                    target="_blank">FontAwesome</a> para exemplos.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold">Salvar Regime</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts extra: AdminLTE 3 usually includes Bootstrap 4, but let's check menu.html for BS version -->
+    <!-- If it's pure AdminLTE/BS4, we might need a mix, but standardizing for current workspace pattern -->
+    </div>
+    </div>
 </body>
+
 </html>
