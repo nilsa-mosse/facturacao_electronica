@@ -21,6 +21,7 @@ public class Empresa {
     private String email;
     private String website;
     private String logotipo;
+    private String regimeFiscal;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -46,4 +47,7 @@ public class Empresa {
 
     public String getLogotipo() { return logotipo; }
     public void setLogotipo(String logotipo) { this.logotipo = logotipo; }
+
+    public String getRegimeFiscal() { return regimeFiscal; }
+    public void setRegimeFiscal(String regimeFiscal) { this.regimeFiscal = regimeFiscal; }
 }

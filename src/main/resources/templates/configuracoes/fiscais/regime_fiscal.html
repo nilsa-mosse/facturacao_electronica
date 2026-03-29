@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper px-4 py-2">
+            <div class="content-header p-0 mb-4">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-sm-6">
+                            <h1 class="fw-bold"><i class="fas fa-gavel text-info me-2"></i><span th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</span></h1>
+                            <p class="text-muted mb-0" th:text="#{config.fiscais.regime.subtitulo}">Defina o enquadramento fiscal da sua empresa junto da AGT.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="content">
+                <div class="container-fluid text-center">
+                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <span th:text="${mensagem}">Actualização realizada com sucesso.</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <form th:action="@{/configuracoes/fiscais/regime-fiscal/salvar}" method="post">
+                        <div class="row g-4 justify-content-center">
+                            <div class="col-md-3">
+                                <div class="card h-100 shadow-sm border-0 transition-hover p-4" th:classappend="${empresa.regimeFiscal == 'GERAL' ? 'bg-soft-primary border border-primary' : ''}">
+                                    <i class="fas fa-balance-scale fa-3x mb-3 text-primary"></i>
+                                    <h4 class="fw-bold" th:text="#{config.fiscais.regime.geral.titulo}">Regime Geral</h4>
+                                    <p class="small text-muted mb-0" th:text="#{config.fiscais.regime.geral.desc}">Para empresas com facturação superior a 250 Milhões de Kz.</p>
+                                    <button type="submit" name="regime" value="GERAL" class="btn btn-primary mt-3 w-100 fw-bold" th:disabled="${empresa.regimeFiscal == 'GERAL'}">
+                                        <span th:text="${empresa.regimeFiscal == 'GERAL' ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 shadow-sm border-0 transition-hover p-4" th:classappend="${empresa.regimeFiscal == 'SIMPLIFICADO' ? 'bg-soft-primary border border-primary' : ''}">
+                                    <i class="fas fa-shield-alt fa-3x text-info mb-3"></i>
+                                    <h4 class="fw-bold" th:text="#{config.fiscais.regime.simplificado.titulo}">Regime Simplificado</h4>
+                                    <p class="small text-muted mb-0" th:text="#{config.fiscais.regime.simplificado.desc}">Para empresas com facturação entre 7.5 e 250 Milhões de Kz.</p>
+                                    <button type="submit" name="regime" value="SIMPLIFICADO" class="btn btn-outline-info mt-3 w-100 fw-bold" th:disabled="${empresa.regimeFiscal == 'SIMPLIFICADO'}">
+                                        <span th:text="${empresa.regimeFiscal == 'SIMPLIFICADO' ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card h-100 shadow-sm border-0 transition-hover p-4" th:classappend="${empresa.regimeFiscal == 'EXCLUSAO' ? 'bg-soft-primary border border-primary' : ''}">
+                                    <i class="fas fa-ban fa-3x text-muted mb-3 opacity-50"></i>
+                                    <h4 class="fw-bold" th:text="#{config.fiscais.regime.exclusao.titulo}">Regime de Exclusão</h4>
+                                    <p class="small text-muted mb-0" th:text="#{config.fiscais.regime.exclusao.desc}">Para empresas com facturação inferior a 7.5 Milhões de Kz.</p>
+                                    <button type="submit" name="regime" value="EXCLUSAO" class="btn btn-outline-dark mt-3 w-100 fw-bold" th:disabled="${empresa.regimeFiscal == 'EXCLUSAO'}">
+                                        <span th:text="${empresa.regimeFiscal == 'EXCLUSAO' ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="card shadow-sm border-0 mt-5 p-4 border-start border-primary border-4 text-start">
+                        <h5 class="fw-bold"><i class="fas fa-info-circle me-2"></i><span th:text="#{config.fiscais.regime.info.titulo}">Informação Importante</span></h5>
+                        <p class="mb-0 text-muted small" th:text="#{config.fiscais.regime.info.desc}">A alteração do Regime Fiscal afecta directamente a obrigatoriedade de liquidação de IVA e a estrutura do ficheiro SAF-T AO exportado para a AGT. Certifique-se de que a sua empresa está qualificada para o regime seleccionado.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

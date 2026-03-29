@@ -34,6 +34,10 @@ public class ConfiguracaoController {
     @Autowired
     private MetodoPagamentoRepository metodoPagamentoRepository;
     @Autowired
+    private TaxaRepository taxaRepository;
+    @Autowired
+    private RetencaoRepository retencaoRepository;
+    @Autowired
     private ConfiguracaoAGTRepository configuracaoAGTRepository;
     @Autowired
     private MessageSource messageSource;
@@ -262,5 +266,74 @@ public class ConfiguracaoController {
         sistemaConfig = sistema;
         redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/geral";
+    }
+
+    // ─── Configurações Fiscais ───────────────────────────────────────────────
+    @GetMapping("/fiscais/impostos")
+    public String fiscaisImpostos(Model model) {
+        model.addAttribute("impostos", impostoRepository.findAll());
+        model.addAttribute("novoImposto", new Imposto());
+        return "configuracoes/fiscais/impostos";
+    }
+
+    @GetMapping("/fiscais/taxas")
+    public String fiscaisTaxas(Model model) {
+        model.addAttribute("taxas", taxaRepository.findAll());
+        model.addAttribute("novaTaxa", new Taxa());
+        return "configuracoes/fiscais/taxas";
+    }
+
+    @PostMapping("/fiscais/taxas/salvar")
+    public String salvarTaxa(@ModelAttribute Taxa taxa, RedirectAttributes redirectAttributes) {
+        taxaRepository.save(taxa);
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/fiscais/taxas";
+    }
+
+    @GetMapping("/fiscais/taxas/eliminar/{id}")
+    public String eliminarTaxa(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        taxaRepository.deleteById(id);
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/fiscais/taxas";
+    }
+
+    @GetMapping("/fiscais/regime-fiscal")
+    public String fiscaisRegime(Model model) {
+        List<Empresa> empresas = empresaRepository.findAll();
+        model.addAttribute("empresa", empresas.isEmpty() ? new Empresa() : empresas.get(0));
+        return "configuracoes/fiscais/regime_fiscal";
+    }
+
+    @PostMapping("/fiscais/regime-fiscal/salvar")
+    public String salvarRegimeFiscal(@RequestParam String regime, RedirectAttributes redirectAttributes) {
+        List<Empresa> empresas = empresaRepository.findAll();
+        if (!empresas.isEmpty()) {
+            Empresa e = empresas.get(0);
+            e.setRegimeFiscal(regime);
+            empresaRepository.save(e);
+            redirectAttributes.addFlashAttribute("mensagem", "Regime Fiscal actualizado com sucesso!");
+        }
+        return "redirect:/configuracoes/fiscais/regime-fiscal";
+    }
+
+    @GetMapping("/fiscais/retencoes")
+    public String fiscaisRetencoes(Model model) {
+        model.addAttribute("retencoes", retencaoRepository.findAll());
+        model.addAttribute("novaRetencao", new Retencao());
+        return "configuracoes/fiscais/retencoes";
+    }
+
+    @PostMapping("/fiscais/retencoes/salvar")
+    public String salvarRetencao(@ModelAttribute Retencao retencao, RedirectAttributes redirectAttributes) {
+        retencaoRepository.save(retencao);
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/fiscais/retencoes";
+    }
+
+    @GetMapping("/fiscais/retencoes/eliminar/{id}")
+    public String eliminarRetencao(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        retencaoRepository.deleteById(id);
+        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/fiscais/retencoes";
     }
 }
