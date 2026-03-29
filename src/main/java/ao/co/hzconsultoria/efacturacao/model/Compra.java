@@ -15,10 +15,20 @@ public class Compra {
 
     private Double total;
 
+    @ManyToOne
+    private Cliente cliente;
+
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<ItemCompra> itens;
 
     // Getters and Setters
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
     public Long getId() {
         return id;
     }

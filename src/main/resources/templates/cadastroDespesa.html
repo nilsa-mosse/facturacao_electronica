@@ -7,14 +7,14 @@
 
         <div class="content-wrapper">
             <section class="content py-4">
-                <div class="container-fluid">
-                    <div class="card form-card">
-                        <div class="form-card-header">
-                            <h3 class="fw-bold mb-0" th:text="#{despesas.cadastro.titulo}">Cadastro de Despesa</h3>
+                <div class="container-fluid px-4">
+                    <div class="card form-card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h3 class="fw-bold mb-0 text-dark" th:text="${despesa.id == null} ? #{despesas.cadastro.titulo} : 'Editar Despesa'">Cadastro de Despesa</h3>
                         </div>
                         <div class="card-body p-4">
                             <form th:action="${despesa.id == null} ? @{/despesas/adicionar} : @{/despesas/atualizar}" 
-                                  th:object="${despesa}" method="POST">
+                                  th:object="${despesa}" method="POST" enctype="multipart/form-data" id="despesaForm">
                                 <input type="hidden" th:field="*{id}" />
 
                                 <div class="mb-3">
@@ -53,20 +53,95 @@
                                     </div>
                                 </div>
 
-                                 <div class="d-grid gap-2 mt-4">
-                                     <button type="submit" class="btn btn-danger py-2 fw-bold">
-                                         <i class="fas fa-save me-1"></i> <span th:text="#{form.salvar}">Salvar Despesa</span>
-                                     </button>
-                                     <a th:href="@{/despesas/listar}" class="btn btn-outline-secondary" th:text="#{form.cancelar}">
-                                         Cancelar
-                                     </a>
-                                 </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Factura (Anexo)</label>
+                                    <div class="input-group">
+                                        <input type="file" name="fileFatura" id="fileInput" class="form-control" accept="image/*,.pdf" onchange="previewFile()">
+                                        <span class="input-group-text bg-light"><i class="fas fa-file-upload"></i></span>
+                                    </div>
+                                    <small class="text-muted" th:if="${despesa.faturaPath != null}">Existe um ficheiro anexado: <span th:text="${despesa.faturaPath}"></span></small>
+                                </div>
+
+                                <!-- Preview Area -->
+                                <div id="previewAreaContainer" class="mb-4 d-none">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">Pré-visualização do Documento</label>
+                                    <div id="previewArea" class="border rounded bg-light p-3 text-center" style="min-height: 150px; display: flex; align-items: center; justify-content: center;">
+                                        <!-- Content injected via JS -->
+                                    </div>
+                                </div>
+
+                                <!-- Existing File Preview (if editing) -->
+                                <div th:if="${despesa.faturaPath != null}" id="existingPreview" class="mb-4">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">Documento Actual</label>
+                                    <div class="border rounded bg-light p-3 text-center">
+                                        <img th:if="${#strings.endsWithIgnoreCase(despesa.faturaPath, '.jpg') or #strings.endsWithIgnoreCase(despesa.faturaPath, '.png') or #strings.endsWithIgnoreCase(despesa.faturaPath, '.jpeg')}" 
+                                             th:src="@{'/uploads/despesas/' + ${despesa.faturaPath}}" 
+                                             class="img-fluid rounded shadow-sm" style="max-height: 300px;">
+                                        
+                                        <div th:if="${#strings.endsWithIgnoreCase(despesa.faturaPath, '.pdf')}">
+                                            <i class="fas fa-file-pdf fs-50 text-danger mb-2"></i>
+                                            <p class="mb-1 fw-bold" th:text="${despesa.faturaPath}"></p>
+                                            <a th:href="@{'/despesas/download/' + ${despesa.id}}" class="btn btn-sm btn-info text-white mt-1">
+                                                <i class="fas fa-download me-1"></i> Baixar Documento
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="submit" class="btn btn-danger py-2 fw-bold">
+                                        <i class="fas fa-save me-1"></i> <span th:text="#{form.salvar}">Salvar Despesa</span>
+                                    </button>
+                                    <a th:href="@{/despesas/listar}" class="btn btn-outline-secondary" th:text="#{form.cancelar}">
+                                        Cancelar
+                                    </a>
+                                </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </section>
         </div>
+    </div>
+
+    <!-- Script for File Preview -->
+    <script th:inline="javascript">
+        function previewFile() {
+            const previewArea = document.getElementById('previewArea');
+            const previewContainer = document.getElementById('previewAreaContainer');
+            const existingPreview = document.getElementById('existingPreview');
+            const file = document.getElementById('fileInput').files[0];
+            const reader = new FileReader();
+
+            if (file) {
+                previewContainer.classList.remove('d-none');
+                if(existingPreview) existingPreview.classList.add('d-none');
+
+                reader.onloadend = function() {
+                    previewArea.innerHTML = '';
+                    
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = reader.result;
+                        img.className = 'img-fluid rounded';
+                        img.style.maxHeight = '300px';
+                        previewArea.appendChild(img);
+                    } else if (file.type === 'application/pdf') {
+                        previewArea.innerHTML = `
+                            <div class="text-center">
+                                <i class="fas fa-file-pdf fs-50 text-danger mb-2"></i>
+                                <p class="mb-0 fw-bold">${file.name}</p>
+                                <p class="text-muted small">PDF pronto para carregamento</p>
+                            </div>
+                        `;
+                    } else {
+                        previewArea.innerHTML = `<p class="text-muted">Ficheiro selecionado: ${file.name}</p>`;
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
     </div>
 
     <!-- Scripts already loaded via menu :: head -->

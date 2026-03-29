@@ -243,16 +243,6 @@
                   </li>
 
 
-
-
-
-
-
-
-
-
-
-
                   <li class="nav-item">
                     <a th:href="@{/precos}" class="nav-link">
                       <i class="fas fa-tag nav-icon"></i>
@@ -272,18 +262,26 @@
           </li>
 
 
+
+
+
           <!-- Facturaçao Menu -->
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-file-invoice-dollar"></i>
-              <p th:text="#{menu.facturacao}">3. Facturaçao<i class="right fas fa-angle-left"></i></p>
+              <p>
+                <th:block th:text="#{menu.facturacao}">3. Facturação</th:block><i class="right fas fa-angle-left"></i>
+              </p>
             </a>
             <ul class="nav nav-treeview">
               <!-- Clientes Submenu -->
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="fas fa-file-invoice nav-icon"></i>
-                  <p th:text="#{menu.facturacao.facturas}">Facturas<i class="right fas fa-angle-left"></i></p>
+                  <p>
+                    <th:block th:text="#{menu.facturacao.facturas}">Facturas</th:block><i
+                      class="right fas fa-angle-left"></i>
+                  </p>
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
@@ -305,47 +303,22 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/clientes/historico-compras}" class="nav-link">
+                    <a th:href="@{/clientes/historico-compras}" class="nav-link"
+                      title="Emitidas, Enviadas, Validadas AGT, Rejeitadas AGT">
                       <i class="fas fa-info-circle nav-icon"></i>
-                      <p>Facturas por Estado (Emitidas, Enviadas, Validadas AGT, Rejeitadas AGT)</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <!-- Fornecedores Submenu -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-user-invoice nav-icon"></i>
-                  <p th:text="#{menu.facturacao.facturas}">Facturas de Clientes<i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/fornecedores/listar}" class="nav-link">
-                      <i class="fas fa-list nav-icon"></i>
-                      <p th:text="#{menu.facturacao.emitir}">Emitir Facturas</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
-                      <i class="fas fa-print nav-icon"></i>
-                      <p>Reimprimir</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
-                      <i class="fas fa-search-plus nav-icon"></i>
-                      <p>Ver Detalhes</p>
+                      <p>Facturas por Estado</p>
                     </a>
                   </li>
                 </ul>
               </li>
 
-              <!-- Fornecedores Submenu -->
+              <!-- FACTURAS Submenu -->
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="fas fa-cloud-upload-alt nav-icon"></i>
-                  <p th:text="#{menu.facturacao.agt}">Facturas Electronicas AGT<i class="right fas fa-angle-left"></i>
+                  <p>
+                    <th:block th:text="#{menu.facturacao.agt}">Facturas AGT</th:block><i
+                      class="right fas fa-angle-left"></i>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
@@ -356,15 +329,16 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/factura-eletronica/estado}" class="nav-link">
+                    <a th:href="@{/factura-eletronica/estado}" class="nav-link"
+                      title="Em processamento, Validada, Rejeitada">
                       <i class="fas fa-satellite-dish nav-icon"></i>
-                      <p>Estado (Em processamento, Validada, Rejeitada)</p>
+                      <p>Estado AGT</p>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a th:href="@{/fornecedores/adicionar}" class="nav-link">
                       <i class="fas fa-search nav-icon"></i>
-                      <p>Consultar Resultado / Mensagens AGT</p>
+                      <p>Mensagens AGT</p>
                     </a>
                   </li>
                   <li class="nav-item">
@@ -383,12 +357,14 @@
                   <p th:text="#{menu.facturacao.recebidas}">Faturas Recibidas</p>
                 </a>
               </li>
-              <!-- Fornecedores Submenu -->
+              <!-- Guias Submenu -->
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="fas fa-map-marked-alt nav-icon"></i>
-                  <p th:text="#{menu.facturacao.guias}">Guias de Remessa / Notas de Crédito / Débito<i
-                      class="right fas fa-angle-left"></i></p>
+                  <p>
+                    <th:block th:text="#{menu.facturacao.guias}">Guias e Notas</th:block><i
+                      class="right fas fa-angle-left"></i>
+                  </p>
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
@@ -420,17 +396,24 @@
 
 
           <!-- 4. Inventário / Stock Menu -->
+
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-boxes"></i>
-              <p th:text="#{menu.inventario}">4. Inventário / Stock<i class="right fas fa-angle-left"></i></p>
+              <p>
+                <th:block th:text="#{menu.inventario}">4. Inventário / Stock</th:block><i
+                  class="right fas fa-angle-left"></i>
+              </p>
             </a>
             <ul class="nav nav-treeview">
               <!-- Movimentos de Stock Submenu -->
+
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="fas fa-exchange-alt nav-icon"></i>
-                  <p th:text="#{menu.inventario.movimentos}">Movimentos de Stock<i class="right fas fa-angle-left"></i>
+                  <p>
+                    <th:block th:text="#{menu.inventario.movimentos}">Movimentos de Stock</th:block><i
+                      class="right fas fa-angle-left"></i>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
@@ -456,10 +439,14 @@
                 </ul>
               </li>
               <!-- Relatórios Submenu -->
+
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="fas fa-file-alt nav-icon"></i>
-                  <p th:text="#{menu.inventario.relatorios}">Relatórios<i class="right fas fa-angle-left"></i></p>
+                  <p>
+                    <th:block th:text="#{menu.inventario.relatorios}">Relatórios</th:block><i
+                      class="right fas fa-angle-left"></i>
+                  </p>
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
@@ -489,14 +476,19 @@
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-hand-holding-usd"></i>
-              <p th:text="#{menu.pagamentos}">5. Pagamentos / Recebimentos<i class="right fas fa-angle-left"></i></p>
+              <p>
+                <th:block th:text="#{menu.pagamentos}">5. Pagamentos / Recebimentos</th:block><i
+                  class="right fas fa-angle-left"></i>
+              </p>
             </a>
             <ul class="nav nav-treeview">
               <!-- Movimentos de Stock Submenu -->
               <li class="nav-item has-treeview">
                 <a href="#" class="nav-link">
                   <i class="fas fa-user-shield nav-icon"></i>
-                  <p th:text="#{menu.pagamentos.clientes}">Pagamentos de Clientes<i class="right fas fa-angle-left"></i>
+                  <p>
+                    <th:block th:text="#{menu.pagamentos.clientes}">Pagamentos de Clientes</th:block><i
+                      class="right fas fa-angle-left"></i>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
@@ -545,7 +537,10 @@
           <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-cogs"></i>
-              <p th:text="#{menu.configuracoes}">6. Configurações<i class="right fas fa-angle-left"></i></p>
+              <p>
+                <th:block th:text="#{menu.configuracoes}">6. Configurações</th:block><i
+                  class="right fas fa-angle-left"></i>
+              </p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">

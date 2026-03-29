@@ -11,8 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +39,8 @@ public class ConfiguracaoController {
     private ConfiguracaoAGTRepository configuracaoAGTRepository;
     @Autowired
     private MessageSource messageSource;
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.AgtService agtService;
 
     // ─── Dados da Empresa ────────────────────────────────────────────────────
     @GetMapping("/empresa")
@@ -185,62 +185,17 @@ public class ConfiguracaoController {
     @PostMapping("/comunicacao-agt/testar")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> testarConexaoAgt(@RequestBody Map<String, String> payload) {
-        Map<String, Object> resultado = new HashMap<>();
         String urlApi = payload.get("urlApi");
-        String token = payload.get("token");
+        String token  = payload.get("token");
 
         if (urlApi == null || urlApi.trim().isEmpty()) {
-            resultado.put("sucesso", false);
-            resultado.put("mensagem", messageSource.getMessage("config.agt.teste.falha_url", null, LocaleContextHolder.getLocale()));
-            return ResponseEntity.badRequest().body(resultado);
+            Map<String, Object> err = new HashMap<>();
+            err.put("sucesso", false);
+            err.put("mensagem", messageSource.getMessage("config.agt.teste.falha_url", null, LocaleContextHolder.getLocale()));
+            return ResponseEntity.badRequest().body(err);
         }
 
-        long inicio = System.currentTimeMillis();
-        try {
-            URL url = new URL(urlApi);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(10000);
-            conn.setReadTimeout(10000);
-
-            // Adicionar token de autenticação se disponível
-            if (token != null && !token.trim().isEmpty()) {
-                conn.setRequestProperty("Authorization", "Bearer " + token);
-            }
-            conn.setRequestProperty("Accept", "application/json");
-
-            int codigoHttp = conn.getResponseCode();
-            long tempoMs = System.currentTimeMillis() - inicio;
-
-            resultado.put("codigoHttp", codigoHttp);
-            resultado.put("tempoMs", tempoMs);
-
-            if (codigoHttp >= 200 && codigoHttp < 300) {
-                resultado.put("sucesso", true);
-                resultado.put("mensagem", messageSource.getMessage("config.agt.teste.sucesso", null, LocaleContextHolder.getLocale()) + " (HTTP " + codigoHttp + ")");
-            } else if (codigoHttp == 401 || codigoHttp == 403) {
-                resultado.put("sucesso", false);
-                resultado.put("mensagem", messageSource.getMessage("config.agt.teste.falha_token", null, LocaleContextHolder.getLocale()) + " (HTTP " + codigoHttp + ")");
-            } else {
-                resultado.put("sucesso", false);
-                resultado.put("mensagem", messageSource.getMessage("config.agt.teste.falha_geral", null, LocaleContextHolder.getLocale()) + " (HTTP " + codigoHttp + ")");
-            }
-
-            conn.disconnect();
-        } catch (java.net.SocketTimeoutException e) {
-            resultado.put("sucesso", false);
-            resultado.put("tempoMs", System.currentTimeMillis() - inicio);
-            resultado.put("mensagem", "Tempo de conexão expirado. Verifique a URL e a sua rede.");
-        } catch (java.net.UnknownHostException e) {
-            resultado.put("sucesso", false);
-            resultado.put("tempoMs", System.currentTimeMillis() - inicio);
-            resultado.put("mensagem", "Endereço não encontrado. Verifique a URL da API.");
-        } catch (Exception e) {
-            resultado.put("sucesso", false);
-            resultado.put("tempoMs", System.currentTimeMillis() - inicio);
-            resultado.put("mensagem", "Erro ao conectar: " + e.getMessage());
-        }
-
+        Map<String, Object> resultado = agtService.pingAgt(urlApi, token);
         return ResponseEntity.ok(resultado);
     }
 

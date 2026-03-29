@@ -1,7 +1,9 @@
 package ao.co.hzconsultoria.efacturacao.service;
 
+import ao.co.hzconsultoria.efacturacao.dto.AgtResponse;
 import ao.co.hzconsultoria.efacturacao.model.Fatura;
 import ao.co.hzconsultoria.efacturacao.model.Carrinho;
+import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
@@ -12,6 +14,8 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +34,14 @@ import java.awt.image.BufferedImage;
 
 @Service
 public class FaturaService {
+
+    private static final Logger log = LoggerFactory.getLogger(FaturaService.class);
+
     @Autowired
     private FaturaRepository faturaRepository;
+
+    @Autowired
+    private AgtService agtService;
 
 
     public Fatura emitirFatura(Compra compra) {
@@ -40,31 +50,78 @@ public class FaturaService {
         String numeroFatura = "FT-" + System.currentTimeMillis();
         fatura.setNumeroFatura(numeroFatura);
         fatura.setDataEmissao(new Date());
-        fatura.setEnviadaAGT(true);
-        fatura.setStatus("VALIDADA");
-        // Calcular total, iva, hash, codigoAgt
+        // Calcular totais e IVA
         double totalSemImposto = 0;
         double valorIva = 0;
         for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : compra.getItens()) {
-            // Buscar IVA do produto se possível
-            double ivaPercentual = 0;
-            // ... buscar ivaPercentual do produto se necessário ...
             double subtotal = item.getSubtotal();
-            if (ivaPercentual > 0) {
-                valorIva += subtotal * (ivaPercentual / 100);
-            }
             totalSemImposto += subtotal;
         }
         double totalFinal = totalSemImposto + valorIva;
         fatura.setTotal(totalFinal);
         fatura.setIva(valorIva);
+
+        // Gerar hash SHA-256 para assinatura
         String data = new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(fatura.getDataEmissao());
         String hash = gerarHash(numeroFatura + data + totalFinal);
         fatura.setHash(hash);
-        fatura.setCodigoAgt("AGT" + System.currentTimeMillis());
+
+        // Guardar fatura antes de enviar (para ter ID gerado)
+        fatura.setEnviadaAGT(false);
+        fatura.setStatus("PENDENTE");
         Fatura faturaSalva = faturaRepository.save(fatura);
+
+        // Enviar para a AGT
+        try {
+            AgtResponse agtResponse = agtService.enviarFatura(faturaSalva);
+            if (agtResponse.isSucesso()) {
+                faturaSalva.setEnviadaAGT(true);
+                faturaSalva.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
+                faturaSalva.setCodigoAgt(agtResponse.getCodigoAgt());
+                log.info("Fatura {} enviada e validada pela AGT. Código: {}", numeroFatura, agtResponse.getCodigoAgt());
+            } else {
+                faturaSalva.setEnviadaAGT(false);
+                faturaSalva.setStatus("FALHA_ENVIO");
+                faturaSalva.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
+                log.warn("Falha no envio da fatura {} para AGT: {}", numeroFatura, agtResponse.getMensagem());
+            }
+        } catch (Exception e) {
+            faturaSalva.setStatus("FALHA_ENVIO");
+            log.error("Erro crítico ao enviar fatura {} para AGT: {}", numeroFatura, e.getMessage());
+        }
+
+        // Actualizar estado final na BD
+        faturaSalva = faturaRepository.save(faturaSalva);
         gerarPdfFatura(faturaSalva);
         return faturaSalva;
+    }
+
+    public Fatura reenviarFatura(Long id) {
+        Fatura fatura = faturaRepository.findById(id).orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
+
+        try {
+            AgtResponse agtResponse = agtService.enviarFatura(fatura);
+            if (agtResponse.isSucesso()) {
+                fatura.setEnviadaAGT(true);
+                fatura.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
+                fatura.setCodigoAgt(agtResponse.getCodigoAgt());
+                log.info("Reenvio da Fatura {} foi aceite. Código: {}", fatura.getNumeroFatura(), agtResponse.getCodigoAgt());
+            } else {
+                fatura.setEnviadaAGT(false);
+                fatura.setStatus("FALHA_ENVIO");
+                fatura.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
+                log.warn("Falha no reenvio da fatura {}: {}", fatura.getNumeroFatura(), agtResponse.getMensagem());
+            }
+        } catch (Exception e) {
+            fatura.setStatus("FALHA_ENVIO");
+            log.error("Erro crítico ao reenviar fatura {}: {}", fatura.getNumeroFatura(), e.getMessage());
+        }
+
+        fatura = faturaRepository.save(fatura);
+        if (fatura.isEnviadaAGT()) {
+            gerarPdfFatura(fatura);
+        }
+        return fatura;
     }
 
     private String gerarHash(String input) {
@@ -157,11 +214,18 @@ public class FaturaService {
         // Left: Client Info
         PdfPCell clientCell = new PdfPCell();
         clientCell.setBorder(0);
+        
+        Cliente cliente = (fatura.getCompra() != null) ? fatura.getCompra().getCliente() : null;
+        String nomeCliente = (cliente != null) ? cliente.getNome() : "Consumidor Final";
+        String enderecoCliente = (cliente != null) ? cliente.getEndereco() : "Endereço Não Especificado";
+        String contatoCliente = (cliente != null) ? (cliente.getEmail() + " | " + cliente.getTelefone()) : "contato@exemplo.com";
+        String nifCliente = (cliente != null) ? cliente.getNif() : "999999999";
+
         clientCell.addElement(new Paragraph("DADOS DO CLIENTE", fontSubtitle));
-        clientCell.addElement(new Paragraph("NOME DO CLIENTE", bold));
-        clientCell.addElement(new Paragraph("Endereço do Cliente, Cidade", normal));
-        clientCell.addElement(new Paragraph("cliente@email.com | +244 999 000 000", normal));
-        clientCell.addElement(new Paragraph("NIF: 00000000000", normal));
+        clientCell.addElement(new Paragraph(nomeCliente, bold));
+        clientCell.addElement(new Paragraph(enderecoCliente, normal));
+        clientCell.addElement(new Paragraph(contatoCliente, normal));
+        clientCell.addElement(new Paragraph("NIF: " + nifCliente, normal));
         clientMetaTable.addCell(clientCell);
 
         // Right: Metadata (Invoice No, Date)

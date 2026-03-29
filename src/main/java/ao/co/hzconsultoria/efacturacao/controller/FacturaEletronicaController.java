@@ -1,97 +1,91 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
+import ao.co.hzconsultoria.efacturacao.model.Fatura;
+import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
+import ao.co.hzconsultoria.efacturacao.service.FaturaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Date;
 import java.util.List;
 
 @Controller
 @RequestMapping("/factura-eletronica")
 public class FacturaEletronicaController {
 
-    // Lista simulada de facturas enviadas para AGT
-    private static final List<FacturaSimulada> facturasEnviadas = new ArrayList<>();
+    @Autowired
+    private FaturaRepository faturaRepository;
 
-    @GetMapping("/enviar")
-    public String mostrarTelaEnvio(Model model) {
-        // Adiciona atributo para garantir que o formulário use multipart
-        model.addAttribute("formMultipart", true);
-        return "enviarFacturaAGT";
-    }
+    @Autowired
+    private FaturaService faturaService;
 
-    @PostMapping("/enviar")
-    public String enviarParaAGT(@RequestParam("numeroFactura") String numeroFactura,
-                                @RequestParam("dataEmissao") String dataEmissao,
-                                @RequestParam("nifCliente") String nifCliente,
-                                @RequestParam("valorTotal") Double valorTotal,
-                                @RequestParam("tipoDocumento") String tipoDocumento,
-                                @RequestParam("serie") String serie,
-                                @RequestParam("xml") MultipartFile xmlFile,
-                                Model model) {
-        // Simular integração com AGT: adicionar factura à lista com estado "EM_PROCESSAMENTO"
-        FacturaSimulada factura = new FacturaSimulada();
-        factura.setNumero(numeroFactura);
-        factura.setDataEmissao(LocalDate.parse(dataEmissao));
-        factura.setNomeCliente(nifCliente); // Em sistemas reais, buscar nome pelo NIF
-        factura.setValorTotal(valorTotal);
-        factura.setEstado("EM_PROCESSAMENTO");
-        factura.setMensagemAGT("Factura recebida pela AGT. Em processamento.");
-        synchronized (facturasEnviadas) {
-            facturasEnviadas.add(factura);
-        }
-        model.addAttribute("mensagem", "Factura enviada para AGT com sucesso (simulado)." );
-        return "enviarFacturaAGT";
-    }
+    @Autowired
+    private EmpresaRepository empresaRepository;
 
+    // Endpoint para ver e listar o estado atual das facturas baseado no banco de dados
     @GetMapping("/estado")
-    public String mostrarEstadoFacturas(Model model) {
-        // Simular mudança de estado para algumas facturas
-        synchronized (facturasEnviadas) {
-            for (int i = 0; i < facturasEnviadas.size(); i++) {
-                FacturaSimulada f = facturasEnviadas.get(i);
-                if (i % 3 == 0) {
-                    f.setEstado("VALIDADA");
-                    f.setMensagemAGT("Factura validada com sucesso pela AGT.");
-                } else if (i % 3 == 1) {
-                    f.setEstado("REJEITADA");
-                    f.setMensagemAGT("Erro: NIF do cliente inválido.");
-                } else {
-                    f.setEstado("EM_PROCESSAMENTO");
-                    f.setMensagemAGT("Factura recebida pela AGT. Em processamento.");
-                }
-            }
-        }
-        model.addAttribute("facturas", facturasEnviadas);
+    public String mostrarEstadoFacturas(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date dataFim,
+            @RequestParam(required = false) String nif,
+            Model model) {
+
+        // Normalizar filtros para a query
+        String statusFilter = (status != null && !status.isEmpty() && !status.equals("TODOS")) ? status : null;
+        String nifFilter = (nif != null && !nif.isEmpty()) ? nif : null;
+
+        List<Fatura> facturas = faturaRepository.findByFilters(statusFilter, dataInicio, dataFim, nifFilter);
+
+        // Estatísticas para os KPI Cards (baseadas na lista filtrada ou total? 
+        // Geralmente KPIs mostram o estado global ou o filtrado. Vamos mostrar o global para contexto.)
+        List<Fatura> todas = faturaRepository.findAll();
+        long totalCount = todas.size();
+        long validadasCount = todas.stream().filter(f -> "VALIDADA".equals(f.getStatus())).count();
+        long falhasCount = todas.stream().filter(f -> "FALHA_ENVIO".equals(f.getStatus())).count();
+        long pendentesCount = todas.stream().filter(f -> "PENDENTE".equals(f.getStatus())).count();
+
+        // Dados da Empresa para o Regime Fiscal
+        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
+        String regimeFiscal = (empresa != null) ? empresa.getRegimeFiscal() : "Regime Geral";
+
+        model.addAttribute("facturas", facturas);
+        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("validadasCount", validadasCount);
+        model.addAttribute("falhasCount", falhasCount);
+        model.addAttribute("pendentesCount", pendentesCount);
+        model.addAttribute("regimeFiscal", regimeFiscal);
+
+        // Manter os filtros no formulário
+        model.addAttribute("statusAtual", status);
+        model.addAttribute("dataInicioAtual", dataInicio);
+        model.addAttribute("dataFimAtual", dataFim);
+        model.addAttribute("nifAtual", nif);
+
         return "estadoFacturasAGT";
     }
 
-    // Classe interna para simulação de facturas
-    public static class FacturaSimulada {
-        private String numero;
-        private LocalDate dataEmissao;
-        private String nomeCliente;
-        private Double valorTotal;
-        private String estado;
-        private String mensagemAGT;
-        public String getNumero() { return numero; }
-        public void setNumero(String numero) { this.numero = numero; }
-        public LocalDate getDataEmissao() { return dataEmissao; }
-        public void setDataEmissao(LocalDate dataEmissao) { this.dataEmissao = dataEmissao; }
-        public String getNomeCliente() { return nomeCliente; }
-        public void setNomeCliente(String nomeCliente) { this.nomeCliente = nomeCliente; }
-        public Double getValorTotal() { return valorTotal; }
-        public void setValorTotal(Double valorTotal) { this.valorTotal = valorTotal; }
-        public String getEstado() { return estado; }
-        public void setEstado(String estado) { this.estado = estado; }
-        public String getMensagemAGT() { return mensagemAGT; }
-        public void setMensagemAGT(String mensagemAGT) { this.mensagemAGT = mensagemAGT; }
+    @GetMapping("/reenviar/{id}")
+    public String reenviarFatura(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Fatura fatura = faturaService.reenviarFatura(id);
+            if (fatura.isEnviadaAGT()) {
+                redirectAttributes.addFlashAttribute("mensagemSucesso", "Fatura reenviada com sucesso para a AGT.");
+            } else {
+                redirectAttributes.addFlashAttribute("mensagemErro", "Falha ao reenviar fatura: " + fatura.getCodigoAgt());
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar reenvio: " + e.getMessage());
+        }
+        return "redirect:/factura-eletronica/estado";
     }
 }

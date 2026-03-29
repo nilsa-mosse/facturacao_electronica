@@ -67,6 +67,7 @@ public class CarrinhoController {
     public String finalizarVenda(Model model) {
         // Convert Carrinho to Compra
         Compra compra = new Compra();
+        compra.setCliente(carrinho.getCliente());
         compra.setItens(carrinho.getItens().stream().map(item -> {
             ItemCompra itemCompra = new ItemCompra();
             itemCompra.setNomeProduto(item.getProduto().getNome());

@@ -64,6 +64,9 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="btn-group">
+                                                    <a th:if="${despesa.faturaPath != null}" th:href="@{'/despesas/download/' + ${despesa.id}}" class="btn btn-outline-info btn-sm" title="Baixar Factura">
+                                                        <i class="fas fa-download"></i>
+                                                    </a>
                                                     <a th:href="@{'/despesas/editar/' + ${despesa.id}}" class="btn btn-outline-primary btn-sm">
                                                         <i class="fas fa-edit"></i>
                                                     </a>

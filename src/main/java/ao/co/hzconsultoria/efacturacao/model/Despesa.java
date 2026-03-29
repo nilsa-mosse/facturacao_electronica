@@ -21,6 +21,8 @@ public class Despesa {
     private String categoria;
     private String status;
 
+    private String faturaPath;
+
     public Despesa() {}
 
     public Long getId() {
@@ -69,5 +71,13 @@ public class Despesa {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getFaturaPath() {
+        return faturaPath;
+    }
+
+    public void setFaturaPath(String faturaPath) {
+        this.faturaPath = faturaPath;
     }
 }
