@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Fatura;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
+import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.FaturaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
@@ -27,6 +28,9 @@ public class CompraController {
     private ProdutoRepository produtoRepository;
     
     @Autowired
+    private CategoriaRepository categoriaRepository;
+    
+    @Autowired
     private VendaService vendaService;
     
     @Autowired
@@ -34,9 +38,10 @@ public class CompraController {
 
     @GetMapping("/pos")
     public String abrirPDV(Model model) {
-    	 Pageable pageable = PageRequest.of(0, 60); // primeira página, 20 itens
+    	 Pageable pageable = PageRequest.of(0, 60); // primeira página, 60 itens
         List<Produto> produtos = produtoRepository.findAll(pageable).getContent();
         model.addAttribute("produtos", produtos);
+        model.addAttribute("categorias", categoriaRepository.findAll());
         return "pos";
     }
 

@@ -279,18 +279,17 @@
                             <input type="text" id="search" class="form-control" th:placeholder="#{pos.procurar}">
                         </div>
 
-                        <!-- Categorias (Fictícias para UI) -->
+                        <!-- Categorias Reais -->
                         <div class="d-flex gap-2 mb-4 overflow-auto pb-2" id="categoryFilters">
-                            <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold">Todos</button>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">Bebidas</button>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">Alimentos</button>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">Mercearia</button>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold">Higiene</button>
+                            <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold filter-category" data-category="0">Todos</button>
+                            <button th:each="cat : ${categorias}" 
+                                    class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold filter-category text-nowrap" 
+                                    th:data-category="${cat.id}" 
+                                    th:text="${cat.nome}">Categoria</button>
                         </div>
 
-                        <!-- Grid de Produtos -->
                         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4" id="productList">
-                            <div class="col" th:each="produto : ${produtos}">
+                            <div class="col product-item" th:each="produto : ${produtos}" th:attr="data-category-id=${produto.categoria != null ? produto.categoria.id : 0}">
                                 <div class="product-card">
                                     <div class="product-img-container">
                                         <img th:src="${produto.imagem}" class="product-img" alt="Produto">
@@ -434,13 +433,36 @@
         }
 
         $(document).ready(function () {
-            // Search functionality
-            $('#search').on('input', function() {
-                let searchTerm = $(this).val().toLowerCase();
-                $('#productList .col').each(function() {
-                    let text = $(this).find('.product-name').text().toLowerCase();
-                    $(this).toggle(text.includes(searchTerm));
+            let selectedCategoryId = 0;
+
+            function filterProducts() {
+                let searchTerm = $('#search').val().toLowerCase();
+                
+                $('.product-item').each(function() {
+                    let productName = $(this).find('.product-name').text().toLowerCase();
+                    let productCategoryId = parseInt($(this).data('category-id'));
+                    
+                    let matchesSearch = productName.includes(searchTerm);
+                    let matchesCategory = (selectedCategoryId === 0 || productCategoryId === selectedCategoryId);
+                    
+                    if (matchesSearch && matchesCategory) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
                 });
+            }
+
+            // Search functionality
+            $('#search').on('input', filterProducts);
+
+            // Category Filter click
+            $('.filter-category').on('click', function() {
+                $('.filter-category').removeClass('btn-primary').addClass('btn-outline-dark');
+                $(this).removeClass('btn-outline-dark').addClass('btn-primary');
+                
+                selectedCategoryId = parseInt($(this).data('category'));
+                filterProducts();
             });
 
             $('#finalizarCompra').click(function () {
@@ -483,13 +505,8 @@
                     }
                 });
             });
-
-            // simulated categories filter click
-            $('#categoryFilters button').click(function() {
-                $('#categoryFilters button').removeClass('btn-primary').addClass('btn-outline-dark');
-                $(this).removeClass('btn-outline-dark').addClass('btn-primary');
-            });
         });
     </script>
 </body>
+
 </html>
