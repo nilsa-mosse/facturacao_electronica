@@ -2,6 +2,7 @@ package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ClienteRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.CarrinhoService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,9 @@ public class CarrinhoController {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
+    @Autowired
+    private ClienteRepository clienteRepository;
+
     @Autowired(required = false)
     private ao.co.hzconsultoria.efacturacao.service.FaturaService faturaService;
 
@@ -35,17 +40,30 @@ public class CarrinhoController {
     private VendaService vendaService;
 
     @GetMapping("/")
-    public String index(Model model) {
-        long start = System.currentTimeMillis();
-        Pageable pageable = PageRequest.of(0, 20); // primeira página, 20 itens
-        List<Produto> produtos = produtoRepository.findAll(pageable).getContent();
-        List<Categoria> categorias = categoriaRepository.findAll(pageable).getContent();
+    public String index(
+            @RequestParam(value = "categoriaId", required = false) Long categoriaId,
+            @RequestParam(value = "pesquisa", required = false) String pesquisa,
+            Model model
+    ) {
+        List<Produto> produtos;
+        if (pesquisa != null && !pesquisa.isEmpty()) {
+            produtos = produtoRepository.findAll().stream()
+                .filter(p -> p.getNome().toLowerCase().contains(pesquisa.toLowerCase()) || 
+                             (p.getCodigoBarra() != null && p.getCodigoBarra().contains(pesquisa)))
+                .collect(Collectors.toList());
+        } else if (categoriaId != null) {
+            produtos = produtoRepository.findAll().stream()
+                .filter(p -> p.getCategoria() != null && p.getCategoria().getId().equals(categoriaId))
+                .collect(Collectors.toList());
+        } else {
+            produtos = produtoRepository.findAll(PageRequest.of(0, 24)).getContent();
+        }
+
         model.addAttribute("produtos", produtos);
-        model.addAttribute("categorias", categorias);
+        model.addAttribute("categorias", categoriaRepository.findAll());
+        model.addAttribute("clientes", clienteRepository.findAll());
         model.addAttribute("carrinho", carrinho);
-        model.addAttribute("categoriaSelecionada", null); // Ensure variable is always present
-        long end = System.currentTimeMillis();
-        System.out.println("[PERF] Tempo de resposta do endpoint '/' = " + (end - start) + " ms");
+        model.addAttribute("categoriaSelecionada", categoriaId);
         return "index";
     }
 
@@ -64,7 +82,11 @@ public class CarrinhoController {
     }
 
     @PostMapping("/finalizarVenda")
-    public String finalizarVenda(Model model) {
+    public String finalizarVenda(RedirectAttributes redirectAttributes) {
+        if (carrinho.getItens().isEmpty()) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "O carrinho está vazio.");
+            return "redirect:/";
+        }
         // Convert Carrinho to Compra
         Compra compra = new Compra();
         compra.setCliente(carrinho.getCliente());
@@ -84,8 +106,9 @@ public class CarrinhoController {
         // Clear the cart after saving
         carrinho = new Carrinho();
 
+        redirectAttributes.addFlashAttribute("mensagemSucesso", "Venda finalizada com sucesso!");
         // Redirect to the home page
-        return "index";
+        return "redirect:/";
     }
 
     @GetMapping("/buscarProduto")
@@ -96,21 +119,29 @@ public class CarrinhoController {
         return "index";
     }
 
-    @GetMapping("/index")
-    public String index(@RequestParam(value = "categoriaSelecionada", required = false) String categoriaSelecionada, Model model) {
-        Pageable pageable = PageRequest.of(0, 20);
-        List<Produto> produtos = produtoRepository.findAll(pageable).getContent();
-        List<Categoria> categorias = categoriaRepository.findAll(pageable).getContent();
-        if (categoriaSelecionada != null && !categoriaSelecionada.isEmpty()) {
-            produtos = produtos.stream()
-                .filter(p -> p.getCategoria() != null && categoriaSelecionada.equals(p.getCategoria().getNome()))
-                .collect(Collectors.toList());
+    @PostMapping("/api/removerProduto")
+    @ResponseBody
+    public Carrinho removerProdutoApi(@RequestParam Long produtoId) {
+        Produto produto = produtoRepository.findById(produtoId).orElse(null);
+        if (produto != null) {
+            carrinhoService.removerProduto(carrinho, produto);
         }
-        model.addAttribute("produtos", produtos);
-        model.addAttribute("categorias", categorias);
-        model.addAttribute("categoriaSelecionada", categoriaSelecionada);
-        model.addAttribute("carrinho", carrinho);
-        return "index";
+        return carrinho;
+    }
+
+    @PostMapping("/api/definirCliente")
+    @ResponseBody
+    public Carrinho definirClienteApi(@RequestParam Long clienteId) {
+        Cliente cliente = clienteRepository.findById(clienteId).orElse(null);
+        carrinho.setCliente(cliente);
+        return carrinho;
+    }
+
+    @PostMapping("/api/limparCarrinho")
+    @ResponseBody
+    public Carrinho limparCarrinhoApi() {
+        carrinho = new Carrinho();
+        return carrinho;
     }
 
     @PostMapping("/api/adicionarProduto")

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper bg-light">
+            <div class="container-fluid px-4 py-4">
+                
+                <!-- Page Header -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="fw-800 text-dark"><i class="fas fa-truck-loading me-2 text-primary"></i> Guias de Remessa</h2>
+                        <p class="text-muted">Gestão de documentos de transporte e movimentação de mercadorias.</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a th:href="@{/guias/nova}" class="btn btn-primary shadow-sm px-4 py-2 rounded-pill">
+                            <i class="fas fa-plus me-2"></i> Emitir Nova Guia
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="premium-card grad-primary">
+                            <div class="info-box-icon"><i class="fas fa-file-contract"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total de Guias</span>
+                                <span class="info-box-number" th:text="${guias.size()}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="premium-card grad-success">
+                            <div class="info-box-icon"><i class="fas fa-route"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Guias Activas</span>
+                                <span class="info-box-number" th:text="${guias.stream().filter(g -> 'ATIVA'.equals(g.status)).count()}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="premium-card grad-info">
+                            <div class="info-box-icon"><i class="fas fa-shipping-fast"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Em Trânsito</span>
+                                <span class="info-box-number">A acompanhar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- List Content -->
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fs-16 fw-700 text-dark">Histórico de Movimentação</h5>
+                        <div class="input-group input-group-sm rounded-pill border overflow-hidden shadow-sm" style="width: 250px;">
+                            <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" class="form-control border-0" placeholder="Pesquisar guia...">
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light small fw-bold text-muted uppercase">
+                                    <tr>
+                                        <th class="ps-4">Nº da Guia</th>
+                                        <th>Data Emissão</th>
+                                        <th>Cliente</th>
+                                        <th>Origem - Destino</th>
+                                        <th>Viatura / Motorista</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center pe-4">Acções</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="guia : ${guias}">
+                                        <td class="ps-4">
+                                            <span class="fw-bold text-primary" th:text="${guia.numeroGuia}"></span>
+                                            <div th:if="${guia.faturaOrigem != null}" class="small">
+                                                <i class="fas fa-link text-muted me-1"></i>
+                                                <small class="text-muted" th:text="'Ref. Factura #' + ${guia.faturaOrigem.id}"></small>
+                                            </div>
+                                        </td>
+                                        <td th:text="${#temporals.format(guia.dataEmissao, 'dd/MM/yyyy HH:mm')}"></td>
+                                        <td>
+                                            <span class="fw-bold text-dark" th:text="${guia.cliente?.nome != null ? guia.cliente.nome : 'Empresa Própria'}"></span>
+                                        </td>
+                                        <td>
+                                            <div class="small d-flex align-items-center">
+                                                <span class="text-truncate" style="max-width: 120px;" th:text="${guia.localCarga}"></span>
+                                                <i class="fas fa-long-arrow-alt-right mx-2 text-primary"></i>
+                                                <span class="text-truncate" style="max-width: 120px;" th:text="${guia.localDescarga}"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-soft-info" th:text="${guia.matriculaViatura}"></span>
+                                            <div class="small text-muted" th:text="${guia.motorista}"></div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span th:if="${guia.status == 'ATIVA'}" class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-2">
+                                                <i class="fas fa-check-circle me-1"></i> Activa
+                                            </span>
+                                            <span th:if="${guia.status != 'ATIVA'}" class="badge bg-soft-danger text-danger border border-danger rounded-pill px-3 py-2">
+                                                <i class="fas fa-times-circle me-1"></i> Cancelada
+                                            </span>
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <div class="btn-group shadow-sm border rounded">
+                                                <a href="#" class="btn btn-white btn-sm border-0" title="Ver Detalhes">
+                                                    <i class="fas fa-eye text-info"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-white btn-sm border-0 border-start" title="Imprimir Guia">
+                                                    <i class="fas fa-print text-muted"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(guias)}">
+                                        <td colspan="7" class="text-center py-5 text-muted bg-white">
+                                            <div class="py-4">
+                                                <i class="fas fa-truck-moving mb-3 fs-40 opacity-20"></i>
+                                                <p class="mb-0">Ainda não foram emitidas guias de remessa.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Navigation -->
+                <div class="row mt-4">
+                    <div class="col-12 text-end">
+                        <a th:href="@{/dashboard}" class="btn btn-light shadow-sm border px-4 py-2">
+                            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Handling -->
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var msgSucesso = /*[[${mensagemSucesso}]]*/ null;
+            var msgErro = /*[[${mensagemErro}]]*/ null;
+            
+            if(msgSucesso) {
+                $(document).Toasts('create', {
+                    class: 'bg-success',
+                    title: 'Sucesso',
+                    autohide: true,
+                    delay: 5000,
+                    body: msgSucesso
+                });
+            }
+            if(msgErro) {
+                $(document).Toasts('create', {
+                    class: 'bg-danger',
+                    title: 'Erro',
+                    autohide: true,
+                    delay: 7000,
+                    body: msgErro
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper bg-light">
+            <div class="container-fluid px-4 py-4">
+                
+                <!-- Page Header -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-800 text-dark"><i class="fas fa-plus-circle me-2 text-primary"></i> Emitir Guia de Remessa</h2>
+                        <p class="text-muted">Preencha os dados do transporte e os itens a movimentar.</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/guias/salvar}" method="post" th:object="${guia}">
+                    <div class="row g-4">
+                        <!-- Coluna: Dados do Cliente e Transporte -->
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-700">Informação Geral</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Destinatário (Cliente)</label>
+                                        <select th:field="*{cliente}" class="form-select border-0 bg-light rounded-pill shadow-sm" required>
+                                            <option value="">Selecione um cliente...</option>
+                                            <option th:each="cli : ${clientes}" th:value="${cli.id}" th:text="${cli.nome} + ' (NIF: ' + ${cli.nif} + ')'"></option>
+                                        </select>
+                                    </div>
+                                    <hr class="my-4">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Local de Carga</label>
+                                        <input type="text" th:field="*{localCarga}" class="form-control border-0 bg-light rounded-pill shadow-sm" placeholder="Ex: Armazém Central" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Local de Descarga</label>
+                                        <input type="text" th:field="*{localDescarga}" class="form-control border-0 bg-light rounded-pill shadow-sm" placeholder="Ex: Loja do Cliente" required>
+                                    </div>
+                                    <div class="row g-2 mt-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-muted text-uppercase">Matrícula</label>
+                                            <input type="text" th:field="*{matriculaViatura}" class="form-control border-0 bg-light rounded-pill shadow-sm" placeholder="LD-00-00-XX" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-muted text-uppercase">Motorista</label>
+                                            <input type="text" th:field="*{motorista}" class="form-control border-0 bg-light rounded-pill shadow-sm" placeholder="Nome completo" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coluna: Itens da Guia -->
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 fw-700">Artigos a Transportar</h5>
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="adicionarLinha()">
+                                        <i class="fas fa-plus me-1"></i> Adicionar Artigo
+                                    </button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0" id="tabelaItens">
+                                            <thead class="bg-light small fw-bold text-muted uppercase">
+                                                <tr>
+                                                    <th class="ps-4">Artigo / Designação</th>
+                                                    <th width="120px">Qtd</th>
+                                                    <th width="120px">Unidade</th>
+                                                    <th class="text-end pe-4">Remover</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Linhas serão adicionadas via JS -->
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <input type="text" name="itens[0].nomeProduto" class="form-control form-control-sm border-0 bg-light rounded-pill" placeholder="Nome do produto" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" name="itens[0].quantidade" class="form-control form-control-sm border-0 bg-light rounded-pill text-center" value="1" min="1" step="any" required>
+                                                    </td>
+                                                    <td>
+                                                        <select name="itens[0].unidadeMedida" class="form-select form-select-sm border-0 bg-light rounded-pill">
+                                                            <option value="UN">Unidade</option>
+                                                            <option value="KG">Quilo</option>
+                                                            <option value="LT">Litro</option>
+                                                            <option value="CX">Caixa</option>
+                                                        </select>
+                                                    </td>
+                                                    <td class="text-end pe-4 text-danger">
+                                                        <i class="fas fa-minus-circle cursor-pointer" onclick="removerLinha(this)"></i>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Empty state dynamic -->
+                                    <div id="emptyItems" class="text-center py-5 text-muted" style="display: none;">
+                                        <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i>
+                                        <p>Nenhum artigo adicionado.</p>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-top py-4">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a th:href="@{/guias/listar}" class="btn btn-light px-4 py-2 border rounded-pill">Cancelar</a>
+                                        <button type="submit" class="btn btn-success px-5 py-2 shadow rounded-pill fw-bold">
+                                            <i class="fas fa-save me-2"></i> EMITIR GUIA
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Scripts -->
+    <script th:inline="javascript">
+        let contadorLinhas = 1;
+
+        function adicionarLinha() {
+            const tbody = document.querySelector('#tabelaItens tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="ps-4">
+                    <input type="text" name="itens[${contadorLinhas}].nomeProduto" class="form-control form-control-sm border-0 bg-light rounded-pill" placeholder="Nome do produto" required>
+                </td>
+                <td>
+                    <input type="number" name="itens[${contadorLinhas}].quantidade" class="form-control form-control-sm border-0 bg-light rounded-pill text-center" value="1" min="1" step="any" required>
+                </td>
+                <td>
+                    <select name="itens[${contadorLinhas}].unidadeMedida" class="form-select form-select-sm border-0 bg-light rounded-pill">
+                        <option value="UN">Unidade</option>
+                        <option value="KG">Quilo</option>
+                        <option value="LT">Litro</option>
+                        <option value="CX">Caixa</option>
+                    </select>
+                </td>
+                <td class="text-end pe-4 text-danger">
+                    <i class="fas fa-minus-circle cursor-pointer" onclick="removerLinha(this)"></i>
+                </td>
+            `;
+            tbody.appendChild(row);
+            contadorLinhas++;
+            actualizarEstadoVazio();
+        }
+
+        function removerLinha(icon) {
+            icon.closest('tr').remove();
+            actualizarEstadoVazio();
+        }
+
+        function actualizarEstadoVazio() {
+            const rows = document.querySelectorAll('#tabelaItens tbody tr');
+            const emptyDiv = document.getElementById('emptyItems');
+            const table = document.getElementById('tabelaItens');
+            if (rows.length === 0) {
+                emptyDiv.style.display = 'block';
+                table.style.display = 'none';
+            } else {
+                emptyDiv.style.display = 'none';
+                table.style.display = 'table';
+            }
+        }
+    </script>
+    <style>
+        .cursor-pointer { cursor: pointer; }
+        .bg-light { background-color: #f8f9fa !important; }
+        .fw-800 { font-weight: 800; }
+        .fw-700 { font-weight: 700; }
+    </style>
+</body>
+
+</html>

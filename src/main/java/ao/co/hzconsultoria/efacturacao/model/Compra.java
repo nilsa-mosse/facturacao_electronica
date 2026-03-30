@@ -21,6 +21,8 @@ public class Compra {
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<ItemCompra> itens;
 
+    private String status = "EMITIDA"; // EMITIDA, CANCELADA
+
     // Getters and Setters
     public Cliente getCliente() {
         return cliente;
@@ -59,5 +61,13 @@ public class Compra {
 
     public void setItens(List<ItemCompra> itens) {
         this.itens = itens;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

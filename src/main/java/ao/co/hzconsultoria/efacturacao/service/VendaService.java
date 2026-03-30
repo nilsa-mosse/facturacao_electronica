@@ -100,4 +100,12 @@ public class VendaService {
         }
         return compras;
     }
+
+    public boolean cancelarVenda(Long id) {
+        return compraRepository.findById(id).map(compra -> {
+            compra.setStatus("CANCELADA");
+            compraRepository.save(compra);
+            return true;
+        }).orElse(false);
+    }
 }

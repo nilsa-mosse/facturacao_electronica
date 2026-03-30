@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper bg-light">
+            <div class="container-fluid px-4 py-4">
+                
+                <!-- Page Header -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-800 text-dark"><i class="fas fa-file-invoice me-2 text-danger"></i> Emitir Nota de Crédito</h2>
+                        <p class="text-muted">Revise os itens da factura original e descreva o motivo da rectificação.</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/notas/salvar}" method="post" th:object="${nota}">
+                    <!-- Hidden field to link the original invoice -->
+                    <input type="hidden" th:field="*{faturaOriginal.id}">
+                    <input type="hidden" th:field="*{cliente.id}">
+
+                    <div class="row g-4">
+                        <!-- Coluna Direita: Dados da Nota -->
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-700">Resumo da Nota</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Factura Original</label>
+                                        <input type="text" class="form-control border-0 bg-light rounded-pill shadow-sm fw-bold text-primary" 
+                                               th:value="'# ' + ${nota.faturaOriginal.id}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Cliente</label>
+                                        <input type="text" class="form-control border-0 bg-light rounded-pill shadow-sm" 
+                                               th:value="${nota.cliente.nome} + ' (NIF: ' + ${nota.cliente.nif} + ')'" readonly>
+                                    </div>
+                                    <hr class="my-4">
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Motivo da Rectificação</label>
+                                        <select th:field="*{motivo}" class="form-select border-0 bg-light rounded shadow-sm" required>
+                                            <option value="">Selecione o motivo...</option>
+                                            <option value="Erro nos dados do destinatário">Erro nos dados do destinatário</option>
+                                            <option value="Erro no preço dos artigos">Erro no preço dos artigos</option>
+                                            <option value="Devolução parcial de mercadoria">Devolução parcial de mercadoria</option>
+                                            <option value="Anulação por mútuo acordo">Anulação por mútuo acordo</option>
+                                            <option value="Outros">Outros (especificar)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3 position-relative">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Total a Creditar</label>
+                                        <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                            <input type="number" th:field="*{totalCredito}" class="form-control border-0 bg-dark text-white fw-800 fs-18 py-3 ps-4" step="any" required>
+                                            <span class="input-group-text bg-dark border-0 text-white pe-4">Kz</span>
+                                        </div>
+                                        <small class="text-danger mt-1 d-block"><i class="fas fa-exclamation-triangle me-1"></i> O valor creditado não deve exceder o total da factura.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coluna Esquerda: Itens da Nota -->
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-700">Itens e Valores de Crédito</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="bg-light small fw-bold text-muted uppercase">
+                                                <tr>
+                                                    <th class="ps-4">Artigo</th>
+                                                    <th width="100px">Qtd</th>
+                                                    <th>Preço Un.</th>
+                                                    <th class="text-end pe-4">Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="item, stat : ${nota.itens}">
+                                                    <td class="ps-4">
+                                                        <input type="hidden" th:field="*{itens[__${stat.index}__].nomeProduto}">
+                                                        <span class="fw-bold text-dark" th:text="${item.nomeProduto}"></span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" th:field="*{itens[__${stat.index}__].quantidade}" 
+                                                               class="form-control form-control-sm border-0 bg-light rounded text-center" step="any" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" th:field="*{itens[__${stat.index}__].precoUnitario}" 
+                                                               class="form-control form-control-sm border-0 bg-light rounded text-center" step="any" required>
+                                                    </td>
+                                                    <td class="text-end pe-4">
+                                                        <span class="fw-bold" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-top py-4">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a th:href="@{/notas/selecionar-fatura}" class="btn btn-light px-4 py-2 border rounded-pill shadow-sm">Voltar</a>
+                                        <button type="submit" class="btn btn-danger px-5 py-2 shadow rounded-pill fw-bold">
+                                            <i class="fas fa-check-circle me-2"></i> FINALIZAR NOTA DE CRÉDITO
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

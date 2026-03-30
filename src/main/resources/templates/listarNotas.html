@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper bg-light">
+            <div class="container-fluid px-4 py-4">
+                
+                <!-- Page Header -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="fw-800 text-dark"><i class="fas fa-file-invoice me-2 text-danger"></i> Notas de Crédito / Débito</h2>
+                        <p class="text-muted">Rectificações de facturação e notas de devolução de mercadoria.</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a th:href="@{/notas/selecionar-fatura}" class="btn btn-danger shadow-sm px-4 py-2 rounded-pill">
+                            <i class="fas fa-plus-circle me-2"></i> Emitir Rectificação
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="premium-card grad-danger">
+                            <div class="info-box-icon"><i class="fas fa-undo-alt"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total de Notas</span>
+                                <span class="info-box-number" th:text="${notas.size()}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="premium-card grad-dark">
+                            <div class="info-box-icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Valor Total Creditado</span>
+                                <span class="info-box-number" th:text="${#numbers.formatDecimal(notas.stream().mapToDouble(n -> n.totalCredito).sum(), 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="premium-card grad-primary">
+                            <div class="info-box-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Status AGT</span>
+                                <span class="info-box-number">Sincronizado</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- List Content -->
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fs-16 fw-700 text-dark">Histórico de Rectificações</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light small fw-bold text-muted uppercase">
+                                    <tr>
+                                        <th class="ps-4">Nº da Nota</th>
+                                        <th>Data Emissão</th>
+                                        <th>Ref. Factura</th>
+                                        <th>Cliente / Empresa</th>
+                                        <th>Valor Creditado</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center pe-4">Acções</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="nota : ${notas}">
+                                        <td class="ps-4 fw-bold text-danger" th:text="${nota.numeroNota}"></td>
+                                        <td th:text="${#temporals.format(nota.dataEmissao, 'dd/MM/yyyy HH:mm')}"></td>
+                                        <td>
+                                            <span class="badge bg-soft-primary" th:text="'Factura #' + ${nota.faturaOriginal?.id}"></span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-dark" th:text="${nota.cliente?.nome != null ? nota.cliente.nome : 'Consumidor Final'}"></span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-800 text-danger" th:text="${#numbers.formatDecimal(nota.totalCredito, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-2">
+                                                <i class="fas fa-check-double me-1"></i> Validada
+                                            </span>
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <div class="btn-group shadow-sm border rounded">
+                                                <a href="#" class="btn btn-white btn-sm border-0" title="Ver Detalhes">
+                                                    <i class="fas fa-eye text-info"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-white btn-sm border-0 border-start" title="Imprimir PDF">
+                                                    <i class="fas fa-file-pdf text-danger"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(notas)}">
+                                        <td colspan="7" class="text-center py-5 text-muted bg-white">
+                                            <div class="py-4">
+                                                <i class="fas fa-file-invoice mb-3 fs-40 opacity-20 text-danger"></i>
+                                                <p class="mb-0">Não foram encontradas notas de crédito ou débito.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Navigation -->
+                <div class="row mt-4">
+                    <div class="col-12 text-end">
+                        <a th:href="@{/dashboard}" class="btn btn-light shadow-sm border px-4 py-2">
+                            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts Handling -->
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var msgSucesso = /*[[${mensagemSucesso}]]*/ null;
+            var msgErro = /*[[${mensagemErro}]]*/ null;
+            
+            if(msgSucesso) {
+                $(document).Toasts('create', {
+                    class: 'bg-success',
+                    title: 'Sucesso',
+                    autohide: true,
+                    delay: 5000,
+                    body: msgSucesso
+                });
+            }
+            if(msgErro) {
+                $(document).Toasts('create', {
+                    class: 'bg-danger',
+                    title: 'Erro',
+                    autohide: true,
+                    delay: 7000,
+                    body: msgErro
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

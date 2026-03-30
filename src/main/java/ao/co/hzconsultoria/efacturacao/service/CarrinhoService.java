@@ -34,7 +34,9 @@ public class CarrinhoService {
     }
 
     public void removerProduto(Carrinho carrinho, Produto produto) {
-        // Lógica para remover produto
+        if (produto != null && carrinho.getItens() != null) {
+            carrinho.getItens().removeIf(item -> item.getProduto().getId().equals(produto.getId()));
+        }
     }
 
     public double calcularTotal(Carrinho carrinho) {
