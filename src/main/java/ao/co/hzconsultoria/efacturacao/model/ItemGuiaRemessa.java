@@ -1,6 +1,7 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class ItemGuiaRemessa {
@@ -14,6 +15,7 @@ public class ItemGuiaRemessa {
     private String unidadeMedida;
 
     @ManyToOne
+    @JsonIgnore
     private GuiaRemessa guiaRemessa;
 
     // Getters and Setters

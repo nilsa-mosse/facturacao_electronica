@@ -34,6 +34,11 @@ public class GuiaRemessa {
     @ManyToOne
     private GuiaRemessa guiaReferencia; // Referência para a guia original em caso de substituição
 
+    private String trackingStatus = "EM_PROCESSAMENTO"; // EM_PROCESSAMENTO, EM_TRANSITO, ENTREGUE, RETORNADO
+
+    @OneToMany(mappedBy = "guiaRemessa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<EventoTracking> eventosTracking;
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -63,4 +68,10 @@ public class GuiaRemessa {
 
     public GuiaRemessa getGuiaReferencia() { return guiaReferencia; }
     public void setGuiaReferencia(GuiaRemessa guiaReferencia) { this.guiaReferencia = guiaReferencia; }
+
+    public String getTrackingStatus() { return trackingStatus; }
+    public void setTrackingStatus(String trackingStatus) { this.trackingStatus = trackingStatus; }
+
+    public java.util.List<EventoTracking> getEventosTracking() { return eventosTracking; }
+    public void setEventosTracking(java.util.List<EventoTracking> eventosTracking) { this.eventosTracking = eventosTracking; }
 }

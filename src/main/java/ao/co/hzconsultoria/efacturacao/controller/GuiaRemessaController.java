@@ -26,10 +26,12 @@ public class GuiaRemessaController {
     public String listarGuias(Model model) {
         java.util.List<GuiaRemessa> guias = guiaRemessaService.listarTodas();
         long activas = guias.stream().filter(g -> "ATIVA".equals(g.getStatus())).count();
+        long substituidas = guias.stream().filter(g -> "SUBSTITUIDA".equals(g.getStatus())).count();
         
         model.addAttribute("guias", guias);
         model.addAttribute("totalGuias", guias.size());
         model.addAttribute("guiasActivas", activas);
+        model.addAttribute("guiasSubstituidas", substituidas);
         return "listarGuias";
     }
 
@@ -123,8 +125,21 @@ public class GuiaRemessaController {
         }
         nova.setItens(novosItens);
         
-        model.addAttribute("guia", nova);
         model.addAttribute("clientes", clienteRepository.findAll());
         return "novaGuia";
+    }
+
+    @GetMapping("/tracking/{id}")
+    @ResponseBody
+    public GuiaRemessa obterTracking(@PathVariable Long id) {
+        return guiaRemessaService.buscarPorId(id);
+    }
+
+    @PostMapping("/tracking/adicionar")
+    public String adicionarTracking(@RequestParam Long id, @RequestParam String trackingStatus, 
+                                   @RequestParam String local, @RequestParam String obs, RedirectAttributes ra) {
+        guiaRemessaService.adicionarEventoTracking(id, trackingStatus, local, obs);
+        ra.addFlashAttribute("mensagemSucesso", "Evento de rastreio registado com sucesso!");
+        return "redirect:/guias/listar";
     }
 }

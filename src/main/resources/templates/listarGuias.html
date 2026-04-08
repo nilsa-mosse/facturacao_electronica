@@ -28,7 +28,7 @@
                 <!-- KPI Cards Row -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
-                        <div class="premium-card grad-primary">
+                        <div class="premium-card grad-primary" style="cursor: pointer;" id="cardTotal">
                             <div class="info-box-icon"><i class="fas fa-file-contract"></i></div>
                             <div class="info-box-content">
                                 <span class="info-box-text">Total de Guias</span>
@@ -37,7 +37,7 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="premium-card grad-success">
+                        <div class="premium-card grad-success" style="cursor: pointer;" id="cardActivas">
                             <div class="info-box-icon"><i class="fas fa-route"></i></div>
                             <div class="info-box-content">
                                 <span class="info-box-text">Guias Activas</span>
@@ -46,11 +46,30 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="premium-card grad-info">
-                            <div class="info-box-icon"><i class="fas fa-shipping-fast"></i></div>
+                        <div class="premium-card grad-warning" style="cursor: pointer;" id="cardSubstituidas">
+                            <div class="info-box-icon"><i class="fas fa-history"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Em Trânsito</span>
-                                <span class="info-box-number">A acompanhar</span>
+                                <span class="info-box-text">Guias Substituídas</span>
+                                <span class="info-box-number" th:text="${guiasSubstituidas}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Box: Utilidade -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert bg-white border-0 shadow-sm d-flex align-items-center p-3" style="border-radius: 12px; border-left: 4px solid #007bff !important;">
+                            <div class="me-4 text-primary">
+                                <i class="fas fa-info-circle fa-2x"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1 text-dark">Propósito das Guias Activas</h6>
+                                <div class="d-flex flex-wrap gap-3 small text-muted">
+                                    <span><i class="fas fa-shield-alt text-primary me-1"></i> Auditorias Fiscais</span>
+                                    <span><i class="fas fa-clipboard-check text-success me-1"></i> Controlo Interno</span>
+                                    <span><i class="fas fa-map-marker-alt text-info me-1"></i> Tracking de Mercadorias</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -79,8 +98,8 @@
                                         <th class="text-center pe-4">Acções</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr th:each="guia : ${guias}">
+                                <tbody id="tabelaGuiasBody">
+                                    <tr th:each="guia : ${guias}" class="guia-row" th:data-status="${guia.status}">
                                         <td class="ps-4">
                                             <div class="d-flex flex-column">
                                                 <span class="fw-bold text-primary" th:text="${guia.numeroGuia}"></span>
@@ -120,21 +139,21 @@
                                             </span>
                                          </td>
                                         <td class="text-center pe-4">
-                                            <div class="btn-group shadow-sm border rounded">
+                                            <div class="btn-group shadow-sm" style="border-radius: 8px; overflow: hidden; border: 1px solid #e9ecef;">
                                                 <a href="javascript:void(0)" th:onclick="'visualizarGuia(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0" title="Ver Detalhes">
-                                                    <i class="fas fa-eye text-info"></i>
+                                                    <i class="fas fa-eye text-primary"></i>
                                                 </a>
-                                                <a th:if="${guia.status == 'ATIVA'}" th:href="@{'/guias/converter/' + ${guia.id}}" class="btn btn-white btn-sm border-0 border-start" title="Converter em Factura">
-                                                    <i class="fas fa-file-invoice text-success"></i>
+                                                <a th:if="${guia.status == 'ATIVA'}" href="javascript:void(0)" th:onclick="'abrirTracking(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0 border-start" title="Rastrear Mercadoria">
+                                                    <i class="fas fa-map-marker-alt text-info"></i>
                                                 </a>
-                                                <a th:if="${guia.status == 'ATIVA'}" th:href="@{'/guias/rectificar/' + ${guia.id}}" class="btn btn-white btn-sm border-0 border-start" title="Rectificar / Substituir">
-                                                    <i class="fas fa-sync-alt text-warning"></i>
+                                                <a th:if="${guia.status == 'ATIVA'}" th:href="@{/guias/rectificar/{id}(id=${guia.id})}" class="btn btn-white btn-sm border-0 border-start" title="Rectificar Guia">
+                                                    <i class="fas fa-edit text-warning"></i>
+                                                </a>
+                                                <a th:if="${guia.status == 'ATIVA'}" th:href="@{/guias/converter/{id}(id=${guia.id})}" class="btn btn-white btn-sm border-0 border-start" title="Converter em Factura">
+                                                    <i class="fas fa-file-invoice-dollar text-success"></i>
                                                 </a>
                                                 <a th:if="${guia.status == 'ATIVA'}" href="javascript:void(0)" th:onclick="'abrirModalAnular(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0 border-start" title="Anular Guia">
                                                     <i class="fas fa-trash-alt text-danger"></i>
-                                                </a>
-                                                <a href="javascript:void(0)" th:onclick="'imprimirGuia(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0 border-start" title="Imprimir Guia">
-                                                    <i class="fas fa-print text-muted"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -205,6 +224,67 @@
         </div>
     </div>
 
+    <!-- Modal Tracking -->
+    <div class="modal fade" id="modalTracking" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow" style="border-radius: 15px;">
+                <div class="modal-header bg-light border-0 py-3">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fas fa-map-marker-alt text-info me-2"></i> Rastreio de Mercadoria: <span id="trackingNumGuia"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <!-- Coluna Histórico (Timeline) -->
+                        <div class="col-md-7 border-end">
+                            <h6 class="fw-bold mb-4">Histórico de Movimentação</h6>
+                            <div id="trackingTimeline" class="tracking-timeline">
+                                <!-- Timeline items via JS -->
+                            </div>
+                        </div>
+                        <!-- Coluna Novo Evento -->
+                        <div class="col-md-5 ps-4">
+                            <h6 class="fw-bold mb-3">Actualizar Estado</h6>
+                            <form th:action="@{/guias/tracking/adicionar}" method="POST">
+                                <input type="hidden" name="id" id="trackingGuiaId">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Novo Estado</label>
+                                    <select name="trackingStatus" class="form-select form-select-sm" required>
+                                        <option value="EM_TRANSITO">Em Trânsito</option>
+                                        <option value="ENTREGUE">Entregue</option>
+                                        <option value="RETORNADO">Retornado (Falha na Entrega)</option>
+                                        <option value="AGUARDANDO_CLIENTE">Aguardando no Cliente</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Localização Actual</label>
+                                    <input type="text" name="local" class="form-control form-control-sm" placeholder="ex: Luanda, Viana" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Observações</label>
+                                    <textarea name="obs" class="form-control form-control-sm" rows="3" placeholder="Detalhes adicionais..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm w-100 shadow-sm">
+                                    <i class="fas fa-save me-1"></i> Actualizar Tracking
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .tracking-timeline { position: relative; padding-left: 30px; }
+        .tracking-timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: #e9ecef; }
+        .timeline-item { position: relative; margin-bottom: 25px; }
+        .timeline-item::before { content: ''; position: absolute; left: -25px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #007bff; border: 2px solid #fff; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        .timeline-date { font-size: 0.75rem; color: #adb5bd; font-weight: bold; }
+        .timeline-status { font-size: 0.85rem; font-weight: bold; color: #495057; display: block; }
+        .timeline-local { font-size: 0.75rem; color: #007bff; font-weight: 600; }
+        .timeline-obs { font-size: 0.8rem; color: #6c757d; margin-top: 3px; font-style: italic; }
+    </style>
+
     <!-- Feedback Handling -->
     <script th:inline="javascript">
         $(document).ready(function() {
@@ -261,6 +341,66 @@
         function abrirModalAnular(id) {
             $('#anularGuiaId').val(id);
             $('#modalAnular').modal('show');
+        }
+
+        // Lógica de Filtragem por Cards
+        $(document).ready(function() {
+            $('#cardTotal').click(function() {
+                $('.guia-row').fadeIn();
+                destacarCard($(this));
+            });
+
+            $('#cardActivas').click(function() {
+                filtrarTabela('ATIVA');
+                destacarCard($(this));
+            });
+
+            $('#cardSubstituidas').click(function() {
+                filtrarTabela('SUBSTITUIDA');
+                destacarCard($(this));
+            });
+
+            function filtrarTabela(status) {
+                $('.guia-row').each(function() {
+                    const rowStatus = $(this).data('status');
+                    if (rowStatus === status) {
+                        $(this).fadeIn();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+
+            function destacarCard(card) {
+                $('.premium-card').css('opacity', '0.7').css('transform', 'scale(1)');
+                card.css('opacity', '1').css('transform', 'scale(1.05)');
+            }
+        });
+
+        function abrirTracking(id) {
+            $('#trackingGuiaId').val(id);
+            $.get('/guias/tracking/' + id, function(guia) {
+                $('#trackingNumGuia').text(guia.numeroGuia);
+                const timeline = $('#trackingTimeline');
+                timeline.empty();
+                
+                if (guia.eventosTracking && guia.eventosTracking.length > 0) {
+                    guia.eventosTracking.sort((a,b) => new Date(b.dataHora) - new Date(a.dataHora)).forEach(ev => {
+                        const data = new Date(ev.dataHora).toLocaleString();
+                        timeline.append(`
+                            <div class="timeline-item">
+                                <div class="timeline-date">${data}</div>
+                                <span class="timeline-status">${ev.status.replace(/_/g, ' ')}</span>
+                                <div class="timeline-local"><i class="fas fa-map-marker-alt me-1"></i>${ev.localizacao}</div>
+                                <div class="timeline-obs">${ev.observacao || ''}</div>
+                            </div>
+                        `);
+                    });
+                } else {
+                    timeline.append('<p class="text-muted small">Nenhum histórico disponível.</p>');
+                }
+                $('#modalTracking').modal('show');
+            });
         }
     </script>
 </body>

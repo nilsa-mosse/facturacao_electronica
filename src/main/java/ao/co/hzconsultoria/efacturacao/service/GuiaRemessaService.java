@@ -2,6 +2,7 @@ package ao.co.hzconsultoria.efacturacao.service;
 
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
+import ao.co.hzconsultoria.efacturacao.model.EventoTracking;
 import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa;
 import ao.co.hzconsultoria.efacturacao.model.ItemGuiaRemessa;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
@@ -110,6 +111,21 @@ public class GuiaRemessaService {
             } catch (Exception e) {
                 log.warn("Falha ao marcar guia original como substituída: {}", e.getMessage());
             }
+        }
+        
+        // Inicializar tracking se for nova
+        if (guia.getId() == null && (guia.getEventosTracking() == null || guia.getEventosTracking().isEmpty())) {
+            EventoTracking ev = new EventoTracking();
+            ev.setStatus("EM_PROCESSAMENTO");
+            ev.setDataHora(LocalDateTime.now());
+            ev.setLocalizacao(guia.getLocalCarga());
+            ev.setObservacao("Guia emitida e aguardando processamento.");
+            ev.setGuiaRemessa(guia);
+            
+            List<EventoTracking> eventos = new ArrayList<>();
+            eventos.add(ev);
+            guia.setEventosTracking(eventos);
+            guia.setTrackingStatus("EM_PROCESSAMENTO");
         }
         
         guiaRemessaRepository.save(guia);
@@ -293,5 +309,24 @@ public class GuiaRemessaService {
     @Transactional
     public void eliminarTodas() {
         guiaRemessaRepository.deleteAll();
+    }
+
+    @Transactional
+    public void adicionarEventoTracking(Long guiaId, String status, String local, String obs) {
+        GuiaRemessa guia = buscarPorId(guiaId);
+        if (guia == null) return;
+
+        EventoTracking ev = new EventoTracking();
+        ev.setStatus(status);
+        ev.setDataHora(LocalDateTime.now());
+        ev.setLocalizacao(local);
+        ev.setObservacao(obs);
+        ev.setGuiaRemessa(guia);
+
+        if (guia.getEventosTracking() == null) guia.setEventosTracking(new ArrayList<>());
+        guia.getEventosTracking().add(ev);
+        guia.setTrackingStatus(status);
+        
+        guiaRemessaRepository.save(guia);
     }
 }
