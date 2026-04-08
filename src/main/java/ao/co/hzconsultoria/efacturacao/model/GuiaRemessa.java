@@ -39,6 +39,14 @@ public class GuiaRemessa {
     @OneToMany(mappedBy = "guiaRemessa", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<EventoTracking> eventosTracking;
 
+    @Column(length = 255)
+    private String hashAgt;
+
+    @Column(length = 100)
+    private String codigoValidacao;
+
+    private LocalDateTime dataValidacaoAgt;
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -74,4 +82,13 @@ public class GuiaRemessa {
 
     public java.util.List<EventoTracking> getEventosTracking() { return eventosTracking; }
     public void setEventosTracking(java.util.List<EventoTracking> eventosTracking) { this.eventosTracking = eventosTracking; }
+
+    public String getHashAgt() { return hashAgt; }
+    public void setHashAgt(String hashAgt) { this.hashAgt = hashAgt; }
+
+    public String getCodigoValidacao() { return codigoValidacao; }
+    public void setCodigoValidacao(String codigoValidacao) { this.codigoValidacao = codigoValidacao; }
+
+    public LocalDateTime getDataValidacaoAgt() { return dataValidacaoAgt; }
+    public void setDataValidacaoAgt(LocalDateTime dataValidacaoAgt) { this.dataValidacaoAgt = dataValidacaoAgt; }
 }

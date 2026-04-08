@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Movimentações de Inventário - eFacturacao</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-soft: rgba(67, 97, 238, 0.08);
+            --success: #2ec4b6;
+            --warning: #ffb703;
+            --danger: #ef233c;
+            --dark: #1a1c23;
+            --bg: #ffffff;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+        
+        body { 
+            background: var(--bg); 
+            font-family: 'Outfit', sans-serif; 
+            color: var(--dark);
+            padding: 30px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+
+        /* KPI Cards Premium */
+        .kpi-card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
+            z-index: -1;
+        }
+        .kpi-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+        }
+        .kpi-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        .kpi-card:hover .kpi-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        /* Grid System for History */
+        .premium-table-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: #fcfcfc;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 20px 25px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table tbody td {
+            padding: 20px 25px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f8fafc;
+        }
+
+        /* Badges Vivas */
+        .type-badge {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .badge-ENTRA { background: #22c55e; color: white; }
+        .badge-SAIDA { background: #ef4444; color: white; }
+        .badge-AJUSTE { background: #f59e0b; color: white; }
+
+        .product-circle {
+            width: 44px;
+            height: 44px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Nav Tabs for Filtering */
+        .filter-tabs {
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 16px;
+            display: inline-flex;
+            gap: 5px;
+            margin-bottom: 25px;
+        }
+        .filter-tab {
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        .filter-tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .search-input {
+            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+            padding: 12px 20px;
+            width: 320px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+
+        .btn-plus {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 14px;
+            padding: 14px 28px;
+            font-weight: 800;
+            border: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+        }
+        .btn-plus:hover { transform: scale(1.03); box-shadow: 0 15px 30px rgba(79, 70, 229, 0.3); color: white; }
+
+        .doc-link {
+            color: var(--primary);
+            background: var(--primary-soft);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="dashboard-header d-flex justify-content-between align-items-end">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item small"><a href="#" class="text-decoration-none text-muted fw-bold">INVENTÁRIO</a></li>
+                        <li class="breadcrumb-item small active fw-bold">CONTROLO DE FLUXO</li>
+                    </ol>
+                </nav>
+                <h1 class="fw-900 mb-0" style="letter-spacing: -1.5px; font-size: 2.8rem; color: #0f172a;">Rastreio de Stock</h1>
+                <p class="text-muted fw-500 fs-5">Monitorização em tempo real de ativos e logística.</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a th:href="@{/stock/entrada}" class="btn-plus"><i class="fas fa-plus-circle me-2"></i> REGISTAR ENTRADA</a>
+            </div>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">
+                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Fluxo Total</small>
+                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos)}">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
+                        <i class="fas fa-plus-square"></i>
+                    </div>
+                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Entradas Stock</small>
+                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos.?[tipo == 'ENTRA'])}">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);">
+                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
+                        <i class="fas fa-minus-square"></i>
+                    </div>
+                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Saídas Ativos</small>
+                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos.?[tipo == 'SAIDA'])}">0</h2>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Ajustes Feitos</small>
+                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos.?[tipo == 'AJUSTE'])}">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="filter-tabs">
+                <a href="#" class="filter-tab active" onclick="filtrarTabela('todos', this)">Todos</a>
+                <a href="#" class="filter-tab" onclick="filtrarTabela('ENTRA', this)">Entradas</a>
+                <a href="#" class="filter-tab" onclick="filtrarTabela('SAIDA', this)">Saídas</a>
+                <a href="#" class="filter-tab" onclick="filtrarTabela('AJUSTE', this)">Ajustes</a>
+            </div>
+            <div class="position-relative">
+                <i class="fas fa-search position-absolute" style="top: 14px; left: 15px; color: #94a3b8;"></i>
+                <input type="text" class="search-input ps-5" placeholder="Procurar produto ou DOC..." onkeyup="pesquisar(this)">
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="premium-table-card">
+            <table class="table mb-0" id="tabelaEstoque">
+                <thead>
+                    <tr>
+                        <th>Data & Hora</th>
+                        <th>Artigo / Produto</th>
+                        <th>Tipo</th>
+                        <th>Quantidade</th>
+                        <th>Origem / Referência</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="mov : ${movimentos}" th:data-tipo="${mov.tipo}">
+                        <td class="small fw-600 text-muted" th:text="${#temporals.format(mov.dataMovimento, 'dd MMM yyyy HH:mm')}"></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="product-circle"><i class="fas fa-box"></i></div>
+                                <div>
+                                    <div class="fw-800" th:text="${mov.produto.nome}"></div>
+                                    <div class="small text-muted" th:text="'ID: ' + ${mov.produto.id}"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:class="'type-badge badge-' + ${mov.tipo}" th:text="${mov.tipo}"></span>
+                        </td>
+                        <td class="fw-800" th:text="${mov.quantidade}"></td>
+                        <td>
+                            <div th:if="${mov.origem != null}" class="small mb-1"><i class="fas fa-truck me-1 opacity-50"></i> <span th:text="${mov.origem}"></span></div>
+                            <div th:if="${mov.documentoReferencia != null}">
+                                <span class="doc-link"><i class="fas fa-file-alt me-1"></i> <span th:text="${mov.documentoReferencia}"></span></span>
+                            </div>
+                        </td>
+                        <td class="small text-muted" style="max-width: 200px;" th:text="${mov.motivo}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(movimentos)}">
+                        <td colspan="6" class="text-center py-5">
+                            <img src="https://cdni.iconscout.com/illustration/premium/thumb/empty-state-2130362-1800926.png" style="width: 150px; opacity: 0.5;">
+                            <p class="mt-3 text-muted fw-bold">Nenhum movimento encontrado.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function filtrarTabela(tipo, element) {
+            // Update tabs
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+
+            // Filter rows
+            const rows = document.querySelectorAll('#tabelaEstoque tbody tr');
+            rows.forEach(row => {
+                if (tipo === 'todos') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = row.getAttribute('data-tipo') === tipo ? '' : 'none';
+                }
+            });
+        }
+
+        function pesquisar(input) {
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaEstoque tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

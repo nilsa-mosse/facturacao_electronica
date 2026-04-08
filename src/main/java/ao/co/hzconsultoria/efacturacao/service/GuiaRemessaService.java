@@ -12,6 +12,8 @@ import ao.co.hzconsultoria.efacturacao.repository.GuiaRemessaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 
 import com.lowagie.text.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfPCell;
@@ -128,8 +130,41 @@ public class GuiaRemessaService {
             guia.setTrackingStatus("EM_PROCESSAMENTO");
         }
         
+        // Comunicar à AGT
+        comunicarAGT(guia);
+        
         guiaRemessaRepository.save(guia);
         gerarPdfGuia(guia);
+    }
+
+    private void comunicarAGT(GuiaRemessa guia) {
+        // Gerar Hash de Assinatura
+        String input = (guia.getNumeroGuia() != null ? guia.getNumeroGuia() : "") + 
+                       (guia.getDataEmissao() != null ? guia.getDataEmissao().toString() : "") + 
+                       (guia.getCliente() != null ? guia.getCliente().getNif() : "");
+        
+        String hash = gerarHash(input);
+        guia.setHashAgt(hash);
+        
+        // Simular Código de Validação da AGT
+        String codigoValidacao = "AGT-GR-" + System.currentTimeMillis();
+        guia.setCodigoValidacao(codigoValidacao);
+        guia.setDataValidacaoAgt(LocalDateTime.now());
+        
+        log.info("Guia {} comunicada à AGT. Código: {}", guia.getNumeroGuia(), codigoValidacao);
+    }
+
+    private String gerarHash(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = md.digest(input.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashBytes) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Erro ao gerar hash AGT", e);
+            return "HASH_ERROR_" + System.currentTimeMillis();
+        }
     }
 
     private void gerarPdfGuia(GuiaRemessa guia) {
@@ -161,6 +196,8 @@ public class GuiaRemessaService {
         Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
         Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
         Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, new java.awt.Color(73, 80, 87));
+        Font small = FontFactory.getFont(FontFactory.HELVETICA, 7);
+        Font smallBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8);
         Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
 
         // Header
@@ -211,6 +248,17 @@ public class GuiaRemessaService {
         String dataDoc = guia.getDataEmissao() != null ? guia.getDataEmissao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-";
         cellMeta.addElement(new Paragraph("Nº DOCUMENTO: " + numeroDoc, bold));
         cellMeta.addElement(new Paragraph("DATA: " + dataDoc, normal));
+        
+        if (guia.getCodigoValidacao() != null) {
+            Paragraph agtCode = new Paragraph("CÓD. AGT: " + guia.getCodigoValidacao(), smallBold);
+            agtCode.setSpacingBefore(5);
+            cellMeta.addElement(agtCode);
+            
+            String miniHash = guia.getHashAgt() != null && guia.getHashAgt().length() > 10 ? 
+                              guia.getHashAgt().substring(0, 4) + "..." + guia.getHashAgt().substring(guia.getHashAgt().length() - 4) : "-";
+            cellMeta.addElement(new Paragraph("HASH: " + miniHash, small));
+        }
+        
         infoTable.addCell(cellMeta);
         doc.add(infoTable);
         doc.add(new Paragraph(" "));
@@ -263,6 +311,7 @@ public class GuiaRemessaService {
     public Compra converterParaFactura(Long guiaId) {
         GuiaRemessa guia = buscarPorId(guiaId);
         if (!"ATIVA".equals(guia.getStatus())) throw new RuntimeException("Apenas guias ATIVAS podem ser convertidas.");
+        if (guia.getFaturaOrigem() != null) throw new RuntimeException("Esta guia já possui uma factura vinculada.");
 
         Compra compra = new Compra();
         compra.setCliente(guia.getCliente());

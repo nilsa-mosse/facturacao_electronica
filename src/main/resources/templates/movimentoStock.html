@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titulo} + ' - eFacturacao'">Movimento de Stock</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --success: #2ec4b6;
+            --warning: #ffb703;
+            --danger: #ef233c;
+            --dark: #1a1c23;
+            --bg: #ffffff;
+            --glass: rgba(255, 255, 255, 0.8);
+        }
+        
+        body { 
+            background: var(--bg); 
+            font-family: 'Outfit', sans-serif; 
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            padding: 40px 0;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Dynamic Theme Colors */
+        .theme-ENTRA { --current: #4361ee; --current-soft: rgba(67, 97, 238, 0.1); }
+        .theme-SAIDA { --current: #ef233c; --current-soft: rgba(239, 35, 60, 0.1); }
+        .theme-AJUSTE { --current: #ffb703; --current-soft: rgba(255, 183, 3, 0.1); }
+
+        .glass-card {
+            background: white;
+            border-radius: 24px;
+            border: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.04);
+            overflow: hidden;
+            display: flex;
+        }
+
+        .side-info {
+            width: 350px;
+            background: linear-gradient(135deg, var(--current) 0%, #1a1c23 150%);
+            padding: 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .form-content {
+            flex: 1;
+            padding: 50px;
+        }
+
+        .step-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #4a5568;
+        }
+
+        .input-premium {
+            border-radius: 12px;
+            border: 2px solid #edf2f7;
+            padding: 12px 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #f8fafc;
+        }
+
+        .input-premium:focus {
+            border-color: var(--current);
+            background: white;
+            box-shadow: 0 0 0 4px var(--current-soft);
+            outline: none;
+        }
+
+        /* Modern Dropzone for Files */
+        .file-dropzone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+            position: relative;
+        }
+
+        .file-dropzone:hover {
+            border-color: var(--current);
+            background: var(--current-soft);
+        }
+
+        .file-dropzone input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            background: var(--current);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--current-soft);
+            color: white;
+            filter: brightness(1.1);
+        }
+
+        .product-meta {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--current);
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 992px) {
+            .glass-card { flex-direction: column; }
+            .side-info { width: 100%; padding: 30px; }
+        }
+    </style>
+</head>
+<body th:class="'theme-' + ${tipo}">
+    <div class="main-wrapper">
+        <div class="glass-card">
+            <!-- Side Informative Panel -->
+            <div class="side-info">
+                <div>
+                    <span class="step-badge">Gestão de Inventário</span>
+                    <div class="icon-box mt-4">
+                        <i th:class="${tipo == 'ENTRA' ? 'fas fa-arrow-down-left' : (tipo == 'SAIDA' ? 'fas fa-arrow-up-right' : 'fas fa-sliders-h')}"></i>
+                    </div>
+                    <h1 class="fw-800" th:text="${titulo}">Movimento</h1>
+                    <p class="opacity-75">Registe com precisão a alteração física de stock para manter a sua empresa auditável e eficiente.</p>
+                    
+                    <div class="product-meta" id="stockPreview" style="display: none;">
+                        <small class="text-uppercase fw-bold opacity-75 d-block mb-3">Impacto no Inventário</small>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Stock Atual:</span>
+                            <span class="fw-800" id="currentStock">0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center p-2 rounded-3" style="background: rgba(255,255,255,0.15);">
+                            <span class="small">Após Operação:</span>
+                            <span class="fw-900 fs-5" id="futureStock">0.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-auto">
+                    <div class="d-flex align-items-center gap-2 opacity-75">
+                        <i class="fas fa-shield-alt"></i>
+                        <small>Ambiente Seguro & Auditado</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Area -->
+            <div class="form-content">
+                <form th:action="@{/stock/movimentar}" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="tipo" th:value="${tipo}">
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Qual o produto a movimentar?</label>
+                        <select name="produtoId" class="form-select input-premium" required onchange="updatePreview(this)">
+                            <option value="" disabled selected>Seleccione um artigo...</option>
+                            <option th:each="prod : ${produtos}" 
+                                    th:value="${prod.id}" 
+                                    th:data-stock="${prod.quantidadeEstoque}"
+                                    th:text="${prod.nome}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-12" th:if="${tipo == 'ENTRA' or tipo == 'SAIDA'}">
+                        <label class="form-label" th:text="${tipo == 'ENTRA' ? 'Origem (Fornecedor)' : 'Destino (Cliente/Motivo)'}">Origem/Destino</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-0 pe-0"><i th:class="${tipo == 'ENTRA' ? 'fas fa-truck' : 'fas fa-shipping-fast'} + ' text-muted'"></i></span>
+                            <input type="text" name="origem" class="form-control input-premium border-0" th:placeholder="${tipo == 'ENTRA' ? 'Nome do fornecedor' : 'Nome do destino ou cliente'}">
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div th:classappend="${tipo == 'ENTRA' ? 'col-md-4' : 'col-md-6'}" class="col-md-6">
+                            <label class="form-label">Quantidade</label>
+                            <input type="number" name="quantidade" id="qtyInput" class="form-control input-premium" step="any" min="0.01" placeholder="0.00" required oninput="calcTotal()">
+                        </div>
+                        <div class="col-md-4" th:if="${tipo == 'ENTRA'}">
+                            <label class="form-label">Preço Unitário (Custo)</label>
+                            <input type="number" name="precoCusto" id="priceInput" class="form-control input-premium" step="any" min="0" placeholder="0.00" oninput="calcTotal()">
+                        </div>
+                        <div th:classappend="${tipo == 'ENTRA' ? 'col-md-4' : 'col-md-6'}" class="col-md-6">
+                            <label class="form-label" th:text="${tipo == 'ENTRA' ? 'Nº Documento' : 'Referência'}">Referência</label>
+                            <input type="text" name="referencia" class="form-control input-premium" placeholder="ex: doc-123">
+                        </div>
+                    </div>
+
+                    <!-- Valor Total Real-time (Apenas Entradas) -->
+                    <div th:if="${tipo == 'ENTRA'}" class="mb-4 p-3 rounded-4 d-flex justify-content-between align-items-center" style="background: rgba(67, 97, 238, 0.05); border: 1px solid rgba(67, 97, 238, 0.1);">
+                        <div>
+                            <span class="d-block small text-muted text-uppercase fw-bold">Investimento Total</span>
+                            <h4 class="mb-0 fw-800 text-primary" id="totalPreview">0,00 Kz</h4>
+                        </div>
+                        <i class="fas fa-calculator text-primary opacity-25 fa-2x"></i>
+                    </div>
+
+                    <div class="col-md-12" th:if="${tipo == 'ENTRA' or tipo == 'SAIDA'}">
+                        <label class="form-label" th:text="${tipo == 'ENTRA' ? 'Comprovativo / Factura' : 'Documento de Saída / Guia'}">Documento</label>
+                        <div class="file-dropzone" id="dropzone">
+                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-muted"></i>
+                            <p class="mb-0 fw-600">Arraste ou clique para anexar</p>
+                            <small class="text-muted">Formatos aceites: PDF, JPG, PNG</small>
+                            <input type="file" name="documento" id="fileInput" accept=".pdf,.jpg,.png" onchange="updateFileName(this)">
+                        </div>
+                        <div id="fileSelected" class="mt-2 text-success small fw-bold" style="display: none;">
+                            <i class="fas fa-check-circle me-1"></i> Ficheiro seleccionado: <span id="fileName"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Motivo ou Observações</label>
+                        <textarea name="motivo" class="form-control input-premium" rows="3" placeholder="Ex: Entrada por reposição de inventário..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-submit shadow">
+                        Confirmar Operação <i class="fas fa-arrow-right ms-2 mt-1"></i>
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <a th:href="@{/stock/historico}" class="text-muted small text-decoration-none hover-link">
+                           <i class="fas fa-times me-1"></i> Cancelar e Voltar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function updatePreview(select) {
+            const stock = select.options[select.selectedIndex].getAttribute('data-stock');
+            const preview = document.getElementById('stockPreview');
+            const currentStock = document.getElementById('currentStock');
+            
+            if (stock !== null) {
+                currentStock.textContent = parseFloat(stock).toFixed(2);
+                preview.style.display = 'block';
+                calcTotal(); // Update future stock immediately
+            }
+        }
+
+        function calcTotal() {
+            const qty = parseFloat(document.getElementById('qtyInput').value) || 0;
+            const price = document.getElementById('priceInput') ? parseFloat(document.getElementById('priceInput').value) || 0 : 0;
+            const current = parseFloat(document.getElementById('currentStock').textContent) || 0;
+            const tipo = /*[[${tipo}]]*/ 'ENTRA';
+            
+            // Financial Total
+            const total = qty * price;
+            const totalPreview = document.getElementById('totalPreview');
+            if (totalPreview) {
+                totalPreview.textContent = total.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' }).replace('Kz', '') + ' Kz';
+            }
+
+            // Inventory Future Preview
+            const futureStockElem = document.getElementById('futureStock');
+            if (futureStockElem) {
+                let future = current;
+                if (tipo === 'ENTRA') future = current + qty;
+                else if (tipo === 'SAIDA') future = current - qty;
+                else if (tipo === 'AJUSTE') future = qty;
+                
+                futureStockElem.textContent = future.toFixed(2);
+                
+                // Visual feedback if negative
+                if (future < 0) futureStockElem.classList.add('text-danger');
+                else futureStockElem.classList.remove('text-danger');
+            }
+        }
+    </script>
+</body>
+</html>

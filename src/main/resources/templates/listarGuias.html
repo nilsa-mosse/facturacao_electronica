@@ -149,7 +149,7 @@
                                                 <a th:if="${guia.status == 'ATIVA'}" th:href="@{/guias/rectificar/{id}(id=${guia.id})}" class="btn btn-white btn-sm border-0 border-start" title="Rectificar Guia">
                                                     <i class="fas fa-edit text-warning"></i>
                                                 </a>
-                                                <a th:if="${guia.status == 'ATIVA'}" th:href="@{/guias/converter/{id}(id=${guia.id})}" class="btn btn-white btn-sm border-0 border-start" title="Converter em Factura">
+                                                <a th:if="${guia.status == 'ATIVA' and guia.faturaOrigem == null}" th:href="@{/guias/converter/{id}(id=${guia.id})}" class="btn btn-white btn-sm border-0 border-start" title="Converter em Factura">
                                                     <i class="fas fa-file-invoice-dollar text-success"></i>
                                                 </a>
                                                 <a th:if="${guia.status == 'ATIVA'}" href="javascript:void(0)" th:onclick="'abrirModalAnular(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0 border-start" title="Anular Guia">

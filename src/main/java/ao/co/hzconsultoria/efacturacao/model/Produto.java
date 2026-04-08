@@ -12,7 +12,7 @@ public class Produto {
     private String nome;
     private String descricao;
     private double preco;
-    private int quantidadeEstoque;
+    private Double quantidadeEstoque;
     private String imagem;
     private String codigoBarra;
     @Lob
@@ -56,11 +56,11 @@ public class Produto {
         this.preco = preco;
     }
 
-    public int getQuantidadeEstoque() {
+    public Double getQuantidadeEstoque() {
         return quantidadeEstoque;
     }
 
-    public void setQuantidadeEstoque(int quantidadeEstoque) {
+    public void setQuantidadeEstoque(Double quantidadeEstoque) {
         this.quantidadeEstoque = quantidadeEstoque;
     }
 

@@ -125,6 +125,7 @@ public class GuiaRemessaController {
         }
         nova.setItens(novosItens);
         
+        model.addAttribute("guia", nova);
         model.addAttribute("clientes", clienteRepository.findAll());
         return "novaGuia";
     }
