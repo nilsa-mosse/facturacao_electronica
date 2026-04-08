@@ -43,12 +43,17 @@ public class VendaService {
     }
 
     public Compra finalizarVenda(Compra compra) {
+        return finalizarVenda(compra, "FT"); // Default to Factura
+    }
+
+    public Compra finalizarVenda(Compra compra, String tipoDocumento) {
         if (compra == null) {
             throw new IllegalArgumentException("Compra cannot be null");
         }
         if (compra.getItens() == null || compra.getItens().isEmpty()) {
             throw new IllegalArgumentException("Compra must have at least one item");
         }
+        compra.setTipoDocumento(tipoDocumento);
         compra.setDataCompra(LocalDateTime.now());
         double totalSemImposto = 0;
         double valorIva = 0;
@@ -104,6 +109,14 @@ public class VendaService {
     public boolean cancelarVenda(Long id) {
         return compraRepository.findById(id).map(compra -> {
             compra.setStatus("CANCELADA");
+            compraRepository.save(compra);
+            return true;
+        }).orElse(false);
+    }
+
+    public boolean restaurarVenda(Long id) {
+        return compraRepository.findById(id).map(compra -> {
+            compra.setStatus("EMITIDA");
             compraRepository.save(compra);
             return true;
         }).orElse(false);

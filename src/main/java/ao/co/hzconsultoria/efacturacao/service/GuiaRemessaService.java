@@ -1,16 +1,33 @@
 package ao.co.hzconsultoria.efacturacao.service;
 
 import ao.co.hzconsultoria.efacturacao.model.Compra;
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa;
 import ao.co.hzconsultoria.efacturacao.model.ItemGuiaRemessa;
+import ao.co.hzconsultoria.efacturacao.model.Produto;
 import ao.co.hzconsultoria.efacturacao.repository.CompraRepository;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.GuiaRemessaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
+
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +38,17 @@ public class GuiaRemessaService {
 
     @Autowired
     private CompraRepository compraRepository;
+
+    @Autowired
+    private EmpresaRepository empresaRepository;
+
+    @Autowired
+    private VendaService vendaService;
+
+    @Autowired
+    private ProdutoRepository produtoRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(GuiaRemessaService.class);
 
     @Transactional
     public GuiaRemessa gerarGuiaAPartirDeFatura(Long facturaId) {
@@ -62,8 +90,208 @@ public class GuiaRemessaService {
         // Garantir vínculo bidireccional dos itens
         if (guia.getItens() != null) {
             guia.getItens().forEach(i -> i.setGuiaRemessa(guia));
+        } else {
+            guia.setItens(new ArrayList<>());
+        }
+
+        // Limpar referência se o ID for nulo ou inválido (evita TransientPropertyValueException)
+        if (guia.getGuiaReferencia() != null && (guia.getGuiaReferencia().getId() == null || guia.getGuiaReferencia().getId() <= 0)) {
+            guia.setGuiaReferencia(null);
+        }
+
+        // Se for uma retificação, marcar a guia anterior como SUBSTITUIDA
+        if (guia.getGuiaReferencia() != null && guia.getGuiaReferencia().getId() != null && guia.getGuiaReferencia().getId() > 0) {
+            try {
+                GuiaRemessa original = buscarPorId(guia.getGuiaReferencia().getId());
+                if (original != null) {
+                    original.setStatus("SUBSTITUIDA");
+                    guiaRemessaRepository.save(original);
+                }
+            } catch (Exception e) {
+                log.warn("Falha ao marcar guia original como substituída: {}", e.getMessage());
+            }
         }
         
         guiaRemessaRepository.save(guia);
+        gerarPdfGuia(guia);
+    }
+
+    private void gerarPdfGuia(GuiaRemessa guia) {
+        try {
+            File dir1 = new File("src/main/resources/static/guias");
+            if (!dir1.exists()) dir1.mkdirs();
+            String filePath1 = "src/main/resources/static/guias/" + guia.getNumeroGuia() + ".pdf";
+
+            File dir2 = new File("target/classes/static/guias");
+            if (!dir2.exists()) dir2.mkdirs();
+            String filePath2 = "target/classes/static/guias/" + guia.getNumeroGuia() + ".pdf";
+
+            gerarPdf(filePath1, guia);
+            gerarPdf(filePath2, guia);
+        } catch (Exception e) {
+            log.error("Erro crítico ao gerar PDF da Guia {}: ", guia.getNumeroGuia(), e);
+        }
+    }
+
+    private void gerarPdf(String filePath, GuiaRemessa guia) throws Exception {
+        Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
+        PdfWriter.getInstance(doc, new FileOutputStream(filePath));
+        doc.open();
+
+        List<Empresa> empresas = empresaRepository.findAll();
+        Empresa configEmpresa = empresas.isEmpty() ? new Empresa() : empresas.get(0);
+
+        java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
+        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
+        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+        Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, new java.awt.Color(73, 80, 87));
+        Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+
+        // Header
+        PdfPTable mainHeader = new PdfPTable(2);
+        mainHeader.setWidthPercentage(100);
+        mainHeader.setWidths(new float[] { 6, 4 });
+
+        PdfPCell titleCell = new PdfPCell(new Phrase("GUIA DE REMESSA", fontTitle));
+        titleCell.setBorder(0);
+        titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        mainHeader.addCell(titleCell);
+
+        PdfPCell logoCell = new PdfPCell();
+        try {
+            if (configEmpresa.getLogotipo() != null) {
+                Image logo = Image.getInstance(configEmpresa.getLogotipo());
+                logo.scaleToFit(150, 150);
+                logoCell = new PdfPCell(logo);
+            } else {
+                logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+            }
+        } catch (Exception e) {
+            logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+        }
+        logoCell.setBorder(0);
+        logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        mainHeader.addCell(logoCell);
+        doc.add(mainHeader);
+        doc.add(new Paragraph(" "));
+
+        // Info Sections
+        PdfPTable infoTable = new PdfPTable(2);
+        infoTable.setWidthPercentage(100);
+
+        // From (Company)
+        PdfPCell cellDe = new PdfPCell();
+        cellDe.setBorder(0);
+        cellDe.addElement(new Paragraph(configEmpresa.getNome(), bold));
+        cellDe.addElement(new Paragraph(configEmpresa.getEndereco(), normal));
+        cellDe.addElement(new Paragraph("NIF: " + configEmpresa.getNif(), normal));
+        infoTable.addCell(cellDe);
+
+        // Meta (Doc info)
+        PdfPCell cellMeta = new PdfPCell();
+        cellMeta.setBorder(0);
+        cellMeta.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        String numeroDoc = guia.getNumeroGuia() != null ? guia.getNumeroGuia() : "-";
+        String dataDoc = guia.getDataEmissao() != null ? guia.getDataEmissao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-";
+        cellMeta.addElement(new Paragraph("Nº DOCUMENTO: " + numeroDoc, bold));
+        cellMeta.addElement(new Paragraph("DATA: " + dataDoc, normal));
+        infoTable.addCell(cellMeta);
+        doc.add(infoTable);
+        doc.add(new Paragraph(" "));
+
+        // Transportation Details
+        PdfPTable transportTable = new PdfPTable(1);
+        transportTable.setWidthPercentage(100);
+        PdfPCell transHeader = new PdfPCell(new Phrase("DETALHES DE TRANSPORTE", fontSubtitle));
+        transHeader.setBackgroundColor(new java.awt.Color(248, 249, 250));
+        transHeader.setPadding(8);
+        transportTable.addCell(transHeader);
+        
+        PdfPCell transBody = new PdfPCell();
+        transBody.setPadding(10);
+        String origem = guia.getLocalCarga() != null ? guia.getLocalCarga() : "-";
+        String destino = guia.getLocalDescarga() != null ? guia.getLocalDescarga() : "-";
+        String viatura = guia.getMatriculaViatura() != null ? guia.getMatriculaViatura() : "-";
+        String motorista = guia.getMotorista() != null ? guia.getMotorista() : "-";
+        
+        transBody.addElement(new Paragraph("ORIGEM: " + origem, normal));
+        transBody.addElement(new Paragraph("DESTINO: " + destino, normal));
+        transBody.addElement(new Paragraph("VIATURA: " + viatura + " | MOTORISTA: " + motorista, normal));
+        transportTable.addCell(transBody);
+        doc.add(transportTable);
+        doc.add(new Paragraph(" "));
+
+        // Items Table
+        PdfPTable itemsTable = new PdfPTable(new float[] { 6, 2, 2 });
+        itemsTable.setWidthPercentage(100);
+        
+        String[] headers = { "ARTIGO / DESIGNAÇÃO", "QTD", "UNIDADE" };
+        for (String h : headers) {
+            PdfPCell c = new PdfPCell(new Phrase(h, bold));
+            c.setBackgroundColor(new java.awt.Color(241, 243, 245));
+            c.setPadding(8);
+            itemsTable.addCell(c);
+        }
+
+        for (ItemGuiaRemessa item : guia.getItens()) {
+            itemsTable.addCell(new PdfPCell(new Phrase(item.getNomeProduto(), normal)));
+            itemsTable.addCell(new PdfPCell(new Phrase(String.valueOf(item.getQuantidade()), normal)));
+            itemsTable.addCell(new PdfPCell(new Phrase(item.getUnidadeMedida(), normal)));
+        }
+        doc.add(itemsTable);
+
+        doc.close();
+    }
+
+    @Transactional
+    public Compra converterParaFactura(Long guiaId) {
+        GuiaRemessa guia = buscarPorId(guiaId);
+        if (!"ATIVA".equals(guia.getStatus())) throw new RuntimeException("Apenas guias ATIVAS podem ser convertidas.");
+
+        Compra compra = new Compra();
+        compra.setCliente(guia.getCliente());
+        compra.setDataCompra(LocalDateTime.now());
+        compra.setStatus("EMITIDA");
+        compra.setTipoDocumento("FT");
+
+        List<ao.co.hzconsultoria.efacturacao.model.ItemCompra> itens = guia.getItens().stream().map(ig -> {
+            ao.co.hzconsultoria.efacturacao.model.ItemCompra ic = new ao.co.hzconsultoria.efacturacao.model.ItemCompra();
+            ic.setNomeProduto(ig.getNomeProduto());
+            ic.setQuantidade(ig.getQuantidade().intValue());
+            
+            // Tentar buscar preço real do produto
+            double preco = 0.0;
+            java.util.List<Produto> prods = produtoRepository.findByNomeStartingWithIgnoreCase(ig.getNomeProduto());
+            if (prods != null && !prods.isEmpty()) {
+                preco = prods.get(0).getPreco();
+            }
+            
+            ic.setPreco(preco);
+            ic.setSubtotal(preco * ic.getQuantidade());
+            ic.setCompra(compra);
+            return ic;
+        }).collect(Collectors.toList());
+
+        compra.setItens(itens);
+        Compra faturaFinal = vendaService.finalizarVenda(compra);
+        
+        guia.setStatus("FECHADA");
+        guia.setFaturaOrigem(faturaFinal);
+        guiaRemessaRepository.save(guia);
+        
+        return faturaFinal;
+    }
+
+    @Transactional
+    public void anularGuia(Long id, String motivo) {
+        GuiaRemessa guia = buscarPorId(id);
+        guia.setStatus("ANULADA");
+        guia.setMotivoAnulacao(motivo);
+        guiaRemessaRepository.save(guia);
+    }
+
+    @Transactional
+    public void eliminarTodas() {
+        guiaRemessaRepository.deleteAll();
     }
 }

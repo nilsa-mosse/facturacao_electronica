@@ -14,6 +14,13 @@ import java.util.stream.Collectors;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+import ao.co.hzconsultoria.efacturacao.model.Fatura;
+import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
+import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 public class HistoricoController {
@@ -23,6 +30,9 @@ public class HistoricoController {
 
     @Autowired
     private VendaService vendaService;
+
+    @Autowired
+    private FaturaRepository faturaRepository;
 
     @GetMapping("/historico-vendas")
     public String historicoVendas(
@@ -38,17 +48,27 @@ public class HistoricoController {
         
         // Estatísticas para os cards
         long totalCount = todasAsCompras.size();
-        long emitidasCount = todasAsCompras.stream().filter(c -> "EMITIDA".equals(c.getStatus())).count();
+        long emitidasCount = todasAsCompras.stream().filter(c -> "EMITIDA".equals(c.getStatus()) && ("FT".equals(c.getTipoDocumento()) || c.getTipoDocumento() == null)).count();
+        long proformasCount = todasAsCompras.stream().filter(c -> "EMITIDA".equals(c.getStatus()) && "FP".equals(c.getTipoDocumento())).count();
         long canceladasCount = todasAsCompras.stream().filter(c -> "CANCELADA".equals(c.getStatus())).count();
 
         List<Compra> filtradas = todasAsCompras;
 
-        // Filtro por tipo (Status)
+        // Filtro por tipo (Tipo de Documento ou Status)
         if (!"todos".equalsIgnoreCase(tipo)) {
-            String statusFiltro = tipo.equalsIgnoreCase("canceladas") ? "CANCELADA" : "EMITIDA";
-            filtradas = filtradas.stream()
-                .filter(c -> statusFiltro.equals(c.getStatus()))
-                .collect(Collectors.toList());
+            if ("canceladas".equalsIgnoreCase(tipo)) {
+                filtradas = filtradas.stream()
+                    .filter(c -> "CANCELADA".equals(c.getStatus()))
+                    .collect(Collectors.toList());
+            } else if ("emitidas".equalsIgnoreCase(tipo) || "FT".equalsIgnoreCase(tipo)) {
+                filtradas = filtradas.stream()
+                    .filter(c -> "EMITIDA".equals(c.getStatus()) && ("FT".equals(c.getTipoDocumento()) || c.getTipoDocumento() == null))
+                    .collect(Collectors.toList());
+            } else if ("FP".equalsIgnoreCase(tipo)) {
+                filtradas = filtradas.stream()
+                    .filter(c -> "FP".equals(c.getTipoDocumento()))
+                    .collect(Collectors.toList());
+            }
         }
 
         // Filtro por data
@@ -79,6 +99,7 @@ public class HistoricoController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalCount", totalCount);
         model.addAttribute("emitidasCount", emitidasCount);
+        model.addAttribute("proformasCount", proformasCount);
         model.addAttribute("canceladasCount", canceladasCount);
         model.addAttribute("dataInicio", dataInicio);
         model.addAttribute("dataFim", dataFim);
@@ -95,5 +116,34 @@ public class HistoricoController {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao anular factura.");
         }
         return "redirect:/historico-vendas?tipo=todos";
+    }
+
+    @GetMapping("/historico-vendas/restaurar/{id}")
+    public String restaurarVenda(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        if (vendaService.restaurarVenda(id)) {
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Factura restaurada com sucesso.");
+        } else {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao restaurar factura.");
+        }
+        return "redirect:/historico-vendas?tipo=canceladas";
+    }
+
+    @GetMapping("/api/compras/fatura-url/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> obterFaturaUrl(@PathVariable Long id) {
+        Optional<Compra> compraOpt = compraRepository.findById(id);
+        if (compraOpt.isPresent()) {
+            List<Fatura> faturas = faturaRepository.findAll().stream()
+                .filter(f -> f.getCompra() != null && f.getCompra().getId().equals(id))
+                .sorted((f1, f2) -> f2.getId().compareTo(f1.getId()))
+                .collect(Collectors.toList());
+            
+            if (!faturas.isEmpty()) {
+                Map<String, String> res = new HashMap<>();
+                res.put("url", "/faturas/" + faturas.get(0).getNumeroFatura() + ".pdf");
+                return ResponseEntity.ok(res);
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 }

@@ -22,6 +22,7 @@ public class Compra {
     private List<ItemCompra> itens;
 
     private String status = "EMITIDA"; // EMITIDA, CANCELADA
+    private String tipoDocumento; // FT, FR, FP
 
     // Getters and Setters
     public Cliente getCliente() {
@@ -70,4 +71,7 @@ public class Compra {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public String getTipoDocumento() { return tipoDocumento; }
+    public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
 }

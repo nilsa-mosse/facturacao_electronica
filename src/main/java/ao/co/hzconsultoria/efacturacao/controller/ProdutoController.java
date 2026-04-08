@@ -140,4 +140,11 @@ public class ProdutoController {
         redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
         return "redirect:/produtos/listar";
     }
+    @GetMapping("/api/produtos/pesquisar")
+    public ResponseEntity<java.util.List<Produto>> pesquisarProdutos(@RequestParam("nome") String nome) {
+        if (nome == null || nome.length() < 1) {
+            return ResponseEntity.ok(new java.util.ArrayList<>());
+        }
+        return ResponseEntity.ok(produtoRepository.findByNomeStartingWithIgnoreCase(nome));
+    }
 }

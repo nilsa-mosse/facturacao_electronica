@@ -9,8 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +59,31 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/empresa/salvar")
-    public String salvarEmpresa(@ModelAttribute Empresa empresa, RedirectAttributes redirectAttributes) {
+    public String salvarEmpresa(@ModelAttribute Empresa empresa, 
+                               @RequestParam(value = "logoFile", required = false) MultipartFile logoFile,
+                               RedirectAttributes redirectAttributes) {
+        
+        if (logoFile != null && !logoFile.isEmpty()) {
+            try {
+                String uploadDir = "src/main/resources/static/uploads/logo/";
+                Path uploadPath = Paths.get(uploadDir);
+                
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+                
+                String fileName = "logo_empresa_" + empresa.getNif() + "_" + logoFile.getOriginalFilename();
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(logoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                
+                // Set the path to be used in the URL/PDF
+                empresa.setLogotipo(uploadDir + fileName);
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
         empresaRepository.save(empresa);
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));

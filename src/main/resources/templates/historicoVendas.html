@@ -22,7 +22,7 @@
 
                 <!-- KPI Cards Row -->
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="premium-card grad-primary" onclick="filterByStatus('todos')">
                             <div class="info-box-icon"><i class="fas fa-archive"></i></div>
                             <div class="info-box-content">
@@ -31,20 +31,29 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="premium-card grad-success" onclick="filterByStatus('emitidas')">
+                    <div class="col-md-3">
+                        <div class="premium-card grad-success" onclick="filterByStatus('FT')">
                             <div class="info-box-icon"><i class="fas fa-check-circle"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Emitidas / Activas</span>
+                                <span class="info-box-text">Facturas (FT)</span>
                                 <span class="info-box-number" th:text="${emitidasCount}">0</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <div class="premium-card grad-info" onclick="filterByStatus('FP')">
+                            <div class="info-box-icon"><i class="fas fa-file-contract"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Pró-formas (FP)</span>
+                                <span class="info-box-number" th:text="${proformasCount != null ? proformasCount : 0}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="premium-card grad-danger" onclick="filterByStatus('canceladas')">
                             <div class="info-box-icon"><i class="fas fa-ban"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Canceladas / Anuladas</span>
+                                <span class="info-box-text">Anuladas</span>
                                 <span class="info-box-number" th:text="${canceladasCount}">0</span>
                             </div>
                         </div>
@@ -62,7 +71,8 @@
                                 <label class="form-label small fw-bold text-muted text-uppercase">Estado da Factura</label>
                                 <select name="tipo" id="statusSelect" class="form-select border-0 shadow-sm" onchange="this.form.submit()">
                                     <option value="todos" th:selected="${tipo == 'todos'}">Todos os Documentos</option>
-                                    <option value="emitidas" th:selected="${tipo == 'emitidas'}">Apenas Emitidas</option>
+                                    <option value="FT" th:selected="${tipo == 'FT' || tipo == 'emitidas'}">Facturas (FT)</option>
+                                    <option value="FP" th:selected="${tipo == 'FP'}">Pró-formas (FP)</option>
                                     <option value="canceladas" th:selected="${tipo == 'canceladas'}">Apenas Anuladas</option>
                                 </select>
                             </div>
@@ -147,8 +157,17 @@
                                         </td>
                                         <td class="text-center pe-4 text-nowrap">
                                             <div class="btn-group shadow-sm border rounded">
-                                                <a href="#" class="btn btn-white btn-sm border-0" title="Ver Detalhes">
+                                                <a href="javascript:void(0)" 
+                                                   th:onclick="'visualizarFactura(' + ${compra.id} + ')'"
+                                                   class="btn btn-white btn-sm border-0" title="Ver Detalhes">
                                                     <i class="fas fa-eye text-info"></i>
+                                                </a>
+                                                <a th:if="${compra.status == 'CANCELADA'}" 
+                                                   th:href="@{'/historico-vendas/restaurar/' + ${compra.id}}" 
+                                                   class="btn btn-white btn-sm border-0 border-start" 
+                                                   title="Restaurar Factura"
+                                                   onclick="return confirm('Confirmar restauração da factura?')">
+                                                    <i class="fas fa-undo-alt text-success"></i>
                                                 </a>
                                                 <a th:if="${compra.status == 'EMITIDA'}" 
                                                    th:href="@{'/historico-vendas/cancelar/' + ${compra.id}}" 
@@ -199,6 +218,24 @@
         </div>
     </div>
 
+    <!-- Modal de Pré-visualização -->
+    <div class="modal fade" id="modalPreview" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px; overflow: hidden;">
+                <div class="modal-header bg-dark text-white p-3">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-file-pdf me-2 text-primary"></i> Pré-visualização do Documento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 bg-secondary" style="height: 85vh;">
+                    <iframe id="pdfFrame" src="" width="100%" height="100%" frameborder="0"></iframe>
+                </div>
+                <div class="modal-footer bg-light p-2">
+                    <button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Fechar Visualização</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts and Interactions -->
     <script th:inline="javascript">
         function filterByStatus(status) {
@@ -228,6 +265,27 @@
                 });
             }
         });
+
+        function visualizarFactura(id) {
+            // Mostrar modal de carregamento ou feedback visual se necessário
+            fetch('/api/compras/fatura-url/' + id)
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Não encontrado');
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.url) {
+                        $('#pdfFrame').attr('src', data.url);
+                        $('#modalPreview').modal('show');
+                    } else {
+                        alert('Não foi possível encontrar o ficheiro PDF para esta factura.');
+                    }
+                })
+                .catch(function(err) {
+                    console.error(err);
+                    alert('Erro ao tentar localizar o documento. Verifique se a factura foi gerada corretamente.');
+                });
+        }
     </script>
 </body>
 

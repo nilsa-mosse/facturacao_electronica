@@ -5,7 +5,8 @@ import ao.co.hzconsultoria.efacturacao.model.Fatura;
 import ao.co.hzconsultoria.efacturacao.model.Carrinho;
 import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
-
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 
 import com.lowagie.text.*;
@@ -43,11 +44,24 @@ public class FaturaService {
     @Autowired
     private AgtService agtService;
 
+    @Autowired
+    private EmpresaRepository empresaRepository;
+
 
     public Fatura emitirFatura(Compra compra) {
+        return emitirDocumento(compra, "FT");
+    }
+
+    public Fatura emitirProforma(Compra compra) {
+        return emitirDocumento(compra, "FP");
+    }
+
+    private Fatura emitirDocumento(Compra compra, String tipo) {
         Fatura fatura = new Fatura();
         fatura.setCompra(compra);
-        String numeroFatura = "FT-" + System.currentTimeMillis();
+        fatura.setTipoDocumento(tipo);
+        String prefixo = tipo + "-";
+        String numeroFatura = prefixo + System.currentTimeMillis();
         fatura.setNumeroFatura(numeroFatura);
         fatura.setDataEmissao(new Date());
         // Calcular totais e IVA
@@ -71,23 +85,29 @@ public class FaturaService {
         fatura.setStatus("PENDENTE");
         Fatura faturaSalva = faturaRepository.save(fatura);
 
-        // Enviar para a AGT
-        try {
-            AgtResponse agtResponse = agtService.enviarFatura(faturaSalva);
-            if (agtResponse.isSucesso()) {
-                faturaSalva.setEnviadaAGT(true);
-                faturaSalva.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
-                faturaSalva.setCodigoAgt(agtResponse.getCodigoAgt());
-                log.info("Fatura {} enviada e validada pela AGT. Código: {}", numeroFatura, agtResponse.getCodigoAgt());
-            } else {
-                faturaSalva.setEnviadaAGT(false);
+        // Enviar para a AGT (Apenas se não for FP, ou tratar conforme regra de negócio)
+        if (!"FP".equals(tipo)) {
+            try {
+                AgtResponse agtResponse = agtService.enviarFatura(faturaSalva);
+                if (agtResponse.isSucesso()) {
+                    faturaSalva.setEnviadaAGT(true);
+                    faturaSalva.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
+                    faturaSalva.setCodigoAgt(agtResponse.getCodigoAgt());
+                    log.info("{} {} enviada e validada pela AGT. Código: {}", tipo, numeroFatura, agtResponse.getCodigoAgt());
+                } else {
+                    faturaSalva.setEnviadaAGT(false);
+                    faturaSalva.setStatus("FALHA_ENVIO");
+                    faturaSalva.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
+                    log.warn("Falha no envio da {} {} para AGT: {}", tipo, numeroFatura, agtResponse.getMensagem());
+                }
+            } catch (Exception e) {
                 faturaSalva.setStatus("FALHA_ENVIO");
-                faturaSalva.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
-                log.warn("Falha no envio da fatura {} para AGT: {}", numeroFatura, agtResponse.getMensagem());
+                log.error("Erro crítico ao enviar {} {} para AGT: {}", tipo, numeroFatura, e.getMessage());
             }
-        } catch (Exception e) {
-            faturaSalva.setStatus("FALHA_ENVIO");
-            log.error("Erro crítico ao enviar fatura {} para AGT: {}", numeroFatura, e.getMessage());
+        } else {
+            // Pró-forma não é enviada à AGT obrigatoriamente nesta simulação
+            faturaSalva.setStatus("EMITIDA");
+            log.info("Pró-forma {} emitida com sucesso.", numeroFatura);
         }
 
         // Actualizar estado final na BD
@@ -160,260 +180,263 @@ public class FaturaService {
     }
 
     private void gerarPdf(String filePath, Fatura fatura) throws Exception {
-
-        Document doc = new Document(PageSize.A4, 40, 40, 50, 40);
+        Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
         PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(filePath));
         doc.open();
 
-        // Background Shapes
-        com.lowagie.text.pdf.PdfContentByte cb = writer.getDirectContentUnder();
-        java.awt.Color dustyRose = new java.awt.Color(217, 167, 160);
-        java.awt.Color darkText = new java.awt.Color(26, 26, 26);
-        java.awt.Color lightGrey = new java.awt.Color(241, 241, 241);
+        // Dados da Empresa (Dinâmico)
+        java.util.List<Empresa> empresas = empresaRepository.findAll();
+        Empresa configEmpresa = empresas.isEmpty() ? new Empresa() : empresas.get(0);
+        if (empresas.isEmpty()) {
+            configEmpresa.setNome("MINHA EMPRESA (Configurar nas definições)");
+            configEmpresa.setNif("999999999");
+            configEmpresa.setEndereco("Endereço não configurado");
+            configEmpresa.setEmail("configurar@empresa.com");
+        }
 
-        cb.saveState();
-        cb.setColorFill(dustyRose);
-        // Top right organic curve
-        float w = doc.getPageSize().getWidth();
-        float h = doc.getPageSize().getHeight();
-        cb.moveTo(w - 200, h);
-        cb.curveTo(w - 200, h - 80, w - 80, h - 180, w, h - 100);
-        cb.lineTo(w, h);
-        cb.fill();
-        // Bottom left organic curve
-        cb.moveTo(0, 180);
-        cb.curveTo(80, 180, 180, 80, 100, 0);
-        cb.lineTo(0, 0);
-        cb.fill();
-        cb.restoreState();
+        // Color Palette (Canva Minimalist Black & Gray)
+        java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
+        java.awt.Color grayHeader = new java.awt.Color(248, 249, 250);
+        java.awt.Color grayLine = new java.awt.Color(222, 226, 230);
+        java.awt.Color darkGray = new java.awt.Color(73, 80, 87);
 
-        Font fontFactura = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 28, darkText);
-        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, darkText);
-        Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, darkText);
-        Font normalWhite = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, java.awt.Color.WHITE);
-        Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, darkText);
-        Font thankYouFont = FontFactory.getFont(FontFactory.TIMES_ITALIC, 18, darkText);
+        // Fonts
+        Font fontFactura = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
+        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+        Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, darkGray);
+        Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+        Font tableHeaderFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, java.awt.Color.WHITE);
+        Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 7, darkGray);
 
         DecimalFormat df = new DecimalFormat("#,##0.00");
 
-        // Top Section: Title
-        PdfPTable header = new PdfPTable(1);
-        header.setWidthPercentage(100);
-        PdfPCell titleCell = new PdfPCell(new Phrase("FACTURA", fontFactura));
+        // Header Section
+        PdfPTable mainHeader = new PdfPTable(2);
+        mainHeader.setWidthPercentage(100);
+        mainHeader.setWidths(new float[] { 6, 4 });
+
+        String tituloDocumento = "FACTURA";
+        if ("FP".equals(fatura.getTipoDocumento())) {
+            tituloDocumento = "FACTURA PRÓ-FORMA";
+        } else if ("FR".equals(fatura.getTipoDocumento())) {
+            tituloDocumento = "FACTURA RECIBO";
+        }
+
+        PdfPCell titleCell = new PdfPCell(new Phrase(tituloDocumento, fontFactura));
         titleCell.setBorder(0);
-        titleCell.setPaddingTop(20);
-        titleCell.setPaddingBottom(30);
-        header.addCell(titleCell);
-        doc.add(header);
+        titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        titleCell.setPaddingBottom(10);
+        mainHeader.addCell(titleCell);
 
-        // Client Info & Metadata
-        PdfPTable clientMetaTable = new PdfPTable(2);
-        clientMetaTable.setWidthPercentage(100);
-        clientMetaTable.setWidths(new float[] { 6, 4 });
+        PdfPCell logoCell = new PdfPCell();
+        try {
+            String logoPath = configEmpresa.getLogotipo();
+            if (logoPath != null && !logoPath.isEmpty()) {
+                Image logo = Image.getInstance(logoPath);
+                logo.scaleToFit(200, 200);
+                logoCell = new PdfPCell(logo);
+            } else {
+                logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+            }
+        } catch (Exception e) {
+            logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+        }
+        logoCell.setBorder(0);
+        logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        logoCell.setPaddingBottom(10);
+        mainHeader.addCell(logoCell);
 
-        // Left: Client Info
-        PdfPCell clientCell = new PdfPCell();
-        clientCell.setBorder(0);
+        doc.add(mainHeader);
+        doc.add(new Paragraph(" "));
+        doc.add(new Paragraph(" "));
+
+        // Client & Meta Section
+        PdfPTable infoTable = new PdfPTable(2);
+        infoTable.setWidthPercentage(100);
+        infoTable.setWidths(new float[] { 6, 4 });
+
+        // Left: My Company Info (Dynamic from DB)
+        PdfPCell myInfoCell = new PdfPCell();
+        myInfoCell.setBorder(0);
+        myInfoCell.addElement(new Paragraph(configEmpresa.getNome(), bold));
+        myInfoCell.addElement(new Paragraph(configEmpresa.getEndereco() != null ? configEmpresa.getEndereco() : "Angola", normal));
+        myInfoCell.addElement(new Paragraph("NIF: " + (configEmpresa.getNif() != null ? configEmpresa.getNif() : "999999999"), normal));
+        if (configEmpresa.getTelefone() != null && !configEmpresa.getTelefone().isEmpty()) {
+            myInfoCell.addElement(new Paragraph("Tel: " + configEmpresa.getTelefone(), normal));
+        }
+        if (configEmpresa.getEmail() != null) {
+            myInfoCell.addElement(new Paragraph("E-mail: " + configEmpresa.getEmail(), normal));
+        }
+        infoTable.addCell(myInfoCell);
+
+        // Right: Invoice Metadata
+        PdfPCell metaDataCell = new PdfPCell();
+        metaDataCell.setBorder(0);
+        metaDataCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         
-        Cliente cliente = (fatura.getCompra() != null) ? fatura.getCompra().getCliente() : null;
-        String nomeCliente = (cliente != null) ? cliente.getNome() : "Consumidor Final";
-        String enderecoCliente = (cliente != null) ? cliente.getEndereco() : "Endereço Não Especificado";
-        String contatoCliente = (cliente != null) ? (cliente.getEmail() + " | " + cliente.getTelefone()) : "contato@exemplo.com";
-        String nifCliente = (cliente != null) ? cliente.getNif() : "999999999";
-
-        clientCell.addElement(new Paragraph("DADOS DO CLIENTE", fontSubtitle));
-        clientCell.addElement(new Paragraph(nomeCliente, bold));
-        clientCell.addElement(new Paragraph(enderecoCliente, normal));
-        clientCell.addElement(new Paragraph(contatoCliente, normal));
-        clientCell.addElement(new Paragraph("NIF: " + nifCliente, normal));
-        clientMetaTable.addCell(clientCell);
-
-        // Right: Metadata (Invoice No, Date)
-        PdfPCell metaCell = new PdfPCell();
-        metaCell.setBorder(0);
-
         PdfPTable metaInner = new PdfPTable(2);
         metaInner.setWidthPercentage(100);
-        metaInner.setWidths(new float[] { 4, 6 });
+        
+        addMetaRow(metaInner, "Nº DOCUMENTO:", fatura.getNumeroFatura(), bold, normal);
+        String dataStr = fatura.getDataEmissao() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao()) : "-";
+        addMetaRow(metaInner, "DATA DE EMISSÃO:", dataStr, bold, normal);
+        addMetaRow(metaInner, "MOEDA:", "AOA (Kwanza)", bold, normal);
+        
+        metaDataCell.addElement(metaInner);
+        infoTable.addCell(metaDataCell);
+        doc.add(infoTable);
 
-        PdfPCell lblInvoice = new PdfPCell(new Phrase("Nº FACTURA", fontSubtitle));
-        lblInvoice.setBorder(0);
-        PdfPCell valInvoice = new PdfPCell(new Phrase(fatura.getNumeroFatura(), normal));
-        valInvoice.setBorder(0);
-        metaInner.addCell(lblInvoice);
-        metaInner.addCell(valInvoice);
-
-        PdfPCell lblDate = new PdfPCell(new Phrase("DATA", fontSubtitle));
-        lblDate.setBorder(0);
-        PdfPCell valDate;
-        if (fatura.getDataEmissao() != null) {
-            valDate = new PdfPCell(
-                    new Phrase(new java.text.SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao()), normal));
-        } else {
-            valDate = new PdfPCell(new Phrase("", normal));
-        }
-        valDate.setBorder(0);
-        metaInner.addCell(lblDate);
-        metaInner.addCell(valDate);
-
-        metaCell.addElement(metaInner);
-        clientMetaTable.addCell(metaCell);
-
-        doc.add(clientMetaTable);
         doc.add(new Paragraph(" "));
+        
+        // BILL TO Section
+        PdfPTable billingTable = new PdfPTable(1);
+        billingTable.setWidthPercentage(100);
+        PdfPCell billToHeader = new PdfPCell(new Phrase("FACTURADO A:", fontSubtitle));
+        billToHeader.setBorder(0);
+        billToHeader.setPaddingBottom(5);
+        billingTable.addCell(billToHeader);
+
+        Cliente cliente = (fatura.getCompra() != null) ? fatura.getCompra().getCliente() : null;
+        String nomeCli = cliente != null ? cliente.getNome() : "Consumidor Final";
+        String nifCli = cliente != null ? cliente.getNif() : "999999999";
+        String endCli = cliente != null ? cliente.getEndereco() : "Endereço não disponível";
+
+        PdfPCell billToContent = new PdfPCell();
+        billToContent.setBorder(0);
+        billToContent.addElement(new Paragraph(nomeCli, bold));
+        billToContent.addElement(new Paragraph("NIF: " + nifCli, normal));
+        billToContent.addElement(new Paragraph(endCli, normal));
+        billingTable.addCell(billToContent);
+        doc.add(billingTable);
+
         doc.add(new Paragraph(" "));
 
         // Items Table
         PdfPTable table = new PdfPTable(6);
         table.setWidthPercentage(100);
-        table.setWidths(new float[] { 3.5f, 0.8f, 1.5f, 1f, 1.2f, 2f });
-        table.setSpacingBefore(10f);
-        table.setSpacingAfter(10f);
+        table.setWidths(new float[] { 4f, 1f, 1.5f, 1f, 1.2f, 1.8f });
 
-        addCanvaHeader(table, "DESCRIÇÃO", normalWhite, dustyRose);
-        addCanvaHeader(table, "QTD", normalWhite, dustyRose);
-        addCanvaHeader(table, "PREÇO UNIT.", normalWhite, dustyRose);
-        addCanvaHeader(table, "%IVA", normalWhite, dustyRose);
-        addCanvaHeader(table, "IVA", normalWhite, dustyRose);
-        addCanvaHeader(table, "TOTAL", normalWhite, dustyRose);
+        addCanvaHeader(table, "DESCRIÇÃO", tableHeaderFont, blackColor);
+        addCanvaHeader(table, "QTD", tableHeaderFont, blackColor);
+        addCanvaHeader(table, "UNITÁRIO", tableHeaderFont, blackColor);
+        addCanvaHeader(table, "IVA", tableHeaderFont, blackColor);
+        addCanvaHeader(table, "VAL. IVA", tableHeaderFont, blackColor);
+        addCanvaHeader(table, "TOTAL", tableHeaderFont, blackColor);
 
         double totalIva = 0;
-        double total = 0;
+        double subtotalGeral = 0;
 
         if (fatura.getCompra() != null && fatura.getCompra().getItens() != null) {
             for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : fatura.getCompra().getItens()) {
-                double iva = 14;
-                double subtotal = item.getSubtotal();
-                double valorIva = subtotal * (iva / 100);
-
+                double percIva = 14; 
+                double valorIva = item.getSubtotal() * (percIva / 100);
+                subtotalGeral += item.getSubtotal();
                 totalIva += valorIva;
-                total += subtotal;
 
-                table.addCell(cleanCell(item.getNomeProduto(), normal, Element.ALIGN_LEFT));
-                table.addCell(cleanCell(String.valueOf(item.getQuantidade()), normal, Element.ALIGN_CENTER));
-                table.addCell(cleanCell(df.format(item.getPreco()), normal, Element.ALIGN_RIGHT));
-                table.addCell(cleanCell(df.format(iva) + "%", normal, Element.ALIGN_CENTER));
-                table.addCell(cleanCell(df.format(valorIva), normal, Element.ALIGN_RIGHT));
-                table.addCell(cleanCell(df.format(subtotal), normal, Element.ALIGN_RIGHT));
+                table.addCell(minimalCell(item.getNomeProduto(), normal, Element.ALIGN_LEFT, grayLine));
+                table.addCell(minimalCell(String.valueOf(item.getQuantidade()), normal, Element.ALIGN_CENTER, grayLine));
+                table.addCell(minimalCell(df.format(item.getPreco()), normal, Element.ALIGN_RIGHT, grayLine));
+                table.addCell(minimalCell(df.format(percIva) + "%", normal, Element.ALIGN_CENTER, grayLine));
+                table.addCell(minimalCell(df.format(valorIva), normal, Element.ALIGN_RIGHT, grayLine));
+                table.addCell(minimalCell(df.format(item.getSubtotal()), bold, Element.ALIGN_RIGHT, grayLine));
             }
         }
-
         doc.add(table);
 
-        // Totals Section
-        PdfPTable totais = new PdfPTable(2);
-        totais.setWidthPercentage(40);
-        totais.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        // Totals Block
+        PdfPTable totalTable = new PdfPTable(2);
+        totalTable.setWidthPercentage(35);
+        totalTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        totalTable.setSpacingBefore(20);
 
-        totais.addCell(cleanCell("Subtotal", normal, Element.ALIGN_LEFT));
-        totais.addCell(cleanCell(df.format(total), normal, Element.ALIGN_RIGHT));
+        addTotalRow(totalTable, "SUBTOTAL:", df.format(subtotalGeral), normal, normal, null);
+        addTotalRow(totalTable, "TOTAL IVA:", df.format(totalIva), normal, normal, null);
+        addTotalRow(totalTable, "TOTAL FINAL:", df.format(subtotalGeral + totalIva) + " Kz", bold, bold, grayHeader);
 
-        totais.addCell(cleanCell("IVA", normal, Element.ALIGN_LEFT));
-        totais.addCell(cleanCell(df.format(totalIva), normal, Element.ALIGN_RIGHT));
+        doc.add(totalTable);
 
-        PdfPCell totalLbl = new PdfPCell(new Phrase("TOTAL", bold));
-        totalLbl.setBorderWidth(0);
-        totalLbl.setBorderWidthTop(1);
-        totalLbl.setBorderColor(lightGrey);
-        totalLbl.setPaddingTop(8);
-        totalLbl.setPaddingBottom(8);
-
-        PdfPCell totalVal = new PdfPCell(new Phrase(df.format(total + totalIva), bold));
-        totalVal.setBorderWidth(0);
-        totalVal.setBorderWidthTop(1);
-        totalVal.setBorderColor(lightGrey);
-        totalVal.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        totalVal.setPaddingTop(8);
-        totalVal.setPaddingBottom(8);
-
-        totais.addCell(totalLbl);
-        totais.addCell(totalVal);
-
-        doc.add(totais);
+        // Footer Section
         doc.add(new Paragraph(" "));
         doc.add(new Paragraph(" "));
-
-        // Footer Area
-        PdfPTable footer = new PdfPTable(3);
-        footer.setWidthPercentage(100);
-        footer.setWidths(new float[] { 4, 3, 3 });
-
-        // Left Footer: Company Details
-        PdfPCell footerCo = new PdfPCell();
-        footerCo.setBorder(0);
-        footerCo.addElement(new Paragraph("HZ Consultoria", bold));
-        footerCo.addElement(new Paragraph("Luanda - Angola", normal));
-        footerCo.addElement(new Paragraph("NIF: 5000000000", normal));
-        footerCo.addElement(new Paragraph("info@hzconsultoria.co.ao", normal));
-        footer.addCell(footerCo);
-
-        // Center Footer: QR Code & Hash
-        PdfPCell footerVal = new PdfPCell();
-        footerVal.setBorder(0);
-        String qrTexto = fatura.getNumeroFatura() + "|" + fatura.getTotal();
+        
+        PdfPTable footerTable = new PdfPTable(2);
+        footerTable.setWidthPercentage(100);
+        
+        PdfPCell qrCell = new PdfPCell();
+        qrCell.setBorder(0);
         try {
-            Image qrImage = gerarQrCode(qrTexto);
-            if (qrImage != null) {
-                qrImage.scaleToFit(60, 60);
-                footerVal.addElement(qrImage);
+            Image qr = gerarQrCode(fatura.getNumeroFatura() + "|" + fatura.getHash());
+            if (qr != null) {
+                qr.scaleToFit(50, 50);
+                qrCell.addElement(qr);
             }
-        } catch (Exception ignored) {
-        }
-        Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 6, darkText);
-        footerVal.addElement(new Paragraph("Hash: " + fatura.getHash(), smallFont));
+        } catch (Exception ignored) {}
+        qrCell.addElement(new Paragraph("Hash: " + fatura.getHash(), smallFont));
         if (fatura.getCodigoAgt() != null) {
-            footerVal.addElement(new Paragraph("AGT: " + fatura.getCodigoAgt(), smallFont));
+            qrCell.addElement(new Paragraph("Certificado AGT: " + fatura.getCodigoAgt(), smallFont));
         }
-        footer.addCell(footerVal);
+        footerTable.addCell(qrCell);
 
-        // Right Footer: Thanks & Signature
-        PdfPCell footerSig = new PdfPCell();
-        footerSig.setBorder(0);
-        footerSig.setHorizontalAlignment(Element.ALIGN_CENTER);
+        PdfPCell thanksCell = new PdfPCell();
+        thanksCell.setBorder(0);
+        thanksCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        Paragraph p = new Paragraph("OBRIGADO PELA PREFERÊNCIA", bold);
+        p.setAlignment(Element.ALIGN_RIGHT);
+        thanksCell.addElement(p);
+        Paragraph p2 = new Paragraph("Os bens/serviços foram colocados à disposição na data do documento.", smallFont);
+        p2.setAlignment(Element.ALIGN_RIGHT);
+        thanksCell.addElement(p2);
+        footerTable.addCell(thanksCell);
 
-        Paragraph thanks = new Paragraph("Obrigado", thankYouFont);
-        thanks.setAlignment(Element.ALIGN_CENTER);
-        footerSig.addElement(thanks);
-        footerSig.addElement(new Paragraph(" ", normal));
-
-        PdfPCell lineCell = new PdfPCell(new Phrase("Assinatura", normal));
-        lineCell.setBorderWidth(0);
-        lineCell.setBorderWidthTop(1);
-        lineCell.setBorderColor(darkText);
-        lineCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        lineCell.setPaddingTop(4);
-
-        PdfPTable sigTable = new PdfPTable(1);
-        sigTable.setWidthPercentage(80);
-        sigTable.setHorizontalAlignment(Element.ALIGN_CENTER);
-        sigTable.addCell(lineCell);
-
-        footerSig.addElement(sigTable);
-        footer.addCell(footerSig);
-
-        doc.add(footer);
+        doc.add(footerTable);
 
         doc.close();
+    }
+
+    private void addMetaRow(PdfPTable table, String label, String value, Font labelFont, Font valueFont) {
+        PdfPCell c1 = new PdfPCell(new Phrase(label, labelFont));
+        c1.setBorder(0);
+        c1.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        table.addCell(c1);
+        PdfPCell c2 = new PdfPCell(new Phrase(value, valueFont));
+        c2.setBorder(0);
+        c2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        table.addCell(c2);
+    }
+
+    private void addTotalRow(PdfPTable table, String label, String value, Font labelFont, Font valueFont, java.awt.Color bg) {
+        PdfPCell c1 = new PdfPCell(new Phrase(label, labelFont));
+        c1.setBorder(0);
+        c1.setPadding(5);
+        if (bg != null) c1.setBackgroundColor(bg);
+        table.addCell(c1);
+        
+        PdfPCell c2 = new PdfPCell(new Phrase(value, valueFont));
+        c2.setBorder(0);
+        c2.setPadding(5);
+        c2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        if (bg != null) c2.setBackgroundColor(bg);
+        table.addCell(c2);
+    }
+
+    private PdfPCell minimalCell(String text, Font font, int align, java.awt.Color borderColor) {
+        PdfPCell c = new PdfPCell(new Phrase(text, font));
+        c.setBorder(0);
+        c.setBorderWidthBottom(0.5f);
+        c.setBorderColorBottom(borderColor);
+        c.setPadding(8);
+        c.setHorizontalAlignment(align);
+        return c;
     }
 
     private void addCanvaHeader(PdfPTable table, String text, Font font, java.awt.Color bg) {
         PdfPCell c = new PdfPCell(new Phrase(text, font));
         c.setBackgroundColor(bg);
         c.setBorder(0);
-        c.setPadding(8);
+        c.setPadding(10);
         c.setHorizontalAlignment(Element.ALIGN_LEFT);
         table.addCell(c);
-    }
-
-    private PdfPCell cleanCell(String text, Font font, int alignment) {
-        PdfPCell c = new PdfPCell(new Phrase(text != null ? text : "", font));
-        c.setBorderWidth(0);
-        c.setBorderWidthBottom(1f);
-        c.setBorderColorBottom(new java.awt.Color(241, 241, 241));
-        c.setPaddingTop(8);
-        c.setPaddingBottom(8);
-        c.setHorizontalAlignment(alignment);
-        return c;
     }
 
     private Image gerarQrCode(String texto) {

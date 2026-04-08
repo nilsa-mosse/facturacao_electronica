@@ -20,6 +20,7 @@ public class Fatura {
     private Double iva;
     private String hash;
     private String codigoAgt;
+    private String tipoDocumento; // FT, FR, FP (Pro-forma)
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -50,4 +51,7 @@ public class Fatura {
 
     public String getCodigoAgt() { return codigoAgt; }
     public void setCodigoAgt(String codigoAgt) { this.codigoAgt = codigoAgt; }
+
+    public String getTipoDocumento() { return tipoDocumento; }
+    public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
 }

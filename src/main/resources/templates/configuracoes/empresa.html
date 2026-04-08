@@ -31,7 +31,9 @@
                          <div class="card-header">
                             <h3 class="card-title" th:text="#{config.empresa.info_geral}">Informações Gerais</h3>
                         </div>
-                        <form th:action="@{/configuracoes/empresa/salvar}" th:object="${empresa}" method="post">
+                        <form th:action="@{/configuracoes/empresa/salvar}" th:object="${empresa}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" th:field="*{id}" />
+                            <input type="hidden" th:field="*{logotipo}" />
                             <div class="card-body">
                                 <div class="row">
                                      <div class="form-group col-md-4">
@@ -58,8 +60,13 @@
                                          <input type="text" class="form-control" th:field="*{website}">
                                      </div>
                                      <div class="form-group col-md-4">
-                                         <label th:text="#{config.empresa.logotipo}">Logotipo (URL)</label>
-                                         <input type="text" class="form-control" th:field="*{logotipo}">
+                                         <label th:text="#{config.empresa.logotipo}">Carregar Logotipo</label>
+                                         <div class="d-flex align-items-center gap-3">
+                                            <input type="file" name="logoFile" class="form-control" accept="image/*">
+                                            <div th:if="*{logotipo != null}" class="border rounded bg-light p-1">
+                                                <img th:src="@{'/' + *{logotipo.replace('src/main/resources/static/', '')}}" alt="Logo" style="height: 38px; max-width: 60px; object-fit: contain;">
+                                            </div>
+                                         </div>
                                      </div>
                                 </div>
                                  <div class="row mt-3">

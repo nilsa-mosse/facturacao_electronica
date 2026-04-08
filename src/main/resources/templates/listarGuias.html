@@ -32,7 +32,7 @@
                             <div class="info-box-icon"><i class="fas fa-file-contract"></i></div>
                             <div class="info-box-content">
                                 <span class="info-box-text">Total de Guias</span>
-                                <span class="info-box-number" th:text="${guias.size()}">0</span>
+                                <span class="info-box-number" th:text="${totalGuias}">0</span>
                             </div>
                         </div>
                     </div>
@@ -41,7 +41,7 @@
                             <div class="info-box-icon"><i class="fas fa-route"></i></div>
                             <div class="info-box-content">
                                 <span class="info-box-text">Guias Activas</span>
-                                <span class="info-box-number" th:text="${guias.stream().filter(g -> 'ATIVA'.equals(g.status)).count()}">0</span>
+                                <span class="info-box-number" th:text="${guiasActivas}">0</span>
                             </div>
                         </div>
                     </div>
@@ -82,13 +82,15 @@
                                 <tbody>
                                     <tr th:each="guia : ${guias}">
                                         <td class="ps-4">
-                                            <span class="fw-bold text-primary" th:text="${guia.numeroGuia}"></span>
-                                            <div th:if="${guia.faturaOrigem != null}" class="small">
-                                                <i class="fas fa-link text-muted me-1"></i>
-                                                <small class="text-muted" th:text="'Ref. Factura #' + ${guia.faturaOrigem.id}"></small>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-primary" th:text="${guia.numeroGuia}"></span>
+                                                <small th:if="${guia.guiaReferencia != null}" class="text-warning" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-history me-1"></i> Substitui <span th:text="${guia.guiaReferencia.numeroGuia}"></span>
+                                                </small>
+                                                <small class="text-muted" th:if="${guia.faturaOrigem != null}" th:text="'Ref. Factura #' + ${guia.faturaOrigem.id}"></small>
                                             </div>
                                         </td>
-                                        <td th:text="${#temporals.format(guia.dataEmissao, 'dd/MM/yyyy HH:mm')}"></td>
+                                        <td th:text="${guia.dataEmissao != null ? #temporals.format(guia.dataEmissao, 'dd/MM/yyyy HH:mm') : '-'}"></td>
                                         <td>
                                             <span class="fw-bold text-dark" th:text="${guia.cliente?.nome != null ? guia.cliente.nome : 'Empresa Própria'}"></span>
                                         </td>
@@ -103,20 +105,35 @@
                                             <span class="badge bg-soft-info" th:text="${guia.matriculaViatura}"></span>
                                             <div class="small text-muted" th:text="${guia.motorista}"></div>
                                         </td>
-                                        <td class="text-center">
+                                         <td class="text-center">
                                             <span th:if="${guia.status == 'ATIVA'}" class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-2">
                                                 <i class="fas fa-check-circle me-1"></i> Activa
                                             </span>
-                                            <span th:if="${guia.status != 'ATIVA'}" class="badge bg-soft-danger text-danger border border-danger rounded-pill px-3 py-2">
-                                                <i class="fas fa-times-circle me-1"></i> Cancelada
+                                            <span th:if="${guia.status == 'FECHADA'}" class="badge bg-soft-primary text-primary border border-primary rounded-pill px-3 py-2">
+                                                <i class="fas fa-lock me-1"></i> Fechada
                                             </span>
-                                        </td>
+                                            <span th:if="${guia.status == 'ANULADA'}" class="badge bg-soft-secondary text-secondary border border-secondary rounded-pill px-3 py-2">
+                                                <i class="fas fa-ban me-1"></i> Anulada
+                                            </span>
+                                            <span th:if="${guia.status == 'SUBSTITUIDA'}" class="badge bg-soft-warning text-warning border border-warning rounded-pill px-3 py-2">
+                                                <i class="fas fa-sync me-1"></i> Substituída
+                                            </span>
+                                         </td>
                                         <td class="text-center pe-4">
                                             <div class="btn-group shadow-sm border rounded">
-                                                <a href="#" class="btn btn-white btn-sm border-0" title="Ver Detalhes">
+                                                <a href="javascript:void(0)" th:onclick="'visualizarGuia(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0" title="Ver Detalhes">
                                                     <i class="fas fa-eye text-info"></i>
                                                 </a>
-                                                <a href="#" class="btn btn-white btn-sm border-0 border-start" title="Imprimir Guia">
+                                                <a th:if="${guia.status == 'ATIVA'}" th:href="@{'/guias/converter/' + ${guia.id}}" class="btn btn-white btn-sm border-0 border-start" title="Converter em Factura">
+                                                    <i class="fas fa-file-invoice text-success"></i>
+                                                </a>
+                                                <a th:if="${guia.status == 'ATIVA'}" th:href="@{'/guias/rectificar/' + ${guia.id}}" class="btn btn-white btn-sm border-0 border-start" title="Rectificar / Substituir">
+                                                    <i class="fas fa-sync-alt text-warning"></i>
+                                                </a>
+                                                <a th:if="${guia.status == 'ATIVA'}" href="javascript:void(0)" th:onclick="'abrirModalAnular(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0 border-start" title="Anular Guia">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                                <a href="javascript:void(0)" th:onclick="'imprimirGuia(' + ${guia.id} + ')'" class="btn btn-white btn-sm border-0 border-start" title="Imprimir Guia">
                                                     <i class="fas fa-print text-muted"></i>
                                                 </a>
                                             </div>
@@ -149,6 +166,45 @@
         </div>
     </div>
 
+    <!-- Modal de Pré-visualização -->
+    <div class="modal fade" id="modalPreview" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 15px; overflow: hidden;">
+                <div class="modal-header bg-dark text-white p-3">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-file-pdf me-2 text-primary"></i> Pré-visualização da Guia de Remessa</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 bg-secondary" style="height: 85vh;">
+                    <iframe id="pdfFrame" src="" width="100%" height="100%" frameborder="0"></iframe>
+                </div>
+                <div class="modal-footer bg-light p-2">
+                    <button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Fechar Visualização</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Anular Guia -->
+    <div class="modal fade" id="modalAnular" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form th:action="@{/guias/anular}" method="post" class="modal-content border-0 shadow-lg">
+                <input type="hidden" name="id" id="anularGuiaId">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold">Justificar Anulação</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small">Por favor, indique o motivo pelo qual deseja anular esta guia de remessa.</p>
+                    <textarea name="motivo" class="form-control border-light shadow-sm" rows="4" placeholder="Ex: Erro nos artigos, Viatura avariada..." required></textarea>
+                </div>
+                <div class="modal-footer bg-light p-2">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">Anular Guia</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Feedback Handling -->
     <script th:inline="javascript">
         $(document).ready(function() {
@@ -174,6 +230,38 @@
                 });
             }
         });
+
+        function visualizarGuia(id) {
+            fetch('/guias/api/pdf-url/' + id)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.url) {
+                        $('#pdfFrame').attr('src', data.url);
+                        $('#modalPreview').modal('show');
+                    } else {
+                        alert('PDF da guia não encontrado.');
+                    }
+                })
+                .catch(err => alert('Erro ao carregar guia.'));
+        }
+
+        function imprimirGuia(id) {
+            fetch('/guias/api/pdf-url/' + id)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.url) {
+                        window.open(data.url, '_blank');
+                    } else {
+                        alert('PDF da guia não encontrado.');
+                    }
+                })
+                .catch(err => alert('Erro ao carregar guia.'));
+        }
+
+        function abrirModalAnular(id) {
+            $('#anularGuiaId').val(id);
+            $('#modalAnular').modal('show');
+        }
     </script>
 </body>
 

@@ -34,12 +34,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/login", "/assets/**", "/api/compras", "/api/compras/single", "/finalizarVenda").permitAll()
+                .antMatchers("/login", "/assets/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/finalizarVenda").permitAll()
                 .anyRequest().authenticated()
             .and()
             .csrf()
                 .ignoringAntMatchers("/api/compras")
                 .ignoringAntMatchers("/api/compras/single")
+                .ignoringAntMatchers("/api/compras/proforma")
                 .ignoringAntMatchers("/finalizarVenda")
             .and()
             .formLogin()
@@ -49,7 +50,10 @@ public class SecurityConfig {
             .and()
             .logout()
                 .logoutSuccessUrl("/login?logout")
-                .permitAll();
+                .permitAll()
+            .and()
+            .headers()
+                .frameOptions().sameOrigin();
         return http.build();
     }
 }

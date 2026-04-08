@@ -67,5 +67,16 @@ public class CompraController {
         String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
         return ResponseEntity.ok().body(pdfFile);
     }
-    
+
+    @PostMapping("/api/compras/proforma")
+    public ResponseEntity<?> emitirProforma(@RequestBody Compra compra) {
+        if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
+            return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
+        }
+        compra.getItens().forEach(item -> item.setCompra(compra));
+        Compra compraSalva = vendaService.finalizarVenda(compra, "FP");
+        Fatura fatura = faturaService.emitirProforma(compraSalva);
+        String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
+        return ResponseEntity.ok().body(pdfFile);
+    }
 }
