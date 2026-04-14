@@ -3,6 +3,7 @@ package ao.co.hzconsultoria.efacturacao.controller;
 import ao.co.hzconsultoria.efacturacao.model.Categoria;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ImpostoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -31,6 +32,9 @@ public class ProdutoController {
     private CategoriaRepository categoriaRepository;
 
     @Autowired
+    private ImpostoRepository impostoRepository;
+
+    @Autowired
     private MessageSource messageSource;
 
     @GetMapping("/cadastroProduto")
@@ -38,6 +42,7 @@ public class ProdutoController {
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("produto", new Produto());
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
+        model.addAttribute("impostos", impostoRepository.findAll());
         return "cadastroProduto";
     }
 
@@ -70,6 +75,7 @@ public class ProdutoController {
         model.addAttribute("mensagem", messageSource.getMessage("msg.produto.salvo", null, LocaleContextHolder.getLocale()));
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
+        model.addAttribute("impostos", impostoRepository.findAll());
         return "cadastroProduto";
     }
 
@@ -88,6 +94,7 @@ public class ProdutoController {
         Pageable pageable = PageRequest.of(0, 50);
         model.addAttribute("produto", produto);
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
+        model.addAttribute("impostos", impostoRepository.findAll());
         return "detalhesProduto";
     }
 

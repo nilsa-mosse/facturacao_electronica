@@ -10,315 +10,463 @@
         :root {
             --primary: #4361ee;
             --primary-soft: rgba(67, 97, 238, 0.08);
-            --success: #2ec4b6;
-            --warning: #ffb703;
-            --danger: #ef233c;
-            --dark: #1a1c23;
-            --bg: #ffffff;
-            --glass: rgba(255, 255, 255, 0.8);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.75);
+            --card-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
         
         body { 
             background: var(--bg); 
+            background-image: radial-gradient(at 0% 0%, hsla(231,100%,94%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(225,100%,94%,1) 0, transparent 50%);
             font-family: 'Outfit', sans-serif; 
             color: var(--dark);
-            padding: 30px;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .premium-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .dashboard-header {
-            margin-bottom: 40px;
+            margin-bottom: 50px;
+        }
+
+        .title-accent {
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
 
         /* KPI Cards Premium */
         .kpi-card {
-            background: white;
-            border-radius: 24px;
-            padding: 24px;
-            border: 1px solid rgba(255,255,255,0.8);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.02);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .kpi-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-            z-index: -1;
-        }
+
         .kpi-card:hover { 
-            transform: translateY(-8px); 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.06);
+            transform: translateY(-10px) scale(1.02); 
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary);
         }
-        .kpi-icon {
-            width: 54px;
-            height: 54px;
-            border-radius: 16px;
+
+        .kpi-icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            transition: transform 0.3s;
-        }
-        .kpi-card:hover .kpi-icon {
-            transform: scale(1.1) rotate(-5deg);
+            font-size: 1.6rem;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         /* Grid System for History */
-        .premium-table-card {
-            background: white;
+        .premium-table-container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 32px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .table-responsive-custom {
             border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.05);
-            border: 1px solid #f1f5f9;
             overflow: hidden;
         }
 
+        .table {
+            margin-bottom: 0;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            background: transparent;
+        }
+
         .table thead th {
-            background: #fcfcfc;
-            color: #94a3b8;
-            font-size: 0.75rem;
-            font-weight: 800;
+            background: transparent;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             padding: 20px 25px;
-            border-bottom: 1px solid #f1f5f9;
+            border: none;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s;
+            cursor: pointer;
         }
 
         .table tbody td {
-            padding: 20px 25px;
+            background: white;
+            padding: 22px 25px;
             vertical-align: middle;
-            border-bottom: 1px solid #f8fafc;
+            border: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        /* Badges Vivas */
+        .table tbody tr td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+        .table tbody tr td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+        .table tbody tr:hover td {
+            background: #f1f5f9;
+            transform: scale(1.002);
+        }
+
+        /* Badges */
         .type-badge {
-            padding: 8px 16px;
-            border-radius: 10px;
+            padding: 10px 18px;
+            border-radius: 12px;
             font-size: 0.75rem;
             font-weight: 800;
             text-transform: uppercase;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            gap: 10px;
+            transition: all 0.3s;
         }
-        .badge-ENTRA { background: #22c55e; color: white; }
-        .badge-SAIDA { background: #ef4444; color: white; }
-        .badge-AJUSTE { background: #f59e0b; color: white; }
+        
+        .badge-ENTRA { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-SAIDA { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .badge-AJUSTE { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
 
-        .product-circle {
-            width: 44px;
-            height: 44px;
-            background: #e0e7ff;
-            color: #4f46e5;
-            border-radius: 14px;
+        .product-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            color: var(--primary);
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 1.2rem;
+            font-weight: 700;
         }
 
-        /* Nav Tabs for Filtering */
-        .filter-tabs {
-            background: #f1f5f9;
-            padding: 5px;
-            border-radius: 16px;
-            display: inline-flex;
-            gap: 5px;
-            margin-bottom: 25px;
+        /* Controls */
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
         }
-        .filter-tab {
+
+        .segmented-control {
+            background: rgba(226, 232, 240, 0.5);
+            padding: 6px;
+            border-radius: 18px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .segment-btn {
             padding: 10px 24px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 0.85rem;
             font-weight: 700;
             cursor: pointer;
             color: #64748b;
             transition: all 0.3s;
-            text-decoration: none;
+            border: none;
+            background: transparent;
         }
-        .filter-tab.active {
+
+        .segment-btn.active {
             background: white;
-            color: #4f46e5;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 450px;
         }
 
         .search-input {
-            border-radius: 14px;
-            border: 2px solid #e2e8f0;
-            padding: 12px 20px;
-            width: 320px;
-            font-size: 0.9rem;
+            width: 100%;
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 18px;
+            padding: 14px 20px 14px 50px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
             transition: all 0.3s;
         }
+
         .search-input:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
             outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 10px 15px -3px rgba(67, 97, 238, 0.15);
         }
 
-        .btn-plus {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
             color: white;
-            border-radius: 14px;
-            padding: 14px 28px;
-            font-weight: 800;
+            border-radius: 18px;
+            padding: 14px 32px;
+            font-weight: 700;
             border: none;
             transition: all 0.3s;
-            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
-        }
-        .btn-plus:hover { transform: scale(1.03); box-shadow: 0 15px 30px rgba(79, 70, 229, 0.3); color: white; }
-
-        .doc-link {
-            color: var(--primary);
-            background: var(--primary-soft);
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.25);
             text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
+        .btn-premium:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.35);
+            color: white;
+        }
+
+        .doc-chip {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .doc-chip:hover {
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .controls-row { flex-direction: column; align-items: stretch; }
+            .search-container { max-width: 100%; }
+        }
     </style>
+
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="premium-container">
         <!-- Header -->
         <div class="dashboard-header d-flex justify-content-between align-items-end">
             <div>
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-2">
-                        <li class="breadcrumb-item small"><a href="#" class="text-decoration-none text-muted fw-bold">INVENTÁRIO</a></li>
-                        <li class="breadcrumb-item small active fw-bold">CONTROLO DE FLUXO</li>
+                    <ol class="breadcrumb mb-3">
+                        <li class="breadcrumb-item small"><a href="#" class="text-decoration-none text-muted fw-800">INVENTÁRIO</a></li>
+                        <li class="breadcrumb-item small active fw-800 text-primary">HISTÓRICO</li>
                     </ol>
                 </nav>
-                <h1 class="fw-900 mb-0" style="letter-spacing: -1.5px; font-size: 2.8rem; color: #0f172a;">Rastreio de Stock</h1>
-                <p class="text-muted fw-500 fs-5">Monitorização em tempo real de ativos e logística.</p>
+                <h1 class="fw-900 mb-2" style="letter-spacing: -2px; font-size: 3.5rem; color: var(--dark);">
+                    Rastreio de <span class="title-accent">Fluxo</span>
+                </h1>
+                <p class="text-muted fw-500 fs-5 mb-0">Gestão auditável e analítica de ativos em tempo real.</p>
             </div>
-            <div class="d-flex gap-3">
-                <a th:href="@{/stock/entrada}" class="btn-plus"><i class="fas fa-plus-circle me-2"></i> REGISTAR ENTRADA</a>
+            <div>
+                <a th:href="@{/stock/entrada}" class="btn-premium">
+                    <i class="fas fa-plus-circle"></i> REGISTAR MOVIMENTO
+                </a>
             </div>
         </div>
 
         <!-- KPI Row -->
         <div class="row g-4 mb-5">
             <div class="col-md-3">
-                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">
-                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
-                        <i class="fas fa-bolt"></i>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-icon-box" style="background: rgba(67, 97, 238, 0.1); color: var(--primary);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Volume Total</h6>
+                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--dark);" th:text="${#lists.size(movimentos)}">0</h2>
                     </div>
-                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Fluxo Total</small>
-                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos)}">0</h2>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
-                        <i class="fas fa-plus-square"></i>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                            <i class="fas fa-arrow-down-long"></i>
+                        </div>
+                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Entradas</h6>
+                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--success);" th:text="${#lists.size(movimentos.?[tipo == 'ENTRA'])}">0</h2>
                     </div>
-                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Entradas Stock</small>
-                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos.?[tipo == 'ENTRA'])}">0</h2>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);">
-                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
-                        <i class="fas fa-minus-square"></i>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-icon-box" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                            <i class="fas fa-arrow-up-long"></i>
+                        </div>
+                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Saídas</h6>
+                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--danger);" th:text="${#lists.size(movimentos.?[tipo == 'SAIDA'])}">0</h2>
                     </div>
-                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Saídas Ativos</small>
-                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos.?[tipo == 'SAIDA'])}">0</h2>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="kpi-card text-white" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                    <div class="kpi-icon" style="background: rgba(255, 255, 255, 0.25); color: white;">
-                        <i class="fas fa-sync-alt"></i>
+                <div class="kpi-card">
+                    <div>
+                        <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">Ajustes</h6>
+                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--warning);" th:text="${#lists.size(movimentos.?[tipo == 'AJUSTE'])}">0</h2>
                     </div>
-                    <small class="fw-800 text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px; opacity: 0.8;">Ajustes Feitos</small>
-                    <h2 class="fw-900 mb-0" style="font-size: 2.5rem;" th:text="${#lists.size(movimentos.?[tipo == 'AJUSTE'])}">0</h2>
                 </div>
             </div>
         </div>
 
-        <!-- Filters and Search -->
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <div class="filter-tabs">
-                <a href="#" class="filter-tab active" onclick="filtrarTabela('todos', this)">Todos</a>
-                <a href="#" class="filter-tab" onclick="filtrarTabela('ENTRA', this)">Entradas</a>
-                <a href="#" class="filter-tab" onclick="filtrarTabela('SAIDA', this)">Saídas</a>
-                <a href="#" class="filter-tab" onclick="filtrarTabela('AJUSTE', this)">Ajustes</a>
+        <!-- Controls -->
+        <div class="controls-row">
+            <div class="segmented-control">
+                <button class="segment-btn active" onclick="filtrarTabela('todos', this)">Todos Movimentos</button>
+                <button class="segment-btn" onclick="filtrarTabela('ENTRA', this)">Entradas</button>
+                <button class="segment-btn" onclick="filtrarTabela('SAIDA', this)">Saídas</button>
+                <button class="segment-btn" onclick="filtrarTabela('AJUSTE', this)">Ajustes</button>
             </div>
-            <div class="position-relative">
-                <i class="fas fa-search position-absolute" style="top: 14px; left: 15px; color: #94a3b8;"></i>
-                <input type="text" class="search-input ps-5" placeholder="Procurar produto ou DOC..." onkeyup="pesquisar(this)">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Pesquisar por produto, código ou referência..." onkeyup="pesquisar(this)">
             </div>
         </div>
 
-        <!-- Table Card -->
-        <div class="premium-table-card">
-            <table class="table mb-0" id="tabelaEstoque">
-                <thead>
-                    <tr>
-                        <th>Data & Hora</th>
-                        <th>Artigo / Produto</th>
-                        <th>Tipo</th>
-                        <th>Quantidade</th>
-                        <th>Origem / Referência</th>
-                        <th>Motivo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="mov : ${movimentos}" th:data-tipo="${mov.tipo}">
-                        <td class="small fw-600 text-muted" th:text="${#temporals.format(mov.dataMovimento, 'dd MMM yyyy HH:mm')}"></td>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="product-circle"><i class="fas fa-box"></i></div>
-                                <div>
-                                    <div class="fw-800" th:text="${mov.produto.nome}"></div>
-                                    <div class="small text-muted" th:text="'ID: ' + ${mov.produto.id}"></div>
+        <!-- Table Container -->
+        <div class="premium-table-container">
+            <div class="table-responsive-custom">
+                <table class="table" id="tabelaEstoque">
+                    <thead>
+                        <tr>
+                            <th>Registo Temporal</th>
+                            <th>Artigo & Identificação</th>
+                            <th>Natureza</th>
+                            <th>Quantidade</th>
+                            <th>Logística / Referência</th>
+                            <th>Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="mov : ${movimentos}" th:data-tipo="${mov.tipo}">
+                            <td>
+                                <div class="fw-700 color-dark" th:text="${#temporals.format(mov.dataMovimento, 'dd MMM yyyy')}"></div>
+                                <div class="small text-muted fw-600" th:text="${#temporals.format(mov.dataMovimento, 'HH:mm:ss')}"></div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="product-avatar">
+                                        <i class="fas fa-box-open"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-800 text-dark" style="font-size: 1.05rem;" th:text="${mov.produto.nome}"></div>
+                                        <div class="small text-muted fw-700" th:text="'SKU-' + ${mov.produto.id}"></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span th:class="'type-badge badge-' + ${mov.tipo}" th:text="${mov.tipo}"></span>
-                        </td>
-                        <td class="fw-800" th:text="${mov.quantidade}"></td>
-                        <td>
-                            <div th:if="${mov.origem != null}" class="small mb-1"><i class="fas fa-truck me-1 opacity-50"></i> <span th:text="${mov.origem}"></span></div>
-                            <div th:if="${mov.documentoReferencia != null}">
-                                <span class="doc-link"><i class="fas fa-file-alt me-1"></i> <span th:text="${mov.documentoReferencia}"></span></span>
-                            </div>
-                        </td>
-                        <td class="small text-muted" style="max-width: 200px;" th:text="${mov.motivo}"></td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(movimentos)}">
-                        <td colspan="6" class="text-center py-5">
-                            <img src="https://cdni.iconscout.com/illustration/premium/thumb/empty-state-2130362-1800926.png" style="width: 150px; opacity: 0.5;">
-                            <p class="mt-3 text-muted fw-bold">Nenhum movimento encontrado.</p>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            </td>
+                            <td>
+                                <span th:class="'type-badge badge-' + ${mov.tipo}">
+                                    <i th:class="${mov.tipo == 'ENTRA' ? 'fas fa-arrow-down' : (mov.tipo == 'SAIDA' ? 'fas fa-arrow-up' : 'fas fa-exchange-alt')}"></i>
+                                    <span th:text="${mov.tipo}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-900" style="font-size: 1.2rem;" th:text="${mov.quantidade}"></div>
+                                <div class="small text-muted fw-600">UNIDADES</div>
+                            </td>
+                            <td>
+                                <div th:if="${mov.origem != null}" class="fw-700 text-dark mb-1">
+                                    <i class="fas fa-warehouse me-2 text-primary opacity-50"></i>
+                                    <span th:text="${mov.origem}"></span>
+                                </div>
+                                <div th:if="${mov.documentoReferencia != null}">
+                                    <a href="#" class="doc-chip">
+                                        <i class="fas fa-file-invoice"></i>
+                                        <span th:text="${mov.documentoReferencia}"></span>
+                                    </a>
+                                </div>
+                                <div th:if="${mov.origem == null && mov.documentoReferencia == null}" class="text-muted small italic">S/ Ref Doc</div>
+                            </td>
+                            <td>
+                                <div class="small text-muted fw-500" style="max-width: 250px; line-height: 1.4;" th:text="${mov.motivo}"></div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(movimentos)}">
+                            <td colspan="6" class="text-center py-5" style="background: white !important;">
+                                <div class="py-5">
+                                    <i class="fas fa-layer-group fa-4x mb-4 opacity-20" style="color: var(--primary);"></i>
+                                    <h3 class="fw-800 text-muted">Histórico Vazio</h3>
+                                    <p class="text-muted">Ainda não foram registados movimentos no inventário.</p>
+                                    <a th:href="@{/stock/entrada}" class="btn-premium mt-3">PRODUZIR PRIMEIRO REGISTO</a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+
     <script th:inline="javascript">
         function filtrarTabela(tipo, element) {
-            // Update tabs
-            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            // Update segmented control
+            document.querySelectorAll('.segment-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
 
-            // Filter rows
+            // Filter rows with transition
             const rows = document.querySelectorAll('#tabelaEstoque tbody tr');
             rows.forEach(row => {
-                if (tipo === 'todos') {
+                if (tipo === 'todos' || row.getAttribute('data-tipo') === tipo) {
                     row.style.display = '';
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        row.style.transition = 'opacity 0.4s ease';
+                        row.style.opacity = '1';
+                    }, 50);
                 } else {
-                    row.style.display = row.getAttribute('data-tipo') === tipo ? '' : 'none';
+                    row.style.display = 'none';
                 }
             });
         }
@@ -328,7 +476,12 @@
             const rows = document.querySelectorAll('#tabelaEstoque tbody tr');
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(filter) ? '' : 'none';
+                if (text.includes(filter)) {
+                    row.style.display = '';
+                    row.style.opacity = '1';
+                } else {
+                    row.style.display = 'none';
+                }
             });
         }
     </script>
