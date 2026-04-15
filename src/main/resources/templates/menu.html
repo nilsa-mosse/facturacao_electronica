@@ -25,6 +25,17 @@
 
   <!-- Custom Premium Style -->
   <link rel="stylesheet" th:href="@{/css/premium-style.css}">
+  
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+      100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    .badge-pulse {
+      animation: pulse-ring 2s infinite;
+    }
+  </style>
 </head>
 
 <body>
@@ -427,10 +438,13 @@
                       <p>Saldo Por Produto</p>
                     </a>
                   </li>
-                  <li class="nav-item">
-                    <a th:href="@{/stock/alertas}" class="nav-link">
-                      <i class="fas fa-exclamation-triangle nav-icon"></i>
-                      <p th:text="#{menu.inventario.alertas}">Alertas de stock mínimo</p>
+                  <li class="nav-item pt-2 border-top border-danger border-opacity-25 mt-1">
+                    <a th:href="@{/stock/alertas}" class="nav-link text-danger" style="background: rgba(220,53,69,0.05);">
+                      <i class="fas fa-exclamation-triangle nav-icon text-danger"></i>
+                      <p class="fw-bold">
+                        Alertas de Ruptura
+                        <span class="right badge bg-danger badge-pulse">URGENTE</span>
+                      </p>
                     </a>
                   </li>
 

@@ -10,67 +10,122 @@
         :root {
             --primary: #4361ee;
             --secondary: #3f37c9;
-            --success: #10b981;
-            --dark: #0f172a;
-            --bg: #f8fafc;
+            --success: #059669;
+            --danger: #dc2626;
+            --dark: #1e293b;
+            --bg: #f4f7fe;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
         }
         
         body { 
             background: var(--bg); 
-            background-image: radial-gradient(at 100% 0%, hsla(225,100%,94%,1) 0, transparent 50%), 
-                              radial-gradient(at 0% 100%, hsla(225,100%,94%,1) 0, transparent 50%);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(67, 97, 238, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(76, 201, 240, 0.1) 0px, transparent 50%);
             font-family: 'Outfit', sans-serif; 
             color: var(--dark);
             min-height: 100vh;
             padding: 40px 20px;
+            overflow-x: hidden;
         }
 
         .premium-container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
-            animation: fadeIn 0.8s ease-out;
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes slideUpFade {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .header-section { margin-bottom: 50px; }
+        .header-section { 
+            margin-bottom: 40px; 
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
         
+        .title-area h1 {
+            font-weight: 800;
+            letter-spacing: -2px;
+            font-size: 3.5rem;
+            color: var(--dark);
+            text-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin: 0;
+        }
+        
+        .title-area h1 span {
+            background: linear-gradient(135deg, var(--primary), #4cc9f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         .balance-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            position: relative;
             overflow: hidden;
-            padding: 30px;
+        }
+
+        /* Decorative blobs behind card */
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50px; right: -50px;
+            width: 200px; height: 200px;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), transparent);
+            border-radius: 50%;
+            z-index: -1;
         }
 
         .search-bar {
             background: white;
-            border-radius: 20px;
-            padding: 15px 25px;
-            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 18px 25px;
+            border: 1px solid rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            margin-bottom: 35px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar:focus-within {
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+            border-color: var(--primary);
+            transform: translateY(-2px);
         }
 
         .search-bar input {
             border: none;
             outline: none;
             width: 100%;
-            font-weight: 600;
+            font-weight: 500;
+            font-size: 1.1rem;
             color: var(--dark);
+            background: transparent;
+        }
+
+        .search-bar i {
+            color: var(--primary);
+            font-size: 1.2rem;
         }
 
         .table {
             border-collapse: separate;
-            border-spacing: 0 10px;
+            border-spacing: 0 12px;
+            margin-top: -12px;
         }
 
         .table thead th {
@@ -78,56 +133,123 @@
             color: #64748b;
             font-weight: 700;
             text-transform: uppercase;
-            font-size: 0.8rem;
-            padding: 15px 25px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            padding: 10px 25px;
         }
 
         .table tbody tr td {
             background: white;
             border: none;
-            padding: 20px 25px;
+            padding: 22px 25px;
             vertical-align: middle;
-            transition: all 0.3s;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .table tbody tr:hover td { transform: scale(1.01); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); z-index: 10; cursor: pointer; }
+        .table tbody tr {
+            position: relative;
+        }
 
-        .table tbody tr td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
-        .table tbody tr td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+        /* Hover Effect for Rows */
+        .table tbody tr:hover td { 
+            transform: scale(1.01); 
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08); 
+            z-index: 10; 
+            cursor: default;
+        }
+
+        .table tbody tr td:first-child { 
+            border-top-left-radius: 20px; 
+            border-bottom-left-radius: 20px; 
+        }
+        
+        .table tbody tr td:last-child { 
+            border-top-right-radius: 20px; 
+            border-bottom-right-radius: 20px; 
+        }
 
         .qty-badge {
             background: #f1f5f9;
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 12px;
             font-weight: 800;
             font-size: 1.1rem;
             color: var(--dark);
+            display: inline-block;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .qty-low { background: #fee2e2; color: #dc2626; }
-        .qty-ok { background: #ecfdf5; color: #059669; }
+        .qty-low { 
+            background: linear-gradient(135deg, #fecaca, #fca5a5); 
+            color: #991b1b; 
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.15);
+        }
+        
+        .qty-ok { 
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0); 
+            color: #065f46; 
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+        }
 
         .btn-back {
             background: white;
             color: var(--dark);
             border-radius: 14px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-weight: 700;
             text-decoration: none;
-            display: inline-flex; align-items: center; gap: 8px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.3s;
-        }
-        .btn-back:hover { background: #f8fafc; transform: translateX(-5px); }
-
-        .row-out-of-stock td {
-            background: #fff1f2 !important;
-            border-bottom: 2px solid #fecaca !important;
+            display: inline-flex; align-items: center; gap: 10px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 0.95rem;
         }
         
+        .btn-back:hover { 
+            background: var(--primary); 
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2); 
+        }
+
+        /* Sold out row styling */
+        .row-out-of-stock td {
+            background: #fffafa !important;
+        }
+        
+        .row-out-of-stock td:first-child::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10%;
+            height: 80%;
+            width: 4px;
+            background: var(--danger);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 8px 14px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
         .status-unavailable {
-            background: #991b1b;
-            color: white !important;
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .status-available {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
     </style>
@@ -135,9 +257,14 @@
 <body>
     <div class="premium-container">
         <div class="header-section">
-            <a th:href="@{/dashboard}" class="btn-back mb-3"><i class="fas fa-arrow-left"></i> VOLTAR</a>
-            <h1 class="fw-900 mb-0" style="letter-spacing: -1.5px; font-size: 3rem;">Saldos por <span style="color: var(--primary);">Produto</span></h1>
-            <p class="text-muted fw-600">Visão consolidada do inventário disponível em tempo real.</p>
+            <div class="title-area">
+                <a th:href="@{/dashboard}" class="btn-back mb-4"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</a>
+                <h1 class="mb-2">Saldos de <span>Inventário</span></h1>
+                <p class="text-muted fw-600 mb-0" style="font-size: 1.1rem;">Monitorização consolidada e em tempo-real do stock de produtos e mercadorias.</p>
+            </div>
+            <div class="d-none d-md-block">
+                <i class="fas fa-boxes text-primary" style="font-size: 4rem; opacity: 0.1;"></i>
+            </div>
         </div>
 
         <div class="balance-card">
@@ -180,11 +307,11 @@
                                       th:text="${produto.quantidadeEstoque}">0</span>
                             </td>
                             <td>
-                                <div th:if="${!produto.disponivel}" class="text-white bg-danger fw-700 small px-2 py-1 rounded">
-                                    <i class="fas fa-times-circle me-1"></i> INDISPONÍVEL
+                                <div th:if="${!produto.disponivel}" class="status-badge status-unavailable">
+                                    <i class="fas fa-lock"></i> ESGOTADO
                                 </div>
-                                <div th:if="${produto.disponivel}" class="text-success fw-700 small">
-                                    <i class="fas fa-check-circle me-1"></i> DISPONÍVEL
+                                <div th:if="${produto.disponivel}" class="status-badge status-available">
+                                    <i class="fas fa-check-circle"></i> DISPONÍVEL
                                 </div>
                             </td>
                         </tr>

@@ -401,39 +401,34 @@
                         <!-- Gerado via JS -->
                     </div>
 
-                    <div class="cart-footer">
-                        <div class="cart-summary shadow-sm mb-4">
-                            <div class="summary-row">
-                                <span class="text-muted" th:text="#{pos.total.sem_imposto}">Subtotal</span>
-                                <span class="fw-bold" id="totalSemImposto">0.00 Kz</span>
+                        <div class="cart-footer">
+                            <div class="cart-summary shadow-sm mb-4">
+                                <div class="summary-row">
+                                    <span class="text-muted" th:text="#{pos.total.sem_imposto}">Subtotal</span>
+                                    <span class="fw-bold" id="totalSemImposto">0.00 Kz</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="text-muted" th:text="#{pos.iva}">IVA Acumulado</span>
+                                    <span class="fw-bold text-info" id="valorIva">0.00 Kz</span>
+                                </div>
+                                <div class="summary-row summary-total">
+                                    <span th:text="#{pos.total}">Total Final</span>
+                                    <span id="totalFinal">0.00 Kz</span>
+                                </div>
                             </div>
-                            <div class="summary-row">
-                                <span class="text-muted" th:text="#{pos.iva}">IVA Acumulado</span>
-                                <span class="fw-bold text-info" id="valorIva">0.00 Kz</span>
+
+                            <button type="button" id="btnContinuar"
+                                class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm"
+                                onclick="abrirModalCheckout()">
+                                <i class="fas fa-arrow-right me-2"></i> Continuar
+                            </button>
+
+                            <div id="pdfLinkBox" class="mt-3 d-none text-center">
+                                <a id="pdfLink" href="#" target="_blank" class="btn btn-outline-primary w-100 rounded-pill">
+                                    <i class="fas fa-file-pdf me-2"></i><span id="pdfLinkText"
+                                        th:text="#{pos.fatura.baixar}">Baixar Factura</span>
+                                </a>
                             </div>
-                            <div class="summary-row summary-total">
-                                <span th:text="#{pos.total}">Total Final</span>
-                                <span id="totalFinal">0.00 Kz</span>
-                            </div>
-                        </div>
-
-                        <button type="button" id="finalizarCompra"
-                            class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">
-                            <i class="fas fa-receipt me-2"></i><span th:text="#{pos.btn.finalizar}">Finalizar
-                                Venda</span>
-                        </button>
-
-                        <button type="button" id="emitirProforma"
-                            class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-3">
-                            <i class="fas fa-file-invoice me-2"></i><span th:text="#{pos.btn.proforma}">Emitir
-                                Pró-forma</span>
-                        </button>
-
-                        <div id="pdfLinkBox" class="mt-3 d-none text-center">
-                            <a id="pdfLink" href="#" target="_blank" class="btn btn-outline-primary w-100 rounded-pill">
-                                <i class="fas fa-file-pdf me-2"></i><span id="pdfLinkText"
-                                    th:text="#{pos.fatura.baixar}">Baixar Factura</span>
-                            </a>
                         </div>
                     </div>
                 </div>
@@ -446,6 +441,124 @@
             <span id="t-fatura-baixar" th:text="#{pos.fatura.baixar}"></span>
             <span id="t-proforma-baixar" th:text="#{pos.proforma.baixar}"></span>
         </div>
+    </div>
+
+    <!-- ============================================================
+         MODAL DE CHECKOUT
+    =============================================================== -->
+    <div class="modal fade" id="modalCheckout" tabindex="-1" aria-labelledby="modalCheckoutLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+
+          <!-- Header -->
+          <div class="modal-header text-white" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 0;">
+            <div>
+              <h5 class="modal-title fw-bold mb-0" id="modalCheckoutLabel">
+                <i class="fas fa-shopping-bag me-2"></i> Revisão da Compra
+              </h5>
+              <small class="text-white-50">Confirme os itens e escolha a forma de pagamento</small>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+
+          <!-- Body -->
+          <div class="modal-body p-4" style="background: #f8fafc;">
+
+            <!-- Tabela de Itens -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;">
+              <div class="card-header fw-bold text-dark border-0" style="background: #eff6ff;">
+                <i class="fas fa-list me-2 text-primary"></i> Itens do Carrinho
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0" id="modalCartTable">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-3">Produto</th>
+                      <th class="text-center">Qtd</th>
+                      <th class="text-end">Preço Unit.</th>
+                      <th class="text-end pe-3">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="modalCartBody">
+                    <!-- Preenchido via JS -->
+                  </tbody>
+                  <tfoot class="table-light fw-bold">
+                    <tr>
+                      <td colspan="3" class="text-end ps-3">Subtotal:</td>
+                      <td class="text-end pe-3" id="modalSubtotal">0.00 Kz</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="text-end">IVA:</td>
+                      <td class="text-end pe-3" id="modalIva">0.00 Kz</td>
+                    </tr>
+                    <tr class="table-success">
+                      <td colspan="3" class="text-end fw-bold fs-6">TOTAL FINAL:</td>
+                      <td class="text-end pe-3 fw-bold fs-6 text-success" id="modalTotal">0.00 Kz</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            <!-- Forma de Pagamento -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+              <div class="card-header fw-bold text-dark border-0" style="background: #f0fdf4;">
+                <i class="fas fa-credit-card me-2 text-success"></i> Forma de Pagamento
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="formaPagamento" id="pagTPA" value="TPA" autocomplete="off">
+                    <label for="pagTPA" class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-2" style="border-radius: 14px;">
+                      <i class="fas fa-credit-card fa-2x"></i>
+                      <span class="fw-bold small">TPA / Cartão</span>
+                    </label>
+                  </div>
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="formaPagamento" id="pagCASH" value="CASH" autocomplete="off" checked>
+                    <label for="pagCASH" class="btn btn-outline-success w-100 py-3 d-flex flex-column align-items-center gap-2" style="border-radius: 14px;">
+                      <i class="fas fa-money-bill-wave fa-2x"></i>
+                      <span class="fw-bold small">Dinheiro (CASH)</span>
+                    </label>
+                  </div>
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="formaPagamento" id="pagTRANSF" value="TRANSFERENCIA" autocomplete="off">
+                    <label for="pagTRANSF" class="btn btn-outline-warning w-100 py-3 d-flex flex-column align-items-center gap-2" style="border-radius: 14px;">
+                      <i class="fas fa-exchange-alt fa-2x"></i>
+                      <span class="fw-bold small">Transferência</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acao Adicionar mais produtos -->
+            <div class="alert alert-info border-0 d-flex align-items-center gap-3" style="border-radius: 12px;">
+              <i class="fas fa-info-circle fa-lg"></i>
+              <span>Para <strong>adicionar mais produtos</strong> ou <strong>alterar quantidades</strong>, feche esta janela e edite o carrinho diretamente.</span>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer border-0 p-4" style="background: #f8fafc; gap: 12px;">
+            <button type="button" class="btn btn-outline-danger rounded-pill px-4"
+                    data-bs-dismiss="modal" onclick="cancelarCompra()">
+              <i class="fas fa-times me-2"></i> Cancelar Compra
+            </button>
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+              <i class="fas fa-edit me-2"></i> Editar Carrinho
+            </button>
+            <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold" id="btnEmitirProformaModal">
+              <i class="fas fa-file-invoice me-2"></i> Pró-forma
+            </button>
+            <button type="button" class="btn btn-success rounded-pill px-5 fw-bold shadow" id="btnFinalizarModal">
+              <i class="fas fa-check-circle me-2"></i> Finalizar Venda
+            </button>
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <!-- JS Logic Refactored -->
@@ -676,6 +789,99 @@
                     }
                 });
             }
+
+            // ---- MODAL CHECKOUT ----
+
+            function abrirModalCheckout() {
+                if (cart.length === 0) {
+                    alert('O carrinho está vazio. Adicione produtos primeiro.');
+                    return;
+                }
+                renderModalCart();
+                var myModal = new bootstrap.Modal(document.getElementById('modalCheckout'));
+                myModal.show();
+            }
+
+            window.abrirModalCheckout = abrirModalCheckout;
+
+            function renderModalCart() {
+                var tbody = $('#modalCartBody');
+                tbody.empty();
+                var subtotal = 0, totalIva = 0;
+
+                cart.forEach(function(item, idx) {
+                    var itemTotal = item.qtd * item.preco;
+                    subtotal += itemTotal;
+                    totalIva += itemTotal * (item.ivaPercentual / 100);
+
+                    tbody.append(
+                        '<tr>' +
+                        '  <td class="ps-3"><div class="fw-semibold">' + item.nome + '</div>' +
+                        '    <small class="text-muted">' + item.preco.toFixed(2) + ' Kz / un.</small></td>' +
+                        '  <td class="text-center">' +
+                        '    <div class="d-flex align-items-center justify-content-center gap-2">' +
+                        '      <button class="btn btn-sm btn-outline-secondary rounded-circle" onclick="modalDecreaseQty(' + idx + ')" style="width:28px;height:28px;padding:0;"><i class="fas fa-minus" style="font-size:10px;"></i></button>' +
+                        '      <span class="fw-bold" id="modal-qty-' + idx + '">' + item.qtd + '</span>' +
+                        '      <button class="btn btn-sm btn-outline-secondary rounded-circle" onclick="modalIncreaseQty(' + idx + ')" style="width:28px;height:28px;padding:0;"><i class="fas fa-plus" style="font-size:10px;"></i></button>' +
+                        '    </div>' +
+                        '  </td>' +
+                        '  <td class="text-end">' + item.preco.toFixed(2) + ' Kz</td>' +
+                        '  <td class="text-end pe-3 fw-bold">' + itemTotal.toFixed(2) + ' Kz</td>' +
+                        '</tr>'
+                    );
+                });
+
+                var totalFinal = subtotal + totalIva;
+                $('#modalSubtotal').text(subtotal.toFixed(2) + ' Kz');
+                $('#modalIva').text(totalIva.toFixed(2) + ' Kz');
+                $('#modalTotal').text(totalFinal.toFixed(2) + ' Kz');
+            }
+
+            window.modalIncreaseQty = function(idx) {
+                var item = cart[idx];
+                if (item.stockMax !== Infinity && item.qtd + 1 > item.stockMax) {
+                    alert('Stock insuficiente!');
+                    return;
+                }
+                item.qtd++;
+                renderCart();
+                renderModalCart();
+            };
+
+            window.modalDecreaseQty = function(idx) {
+                if (cart[idx].qtd > 1) {
+                    cart[idx].qtd--;
+                } else {
+                    cart.splice(idx, 1);
+                }
+                renderCart();
+                renderModalCart();
+                if (cart.length === 0) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+                }
+            };
+
+            function cancelarCompra() {
+                if (confirm('Tem a certeza que deseja cancelar esta compra? O carrinho será limpo.')) {
+                    cart = [];
+                    renderCart();
+                }
+            }
+
+            function getFormaPagamento() {
+                return $('input[name="formaPagamento"]:checked').val() || 'CASH';
+            }
+
+            $('#btnFinalizarModal').click(function() {
+                var forma = getFormaPagamento();
+                processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#btnFinalizarModal');
+                bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+            });
+
+            $('#btnEmitirProformaModal').click(function() {
+                processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal');
+                bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+            });
 
             $('#finalizarCompra').click(function () {
                 processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#finalizarCompra');
