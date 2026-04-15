@@ -24,6 +24,19 @@ public class Compra {
     private String status = "EMITIDA"; // EMITIDA, CANCELADA
     private String tipoDocumento; // FT, FR, FP
 
+    // Dados do cliente para a factura (pode ser FK ou Consumidor Final)
+    private String nomeCliente;
+    private String nifCliente;
+    private String formaPagamento; // CASH, TPA, TRANSFERENCIA, CASH+TPA, etc.
+
+    // Detalhes MULTICAIXA (Angola)
+    private Double valorPagoCash;
+    private Double valorPagoMulticaixa;
+    private String bancoMulticaixa;       // BFA, BAI, BCI, etc.
+    private String referenciaMulticaixa;  // Número do borderô/transação
+    private Double comissaoMulticaixa;    // Valor da taxa (padrão 1.5%)
+    private Double valorLiquidoMulticaixa; // Valor líquido que entra na conta
+
     // Getters and Setters
     public Cliente getCliente() {
         return cliente;
@@ -74,4 +87,31 @@ public class Compra {
 
     public String getTipoDocumento() { return tipoDocumento; }
     public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
+
+    public String getNomeCliente() { return nomeCliente; }
+    public void setNomeCliente(String nomeCliente) { this.nomeCliente = nomeCliente; }
+
+    public String getNifCliente() { return nifCliente; }
+    public void setNifCliente(String nifCliente) { this.nifCliente = nifCliente; }
+
+    public String getFormaPagamento() { return formaPagamento; }
+    public void setFormaPagamento(String formaPagamento) { this.formaPagamento = formaPagamento; }
+
+    public Double getValorPagoCash() { return valorPagoCash; }
+    public void setValorPagoCash(Double valorPagoCash) { this.valorPagoCash = valorPagoCash; }
+
+    public Double getValorPagoMulticaixa() { return valorPagoMulticaixa; }
+    public void setValorPagoMulticaixa(Double valorPagoMulticaixa) { this.valorPagoMulticaixa = valorPagoMulticaixa; }
+
+    public String getBancoMulticaixa() { return bancoMulticaixa; }
+    public void setBancoMulticaixa(String bancoMulticaixa) { this.bancoMulticaixa = bancoMulticaixa; }
+
+    public String getReferenciaMulticaixa() { return referenciaMulticaixa; }
+    public void setReferenciaMulticaixa(String referenciaMulticaixa) { this.referenciaMulticaixa = referenciaMulticaixa; }
+
+    public Double getComissaoMulticaixa() { return comissaoMulticaixa; }
+    public void setComissaoMulticaixa(Double comissaoMulticaixa) { this.comissaoMulticaixa = comissaoMulticaixa; }
+
+    public Double getValorLiquidoMulticaixa() { return valorLiquidoMulticaixa; }
+    public void setValorLiquidoMulticaixa(Double valorLiquidoMulticaixa) { this.valorLiquidoMulticaixa = valorLiquidoMulticaixa; }
 }

@@ -447,7 +447,7 @@
          MODAL DE CHECKOUT
     =============================================================== -->
     <div class="modal fade" id="modalCheckout" tabindex="-1" aria-labelledby="modalCheckoutLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="max-width: 95%;">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
 
           <!-- Header -->
@@ -463,82 +463,209 @@
 
           <!-- Body -->
           <div class="modal-body p-4" style="background: #f8fafc;">
+            <div class="row g-4" id="checkoutFormRow">
 
-            <!-- Tabela de Itens -->
-            <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;">
-              <div class="card-header fw-bold text-dark border-0" style="background: #eff6ff;">
-                <i class="fas fa-list me-2 text-primary"></i> Itens do Carrinho
-              </div>
-              <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0" id="modalCartTable">
-                  <thead class="table-light">
-                    <tr>
-                      <th class="ps-3">Produto</th>
-                      <th class="text-center">Qtd</th>
-                      <th class="text-end">Preço Unit.</th>
-                      <th class="text-end pe-3">Subtotal</th>
-                    </tr>
-                  </thead>
-                  <tbody id="modalCartBody">
-                    <!-- Preenchido via JS -->
-                  </tbody>
-                  <tfoot class="table-light fw-bold">
-                    <tr>
-                      <td colspan="3" class="text-end ps-3">Subtotal:</td>
-                      <td class="text-end pe-3" id="modalSubtotal">0.00 Kz</td>
-                    </tr>
-                    <tr>
-                      <td colspan="3" class="text-end">IVA:</td>
-                      <td class="text-end pe-3" id="modalIva">0.00 Kz</td>
-                    </tr>
-                    <tr class="table-success">
-                      <td colspan="3" class="text-end fw-bold fs-6">TOTAL FINAL:</td>
-                      <td class="text-end pe-3 fw-bold fs-6 text-success" id="modalTotal">0.00 Kz</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-
-            <!-- Forma de Pagamento -->
-            <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
-              <div class="card-header fw-bold text-dark border-0" style="background: #f0fdf4;">
-                <i class="fas fa-credit-card me-2 text-success"></i> Forma de Pagamento
-              </div>
-              <div class="card-body">
-                <div class="row g-3">
-                  <div class="col-4">
-                    <input type="radio" class="btn-check" name="formaPagamento" id="pagTPA" value="TPA" autocomplete="off">
-                    <label for="pagTPA" class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center gap-2" style="border-radius: 14px;">
-                      <i class="fas fa-credit-card fa-2x"></i>
-                      <span class="fw-bold small">TPA / Cartão</span>
-                    </label>
+              <!-- COL 1: Tabela de Itens (col-4) -->
+              <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;">
+                  <div class="card-header fw-bold text-dark border-0" style="background: #eff6ff;">
+                    <i class="fas fa-list me-2 text-primary"></i> Itens do Carrinho
                   </div>
-                  <div class="col-4">
-                    <input type="radio" class="btn-check" name="formaPagamento" id="pagCASH" value="CASH" autocomplete="off" checked>
-                    <label for="pagCASH" class="btn btn-outline-success w-100 py-3 d-flex flex-column align-items-center gap-2" style="border-radius: 14px;">
-                      <i class="fas fa-money-bill-wave fa-2x"></i>
-                      <span class="fw-bold small">Dinheiro (CASH)</span>
-                    </label>
-                  </div>
-                  <div class="col-4">
-                    <input type="radio" class="btn-check" name="formaPagamento" id="pagTRANSF" value="TRANSFERENCIA" autocomplete="off">
-                    <label for="pagTRANSF" class="btn btn-outline-warning w-100 py-3 d-flex flex-column align-items-center gap-2" style="border-radius: 14px;">
-                      <i class="fas fa-exchange-alt fa-2x"></i>
-                      <span class="fw-bold small">Transferência</span>
-                    </label>
+                  <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0" id="modalCartTable">
+                      <thead class="table-light">
+                        <tr>
+                          <th class="ps-3">Produto</th>
+                          <th class="text-center">Qtd</th>
+                          <th class="text-end">Unit.</th>
+                          <th class="text-end pe-3">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody id="modalCartBody"></tbody>
+                      <tfoot class="table-light fw-bold">
+                        <tr><td colspan="3" class="text-end ps-3">Subtotal:</td><td class="text-end pe-3" id="modalSubtotal">0.00 Kz</td></tr>
+                        <tr><td colspan="3" class="text-end">IVA:</td><td class="text-end pe-3" id="modalIva">0.00 Kz</td></tr>
+                        <tr class="table-success">
+                          <td colspan="3" class="text-end fw-bold">TOTAL:</td>
+                          <td class="text-end pe-3 fw-bold text-success" id="modalTotal">0.00 Kz</td>
+                        </tr>
+                      </tfoot>
+                    </table>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Acao Adicionar mais produtos -->
-            <div class="alert alert-info border-0 d-flex align-items-center gap-3" style="border-radius: 12px;">
-              <i class="fas fa-info-circle fa-lg"></i>
-              <span>Para <strong>adicionar mais produtos</strong> ou <strong>alterar quantidades</strong>, feche esta janela e edite o carrinho diretamente.</span>
-            </div>
+              <!-- COL 2: Forma de Pagamento (col-4) -->
+              <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                  <div class="card-header fw-bold text-dark border-0" style="background: #f0fdf4;">
+                    <i class="fas fa-credit-card me-2 text-success"></i> Pagamento
+                  </div>
+                  <div class="card-body">
+                    <small class="text-muted d-block mb-3">Selecione <strong>até 2</strong> formas de pagamento</small>
+                    <div class="d-flex flex-column gap-2 mb-3">
+                      <div>
+                        <input type="checkbox" class="btn-check pagamento-check" id="pagMULTICAIXA" value="MULTICAIXA" autocomplete="off">
+                        <label for="pagMULTICAIXA" class="btn btn-outline-primary w-100 py-3 d-flex align-items-center gap-3" style="border-radius: 14px;">
+                          <i class="fas fa-credit-card fa-lg"></i>
+                          <div class="text-start">
+                            <div class="fw-bold">MULTICAIXA</div>
+                            <small>Cartão / MCX</small>
+                          </div>
+                        </label>
+                      </div>
+                      <div>
+                        <input type="checkbox" class="btn-check pagamento-check" id="pagCASH" value="CASH" autocomplete="off" checked>
+                        <label for="pagCASH" class="btn btn-outline-success w-100 py-3 d-flex align-items-center gap-3" style="border-radius: 14px;">
+                          <i class="fas fa-money-bill-wave fa-lg"></i>
+                          <div class="text-start">
+                            <div class="fw-bold">CASH</div>
+                            <small>Dinheiro</small>
+                          </div>
+                        </label>
+                      </div>
+                      <div>
+                        <input type="checkbox" class="btn-check pagamento-check" id="pagTRANSF" value="TRANSFERENCIA" autocomplete="off">
+                        <label for="pagTRANSF" class="btn btn-outline-warning w-100 py-3 d-flex align-items-center gap-3" style="border-radius: 14px;">
+                          <i class="fas fa-exchange-alt fa-lg"></i>
+                          <div class="text-start">
+                            <div class="fw-bold">Transferência</div>
+                            <small>Banco / IBAN</small>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
 
+                    <div id="aviso-pagamento" class="alert alert-warning border-0 mt-3 py-2 px-3 d-none" style="border-radius: 10px; font-size: 0.82rem;">
+                      <i class="fas fa-exclamation-triangle me-1"></i> Máximo de 2 formas de pagamento.
+                    </div>
+
+                    <!-- Detalhes MULTICAIXA (Angola) -->
+                    <div id="painelMulticaixa" class="border rounded p-3 bg-light mt-3 d-none" style="border-radius: 14px !important;">
+                      <h6 class="fw-bold mb-3 small text-uppercase text-primary"><i class="fas fa-terminal me-2"></i> Detalhes do MULTICAIXA</h6>
+                      <div class="mb-2">
+                        <label class="form-label small fw-bold">Banco do Terminal</label>
+                        <select id="multicaixaBanco" class="form-select form-select-sm" style="border-radius: 8px;">
+                          <option value="BAI">BAI (Banco Angolano de Investimentos)</option>
+                          <option value="BFA">BFA (Banco de Fomento Angola)</option>
+                          <option value="BIC">BIC (Banco BIC)</option>
+                          <option value="ATLANTICO">Millennium Atlântico</option>
+                          <option value="BCI">BCI (Comércio e Indústria)</option>
+                          <option value="BPC">BPC (Poupança e Crédito)</option>
+                          <option value="SOL">Banco SOL</option>
+                          <option value="ECONOMICO">Banco Económico</option>
+                          <option value="OUTRO">Outro / Multicaixa</option>
+                        </select>
+                      </div>
+                      <div class="mb-2">
+                        <label class="form-label small fw-bold">Nº de Referência / Borderô</label>
+                        <input type="text" id="multicaixaReferencia" class="form-control form-control-sm" placeholder="Ex: 123456" style="border-radius: 8px;">
+                      </div>
+                      <div id="painelMistoMCX" class="mb-2 d-none">
+                        <label class="form-label small fw-bold">Valor Pago no MULTICAIXA</label>
+                        <div class="input-group input-group-sm">
+                           <input type="number" id="multicaixaValorPago" class="form-control" step="0.01" style="border-radius: 8px 0 0 8px;">
+                           <span class="input-group-text" style="border-radius: 0 8px 8px 0;">Kz</span>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">O restante será atribuído ao Cash.</small>
+                      </div>
+                      <div class="mt-3 p-2 border-top">
+                        <div class="d-flex justify-content-between small">
+                          <span class="text-muted">Comissão (1.5%):</span>
+                          <span id="multicaixaComissao" class="fw-bold">0.00 Kz</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold text-success">
+                          <span>Valor Líquido:</span>
+                          <span id="multicaixaValorLiquido">0.00 Kz</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- COL 3: Identificacao do Cliente (col-4) -->
+              <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px;">
+                  <div class="card-header fw-bold text-dark border-0" style="background: #fefce8;">
+                    <i class="fas fa-user me-2 text-warning"></i> Identificação do Cliente
+                  </div>
+                  <div class="card-body">
+
+                    <!-- Toggle: Existente vs Novo -->
+                    <div class="d-flex gap-2 mb-3">
+                      <button type="button" id="btnClienteExistente" class="btn btn-sm btn-primary flex-fill rounded-pill fw-bold" onclick="toggleClienteMode('existente')">
+                        <i class="fas fa-search me-1"></i> Existente
+                      </button>
+                      <button type="button" id="btnClienteNovo" class="btn btn-sm btn-outline-secondary flex-fill rounded-pill" onclick="toggleClienteMode('novo')">
+                        <i class="fas fa-user-plus me-1"></i> Novo
+                      </button>
+                    </div>
+
+                    <!-- Painel: Cliente Existente -->
+                    <div id="painelClienteExistente">
+                      <label class="form-label small fw-bold text-muted text-uppercase">Selecionar Cliente</label>
+                      <select id="selectCliente" class="form-select form-select-sm" style="border-radius: 10px;">
+                        <option value="">-- Consumidor Final (NIF: 999999999) --</option>
+                        <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome + (c.nif != null ? ' — NIF: ' + c.nif : '')}"></option>
+                      </select>
+                      <!-- Info cliente selecionado -->
+                      <div class="mt-2" id="infoClienteSelecionado">
+                        <div class="alert border-0 py-2 px-3" id="alertInfoCliente"
+                             style="border-radius: 10px; font-size: 0.82rem; background:#f0fdf4; color:#166534;">
+                          <i class="fas fa-id-card me-1"></i>
+                          <span id="nomeClienteSel">Consumidor Final</span>
+                          &nbsp;&bull;&nbsp;
+                          <strong>NIF: <span id="nifClienteSel">999999999</span></strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Painel: Novo Cliente -->
+                    <div id="painelClienteNovo" style="display: none;">
+                      <div class="mb-2">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Nome *</label>
+                        <input type="text" id="novoClienteNome" class="form-control form-control-sm" placeholder="Nome completo" style="border-radius: 10px;">
+                      </div>
+                      <div class="mb-2">
+                        <label class="form-label small fw-bold text-muted text-uppercase">NIF</label>
+                        <div class="input-group input-group-sm">
+                          <input type="text" id="novoClienteNif" class="form-control" placeholder="Opcional" style="border-radius: 10px 0 0 10px;">
+                          <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('novoClienteNif').value=''" title="Limpar NIF" style="border-radius: 0 10px 10px 0;">
+                            <i class="fas fa-times"></i>
+                          </button>
+                        </div>
+                        <small class="text-muted">Deixar em branco para venda sem NIF</small>
+                      </div>
+                      <div class="mb-2">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Telefone</label>
+                        <input type="text" id="novoClienteTelefone" class="form-control form-control-sm" placeholder="Opcional" style="border-radius: 10px;">
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div> <!-- Fim de #checkoutFormRow -->
+
+            <!-- Checkout Preview Container -->
+            <div id="checkoutPreviewContainer" class="d-none h-100">
+               <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold mb-0 text-dark">
+                    <i class="fas fa-file-pdf me-2 text-primary"></i> 
+                    Pré-visualização do Documento
+                  </h6>
+                  <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="fecharPreviewInterno()">
+                    <i class="fas fa-arrow-left me-1"></i> Voltar ao Checkout
+                  </button>
+               </div>
+               <div class="border rounded bg-white shadow-inner" style="height: 60vh; overflow: hidden;">
+                  <iframe id="checkoutPdfFrame" src="" width="100%" height="100%" frameborder="0"></iframe>
+               </div>
+            </div>
           </div>
+
 
           <!-- Footer -->
           <div class="modal-footer border-0 p-4" style="background: #f8fafc; gap: 12px;">
@@ -701,14 +828,16 @@
                 filterProducts();
             });
 
-            function processarVenda(url, successMsg, btnId) {
+            function processarVenda(url, successMsg, btnId, skipModalClose) {
                 if (cart.length === 0) {
                     alert('Carrinho vazio!');
                     return;
                 }
 
+                var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+                var totalGeral = parseFloat(totalStr) || 0;
+
                 var itensCompra = [];
-                var totalGeral = 0;
                 for (var j = 0; j < cart.length; j++) {
                     var it = cart[j];
                     itensCompra.push({
@@ -718,12 +847,36 @@
                         preco: it.preco,
                         subtotal: it.qtd * it.preco
                     });
-                    totalGeral += (it.qtd * it.preco * (1 + (it.ivaPercentual / 100)));
+                }
+                
+                var vMulticaixa = 0;
+                var vCash = totalGeral;
+                
+                if ($('#pagMULTICAIXA').is(':checked')) {
+                    if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
+                         vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
+                         vCash = totalGeral - vMulticaixa;
+                    } else {
+                         vMulticaixa = totalGeral;
+                         vCash = 0;
+                    }
                 }
 
                 var compra = {
                     itens: itensCompra,
-                    total: totalGeral
+                    total: totalGeral,
+                    formaPagamento: getFormaPagamento(),
+                    nomeCliente: obterNomeCliente(),
+                    nifCliente: obterNifCliente(),
+                    cliente: obterClienteId(),
+                    
+                    // Detalhes MULTICAIXA
+                    valorPagoMulticaixa: vMulticaixa,
+                    valorPagoCash: vCash,
+                    bancoMulticaixa: $('#multicaixaBanco').val(),
+                    referenciaMulticaixa: $('#multicaixaReferencia').val(),
+                    comissaoMulticaixa: vMulticaixa * 0.015,
+                    valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015)
                 };
 
                 var $btn = $(btnId);
@@ -736,7 +889,9 @@
                     contentType: 'application/json',
                     data: JSON.stringify(compra),
                     success: function (pdfPath) {
-                        alert(successMsg);
+                        if (!skipModalClose) {
+                            alert(successMsg);
+                        }
                         
                         // Atualizar visualmente o stock dos itens vendidos no grid p/ vendas reais
                         if (url.indexOf('proforma') === -1) {
@@ -772,13 +927,21 @@
                             });
                         }
 
-                        cart = [];
-                        renderCart();
+                        if (!skipModalClose) {
+                            cart = [];
+                            renderCart();
+                        }
+                        
                         if (pdfPath) {
                             var text = url.indexOf('proforma') !== -1 ? $('#t-proforma-baixar').text() : $('#t-fatura-baixar').text();
                             $('#pdfLinkText').text(text);
                             $('#pdfLink').attr('href', pdfPath);
                             $('#pdfLinkBox').removeClass('d-none');
+                            
+                            // Mostrar preview interno se solicitado
+                            if (skipModalClose) {
+                                mostrarPreviewInterno(pdfPath);
+                            }
                         }
                     },
                     error: function (xhr) {
@@ -868,20 +1031,188 @@
                 }
             }
 
-            function getFormaPagamento() {
-                return $('input[name="formaPagamento"]:checked').val() || 'CASH';
+            // Limitar checkboxes de pagamento a maximo 2
+            $(document).on('change', '.pagamento-check', function() {
+                var checked = $('.pagamento-check:checked');
+                if (checked.length > 2) {
+                    $(this).prop('checked', false);
+                    $('#aviso-pagamento').removeClass('d-none');
+                    setTimeout(function() { $('#aviso-pagamento').addClass('d-none'); }, 3000);
+                }
+                // Garantir pelo menos 1 selecionado
+                if ($('.pagamento-check:checked').length === 0) {
+                    $('#pagCASH').prop('checked', true);
+                }
+
+                atualizarVisibilidadeMulticaixa();
+            });
+
+            function atualizarVisibilidadeMulticaixa() {
+                var checked = $('.pagamento-check:checked');
+                var hasMulticaixa = $('#pagMULTICAIXA').is(':checked');
+                var hasCash = $('#pagCASH').is(':checked');
+                
+                if (hasMulticaixa) {
+                    $('#painelMulticaixa').removeClass('d-none');
+                    if (checked.length > 1 && hasCash) {
+                        $('#painelMistoMCX').removeClass('d-none');
+                    } else {
+                        $('#painelMistoMCX').addClass('d-none');
+                        // Se for só MULTICAIXA, o valor é o total da compra
+                        var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+                        $('#multicaixaValorPago').val(parseFloat(totalStr));
+                    }
+                    calcularComissaoMulticaixa();
+                } else {
+                    $('#painelMulticaixa').addClass('d-none');
+                }
             }
 
+            function calcularComissaoMulticaixa() {
+                var valorPago = parseFloat($('#multicaixaValorPago').val()) || 0;
+                var comissao = valorPago * 0.015;
+                var liquido = valorPago - comissao;
+                
+                $('#multicaixaComissao').text(comissao.toFixed(2) + ' Kz');
+                $('#multicaixaValorLiquido').text(liquido.toFixed(2) + ' Kz');
+            }
+
+            $('#multicaixaValorPago').on('input', calcularComissaoMulticaixa);
+
+            // Mostrar info do cliente selecionado
+            $('#selectCliente').on('change', function() {
+                var selectedOption = $(this).find('option:selected');
+                var nome = selectedOption.text();
+                var val = $(this).val();
+
+                if (val) {
+                    // Cliente específico selecionado
+                    var nifMatch = nome.match(/NIF:\s*([\w]+)/);
+                    var nif = nifMatch ? nifMatch[1] : 'N/D';
+                    var nomeLimpo = nome.split(' —')[0].trim();
+                    $('#nomeClienteSel').text(nomeLimpo);
+                    $('#nifClienteSel').text(nif);
+                    $('#alertInfoCliente').css({'background':'#f0fdf4','color':'#166534'});
+                } else {
+                    // Consumidor Final
+                    $('#nomeClienteSel').text('Consumidor Final');
+                    $('#nifClienteSel').text('999999999');
+                    $('#alertInfoCliente').css({'background':'#fefce8','color':'#854d0e'});
+                }
+            });
+
+            function toggleClienteMode(modo) {
+                if (modo === 'existente') {
+                    $('#painelClienteExistente').show();
+                    $('#painelClienteNovo').hide();
+                    $('#btnClienteExistente').removeClass('btn-outline-secondary').addClass('btn-primary');
+                    $('#btnClienteNovo').removeClass('btn-primary').addClass('btn-outline-secondary');
+                } else {
+                    $('#painelClienteExistente').hide();
+                    $('#painelClienteNovo').show();
+                    $('#btnClienteNovo').removeClass('btn-outline-secondary').addClass('btn-primary');
+                    $('#btnClienteExistente').removeClass('btn-primary').addClass('btn-outline-secondary');
+                }
+            }
+            window.toggleClienteMode = toggleClienteMode;
+
+            function getFormaPagamento() {
+                var formas = [];
+                $('.pagamento-check:checked').each(function() { formas.push($(this).val()); });
+                return formas.length > 0 ? formas.join('+') : 'CASH';
+            }
+
+            // Retorna o nome do cliente conforme o modo activo (existente ou novo)
+            function obterNomeCliente() {
+                // Modo "novo cliente"
+                if ($('#painelClienteNovo').is(':visible')) {
+                    var nome = $('#novoClienteNome').val().trim();
+                    return nome !== '' ? nome : 'Consumidor Final';
+                }
+                // Modo "cliente existente"
+                var val = $('#selectCliente').val();
+                if (val) {
+                    var texto = $('#selectCliente option:selected').text();
+                    return texto.split(' \u2014')[0].trim();
+                }
+                return 'Consumidor Final';
+            }
+
+            // Retorna o NIF do cliente
+            function obterNifCliente() {
+                if ($('#painelClienteNovo').is(':visible')) {
+                    var nif = $('#novoClienteNif').val().trim();
+                    return nif !== '' ? nif : '999999999';
+                }
+                var val = $('#selectCliente').val();
+                if (val) {
+                    var texto = $('#selectCliente option:selected').text();
+                    var match = texto.match(/NIF:\s*([\w]+)/);
+                    return match ? match[1] : '999999999';
+                }
+                return '999999999';
+            }
+
+            // Retorna o objecto {id: X} para clientes FK, ou null para Consumidor Final / novo
+            function obterClienteId() {
+                if ($('#painelClienteExistente').is(':visible')) {
+                    var val = $('#selectCliente').val();
+                    if (val && val !== '') {
+                        return { id: parseInt(val) };
+                    }
+                }
+                return null;
+            }
+
+
             $('#btnFinalizarModal').click(function() {
-                var forma = getFormaPagamento();
+                if ($('#pagMULTICAIXA').is(':checked')) {
+                    if (!$('#multicaixaReferencia').val().trim()) {
+                        alert('Por favor, insira a referência do borderô MULTICAIXA.');
+                        return;
+                    }
+                }
+                
+                var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+                var total = parseFloat(totalStr);
+                
+                if ($('.pagamento-check:checked').length > 1 && $('#pagMULTICAIXA').is(':checked') && $('#pagCASH').is(':checked')) {
+                    var vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
+                    if (vMulticaixa > total) {
+                        alert('O valor do MULTICAIXA não pode ser superior ao total da compra.');
+                        return;
+                    }
+                    if (vMulticaixa <= 0) {
+                        alert('Insira um valor válido para o pagamento via MULTICAIXA.');
+                        return;
+                    }
+                }
+
                 processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#btnFinalizarModal');
                 bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
             });
 
             $('#btnEmitirProformaModal').click(function() {
-                processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal');
-                bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+                processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal', true);
+                // Não fechamos o modal aqui, o skipModalClose=true lida com isso
             });
+
+            function mostrarPreviewInterno(url) {
+                $('#checkoutFormRow').addClass('d-none');
+                $('#checkoutPreviewContainer').removeClass('d-none');
+                $('#checkoutPdfFrame').attr('src', url);
+                $('.modal-footer').addClass('d-none'); // Ocultar botões de finalizar enquanto vê PDF
+            }
+
+            function fecharPreviewInterno() {
+                $('#checkoutPreviewContainer').addClass('d-none');
+                $('#checkoutFormRow').removeClass('d-none');
+                $('.modal-footer').removeClass('d-none');
+                $('#checkoutPdfFrame').attr('src', '');
+            }
+
+            window.mostrarPreviewInterno = mostrarPreviewInterno;
+            window.fecharPreviewInterno = fecharPreviewInterno;
 
             $('#finalizarCompra').click(function () {
                 processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#finalizarCompra');

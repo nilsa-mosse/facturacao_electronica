@@ -99,13 +99,18 @@ public class VendaService {
             }
 
             if (produto != null) {
+                String descricaoMov = "Venda / Facturação (" + tipoDocumento + ") - " + compraSalva.getFormaPagamento();
+                if (compraSalva.getReferenciaMulticaixa() != null && !compraSalva.getReferenciaMulticaixa().isEmpty()) {
+                    descricaoMov += " (Ref: " + compraSalva.getReferenciaMulticaixa() + ")";
+                }
+
                 stockService.registrarMovimento(
                     produto.getId(), 
                     item.getQuantidade().doubleValue(), 
                     "SAIDA", 
-                    "Venda / Facturação (" + tipoDocumento + ")", 
+                    descricaoMov, 
                     numeroFatura, 
-                    "Consumidor Final", 
+                    compraSalva.getNomeCliente(), 
                     null, 
                     null, 
                     produto.getPreco()
