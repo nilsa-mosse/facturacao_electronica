@@ -56,4 +56,16 @@ public class StockService {
     public List<MovimentoStock> listarTodos() {
         return movimentoStockRepository.findAllByOrderByDataMovimentoDesc();
     }
+
+    public List<Produto> buscarProdutosComStockBaixo() {
+        return produtoRepository.findProdutosComStockBaixo();
+    }
+
+    public List<Produto> listarTodosProdutos() {
+        return produtoRepository.findAll();
+    }
+
+    public MovimentoStock buscarPorId(Long id) {
+        return movimentoStockRepository.findById(id).orElse(null);
+    }
 }

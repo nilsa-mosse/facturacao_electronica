@@ -13,6 +13,7 @@ public class Produto {
     private String descricao;
     private double preco;
     private Double quantidadeEstoque;
+    private Double estoqueMinimo = 0.0;
     private String imagem;
     private String codigoBarra;
     @Lob
@@ -22,8 +23,35 @@ public class Produto {
     @JoinColumn(name = "categoria_id")
     @JsonBackReference
     private Categoria categoria;
+    @ManyToOne
+    @JoinColumn(name = "estado_id")
+    private Estado estado;
+
 
     // Getters e Setters
+    
+    public Estado getEstado() {
+        // A matemática do stock tem supremacia absoluta sobre a chave gravada, vacinando corrupção.
+        if (this.quantidadeEstoque != null && this.quantidadeEstoque <= 0) {
+            return new Estado(2L, "INDISPONÍVEL");
+        }
+        if (estado == null) {
+            return new Estado(1L, "DISPONÍVEL");
+        }
+        return estado;
+    }
+
+    @Transient
+    public boolean isDisponivel() {
+        Estado currentEstado = this.getEstado();
+        // A lógica instruída: se ID for 2, fica indisponível (logo não é disponível)
+        return currentEstado != null && currentEstado.getId() != null && currentEstado.getId() == 1L;
+    }
+
+    public void setEstado(Estado estado) {
+        this.estado = estado;
+    }
+
     public Long getId() {
         return id;
     }
@@ -62,6 +90,12 @@ public class Produto {
 
     public void setQuantidadeEstoque(Double quantidadeEstoque) {
         this.quantidadeEstoque = quantidadeEstoque;
+        // Auto-resolve o estado baseando-se no valor matemático sempre que o stock for mutado.
+        if (this.quantidadeEstoque != null && this.quantidadeEstoque <= 0) {
+            this.estado = new Estado(2L, "INDISPONÍVEL");
+        } else if (this.quantidadeEstoque != null && this.quantidadeEstoque > 0) {
+            this.estado = new Estado(1L, "DISPONÍVEL");
+        }
     }
 
     public String getImagem() {
@@ -102,5 +136,13 @@ public class Produto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public Double getEstoqueMinimo() {
+        return estoqueMinimo;
+    }
+
+    public void setEstoqueMinimo(Double estoqueMinimo) {
+        this.estoqueMinimo = estoqueMinimo;
     }
 }

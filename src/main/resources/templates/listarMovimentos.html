@@ -421,7 +421,7 @@
                                     <span th:text="${mov.origem}"></span>
                                 </div>
                                 <div th:if="${mov.documentoReferencia != null}">
-                                    <a href="#" class="doc-chip">
+                                    <a th:href="@{/stock/documento/{id}(id=${mov.id})}" target="_blank" class="doc-chip">
                                         <i class="fas fa-file-invoice"></i>
                                         <span th:text="${mov.documentoReferencia}"></span>
                                     </a>
@@ -485,5 +485,6 @@
             });
         }
     </script>
+    </div>
 </body>
 </html>

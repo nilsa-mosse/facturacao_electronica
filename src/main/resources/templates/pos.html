@@ -297,6 +297,30 @@
     ::-webkit-scrollbar-thumb:hover {
         background: #ced4da;
     }
+
+    /* Out of Stock Logic */
+    .product-disabled {
+        opacity: 0.6;
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+
+    .out-of-stock-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.2rem;
+        z-index: 5;
+        backdrop-filter: grayscale(1);
+    }
 </style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
@@ -326,27 +350,41 @@
                         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4" id="productList">
                             <div class="col product-item" th:each="produto : ${produtos}"
                                 th:attr="data-category-id=${produto.categoria != null ? produto.categoria.id : 0}">
-                                <div class="product-card">
+                                <div class="product-card" th:classappend="${!produto.disponivel ? 'product-disabled' : ''}">
                                     <div class="product-img-container">
+                                        <div th:if="${!produto.disponivel}" class="out-of-stock-overlay">
+                                            ESGOTADO
+                                        </div>
                                         <img th:src="${produto.imagem}" class="product-img" alt="Produto">
-                                        <button class="btn-quick-add"
-                                            th:attr="data-id=${produto.id},data-nome=${produto.nome},data-preco=${produto.preco},data-iva=${produto.ivaPercentual}">
+                                        <button th:if="${produto.disponivel}" class="btn-quick-add"
+                                            th:data-id="${produto.id}" 
+                                            th:data-nome="${produto.nome}" 
+                                            th:data-preco="${produto.preco}" 
+                                            th:data-iva="${produto.ivaPercentual}" 
+                                            th:data-stock="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : ''}">
                                             <i class="fas fa-plus"></i>
                                         </button>
+                                        <div th:if="${!produto.disponivel}" class="btn-quick-add bg-danger" style="cursor: not-allowed;">
+                                            <i class="fas fa-times"></i>
+                                        </div>
                                     </div>
                                     <div class="product-info">
-                                        <div class="product-name text-truncate" th:text="${produto.nome}">Nome do
-                                            Produto</div>
+                                        <div class="product-name text-truncate" th:text="${produto.nome}">Nome do Produto</div>
                                         <div class="d-flex justify-content-between align-items-center mt-2">
-                                            <div class="product-price"><span th:text="${produto.preco}">0</span> Kz
+                                            <div class="product-price">
+                                                <span th:text="${produto.preco}">0</span> Kz
                                             </div>
-                                            <span th:if="${produto.ivaPercentual != null}"
-                                                class="badge bg-soft-info text-info small">IVA <span
-                                                    th:text="${produto.ivaPercentual}">0</span>%</span>
+                                            <span th:if="${!produto.disponivel}" class="badge bg-danger">INDISPONÍVEL</span>
+                                            <span th:if="${produto.disponivel && produto.ivaPercentual != null}"
+                                                class="badge bg-soft-info text-info small">IVA <span th:text="${produto.ivaPercentual}">0</span>%</span>
+                                        </div>
+                                        <div class="small text-muted mt-1 fw-bold">
+                                            Stock: <span th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '∞'}">0</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+>
                         </div>
                     </div>
                 </div>
@@ -453,7 +491,12 @@
         }
 
         function increaseQty(index) {
-            cart[index].qtd++;
+            var item = cart[index];
+            if (item.stockMax !== undefined && item.qtd + 1 > item.stockMax) {
+                alert('Stock insuficiente!');
+                return;
+            }
+            item.qtd++;
             renderCart();
         }
 
@@ -481,6 +524,15 @@
                 var nome = $btn.data('nome');
                 var preco = parseFloat($btn.data('preco'));
                 var ivaPercentual = $btn.data('iva') ? parseFloat($btn.data('iva')) : 0;
+                var stockRaw = $btn.attr('data-stock');
+                
+                var stockAtual = stockRaw === '' ? Infinity : parseFloat(stockRaw);
+                if (isNaN(stockAtual)) stockAtual = 0;
+
+                if (stockAtual <= 0) {
+                    alert('Este produto está indisponível em stock.');
+                    return;
+                }
 
                 var item = null;
                 for (var i = 0; i < cart.length; i++) {
@@ -491,9 +543,13 @@
                 }
 
                 if (item) {
+                    if (item.qtd + 1 > stockAtual) {
+                        alert('Quantidade máxima atingida conforme o stock disponível.');
+                        return;
+                    }
                     item.qtd++;
                 } else {
-                    cart.push({ id: id, nome: nome, preco: preco, qtd: 1, ivaPercentual: ivaPercentual });
+                    cart.push({ id: id, nome: nome, preco: preco, qtd: 1, ivaPercentual: ivaPercentual, stockMax: stockAtual });
                     // Animate add
                     var originalHtml = $btn.html();
                     $btn.html('<i class="fas fa-check"></i>');
@@ -543,6 +599,7 @@
                 for (var j = 0; j < cart.length; j++) {
                     var it = cart[j];
                     itensCompra.push({
+                        produtoId: it.id,
                         nomeProduto: it.nome,
                         quantidade: it.qtd,
                         preco: it.preco,
@@ -567,6 +624,41 @@
                     data: JSON.stringify(compra),
                     success: function (pdfPath) {
                         alert(successMsg);
+                        
+                        // Atualizar visualmente o stock dos itens vendidos no grid p/ vendas reais
+                        if (url.indexOf('proforma') === -1) {
+                            cart.forEach(function(item) {
+                                var $btn = $('.btn-quick-add[data-id="' + item.id + '"]');
+                                if($btn.length > 0) {
+                                    var currentStockStr = $btn.attr('data-stock');
+                                    if(currentStockStr !== '') {
+                                        var currentStock = parseFloat(currentStockStr);
+                                        if (isNaN(currentStock)) currentStock = 0;
+                                        var newStock = currentStock - item.qtd;
+                                        $btn.attr('data-stock', newStock);
+                                        
+                                        var $card = $btn.closest('.product-card');
+                                        // Atualiza o texto do stock na interface
+                                        $card.find('.small.text-muted.mt-1.fw-bold span').text(newStock);
+                                        
+                                        // Aplica restrições se esgotado
+                                        if (newStock <= 0) {
+                                            $card.addClass('product-disabled');
+                                            var $imgContainer = $card.find('.product-img-container');
+                                            if($imgContainer.find('.out-of-stock-overlay').length === 0) {
+                                                $imgContainer.prepend('<div class="out-of-stock-overlay">ESGOTADO</div>');
+                                            }
+                                            $btn.addClass('bg-danger').css('cursor', 'not-allowed').html('<i class="fas fa-times"></i>');
+                                            var $priceRow = $card.find('.d-flex.justify-content-between.align-items-center.mt-2');
+                                            if($priceRow.find('.badge.bg-danger').length === 0){
+                                                $priceRow.append('<span class="badge bg-danger">INDISPONÍVEL</span>');
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
                         cart = [];
                         renderCart();
                         if (pdfPath) {

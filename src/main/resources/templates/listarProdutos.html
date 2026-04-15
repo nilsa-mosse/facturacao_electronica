@@ -69,6 +69,7 @@
                   <th th:text="#{listagem.produtos.sku}">Código</th>
                   <th th:text="#{column.preco}">Preço</th>
                   <th th:text="#{column.estoque}">Stock</th>
+                  <th>Estado</th>
                   <th th:text="#{produto.iva}">IVA (%)</th>
                   <th class="text-end" th:text="#{column.acoes}">Ações</th>
                 </tr>
@@ -89,8 +90,12 @@
                   <td th:text="${produto.codigoBarra}"></td>
                   <td><span class="badge bg-success" th:text="${produto.preco} + ' Kz'"></span></td>
                   <td>
-                    <span class="badge" th:classappend="${produto.quantidadeEstoque < 5} ? 'bg-danger' : 'bg-primary'"
+                    <span class="badge" th:classappend="${produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5} ? 'bg-danger' : 'bg-primary'"
                       th:text="${produto.quantidadeEstoque}"></span>
+                  </td>
+                  <td>
+                    <span class="badge" th:classappend="${!produto.disponivel} ? 'bg-danger' : 'bg-success'"
+                      th:text="${produto.estado != null ? produto.estado.nome : 'DISPONÍVEL'}"></span>
                   </td>
                   <td th:text="${produto.ivaPercentual != null ? produto.ivaPercentual + '%': '-'}"></td>
                   <td class="text-end">

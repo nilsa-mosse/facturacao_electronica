@@ -12,11 +12,13 @@ import org.springframework.stereotype.Repository;
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     Produto findByCodigoBarra(String codigoBarra);
     
-    @Cacheable("produtos")
     Page<Produto> findAll(Pageable pageable);
     
     Page<Produto> findByCategoria_Nome(String nome, Pageable pageable);
     Page<Produto> findByCategoria_Id(Long id, Pageable pageable);
     
     List<Produto> findByNomeStartingWithIgnoreCase(String nome);
+
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Produto p WHERE p.quantidadeEstoque <= p.estoqueMinimo")
+    List<Produto> findProdutosComStockBaixo();
 }

@@ -1,74 +1,184 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Alertas de Stock - eFacturacao</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.75);
+        }
+        
+        body { 
+            background: var(--bg); 
+            background-image: radial-gradient(at 0% 0%, hsla(0,100%,94%,1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(225,100%,94%,1) 0, transparent 50%);
+            font-family: 'Outfit', sans-serif; 
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
 
-<head th:replace="menu :: head"></head>
+        .premium-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.8s ease-out;
+        }
 
-<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
-    <div class="wrapper">
-        <!-- Top Navbar -->
-        <nav th:replace="menu :: topbar"></nav>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        <!-- Includes the sidebar menu -->
-        <aside th:replace="menu :: sidebar"></aside>
+        .header-section { margin-bottom: 50px; }
+        
+        .alert-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            padding: 30px;
+        }
 
-        <div class="content-wrapper">
-            <div class="container py-5">
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="card shadow-lg border-0 overflow-hidden">
-                            <div class="grad-danger p-4 text-white">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
-                                    <h2 class="mb-0 fw-bold" th:text="#{dashboard.estoque.titulo}">Produtos com Stock Baixo</h2>
+        .table {
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .table thead th {
+            border: none;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            padding: 15px 25px;
+        }
+
+        .table tbody tr td {
+            background: white;
+            border: none;
+            padding: 20px 25px;
+            vertical-align: middle;
+        }
+
+        .table tbody tr td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+        .table tbody tr td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+
+        .progress { height: 8px; border-radius: 4px; background: #e2e8f0; }
+        .progress-bar { border-radius: 4px; }
+
+        .status-pill {
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-critical { background: #fee2e2; color: #991b1b; }
+        .status-warning { background: #fef3c7; color: #92400e; }
+
+        .product-icon {
+            width: 44px; height: 44px;
+            background: #f1f5f9;
+            color: var(--primary);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .btn-back {
+            background: white;
+            color: var(--dark);
+            border-radius: 14px;
+            padding: 10px 20px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        .btn-back:hover { background: #f8fafc; transform: translateX(-5px); }
+
+    </style>
+</head>
+<body>
+    <div class="premium-container">
+        <div class="header-section d-flex justify-content-between align-items-center">
+            <div>
+                <a th:href="@{/dashboard}" class="btn-back mb-3"><i class="fas fa-arrow-left"></i> VOLTAR AO PAINEL</a>
+                <h1 class="fw-900 mb-0" style="letter-spacing: -1.5px; font-size: 3rem;">Risco de <span style="color: var(--danger);">Ruptura</span></h1>
+                <p class="text-muted fw-600">Produtos que atingiram ou estão abaixo do stock de segurança.</p>
+            </div>
+            <div class="text-end">
+                <div class="fw-800 text-danger" style="font-size: 2.5rem;" th:text="${#lists.size(produtosEstoqueBaixo)}">0</div>
+                <div class="small fw-700 text-muted text-uppercase">Itens Críticos</div>
+            </div>
+        </div>
+
+        <div class="alert-card">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Stock Atual</th>
+                            <th>Stock Mínimo</th>
+                            <th>Estado de Urgência</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="produto : ${produtosEstoqueBaixo}">
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="product-icon"><i class="fas fa-box"></i></div>
+                                    <div>
+                                        <div class="fw-800" th:text="${produto.nome}"></div>
+                                        <div class="small text-muted fw-600" th:text="${produto.codigoBarra}"></div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="card-body p-4">
-                                <div class="mb-4">
-                                    <a th:href="@{/dashboard}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-arrow-left me-2"></i> <span th:text="#{btn.voltar}">Voltar</span>
-                                    </a>
+                            </td>
+                            <td>
+                                <div class="fw-900" style="font-size: 1.2rem;" th:text="${produto.quantidadeEstoque}">0</div>
+                                <div class="progress mt-2" style="width: 100px;">
+                                    <div class="progress-bar bg-danger" th:style="'width: ' + ((produto.quantidadeEstoque / (produto.estoqueMinimo == 0 ? 1 : produto.estoqueMinimo)) * 100) + '%'"></div>
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead class="bg-light text-muted">
-                                            <tr>
-                                                <th class="border-0 ps-4" th:text="#{produtos.col.nome}">Nome</th>
-                                                <th class="border-0 text-center" th:text="#{produtos.col.quantidade}">Stock</th>
-                                                <th class="border-0" th:text="#{produtos.col.preco}">Preço</th>
-                                                <th class="border-0" th:text="#{produtos.col.cod_barras}">Cód. Barras</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr th:each="produto : ${produtosEstoqueBaixo}">
-                                                <td class="ps-4 fw-bold" th:text="${produto.nome}">Nome</td>
-                                                <td class="text-center">
-                                                    <span class="badge bg-soft-danger text-danger px-3 py-2"
-                                                        th:text="${produto.quantidadeEstoque}">0</span>
-                                                </td>
-                                                <td
-                                                    th:text="${#numbers.formatDecimal(produto.preco, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">
-                                                    0,00 Kz</td>
-                                                <td class="text-muted" th:text="${produto.codigoBarra}">-</td>
-                                            </tr>
-                                            <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
-                                                <td colspan="4" class="text-center py-5 text-muted">
-                                                    <i class="fas fa-check-circle mb-3 fa-3x d-block text-success opacity-50"></i>
-                                                    <span th:text="#{clientes.historico.vazio}">Nenhum produto com estoque baixo.</span>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            </td>
+                            <td class="fw-700 text-muted" th:text="${produto.estoqueMinimo}">0.0</td>
+                            <td>
+                                <span th:class="'status-pill ' + (${produto.quantidadeEstoque <= (produto.estoqueMinimo * 0.5)} ? 'status-critical' : 'status-warning')">
+                                    <i th:class="${produto.quantidadeEstoque <= (produto.estoqueMinimo * 0.5)} ? 'fas fa-radiation' : 'fas fa-exclamation-triangle'"></i>
+                                    <span th:text="${produto.quantidadeEstoque <= (produto.estoqueMinimo * 0.5)} ? 'CRÍTICO' : 'ALTO RISCO'"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/stock/entrada(produtoId=${produto.id})}" class="btn btn-sm btn-dark fw-800 rounded-pill px-3">REPOR</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
+                            <td colspan="5" class="text-center py-5">
+                                <div class="py-4 opacity-50">
+                                    <i class="fas fa-shield-alt fa-4x text-success mb-3"></i>
+                                    <h4 class="fw-800">Operação Segura</h4>
+                                    <p>Todos os produtos estão acima dos níveis críticos de stock.</p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <!-- Scripts already loaded in menu :: head -->
 </body>
-
 </html>

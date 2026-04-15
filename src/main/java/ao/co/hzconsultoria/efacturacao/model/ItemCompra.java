@@ -20,8 +20,19 @@ public class ItemCompra {
 
     @ManyToOne
     private Compra compra;
+    
+    @Transient
+    private Long produtoId;
 
     // Getters and Setters
+    public Long getProdutoId() {
+        return produtoId;
+    }
+
+    public void setProdutoId(Long produtoId) {
+        this.produtoId = produtoId;
+    }
+
     public Long getId() {
         return id;
     }

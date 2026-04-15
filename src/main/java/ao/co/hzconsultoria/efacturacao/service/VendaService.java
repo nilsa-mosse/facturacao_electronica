@@ -25,6 +25,9 @@ public class VendaService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+    @Autowired
+    private StockService stockService;
+
     public Compra finalizarVenda(List<Carrinho> carrinho) {
         Compra compra = new Compra();
         compra.setDataCompra(LocalDateTime.now());
@@ -80,6 +83,36 @@ public class VendaService {
         String statusAgt = "VALIDADA";
         // Salvar compra
         Compra compraSalva = compraRepository.save(compra);
+
+        // Registrar Saída de Stock para cada item vendido
+        for (ItemCompra item : compraSalva.getItens()) {
+            Produto produto = null;
+            if (item.getProdutoId() != null) {
+                produto = produtoRepository.findById(item.getProdutoId()).orElse(null);
+            }
+            if (produto == null) {
+                produto = produtoRepository.findByNomeStartingWithIgnoreCase(item.getNomeProduto()).stream().findFirst().orElse(null);
+            }
+            if (produto == null) {
+                // Fallback: tentar por código de barras se o nome falhar ou for o código
+                produto = produtoRepository.findByCodigoBarra(item.getNomeProduto());
+            }
+
+            if (produto != null) {
+                stockService.registrarMovimento(
+                    produto.getId(), 
+                    item.getQuantidade().doubleValue(), 
+                    "SAIDA", 
+                    "Venda / Facturação (" + tipoDocumento + ")", 
+                    numeroFatura, 
+                    "Consumidor Final", 
+                    null, 
+                    null, 
+                    produto.getPreco()
+                );
+            }
+        }
+
         // Salvar fatura
         // ... código para salvar fatura com todos os campos ...
         return compraSalva;

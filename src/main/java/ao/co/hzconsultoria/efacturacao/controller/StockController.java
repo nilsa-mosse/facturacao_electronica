@@ -1,9 +1,15 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
+import ao.co.hzconsultoria.efacturacao.model.MovimentoStock;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -72,5 +78,41 @@ public class StockController {
     public String historico(Model model) {
         model.addAttribute("movimentos", stockService.listarTodos());
         return "listarMovimentos";
+    }
+
+    @GetMapping("/documento/{id}")
+    public ResponseEntity<Resource> visualizarDocumento(@PathVariable Long id) {
+        MovimentoStock movimento = stockService.buscarPorId(id);
+        if (movimento == null || movimento.getDocumentoBlob() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String fileName = movimento.getNomeDocumento() != null ? movimento.getNomeDocumento() : "documento_" + id;
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        
+        if (fileName.toLowerCase().endsWith(".pdf")) {
+            mediaType = MediaType.APPLICATION_PDF;
+        } else if (fileName.toLowerCase().endsWith(".jpg") || fileName.toLowerCase().endsWith(".jpeg")) {
+            mediaType = MediaType.IMAGE_JPEG;
+        } else if (fileName.toLowerCase().endsWith(".png")) {
+            mediaType = MediaType.IMAGE_PNG;
+        }
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                .body(new ByteArrayResource(movimento.getDocumentoBlob()));
+    }
+
+    @GetMapping("/saldos")
+    public String saldos(Model model) {
+        model.addAttribute("produtos", stockService.listarTodosProdutos());
+        return "listarSaldos";
+    }
+
+    @GetMapping("/alertas")
+    public String alertas(Model model) {
+        model.addAttribute("produtosEstoqueBaixo", stockService.buscarProdutosComStockBaixo());
+        return "estoqueBaixo";
     }
 }
