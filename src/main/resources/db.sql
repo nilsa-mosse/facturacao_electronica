@@ -86,6 +86,27 @@ CREATE TABLE IF NOT EXISTS clients (
     address TEXT NOT NULL
 );
 
+-- Tabelas para estabelecimentos e estoques
+
+CREATE TABLE IF NOT EXISTS estabelecimento (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    endereco VARCHAR(255),
+    telefone VARCHAR(50),
+    tipo VARCHAR(50),
+    visivel BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS estoque (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    produto_id BIGINT,
+    estabelecimento_id BIGINT,
+    quantidade DECIMAL(10,2) DEFAULT 0,
+    updated_at DATETIME,
+    FOREIGN KEY (produto_id) REFERENCES produto(id),
+    FOREIGN KEY (estabelecimento_id) REFERENCES estabelecimento(id)
+);
+
 -- Dados fake para categoria
 INSERT INTO categoria (nome) VALUES
 ('Informática'),
@@ -181,3 +202,14 @@ INSERT INTO clients (name, email, phone, address) VALUES
 ('John Doe', 'john.doe@example.com', '123456789', '123 Main St'),
 ('Jane Smith', 'jane.smith@example.com', '987654321', '456 Elm St'),
 ('Alice Johnson', 'alice.johnson@example.com', '555123456', '789 Oak St');
+
+-- Dados fake para estabelecimentos e estoques de exemplo
+INSERT INTO estabelecimento (nome, endereco, telefone, tipo, visivel) VALUES
+('Loja Central', 'Av. Principal, Luanda', '923000100', 'LOJA', TRUE),
+('Armazem Principal', 'Zona Industrial, Luanda', '923000200', 'ARMAZEM', TRUE);
+
+-- Exemplo de estoque (vinculado a produtos já inseridos: produto_id 1 e 2 existem)
+INSERT INTO estoque (produto_id, estabelecimento_id, quantidade, updated_at) VALUES
+(1, 1, 5, NOW()),
+(1, 2, 2, NOW()),
+(2, 1, 0, NOW());

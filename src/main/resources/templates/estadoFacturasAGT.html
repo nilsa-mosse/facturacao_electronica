@@ -115,6 +115,7 @@
                                 <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4">Número</th>
+                                        <th>Tipo de documento</th>
                                         <th>Data Emissão</th>
                                         <th>Cliente / NIF</th>
                                         <th>Regime Fiscal</th>
@@ -127,6 +128,9 @@
                                 <tbody>
                                     <tr th:each="factura : ${facturas}">
                                         <td class="ps-4 fw-bold text-primary" th:text="${factura.numeroFatura}"></td>
+                                        <td>
+                                            <span class="badge bg-soft-secondary" th:text="${factura.tipoDocumento != null ? (factura.tipoDocumento == 'FT' ? 'FT - Fatura' : (factura.tipoDocumento == 'FR' ? 'FR - Rectificativa' : (factura.tipoDocumento == 'FP' ? 'FP - Pro-forma' : factura.tipoDocumento))) : '-'}"></span>
+                                        </td>
                                         <td th:text="${factura.dataEmissao != null ? #dates.format(factura.dataEmissao, 'dd/MM/yyyy HH:mm') : '-'}"></td>
                                         <td>
                                             <div class="d-flex flex-column">
@@ -176,7 +180,7 @@
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(facturas)}">
-                                        <td colspan="8" class="text-center py-5 text-muted bg-white">
+                                        <td colspan="9" class="text-center py-5 text-muted bg-white">
                                             <div class="py-4">
                                                 <i class="fas fa-search mb-3 fs-40 opacity-20"></i>
                                                 <p class="mb-0">Nenhum documento encontrado com os filtros aplicados.</p>

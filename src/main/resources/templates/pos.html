@@ -352,7 +352,7 @@
                                 th:attr="data-category-id=${produto.categoria != null ? produto.categoria.id : 0}">
                                 <div class="product-card" th:classappend="${!produto.disponivel ? 'product-disabled' : ''}">
                                     <div class="product-img-container">
-                                        <div th:if="${!produto.disponivel}" class="out-of-stock-overlay">
+                                        <div th:if="${!produto.disponivel}" class="out-of-stock-overlay clickable-when-disabled" th:data-id="${produto.id}" th:data-nome="${produto.nome}" style="pointer-events:auto;cursor:pointer;">
                                             ESGOTADO
                                         </div>
                                         <img th:src="${produto.imagem}" class="product-img" alt="Produto">
@@ -364,7 +364,7 @@
                                             th:data-stock="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : ''}">
                                             <i class="fas fa-plus"></i>
                                         </button>
-                                        <div th:if="${!produto.disponivel}" class="btn-quick-add bg-danger" style="cursor: not-allowed;">
+                                        <div th:if="${!produto.disponivel}" class="btn-quick-add bg-danger clickable-when-disabled" th:data-id="${produto.id}" th:data-nome="${produto.nome}" style="pointer-events:auto;cursor:pointer;">
                                             <i class="fas fa-times"></i>
                                         </div>
                                     </div>
@@ -384,7 +384,6 @@
                                     </div>
                                 </div>
                             </div>
->
                         </div>
                     </div>
                 </div>
@@ -559,7 +558,7 @@
                       </div>
                       <div class="mb-2">
                         <label class="form-label small fw-bold">Nº de Referência / Borderô</label>
-                        <input type="text" id="multicaixaReferencia" class="form-control form-control-sm" placeholder="Ex: 123456" style="border-radius: 8px;">
+                        <input type="text" id="multicaixaReferencia" class="form-control form-control-sm" placeholder="Gerado automaticamente via TPA" style="border-radius: 8px;" readonly>
                       </div>
                         <div class="row g-2">
                            <div class="col-6">
@@ -702,6 +701,40 @@
       </div>
     </div>
 
+    <!-- Modal: Simulação de TPA Multicaixa -->
+    <div class="modal fade" id="modalTPA" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center shadow-lg" style="border-radius: 20px; border: 4px solid #1a1d20;">
+          <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
+            <h6 class="modal-title w-100 fw-bold font-monospace"><i class="fas fa-terminal me-2"></i>TPA MULTICAIXA</h6>
+          </div>
+          <div class="modal-body p-4" style="background: #e9ecef;">
+            <div id="tpaDisplay" class="bg-success text-white p-3 mb-4 font-monospace fw-bold shadow-inset" style="border-radius: 8px; font-size: 1.1rem; min-height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.4);">
+              <span style="font-size: 0.8rem; opacity: 0.8;">MONTANTE</span>
+              <span id="tpaMontante" style="font-size: 1.3rem;">0.00 Kz</span>
+            </div>
+            <div id="tpaStatus" class="font-monospace fw-bold text-dark mb-4" style="font-size: 0.9rem;">
+              APROXIME OU INSIRA O CARTÃO
+            </div>
+            <div style="height: 60px; display: flex; align-items: center; justify-content: center;">
+                <div class="spinner-border text-primary" role="status" id="tpaSpinner" style="width: 2.5rem; height: 2.5rem;">
+                <span class="visually-hidden">A processar...</span>
+                </div>
+                <i class="fas fa-check-circle text-success" id="tpaSuccessIcon" style="font-size: 3.5rem; display: none;"></i>
+                <i class="fas fa-times-circle text-danger" id="tpaErrorIcon" style="font-size: 3.5rem; display: none;"></i>
+            </div>
+          </div>
+          <div class="modal-footer bg-dark p-3 justify-content-center" style="border-radius: 0 0 15px 15px;">
+             <div class="d-flex gap-2">
+                <div style="width: 25px; height: 12px; background: #dc3545; border-radius: 3px;"></div>
+                <div style="width: 25px; height: 12px; background: #ffc107; border-radius: 3px;"></div>
+                <div style="width: 25px; height: 12px; background: #28a745; border-radius: 3px;"></div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal: Detalhes de Transporte (Guia de Remessa) -->
     <div class="modal fade" id="modalTransporteGuia" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
       <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -770,6 +803,66 @@
       </div>
     </div>
 
+    <!-- Modal: Disponibilidade em Estabelecimentos -->
+    <div class="modal fade" id="estoqueModal" tabindex="-1" aria-labelledby="estoqueModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title mb-0" id="estoqueModalLabel">Disponibilidade</h5>
+              <small class="text-muted" id="estoqueModalSubtitle">Lojas / Armazéns</small>
+            </div>
+            <div class="ms-3 text-end" style="min-width:160px;">
+              <div id="estoqueSpinner" class="spinner-border text-primary d-none" role="status" style="width:1.4rem;height:1.4rem;vertical-align:middle;"></div>
+              <div class="d-inline-block ms-2"><strong id="estoqueModalNomeSmall"></strong></div>
+              <div class="d-block small text-muted" style="font-size:0.78rem;"><span id="estoqueCount">--</span> locais</div>
+            </div>
+             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+           </div>
+           <div class="modal-body">
+             <input type="hidden" id="estoqueModalProdutoId" value="" />
+            <div class="d-flex gap-2 mb-3 align-items-center">
+              <div class="flex-grow-1">
+                <input id="estoqueSearch" type="text" class="form-control form-control-sm" placeholder="Pesquisar por loja ou endereço...">
+              </div>
+              <div class="form-check ms-2 mb-0">
+                <input class="form-check-input" type="checkbox" value="" id="estoqueShowZero">
+                <label class="form-check-label small" for="estoqueShowZero">Mostrar zeros</label>
+              </div>
+              <div class="form-check ms-2 mb-0">
+                <input class="form-check-input" type="checkbox" value="" id="estoqueIncludeAll">
+                <label class="form-check-label small" for="estoqueIncludeAll">Pesquisar todo o grupo</label>
+              </div>
+            </div>
+            <div class="mb-2"><strong id="estoqueModalNome"></strong></div>
+             <div class="table-responsive">
+               <table class="table table-striped table-hover">
+                 <thead>
+                   <tr>
+                     <th>Estabelecimento</th>
+                     <th>Endereço</th>
+                     <th class="text-end">Quantidade</th>
+                     <th>Tipo</th>
+                   </tr>
+                 </thead>
+                 <tbody id="estoqueModalBody">
+                  <tr><td colspan="4" class="text-center text-muted">Pesquisando...</td></tr>
+                 </tbody>
+               </table>
+             </div>
+            <div class="mt-2 small text-muted">
+              <span class="badge bg-success me-2">Disponível</span> locais com stock &nbsp; &nbsp;
+              <span class="badge bg-secondary me-2">Sem stock</span> locais com quantidade 0 &nbsp; &nbsp;
+              <span class="badge bg-warning text-dark">Oculto</span> estabelecimento marcado como não visível
+            </div>
+           </div>
+           <div class="modal-footer">
+             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+           </div>
+         </div>
+       </div>
+     </div>
+
     <!-- JS Logic Refactored -->
     <!-- JS Logic -->
     <script>
@@ -836,8 +929,79 @@
             renderCart();
         }
 
+        // Filtrar linhas da tabela do modal por texto (client-side)
+        function filterEstoqueRows(term) {
+            term = (term || '').toLowerCase();
+            $('#estoqueModalBody tr').each(function() {
+                var txt = $(this).attr('data-search') || '';
+                if (txt.toLowerCase().indexOf(term) !== -1) $(this).show(); else $(this).hide();
+            });
+        }
+
+        // Busca disponibilidade via API e popula o modal
+        function fetchDisponibilidade(produtoId, showZero, includeAll) {
+            var body = $('#estoqueModalBody');
+            var spinner = $('#estoqueSpinner');
+            $('#estoqueModalNomeSmall').text('');
+            $('#estoqueCount').text('--');
+            body.html('<tr><td colspan="4" class="text-center text-muted">Pesquisando...</td></tr>');
+            spinner.removeClass('d-none');
+
+            var url = '/api/produtos/' + produtoId + '/disponibilidade?showZero=' + (showZero ? 'true' : 'false') + '&includeAll=' + (includeAll ? 'true' : 'false');
+            fetch(url).then(function(resp){ if(!resp.ok) throw new Error('Erro'); return resp.json(); }).then(function(data){
+                spinner.addClass('d-none');
+                body.empty();
+                $('#estoqueModalNomeSmall').text($('#estoqueModalNome').text());
+                if (!data || data.length === 0) {
+                    $('#estoqueCount').text('0');
+                    body.html('<tr><td colspan="4" class="text-center text-muted">Nenhum estabelecimento encontrado.</td></tr>');
+                    return;
+                }
+                data.sort(function(a,b){
+                    var qa = a.quantidade == null ? 0 : a.quantidade;
+                    var qb = b.quantidade == null ? 0 : b.quantidade;
+                    return qb - qa;
+                });
+                $('#estoqueCount').text(data.length);
+                data.forEach(function(item){
+                    var quantidade = item.quantidade != null ? item.quantidade : 0;
+                    var cls = quantidade > 0 ? 'text-success' : 'text-muted';
+                    var visClass = item.visivel ? '' : 'opacity-50';
+                    var visBadge = item.visivel ? '' : '<span class="badge bg-warning text-dark ms-1">Oculto</span>';
+                    var rowSearch = (item.nome + ' ' + (item.endereco || '')).toLowerCase();
+                    var row = '<tr class="align-middle ' + visClass + '" data-search="' + rowSearch + '">' +
+                        '<td>' + item.nome + (visBadge) + '</td>' +
+                        '<td>' + (item.endereco || '') + '</td>' +
+                        '<td class="text-end fw-bold ' + cls + '">' + quantidade + '</td>' +
+                        '<td>' + (item.tipo || '') + '</td>' +
+                        '</tr>';
+                    body.append(row);
+                });
+                filterEstoqueRows($('#estoqueSearch').val());
+            }).catch(function(err){
+                spinner.addClass('d-none');
+                body.html('<tr><td colspan="4" class="text-center text-danger">Erro ao pesquisar disponibilidade.</td></tr>');
+                console.error(err);
+            });
+        }
+
         $(document).ready(function () {
-            var selectedCategoryId = 0;
+            // When clicking the red disabled quick-add or the overlay, open availability modal
+            $(document).on('click', '.clickable-when-disabled', function(e) {
+                 var $el = $(this);
+                 var id = parseInt($el.attr('data-id') || $el.data('id'));
+                 var nome = $el.attr('data-nome') || $el.data('nome');
+                 if (!id) return;
+                 $('#estoqueModalProdutoId').val(id);
+                 $('#estoqueModalNome').text(nome);
+                 $('#estoqueModal').modal('show');
+                 // trigger search using current checkbox states
+                 var showZero = $('#estoqueShowZero').is(':checked');
+                 var includeAll = $('#estoqueIncludeAll').is(':checked');
+                 fetchDisponibilidade(id, showZero, includeAll);
+             });
+
+             var selectedCategoryId = 0;
 
             // Handle product click
             $(document).on('click', '.btn-quick-add', function() {
@@ -852,7 +1016,12 @@
                 if (isNaN(stockAtual)) stockAtual = 0;
 
                 if (stockAtual <= 0) {
-                    alert('Este produto está indisponível em stock.');
+                    // Open modal to search availability in visible establishments
+                    $('#estoqueModalProdutoId').val(id);
+                    $('#estoqueModalNome').text(nome);
+                    $('#estoqueModal').modal('show');
+                    // trigger search (default: hide zeros)
+                    fetchDisponibilidade(id, false);
                     return;
                 }
 
@@ -1255,13 +1424,6 @@
 
 
             $('#btnFinalizarModal').click(function() {
-                if ($('#pagMULTICAIXA').is(':checked')) {
-                    if (!$('#multicaixaReferencia').val().trim()) {
-                        alert('Por favor, insira a referência do borderô MULTICAIXA.');
-                        return;
-                    }
-                }
-                
                 var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
                 var total = parseFloat(totalStr);
                 
@@ -1277,9 +1439,102 @@
                     }
                 }
 
-                processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#btnFinalizarModal');
-                bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+                if ($('#pagMULTICAIXA').is(':checked')) {
+                    simularTPA(function(referencia) {
+                        $('#multicaixaReferencia').val(referencia);
+                        concluirFinalizacao();
+                    });
+                } else {
+                    concluirFinalizacao();
+                }
             });
+
+            function concluirFinalizacao() {
+                processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#btnFinalizarModal');
+                var modal = bootstrap.Modal.getInstance(document.getElementById('modalCheckout'));
+                if (modal) modal.hide();
+            }
+
+            function simularTPA(callback) {
+                var vMulticaixa = 0;
+                var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+                var total = parseFloat(totalStr);
+                
+                if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
+                     vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
+                     if (vMulticaixa <= 0) vMulticaixa = total;
+                } else {
+                     vMulticaixa = total;
+                }
+
+                // 1. Configuração Inicial do Modal de TPA
+                $('#tpaMontante').text(parseFloat(vMulticaixa).toFixed(2) + ' Kz');
+                $('#tpaStatus').text('DISPARANDO COMANDO PARA O TERMINAL...');
+                $('#tpaSpinner').show();
+                $('#tpaSuccessIcon').hide();
+                $('#tpaErrorIcon').hide();
+
+                var modalCheck = bootstrap.Modal.getInstance(document.getElementById('modalCheckout'));
+                if (modalCheck) modalCheck.hide();
+
+                var modalTPA = new bootstrap.Modal(document.getElementById('modalTPA'));
+                modalTPA.show();
+
+                // 2. Chamada ao Backend para falar com o Hardware Real
+                // Nota: O backend ficará "preso" aguardando a resposta física da máquina.
+                var tpaPayload = {
+                    valor: vMulticaixa,
+                    tipoOperacao: 'COMPRA',
+                    idVenda: 'POS-' + Date.now()
+                };
+
+                $.ajax({
+                    url: '/api/tpa/processar-pagamento',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(tpaPayload),
+                    success: function(response) {
+                        if (response.sucesso) {
+                            $('#tpaStatus').text('PAGAMENTO APROVADO!');
+                            $('#tpaSpinner').hide();
+                            $('#tpaSuccessIcon').show();
+                            
+                            setTimeout(function() {
+                                modalTPA.hide();
+                                $('.modal-backdrop').remove();
+                                $('body').removeClass('modal-open').css('padding-right', '');
+                                
+                                // O campo de referência agora vem do borderô real da máquina
+                                callback(response.referenciaBorderou);
+                            }, 2000);
+                        } else {
+                            exibirErroTpa(response.mensagem || 'Operação Recusada.');
+                        }
+                    },
+                    error: function(xhr) {
+                        var msg = 'Erro de comunicação com o servidor de hardware.';
+                        if (xhr.status === 504) msg = 'Timeout: O cliente demorou muito a digitar o PIN.';
+                        exibirErroTpa(msg);
+                    }
+                });
+
+                function exibirErroTpa(msg) {
+                    $('#tpaStatus').text(msg.toUpperCase());
+                    $('#tpaSpinner').hide();
+                    $('#tpaErrorIcon').show();
+                    
+                    // Permite fechar o modal de erro após 4 segundos para tentar novamente
+                    setTimeout(function() {
+                        modalTPA.hide();
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                        
+                        // Reabre o checkout para o operador tentar outro método ou ajustar
+                        var mCheck = new bootstrap.Modal(document.getElementById('modalCheckout'));
+                        mCheck.show();
+                    }, 4000);
+                }
+            }
 
             $('#btnEmitirProformaModal').click(function() {
                 processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal', true);

@@ -5,6 +5,8 @@ import ao.co.hzconsultoria.efacturacao.model.Produto;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ImpostoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -35,6 +37,9 @@ public class ProdutoController {
     private ImpostoRepository impostoRepository;
 
     @Autowired
+    private EmpresaRepository empresaRepository;
+
+    @Autowired
     private MessageSource messageSource;
 
     @GetMapping("/cadastroProduto")
@@ -43,19 +48,26 @@ public class ProdutoController {
         model.addAttribute("produto", new Produto());
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
         model.addAttribute("impostos", impostoRepository.findAll());
+        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
+                : "GERAL";
+        model.addAttribute("regimeFiscal", regimeFiscal);
+
+        System.out.println("Regime fiscal da empresa: " + regimeFiscal);
+
         return "cadastroProduto";
     }
 
     @PostMapping("/salvarProduto")
     public String salvarProduto(@RequestParam("nome") String nome,
-                                @RequestParam("descricao") String descricao,
-                                @RequestParam("preco") double preco,
-                                @RequestParam("quantidadeEstoque") Double quantidadeEstoque,
-                                @RequestParam("codigoBarra") String codigoBarra,
-                                @RequestParam("categoriaId") Long categoriaId,
-                                @RequestParam(value = "imagem", required = false) MultipartFile imagem,
-                                @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
-                                Model model) throws IOException {
+            @RequestParam("descricao") String descricao,
+            @RequestParam("preco") double preco,
+            @RequestParam("quantidadeEstoque") Double quantidadeEstoque,
+            @RequestParam("codigoBarra") String codigoBarra,
+            @RequestParam("categoriaId") Long categoriaId,
+            @RequestParam(value = "imagem", required = false) MultipartFile imagem,
+            @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
+            Model model) throws IOException {
         Produto produto = new Produto();
         produto.setNome(nome);
         produto.setDescricao(descricao);
@@ -72,10 +84,15 @@ public class ProdutoController {
             produto.setImagem("/produto/imagem/" + produto.getId()); // Caminho correto
             produtoRepository.save(produto); // Salva novamente com imagem
         }
-        model.addAttribute("mensagem", messageSource.getMessage("msg.produto.salvo", null, LocaleContextHolder.getLocale()));
+        model.addAttribute("mensagem",
+                messageSource.getMessage("msg.produto.salvo", null, LocaleContextHolder.getLocale()));
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
         model.addAttribute("impostos", impostoRepository.findAll());
+        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
+                : "Regime Geral";
+        model.addAttribute("regimeFiscal", regimeFiscal);
         return "cadastroProduto";
     }
 
@@ -95,6 +112,10 @@ public class ProdutoController {
         model.addAttribute("produto", produto);
         model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
         model.addAttribute("impostos", impostoRepository.findAll());
+        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
+                : "Regime Geral";
+        model.addAttribute("regimeFiscal", regimeFiscal);
         return "detalhesProduto";
     }
 
@@ -136,7 +157,8 @@ public class ProdutoController {
         // Salvar alterações no banco
         produtoRepository.save(produto);
 
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.produto.atualizado", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.produto.atualizado", null, LocaleContextHolder.getLocale()));
         // Redirecionar para a listagem com os dados atualizados
         return "redirect:/produtos/listar";
     }
@@ -144,9 +166,11 @@ public class ProdutoController {
     @GetMapping("/produtos/apagar/{id}")
     public String apagarProduto(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         produtoRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
+        redirectAttributes.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
         return "redirect:/produtos/listar";
     }
+
     @GetMapping("/api/produtos/pesquisar")
     public ResponseEntity<java.util.List<Produto>> pesquisarProdutos(@RequestParam("nome") String nome) {
         if (nome == null || nome.length() < 1) {

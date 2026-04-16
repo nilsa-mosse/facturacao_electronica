@@ -199,13 +199,31 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Taxa de IVA (%)</label>
-                            <select name="ivaPercentual" class="form-select input-premium">
-                                <option value="0">Isento / Não Aplicável</option>
-                                <option th:each="imp : ${impostos}" 
-                                        th:value="${imp.percentagem}" 
-                                        th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'"
-                                        th:selected="${produto.ivaPercentual == imp.percentagem}"></option>
-                            </select>
+                            
+                            <!-- Regime Geral: mostrar apenas impostos com percentagem 14 (IVA) ou 1 (Selo) -->
+                            <div th:if="${regimeFiscal == 'Regime Geral'}">
+                                <select name="ivaPercentual" class="form-select input-premium">
+                                    <option value="0" th:selected="${produto.ivaPercentual == null or produto.ivaPercentual == 0}">Isento / Não Aplicável</option>
+                                    <option th:each="imp : ${impostos}"
+                                            th:if="${imp.percentagem != null and (imp.percentagem.floatValue() == 14.0 or imp.percentagem.floatValue() == 1.0)}"
+                                            th:value="${imp.percentagem}"
+                                            th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'"
+                                            th:selected="${produto != null and produto.ivaPercentual != null and produto.ivaPercentual == imp.percentagem.doubleValue()}">
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <!-- Outros regimes: mostrar a lista completa -->
+                            <div th:if="${regimeFiscal != 'Regime Geral'}">
+                                <select name="ivaPercentual" class="form-select input-premium">
+                                    <option value="0" th:selected="${produto.ivaPercentual == null or produto.ivaPercentual == 0}">Isento / Não Aplicável</option>
+                                    <option th:each="imp : ${impostos}" 
+                                            th:value="${imp.percentagem}" 
+                                            th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'"
+                                            th:selected="${produto != null and produto.ivaPercentual != null and produto.ivaPercentual == imp.percentagem.doubleValue()}">
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Stock Actual</label>

@@ -102,9 +102,9 @@
                                 <thead class="bg-white border-bottom small fw-bold text-muted uppercase">
                                     <tr>
                                         <th class="ps-4">Nº / Data</th>
+                                        <th>Tipo documento</th>
                                         <th>Cliente / NIF</th>
                                         <th class="text-end">Total Geral</th>
-                                        <th>Itens / Descrição</th>
                                         <th class="text-center">Estado</th>
                                         <th class="text-center pe-4">Acções</th>
                                     </tr>
@@ -122,19 +122,14 @@
                                             <div class="small text-muted" th:text="${#temporals.format(compra.dataCompra, 'dd/MM/yyyy HH:mm')}"></div>
                                         </td>
                                         <td>
+                                            <span class="badge bg-primary text-white" th:text="${compra.tipoDocumento != null ? (compra.tipoDocumento == 'FT' ? 'FT - Fatura' : (compra.tipoDocumento == 'FR' ? 'FR - Rectificativa' : (compra.tipoDocumento == 'FP' ? 'FP - Pro-forma' : compra.tipoDocumento))) : '-'}"></span>
+                                        </td>
+                                        <td>
                                             <div class="fw-bold" th:text="${compra.nomeCliente ?: 'Consumidor Final'}"></div>
                                             <div class="small text-muted" th:text="${compra.nifCliente ?: '999999999'}"></div>
                                         </td>
                                         <td class="text-end">
                                             <span class="fw-800 text-dark" th:text="${#numbers.formatDecimal(compra.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex flex-wrap gap-1">
-                                                <span th:each="item : ${compra.itens}" 
-                                                      class="badge bg-soft-primary border text-primary"
-                                                      th:text="${item.quantidade} + 'x ' + ${item.nomeProduto}">
-                                                </span>
-                                            </div>
                                         </td>
                                         <td class="text-center">
                                             <span th:if="${compra.status == 'EMITIDA'}" class="badge bg-soft-success text-success border border-success px-3 py-2 rounded-pill">

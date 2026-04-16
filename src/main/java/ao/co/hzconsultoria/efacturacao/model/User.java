@@ -1,6 +1,8 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "usuario")
@@ -21,6 +23,13 @@ public class User {
     @Column(nullable = false)
     private String role;
 
+    // Estabelecimentos visíveis para este usuário
+    @ManyToMany
+    @JoinTable(name = "usuario_estabelecimento",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "estabelecimento_id"))
+    private Set<Estabelecimento> estabelecimentos = new HashSet<>();
+
     // Getters e Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -36,4 +45,7 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public Set<Estabelecimento> getEstabelecimentos() { return estabelecimentos; }
+    public void setEstabelecimentos(Set<Estabelecimento> estabelecimentos) { this.estabelecimentos = estabelecimentos; }
 }
