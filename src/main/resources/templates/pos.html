@@ -561,13 +561,23 @@
                         <label class="form-label small fw-bold">Nº de Referência / Borderô</label>
                         <input type="text" id="multicaixaReferencia" class="form-control form-control-sm" placeholder="Ex: 123456" style="border-radius: 8px;">
                       </div>
-                      <div id="painelMistoMCX" class="mb-2 d-none">
-                        <label class="form-label small fw-bold">Valor Pago no MULTICAIXA</label>
-                        <div class="input-group input-group-sm">
-                           <input type="number" id="multicaixaValorPago" class="form-control" step="0.01" style="border-radius: 8px 0 0 8px;">
-                           <span class="input-group-text" style="border-radius: 0 8px 8px 0;">Kz</span>
+                        <div class="row g-2">
+                           <div class="col-6">
+                             <label class="form-label small fw-bold text-primary">Valor MULTICAIXA</label>
+                             <div class="input-group input-group-sm">
+                                <input type="number" id="multicaixaValorPago" class="form-control" step="0.01" style="border-radius: 8px 0 0 8px;">
+                                <span class="input-group-text" style="border-radius: 0 8px 8px 0;">Kz</span>
+                             </div>
+                           </div>
+                           <div class="col-6">
+                             <label class="form-label small fw-bold text-success">Valor em CASH</label>
+                             <div class="input-group input-group-sm">
+                                <input type="text" id="mistoCashRestante" class="form-control bg-white" readonly value="0.00" style="border-radius: 8px 0 0 8px;">
+                                <span class="input-group-text" style="border-radius: 0 8px 8px 0;">Kz</span>
+                             </div>
+                           </div>
                         </div>
-                        <small class="text-muted" style="font-size: 0.75rem;">O restante será atribuído ao Cash.</small>
+                        <small class="text-muted d-block mt-1" style="font-size: 0.75rem;"><i class="fas fa-info-circle me-1"></i> O valor em Cash é calculado automaticamente.</small>
                       </div>
                       <div class="mt-3 p-2 border-top">
                         <div class="d-flex justify-content-between small">
@@ -582,7 +592,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
 
               <!-- COL 3: Identificacao do Cliente (col-4) -->
               <div class="col-12 col-md-4">
@@ -669,21 +678,94 @@
 
           <!-- Footer -->
           <div class="modal-footer border-0 p-4" style="background: #f8fafc; gap: 12px;">
-            <button type="button" class="btn btn-outline-danger rounded-pill px-4"
-                    data-bs-dismiss="modal" onclick="cancelarCompra()">
-              <i class="fas fa-times me-2"></i> Cancelar Compra
+            <button type="button" class="btn btn-outline-danger rounded-pill px-4" data-bs-dismiss="modal" onclick="cancelarCompra()">
+              <i class="fas fa-times me-2"></i> Cancelar
             </button>
             <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
-              <i class="fas fa-edit me-2"></i> Editar Carrinho
+              <i class="fas fa-edit me-2"></i> Carrinho
             </button>
-            <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold" id="btnEmitirProformaModal">
-              <i class="fas fa-file-invoice me-2"></i> Pró-forma
-            </button>
-            <button type="button" class="btn btn-success rounded-pill px-5 fw-bold shadow" id="btnFinalizarModal">
-              <i class="fas fa-check-circle me-2"></i> Finalizar Venda
-            </button>
+            
+            <div class="ms-auto d-flex gap-2">
+              <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold" id="btnEmitirProformaModal">
+                <i class="fas fa-file-invoice me-2"></i> Pró-forma
+              </button>
+              <button type="button" class="btn btn-info text-white rounded-pill px-4 fw-bold" id="btnEmitirGuiaModal">
+                <i class="fas fa-truck me-2"></i> Guia Remessa
+              </button>
+              <button type="button" class="btn btn-success rounded-pill px-5 fw-bold shadow" id="btnFinalizarModal">
+                <i class="fas fa-check-circle me-2"></i> Finalizar Venda
+              </button>
+            </div>
           </div>
 
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Detalhes de Transporte (Guia de Remessa) -->
+    <div class="modal fade" id="modalTransporteGuia" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+          <div class="modal-header border-0 p-4 pb-0">
+            <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
+              <i class="fas fa-truck me-3 text-info"></i>
+              Detalhes de Transporte
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="row g-4">
+              <!-- Coluna 1: Informação Geral -->
+              <div class="col-12 col-md-6 border-end">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">Informação Logística</h6>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Nome do Motorista *</label>
+                  <input type="text" id="guiaMotorista" class="form-control form-control-sm" placeholder="Nome completo" style="border-radius: 8px;">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Matrícula da Viatura *</label>
+                  <input type="text" id="guiaMatricula" class="form-control form-control-sm" placeholder="Ex: LD-00-00-AA" style="border-radius: 8px;">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Local de Carga</label>
+                  <input type="text" id="guiaLocalCarga" class="form-control form-control-sm" placeholder="Onde os produtos saem" style="border-radius: 8px;">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Local de Descarga</label>
+                  <input type="text" id="guiaLocalDescarga" class="form-control form-control-sm" placeholder="Onde os produtos serão entregues" style="border-radius: 8px;">
+                </div>
+              </div>
+
+              <!-- Coluna 2: Artigos a Transportar -->
+              <div class="col-12 col-md-6 bg-light bg-opacity-50 p-3" style="border-radius: 12px;">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">Artigos do Carrinho</h6>
+                <div class="table-responsive" style="max-height: 250px;">
+                  <table class="table table-sm table-borderless align-middle">
+                    <thead class="bg-white border-bottom shadow-sm">
+                      <tr>
+                        <th class="small">Produto</th>
+                        <th class="small text-center">Qtd</th>
+                      </tr>
+                    </thead>
+                    <tbody id="listaArtigosTransporte">
+                      <!-- Preenchido via JS -->
+                    </tbody>
+                  </table>
+                </div>
+                <div class="alert alert-info border-0 mt-3 mb-0 py-2 px-3 small" style="border-radius: 8px;">
+                  <i class="fas fa-info-circle me-1"></i> Os itens acima serão convertidos automaticamente em registos de Guia de Remessa.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 p-4 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow-sm" onclick="confirmarEmissaoGuia()">
+              <i class="fas fa-check-circle me-1"></i> Gerar Guia de Remessa
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1070,6 +1152,13 @@
 
             function calcularComissaoMulticaixa() {
                 var valorPago = parseFloat($('#multicaixaValorPago').val()) || 0;
+                var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+                var totalGeral = parseFloat(totalStr) || 0;
+                
+                var cashRestante = totalGeral - valorPago;
+                if (cashRestante < 0) cashRestante = 0;
+                $('#mistoCashRestante').val(cashRestante.toFixed(2));
+
                 var comissao = valorPago * 0.015;
                 var liquido = valorPago - comissao;
                 
@@ -1197,6 +1286,110 @@
                 // Não fechamos o modal aqui, o skipModalClose=true lida com isso
             });
 
+            $('#btnEmitirGuiaModal').click(function() {
+                abrirModalTransporte();
+            });
+
+            function abrirModalTransporte() {
+                var list = $('#listaArtigosTransporte');
+                list.empty();
+                
+                cart.forEach(function(item) {
+                   list.append('<tr>' +
+                                '<td><div class="fw-bold text-dark">' + item.nome + '</div></td>' +
+                                '<td class="text-center"><span class="badge bg-secondary rounded-pill">' + item.qtd + '</span></td>' +
+                               '</tr>');
+                });
+
+                // Tentar preencher endereços padrões se disponíveis
+                $('#guiaLocalCarga').val(''); 
+                $('#guiaLocalDescarga').val($('#alertInfoCliente:visible').length ? $('#nomeClienteSel').text() : '');
+
+                bootstrap.Modal.getInstance(document.getElementById('modalCheckout')).hide();
+                var modalTrans = new bootstrap.Modal(document.getElementById('modalTransporteGuia'));
+                modalTrans.show();
+            }
+
+            function confirmarEmissaoGuia() {
+                var motorista = $('#guiaMotorista').val().trim();
+                var matricula = $('#guiaMatricula').val().trim();
+                
+                if (!motorista || !matricula) {
+                    alert('Por favor, preencha o motorista e a matrícula do veículo.');
+                    return;
+                }
+
+                var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+                var totalGeral = parseFloat(totalStr) || 0;
+                var vMulticaixa = 0;
+                var vCash = totalGeral;
+                
+                if ($('#pagMULTICAIXA').is(':checked')) {
+                    if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
+                         vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
+                         vCash = totalGeral - vMulticaixa;
+                    } else {
+                         vMulticaixa = totalGeral;
+                         vCash = 0;
+                    }
+                }
+
+                var items = cart.map(function(p) {
+                    return {
+                        produto: { id: p.id },
+                        nomeProduto: p.nome,
+                        quantidade: p.qtd,
+                        preco: p.preco,
+                        taxaIva: p.ivaPercentual,
+                        subtotal: p.qtd * p.preco
+                    };
+                });
+
+                var payload = {
+                    itens: items,
+                    total: totalGeral,
+                    formaPagamento: getFormaPagamento(),
+                    nomeCliente: obterNomeCliente(),
+                    nifCliente: obterNifCliente(),
+                    cliente: obterClienteId(),
+                    valorPagoMulticaixa: vMulticaixa,
+                    valorPagoCash: vCash,
+                    bancoMulticaixa: $('#multicaixaBanco').val(),
+                    referenciaMulticaixa: $('#multicaixaReferencia').val(),
+                    comissaoMulticaixa: vMulticaixa * 0.015,
+                    valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015),
+                    
+                    // Dados de Transporte
+                    motorista: motorista,
+                    matriculaViatura: matricula,
+                    localCarga: $('#guiaLocalCarga').val(),
+                    localDescarga: $('#guiaLocalDescarga').val()
+                };
+
+                $.ajax({
+                    url: '/api/compras/guia',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(payload),
+                    success: function (url) {
+                        bootstrap.Modal.getInstance(document.getElementById('modalTransporteGuia')).hide();
+                        
+                        // Re-abrir modal checkout apenas para mostrar o PDF
+                        var modalCheck = new bootstrap.Modal(document.getElementById('modalCheckout'));
+                        modalCheck.show();
+                        
+                        setTimeout(function() {
+                            mostrarPreviewInterno(url);
+                            cart = [];
+                            renderCart();
+                        }, 500);
+                    },
+                    error: function (xhr) {
+                        alert("Erro ao emitir Guia: " + (xhr.responseText || "Erro desconhecido"));
+                    }
+                });
+            }
+
             function mostrarPreviewInterno(url) {
                 $('#checkoutFormRow').addClass('d-none');
                 $('#checkoutPreviewContainer').removeClass('d-none');
@@ -1213,6 +1406,8 @@
 
             window.mostrarPreviewInterno = mostrarPreviewInterno;
             window.fecharPreviewInterno = fecharPreviewInterno;
+            window.confirmarEmissaoGuia = confirmarEmissaoGuia;
+            window.abrirModalTransporte = abrirModalTransporte;
 
             $('#finalizarCompra').click(function () {
                 processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#finalizarCompra');

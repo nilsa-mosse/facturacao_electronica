@@ -24,4 +24,6 @@ public interface FaturaRepository extends JpaRepository<Fatura, Long> {
                               @Param("startDate") Date startDate, 
                               @Param("endDate") Date endDate, 
                               @Param("nif") String nif);
+
+    List<Fatura> findByCompra(Compra compra);
 }

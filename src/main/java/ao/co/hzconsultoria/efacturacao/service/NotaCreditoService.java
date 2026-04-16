@@ -60,6 +60,31 @@ public class NotaCreditoService {
         notaCreditoRepository.save(nota);
     }
 
+    @Transactional
+    public NotaCredito gerarNotaCreditoAutomatica(Compra compra, String motivo) {
+        NotaCredito nota = new NotaCredito();
+        nota.setCliente(compra.getCliente());
+        nota.setFaturaOriginal(compra);
+        nota.setDataEmissao(LocalDateTime.now());
+        nota.setNumeroNota("NC-" + System.currentTimeMillis());
+        nota.setTotalCredito(compra.getTotal());
+        nota.setMotivo(motivo);
+        nota.setStatus("VALIDADA");
+
+        List<ItemNotaCredito> itensNota = compra.getItens().stream().map(item -> {
+            ItemNotaCredito inc = new ItemNotaCredito();
+            inc.setNomeProduto(item.getNomeProduto());
+            inc.setQuantidade(Double.valueOf(item.getQuantidade()));
+            inc.setPrecoUnitario(item.getPreco());
+            inc.setSubtotal(item.getSubtotal());
+            inc.setNotaCredito(nota);
+            return inc;
+        }).collect(Collectors.toList());
+
+        nota.setItens(itensNota);
+        return notaCreditoRepository.save(nota);
+    }
+
     public List<NotaCredito> listarTodas() {
         return notaCreditoRepository.findAll();
     }

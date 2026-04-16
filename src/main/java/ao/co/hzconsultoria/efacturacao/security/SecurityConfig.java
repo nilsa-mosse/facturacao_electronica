@@ -34,13 +34,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/login", "/assets/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/finalizarVenda").permitAll()
+                .antMatchers("/login", "/assets/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia", "/finalizarVenda").permitAll()
                 .anyRequest().authenticated()
             .and()
             .csrf()
                 .ignoringAntMatchers("/api/compras")
                 .ignoringAntMatchers("/api/compras/single")
                 .ignoringAntMatchers("/api/compras/proforma")
+                .ignoringAntMatchers("/api/compras/guia")
                 .ignoringAntMatchers("/finalizarVenda")
             .and()
             .formLogin()

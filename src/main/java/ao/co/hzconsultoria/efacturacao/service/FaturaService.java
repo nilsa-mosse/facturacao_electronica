@@ -56,7 +56,7 @@ public class FaturaService {
         return emitirDocumento(compra, "FP");
     }
 
-    private Fatura emitirDocumento(Compra compra, String tipo) {
+    public Fatura emitirDocumento(Compra compra, String tipo) {
         Fatura fatura = new Fatura();
         fatura.setCompra(compra);
         fatura.setTipoDocumento(tipo);
@@ -281,6 +281,19 @@ public class FaturaService {
         addMetaRow(metaInner, "Nº DOCUMENTO:", fatura.getNumeroFatura(), bold, normal);
         String dataStr = fatura.getDataEmissao() != null ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao()) : "-";
         addMetaRow(metaInner, "DATA DE EMISSÃO:", dataStr, bold, normal);
+        
+        // Referência a documento anterior (Rectificação/Substituição)
+        if (fatura.getCompra() != null && fatura.getCompra().getFaturaReferencia() != null) {
+            String refNumero = "---";
+            java.util.List<Fatura> faturasOrig = faturaRepository.findByCompra(fatura.getCompra().getFaturaReferencia());
+            if (!faturasOrig.isEmpty()) {
+                refNumero = faturasOrig.get(0).getNumeroFatura();
+            } else {
+                refNumero = "#" + fatura.getCompra().getFaturaReferencia().getId();
+            }
+            addMetaRow(metaInner, "DOC. REFERÊNCIA:", refNumero, bold, normal);
+        }
+        
         addMetaRow(metaInner, "MOEDA:", "AOA (Kwanza)", bold, normal);
         
         metaDataCell.addElement(metaInner);

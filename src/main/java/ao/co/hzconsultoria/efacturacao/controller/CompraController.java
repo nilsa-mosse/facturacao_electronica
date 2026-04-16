@@ -19,7 +19,9 @@ import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ClienteRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.FaturaService;
+import ao.co.hzconsultoria.efacturacao.service.GuiaRemessaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
+import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa; 
 
 
 @Controller
@@ -36,6 +38,9 @@ public class CompraController {
     
     @Autowired
     private FaturaService faturaService;
+
+    @Autowired
+    private GuiaRemessaService guiaRemessaService;
 
     @Autowired
     private ClienteRepository clienteRepository;
@@ -85,6 +90,34 @@ public class CompraController {
         Compra compraSalva = vendaService.finalizarVenda(compra, "FP");
         Fatura fatura = faturaService.emitirProforma(compraSalva);
         String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
+        return ResponseEntity.ok().body(pdfFile);
+    }
+
+    @PostMapping("/api/compras/guia")
+    public ResponseEntity<?> emitirGuia(@RequestBody Compra compra) {
+        if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
+            return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
+        }
+        compra.getItens().forEach(item -> item.setCompra(compra));
+        resolverCliente(compra);
+        
+        // 1. Finalizar a venda como uma FR/FT padrão para garantir stock e fatura base
+        Compra compraSalva = vendaService.finalizarVenda(compra);
+        faturaService.emitirFatura(compraSalva);
+        
+        // 2. Gerar a Guia de Remessa a partir da venda salva
+        GuiaRemessa guia = guiaRemessaService.gerarGuiaAPartirDeFatura(compraSalva.getId());
+        
+        // 4. Preencher dados de transporte vindos do POS
+        if (compra.getMotorista() != null) guia.setMotorista(compra.getMotorista());
+        if (compra.getMatriculaViatura() != null) guia.setMatriculaViatura(compra.getMatriculaViatura());
+        if (compra.getLocalCarga() != null) guia.setLocalCarga(compra.getLocalCarga());
+        if (compra.getLocalDescarga() != null) guia.setLocalDescarga(compra.getLocalDescarga());
+
+        // 3. Salvar para disparar geração de PDF e registo AGT
+        guiaRemessaService.salvar(guia);
+        
+        String pdfFile = "/guias/" + guia.getNumeroGuia() + ".pdf";
         return ResponseEntity.ok().body(pdfFile);
     }
 

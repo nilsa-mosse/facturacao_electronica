@@ -7,6 +7,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import ao.co.hzconsultoria.efacturacao.model.ItemCompra;
+import ao.co.hzconsultoria.efacturacao.repository.ClienteRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,6 +37,9 @@ public class HistoricoController {
     @Autowired
     private FaturaRepository faturaRepository;
 
+    @Autowired
+    private ClienteRepository clienteRepository;
+
     @GetMapping("/historico-vendas")
     public String historicoVendas(
             Model model,
@@ -47,22 +53,31 @@ public class HistoricoController {
         List<Compra> todasAsCompras = compraRepository.findAll();
         
         // Estatísticas para os cards
-        long totalCount = todasAsCompras.size();
-        long emitidasCount = todasAsCompras.stream().filter(c -> "EMITIDA".equals(c.getStatus()) && ("FT".equals(c.getTipoDocumento()) || c.getTipoDocumento() == null)).count();
-        long proformasCount = todasAsCompras.stream().filter(c -> "EMITIDA".equals(c.getStatus()) && "FP".equals(c.getTipoDocumento())).count();
+        long totalVendas = todasAsCompras.size();
+        long emitidasCount = todasAsCompras.stream().filter(c -> "EMITIDA".equals(c.getStatus())).count();
+        long substituidasCount = todasAsCompras.stream().filter(c -> "SUBSTITUIDA".equals(c.getStatus())).count();
         long canceladasCount = todasAsCompras.stream().filter(c -> "CANCELADA".equals(c.getStatus())).count();
 
         List<Compra> filtradas = todasAsCompras;
 
         // Filtro por tipo (Tipo de Documento ou Status)
         if (!"todos".equalsIgnoreCase(tipo)) {
-            if ("canceladas".equalsIgnoreCase(tipo)) {
+            if ("CANCELADA".equalsIgnoreCase(tipo) || "canceladas".equalsIgnoreCase(tipo)) {
                 filtradas = filtradas.stream()
                     .filter(c -> "CANCELADA".equals(c.getStatus()))
                     .collect(Collectors.toList());
-            } else if ("emitidas".equalsIgnoreCase(tipo) || "FT".equalsIgnoreCase(tipo)) {
+            } else if ("SUBSTITUIDA".equalsIgnoreCase(tipo)) {
                 filtradas = filtradas.stream()
-                    .filter(c -> "EMITIDA".equals(c.getStatus()) && ("FT".equals(c.getTipoDocumento()) || c.getTipoDocumento() == null))
+                    .filter(c -> "SUBSTITUIDA".equals(c.getStatus()))
+                    .collect(Collectors.toList());
+            } else if ("EMITIDA".equalsIgnoreCase(tipo) || "emitidas".equalsIgnoreCase(tipo)) {
+                filtradas = filtradas.stream()
+                    .filter(c -> "EMITIDA".equals(c.getStatus()))
+                    .collect(Collectors.toList());
+            } else if ("FT".equalsIgnoreCase(tipo)) {
+                // Se pedir explicitamente FT, mostramos as que não são Pro-formas, de preferência emitidas
+                filtradas = filtradas.stream()
+                    .filter(c -> !"FP".equals(c.getTipoDocumento()))
                     .collect(Collectors.toList());
             } else if ("FP".equalsIgnoreCase(tipo)) {
                 filtradas = filtradas.stream()
@@ -97,9 +112,9 @@ public class HistoricoController {
         model.addAttribute("compras", compras);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("totalVendas", totalVendas);
         model.addAttribute("emitidasCount", emitidasCount);
-        model.addAttribute("proformasCount", proformasCount);
+        model.addAttribute("substituidasCount", substituidasCount);
         model.addAttribute("canceladasCount", canceladasCount);
         model.addAttribute("dataInicio", dataInicio);
         model.addAttribute("dataFim", dataFim);
@@ -108,14 +123,78 @@ public class HistoricoController {
         return "historicoVendas";
     }
 
-    @GetMapping("/historico-vendas/cancelar/{id}")
-    public String cancelarVenda(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        if (vendaService.cancelarVenda(id)) {
+    @PostMapping("/historico-vendas/anular")
+    public String anularVenda(
+            @RequestParam(value = "id", required = false) Long id, 
+            @RequestParam(value = "motivo", required = false) String motivo, 
+            RedirectAttributes redirectAttributes) {
+            
+        if (id == null || motivo == null || motivo.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Dados inválidos para anulação.");
+            return "redirect:/historico-vendas";
+        }
+
+        if (vendaService.cancelarVenda(id, motivo)) {
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Factura anulada com sucesso.");
         } else {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao anular factura.");
         }
         return "redirect:/historico-vendas?tipo=todos";
+    }
+
+    @GetMapping("/historico-vendas/rectificar/{id}")
+    public String prepararRectificacao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Optional<Compra> compraOpt = compraRepository.findById(id);
+        if (compraOpt.isPresent()) {
+            Compra original = compraOpt.get();
+            Compra nova = new Compra();
+            nova.setCliente(original.getCliente());
+            nova.setFaturaReferencia(original);
+            nova.setNomeCliente(original.getNomeCliente());
+            nova.setNifCliente(original.getNifCliente());
+            nova.setFormaPagamento(original.getFormaPagamento());
+            
+            // Clonar itens
+            List<ItemCompra> novosItens = original.getItens().stream().map(i -> {
+                ItemCompra ni = new ItemCompra();
+                ni.setNomeProduto(i.getNomeProduto());
+                ni.setQuantidade(i.getQuantidade());
+                ni.setPreco(i.getPreco());
+                ni.setSubtotal(i.getSubtotal());
+                ni.setIva(i.getIva());
+                return ni;
+            }).collect(Collectors.toList());
+            nova.setItens(novosItens);
+            
+            model.addAttribute("compra", nova);
+            model.addAttribute("clientes", clienteRepository.findAll());
+            
+            return "rectificarFactura";
+        }
+        redirectAttributes.addFlashAttribute("mensagemErro", "Factura não encontrada.");
+        return "redirect:/historico-vendas";
+    }
+
+    @PostMapping("/historico-vendas/salvar-rectificacao")
+    public String salvarRectificacao(Compra compra, RedirectAttributes redirectAttributes) {
+        try {
+            // 1. Marcar a original como SUBSTITUIDA
+            if (compra.getFaturaReferencia() != null) {
+                Compra original = compraRepository.findById(compra.getFaturaReferencia().getId()).orElse(null);
+                if (original != null) {
+                    original.setStatus("SUBSTITUIDA");
+                    compraRepository.save(original);
+                }
+            }
+            
+            // 2. Salvar a nova factura
+            vendaService.finalizarVenda(compra, "FT");
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Factura rectificada com sucesso!");
+            return "redirect:/historico-vendas";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao rectificar factura: " + e.getMessage());
+            return "redirect:/historico-vendas";
+        }
     }
 
     @GetMapping("/historico-vendas/restaurar/{id}")

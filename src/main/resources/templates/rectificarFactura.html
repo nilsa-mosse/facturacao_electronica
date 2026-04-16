@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper bg-light">
+            <div class="container-fluid px-4 py-4">
+                
+                <!-- Page Header -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="fw-800 text-dark"><i class="fas fa-edit me-2 text-warning"></i> Rectificar Factura</h2>
+                        <p class="text-muted">A preparar documento de substituição para a Factura <span class="fw-bold text-primary" th:text="'#' + ${compra.faturaReferencia.id}"></span>.</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-soft-warning text-warning border border-warning rounded-pill px-3 py-2">
+                            <i class="fas fa-sync me-1"></i> Documento de Substituição
+                        </span>
+                    </div>
+                </div>
+
+                <form th:action="@{/historico-vendas/salvar-rectificacao}" method="post" th:object="${compra}">
+                    <input type="hidden" th:field="*{faturaReferencia.id}">
+                    
+                    <div class="row g-4">
+                        <!-- Coluna: Identificação e Pagamento -->
+                        <div class="col-lg-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-700">Identificação e Pagamento</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-4">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Cliente / Entidade</label>
+                                        <select th:field="*{cliente}" class="form-select border-0 bg-light rounded-pill shadow-sm" required>
+                                            <option value="">Consumidor Final</option>
+                                            <option th:each="cli : ${clientes}" th:value="${cli.id}" 
+                                                    th:selected="${compra.cliente != null and cli.id == compra.cliente.id}"
+                                                    th:text="${cli.nome} + ' (NIF: ' + ${cli.nif} + ')'">
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label small fw-bold text-muted text-uppercase">Forma de Pagamento</label>
+                                        <select th:field="*{formaPagamento}" class="form-select border-0 bg-light rounded-pill shadow-sm" required>
+                                            <option value="CASH" th:selected="${compra.formaPagamento == 'CASH'}">Dinheiro (CASH)</option>
+                                            <option value="MULTICAIXA" th:selected="${compra.formaPagamento == 'MULTICAIXA'}">Multicaixa (TPA)</option>
+                                            <option value="TRANSFERENCIA" th:selected="${compra.formaPagamento == 'TRANSFERENCIA'}">Transferência Bancária</option>
+                                            <option value="CASH+MULTICAIXA" th:selected="${compra.formaPagamento == 'CASH+MULTICAIXA'}">Pagamento Misto</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="alert alert-warning border-0 small shadow-sm" style="border-radius: 12px;">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Nota Fiscais:</strong> Ao salvar, a factura original será marcada como substituída e o stock será ajustado conforme os novos itens.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coluna: Itens da Factura -->
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 fw-700">Artigos / Serviços</h5>
+                                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="adicionarLinha()">
+                                        <i class="fas fa-plus me-1"></i> Adicionar Item
+                                    </button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0" id="tabelaItens">
+                                            <thead class="bg-light small fw-bold text-muted uppercase">
+                                                <tr>
+                                                    <th class="ps-4">Designação</th>
+                                                    <th width="100px" class="text-center">Qtd</th>
+                                                    <th width="150px" class="text-end">Preço Unit.</th>
+                                                    <th width="150px" class="text-end pe-4">Subtotal</th>
+                                                    <th width="50px"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="corpoTabelaItens">
+                                                <tr th:each="item, stat : ${compra.itens}">
+                                                    <td class="ps-4">
+                                                        <input type="text" th:name="'itens[' + ${stat.index} + '].nomeProduto'" th:value="${item.nomeProduto}" 
+                                                               class="form-control form-control-sm border-0 bg-light rounded-pill input-busca-produto" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" th:name="'itens[' + ${stat.index} + '].quantidade'" th:value="${item.quantidade}" 
+                                                               class="form-control form-control-sm border-0 bg-light rounded-pill text-center input-qtd" min="1" step="any" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" th:name="'itens[' + ${stat.index} + '].preco'" th:value="${item.preco}" 
+                                                               class="form-control form-control-sm border-0 bg-light rounded-pill text-end input-preco" step="any" required>
+                                                    </td>
+                                                    <td class="text-end pe-4">
+                                                        <span class="fw-bold text-dark item-subtotal" th:text="${#numbers.formatDecimal(item.subtotal, 1, 'POINT', 2, 'COMMA')}">0,00</span>
+                                                        <input type="hidden" th:name="'itens[' + ${stat.index} + '].subtotal'" th:value="${item.subtotal}" class="input-subtotal-val">
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-link text-danger p-0" onclick="removerLinha(this)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Totais -->
+                                    <div class="p-4 bg-light border-top">
+                                        <div class="row justify-content-end">
+                                            <div class="col-md-5">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="text-muted fw-bold">Subtotal:</span>
+                                                    <span id="valorSubtotal" class="fw-bold">0,00 Kz</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-3">
+                                                    <span class="text-muted fw-bold">Imposto (IVA):</span>
+                                                    <span id="valorIva" class="fw-bold">0,00 Kz</span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between">
+                                                    <h4 class="fw-800 text-primary">Total Geral:</h4>
+                                                    <h4 class="fw-800 text-primary" id="valorTotal">0,00 Kz</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-top py-4 text-end">
+                                    <a th:href="@{/historico-vendas}" class="btn btn-light px-4 py-2 border rounded-pill me-2">Voltar</a>
+                                    <button type="submit" class="btn btn-warning px-5 py-2 shadow rounded-pill fw-bold text-dark">
+                                        <i class="fas fa-check-circle me-2"></i> EMITIR SUBSTITUIÇÃO
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:inline="javascript">
+        let contadorLinhas = [[${compra.itens != null ? #lists.size(compra.itens) : 0}]];
+
+        $(document).ready(function() {
+            $('.input-busca-produto').each(function() { vincularBuscaProduto($(this)); });
+            
+            $(document).on('input', '.input-qtd, .input-preco', function() {
+                calcularLinha($(this).closest('tr'));
+                calcularTotais();
+            });
+
+            calcularTotais();
+        });
+
+        function adicionarLinha() {
+            const tbody = $('#corpoTabelaItens');
+            const idx = contadorLinhas;
+            const row = `
+                <tr>
+                    <td class="ps-4">
+                        <input type="text" name="itens[${idx}].nomeProduto" class="form-control form-control-sm border-0 bg-light rounded-pill input-busca-produto" placeholder="Designação do produto" required>
+                    </td>
+                    <td>
+                        <input type="number" name="itens[${idx}].quantidade" class="form-control form-control-sm border-0 bg-light rounded-pill text-center input-qtd" value="1" min="1" step="any" required>
+                    </td>
+                    <td>
+                        <input type="number" name="itens[${idx}].preco" class="form-control form-control-sm border-0 bg-light rounded-pill text-end input-preco" value="0" step="any" required>
+                    </td>
+                    <td class="text-end pe-4">
+                        <span class="fw-bold text-dark item-subtotal">0,00</span>
+                        <input type="hidden" name="itens[${idx}].subtotal" value="0" class="input-subtotal-val">
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-link text-danger p-0" onclick="removerLinha(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tbody.append(row);
+            vincularBuscaProduto(tbody.find('tr:last .input-busca-produto'));
+            contadorLinhas++;
+        }
+
+        function removerLinha(btn) {
+            $(btn).closest('tr').remove();
+            calcularTotais();
+        }
+
+        function calcularLinha(row) {
+            const qtd = parseFloat(row.find('.input-qtd').val()) || 0;
+            const preco = parseFloat(row.find('.input-preco').val()) || 0;
+            const subtotal = qtd * preco;
+            row.find('.item-subtotal').text(subtotal.toLocaleString('pt-PT', {minimumFractionDigits: 2}));
+            row.find('.input-subtotal-val').val(subtotal.toFixed(2));
+        }
+
+        function calcularTotais() {
+            let total = 0;
+            $('.input-subtotal-val').each(function() {
+                total += parseFloat($(this).val()) || 0;
+            });
+            
+            // Simulação de IVA (14%) para visualização
+            const iva = total * 0.14; 
+            
+            $('#valorSubtotal').text(total.toLocaleString('pt-PT', {minimumFractionDigits: 2}) + ' Kz');
+            $('#valorIva').text(iva.toLocaleString('pt-PT', {minimumFractionDigits: 2}) + ' Kz');
+            $('#valorTotal').text((total + iva).toLocaleString('pt-PT', {minimumFractionDigits: 2}) + ' Kz');
+        }
+
+        function vincularBuscaProduto(input) {
+            const $wrapper = $('<div class="autocomplete-wrapper" style="position:relative;"></div>');
+            input.wrap($wrapper);
+            const $list = $('<div class="suggestions-list shadow-lg"></div>');
+            input.after($list);
+
+            input.on('input', function() {
+                const query = $(this).val();
+                if (query.length < 2) { $list.hide(); return; }
+
+                fetch(`/api/produtos/pesquisar?nome=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        $list.empty();
+                        if (data.length > 0) {
+                            data.forEach(prod => {
+                                const $item = $(`<div class="suggestion-item"><i class="fas fa-box me-2 opacity-50"></i> <b>${prod.nome}</b> - ${prod.preco} Kz</div>`);
+                                $item.on('click', function() {
+                                    input.val(prod.nome);
+                                    const row = input.closest('tr');
+                                    row.find('.input-preco').val(prod.preco).trigger('input');
+                                    $list.hide();
+                                });
+                                $list.append($item);
+                            });
+                            $list.show();
+                        } else { $list.hide(); }
+                    });
+            });
+            
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.autocomplete-wrapper').length) { $('.suggestions-list').hide(); }
+            });
+        }
+    </script>
+
+    <style>
+        .premium-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 25px; transition: all 0.3s; }
+        .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
+        .suggestions-list {
+            position: absolute; z-index: 1000; background: white; width: 100%; max-height: 200px;
+            overflow-y: auto; border-radius: 8px; border: 1px solid #ddd;
+        }
+        .suggestion-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .suggestion-item:hover { background: #f8f9fa; }
+    </style>
+</body>
+</html>

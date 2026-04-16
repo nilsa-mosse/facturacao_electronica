@@ -21,7 +21,7 @@ public class Compra {
     @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
     private List<ItemCompra> itens;
 
-    private String status = "EMITIDA"; // EMITIDA, CANCELADA
+    private String status = "EMITIDA"; // EMITIDA, CANCELADA, SUBSTITUIDA
     private String tipoDocumento; // FT, FR, FP
 
     // Dados do cliente para a factura (pode ser FK ou Consumidor Final)
@@ -32,10 +32,25 @@ public class Compra {
     // Detalhes MULTICAIXA (Angola)
     private Double valorPagoCash;
     private Double valorPagoMulticaixa;
-    private String bancoMulticaixa;       // BFA, BAI, BCI, etc.
-    private String referenciaMulticaixa;  // Número do borderô/transação
-    private Double comissaoMulticaixa;    // Valor da taxa (padrão 1.5%)
+    private String bancoMulticaixa; // BFA, BAI, BCI, etc.
+    private String referenciaMulticaixa; // Número do borderô/transação
+    private Double comissaoMulticaixa; // Valor da taxa (padrão 1.5%)
     private Double valorLiquidoMulticaixa; // Valor líquido que entra na conta
+
+    // Campos transientes para transporte (Guia de Remessa no POS)
+    @Transient
+    private String motorista;
+    @Transient
+    private String matriculaViatura;
+    @Transient
+    private String localCarga;
+    @Transient
+    private String localDescarga;
+
+    private String motivoAnulacao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Compra faturaReferencia;
 
     // Getters and Setters
     public Cliente getCliente() {
@@ -45,6 +60,7 @@ public class Compra {
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
     }
+
     public Long getId() {
         return id;
     }
@@ -85,33 +101,131 @@ public class Compra {
         this.status = status;
     }
 
-    public String getTipoDocumento() { return tipoDocumento; }
-    public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
+    public String getTipoDocumento() {
+        return tipoDocumento;
+    }
 
-    public String getNomeCliente() { return nomeCliente; }
-    public void setNomeCliente(String nomeCliente) { this.nomeCliente = nomeCliente; }
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
 
-    public String getNifCliente() { return nifCliente; }
-    public void setNifCliente(String nifCliente) { this.nifCliente = nifCliente; }
+    public String getNomeCliente() {
+        return nomeCliente;
+    }
 
-    public String getFormaPagamento() { return formaPagamento; }
-    public void setFormaPagamento(String formaPagamento) { this.formaPagamento = formaPagamento; }
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
+    }
 
-    public Double getValorPagoCash() { return valorPagoCash; }
-    public void setValorPagoCash(Double valorPagoCash) { this.valorPagoCash = valorPagoCash; }
+    public String getNifCliente() {
+        return nifCliente;
+    }
 
-    public Double getValorPagoMulticaixa() { return valorPagoMulticaixa; }
-    public void setValorPagoMulticaixa(Double valorPagoMulticaixa) { this.valorPagoMulticaixa = valorPagoMulticaixa; }
+    public void setNifCliente(String nifCliente) {
+        this.nifCliente = nifCliente;
+    }
 
-    public String getBancoMulticaixa() { return bancoMulticaixa; }
-    public void setBancoMulticaixa(String bancoMulticaixa) { this.bancoMulticaixa = bancoMulticaixa; }
+    public String getFormaPagamento() {
+        return formaPagamento;
+    }
 
-    public String getReferenciaMulticaixa() { return referenciaMulticaixa; }
-    public void setReferenciaMulticaixa(String referenciaMulticaixa) { this.referenciaMulticaixa = referenciaMulticaixa; }
+    public void setFormaPagamento(String formaPagamento) {
+        this.formaPagamento = formaPagamento;
+    }
 
-    public Double getComissaoMulticaixa() { return comissaoMulticaixa; }
-    public void setComissaoMulticaixa(Double comissaoMulticaixa) { this.comissaoMulticaixa = comissaoMulticaixa; }
+    public Double getValorPagoCash() {
+        return valorPagoCash;
+    }
 
-    public Double getValorLiquidoMulticaixa() { return valorLiquidoMulticaixa; }
-    public void setValorLiquidoMulticaixa(Double valorLiquidoMulticaixa) { this.valorLiquidoMulticaixa = valorLiquidoMulticaixa; }
+    public void setValorPagoCash(Double valorPagoCash) {
+        this.valorPagoCash = valorPagoCash;
+    }
+
+    public Double getValorPagoMulticaixa() {
+        return valorPagoMulticaixa;
+    }
+
+    public void setValorPagoMulticaixa(Double valorPagoMulticaixa) {
+        this.valorPagoMulticaixa = valorPagoMulticaixa;
+    }
+
+    public String getBancoMulticaixa() {
+        return bancoMulticaixa;
+    }
+
+    public void setBancoMulticaixa(String bancoMulticaixa) {
+        this.bancoMulticaixa = bancoMulticaixa;
+    }
+
+    public String getReferenciaMulticaixa() {
+        return referenciaMulticaixa;
+    }
+
+    public void setReferenciaMulticaixa(String referenciaMulticaixa) {
+        this.referenciaMulticaixa = referenciaMulticaixa;
+    }
+
+    public Double getComissaoMulticaixa() {
+        return comissaoMulticaixa;
+    }
+
+    public void setComissaoMulticaixa(Double comissaoMulticaixa) {
+        this.comissaoMulticaixa = comissaoMulticaixa;
+    }
+
+    public Double getValorLiquidoMulticaixa() {
+        return valorLiquidoMulticaixa;
+    }
+
+    public void setValorLiquidoMulticaixa(Double valorLiquidoMulticaixa) {
+        this.valorLiquidoMulticaixa = valorLiquidoMulticaixa;
+    }
+
+    public String getMotorista() {
+        return motorista;
+    }
+
+    public void setMotorista(String motorista) {
+        this.motorista = motorista;
+    }
+
+    public String getMatriculaViatura() {
+        return matriculaViatura;
+    }
+
+    public void setMatriculaViatura(String matriculaViatura) {
+        this.matriculaViatura = matriculaViatura;
+    }
+
+    public String getLocalCarga() {
+        return localCarga;
+    }
+
+    public void setLocalCarga(String localCarga) {
+        this.localCarga = localCarga;
+    }
+
+    public String getLocalDescarga() {
+        return localDescarga;
+    }
+
+    public void setLocalDescarga(String localDescarga) {
+        this.localDescarga = localDescarga;
+    }
+
+    public String getMotivoAnulacao() {
+        return motivoAnulacao;
+    }
+
+    public void setMotivoAnulacao(String motivoAnulacao) {
+        this.motivoAnulacao = motivoAnulacao;
+    }
+
+    public Compra getFaturaReferencia() {
+        return faturaReferencia;
+    }
+
+    public void setFaturaReferencia(Compra faturaReferencia) {
+        this.faturaReferencia = faturaReferencia;
+    }
 }

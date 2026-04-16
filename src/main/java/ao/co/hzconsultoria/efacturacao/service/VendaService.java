@@ -28,6 +28,12 @@ public class VendaService {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private FaturaService faturaService;
+
+    @Autowired
+    private NotaCreditoService notaCreditoService;
+
     public Compra finalizarVenda(List<Carrinho> carrinho) {
         Compra compra = new Compra();
         compra.setDataCompra(LocalDateTime.now());
@@ -74,6 +80,13 @@ public class VendaService {
         }
         double totalFinal = totalSemImposto + valorIva;
         compra.setTotal(totalFinal);
+        compra.setStatus("EMITIDA"); // Garantir estado "Emitida"
+        
+        // Vincular itens à compra para persistência correta
+        if (compra.getItens() != null) {
+            compra.getItens().forEach(item -> item.setCompra(compra));
+        }
+
         // Gerar hash SHA256(numeroFatura+data+totalFinal)
         String numeroFatura = "FT-" + System.currentTimeMillis();
         String data = compra.getDataCompra().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -118,8 +131,9 @@ public class VendaService {
             }
         }
 
-        // Salvar fatura
-        // ... código para salvar fatura com todos os campos ...
+        // Salvar fatura fiscal e gerar PDF
+        faturaService.emitirDocumento(compraSalva, tipoDocumento);
+
         return compraSalva;
     }
 
@@ -144,10 +158,17 @@ public class VendaService {
         return compras;
     }
 
-    public boolean cancelarVenda(Long id) {
+    public boolean cancelarVenda(Long id, String motivo) {
         return compraRepository.findById(id).map(compra -> {
+            boolean wasEmitida = "EMITIDA".equals(compra.getStatus());
             compra.setStatus("CANCELADA");
+            compra.setMotivoAnulacao(motivo);
             compraRepository.save(compra);
+            
+            // Se já tinha sido emitida, gera Nota de Crédito fiscal automaticamente
+            if (wasEmitida) {
+                notaCreditoService.gerarNotaCreditoAutomatica(compra, motivo);
+            }
             return true;
         }).orElse(false);
     }
