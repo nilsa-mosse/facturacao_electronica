@@ -823,7 +823,17 @@
              <input type="hidden" id="estoqueModalProdutoId" value="" />
             <div class="d-flex gap-2 mb-3 align-items-center">
               <div class="flex-grow-1">
-                <input id="estoqueSearch" type="text" class="form-control form-control-sm" placeholder="Pesquisar por loja ou endereço...">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input id="estoqueSearch" type="text" class="form-control border-start-0" placeholder="Pesquisar por nome, endereço ou tipo...">
+                </div>
+              </div>
+              <div style="width: 130px;">
+                <select id="estoqueFilterTipo" class="form-select form-select-sm">
+                  <option value="">Todos Tipos</option>
+                  <option value="LOJA">LOJA</option>
+                  <option value="ARMAZEM">ARMAZEM</option>
+                </select>
               </div>
               <div class="form-check ms-2 mb-0">
                 <input class="form-check-input" type="checkbox" value="" id="estoqueShowZero">
@@ -930,13 +940,24 @@
         }
 
         // Filtrar linhas da tabela do modal por texto (client-side)
-        function filterEstoqueRows(term) {
-            term = (term || '').toLowerCase();
+        function filterEstoqueRows() {
+            var term = ($('#estoqueSearch').val() || '').toLowerCase();
+            var tipo = $('#estoqueFilterTipo').val() || '';
+
             $('#estoqueModalBody tr').each(function() {
                 var txt = $(this).attr('data-search') || '';
-                if (txt.toLowerCase().indexOf(term) !== -1) $(this).show(); else $(this).hide();
+                var rowTipo = $(this).attr('data-tipo') || '';
+                
+                var matchesTerm = txt.toLowerCase().indexOf(term) !== -1;
+                var matchesTipo = tipo === '' || rowTipo === tipo;
+
+                if (matchesTerm && matchesTipo) $(this).show(); else $(this).hide();
             });
         }
+
+        // Listener para o novo filtro de tipo
+        $(document).on('change', '#estoqueFilterTipo', filterEstoqueRows);
+        $(document).on('input', '#estoqueSearch', filterEstoqueRows);
 
         // Busca disponibilidade via API e popula o modal
         function fetchDisponibilidade(produtoId, showZero, includeAll) {
@@ -968,16 +989,17 @@
                     var cls = quantidade > 0 ? 'text-success' : 'text-muted';
                     var visClass = item.visivel ? '' : 'opacity-50';
                     var visBadge = item.visivel ? '' : '<span class="badge bg-warning text-dark ms-1">Oculto</span>';
-                    var rowSearch = (item.nome + ' ' + (item.endereco || '')).toLowerCase();
-                    var row = '<tr class="align-middle ' + visClass + '" data-search="' + rowSearch + '">' +
+                    var rowTipo = item.tipo || '';
+                    var rowSearch = (item.nome + ' ' + (item.endereco || '') + ' ' + rowTipo).toLowerCase();
+                    var row = '<tr class="align-middle ' + visClass + '" data-search="' + rowSearch + '" data-tipo="' + rowTipo + '">' +
                         '<td>' + item.nome + (visBadge) + '</td>' +
                         '<td>' + (item.endereco || '') + '</td>' +
                         '<td class="text-end fw-bold ' + cls + '">' + quantidade + '</td>' +
-                        '<td>' + (item.tipo || '') + '</td>' +
+                        '<td>' + (rowTipo) + '</td>' +
                         '</tr>';
                     body.append(row);
                 });
-                filterEstoqueRows($('#estoqueSearch').val());
+                filterEstoqueRows();
             }).catch(function(err){
                 spinner.addClass('d-none');
                 body.html('<tr><td colspan="4" class="text-center text-danger">Erro ao pesquisar disponibilidade.</td></tr>');
@@ -998,7 +1020,16 @@
                  // trigger search using current checkbox states
                  var showZero = $('#estoqueShowZero').is(':checked');
                  var includeAll = $('#estoqueIncludeAll').is(':checked');
-                 fetchDisponibilidade(id, showZero, includeAll);
+                  fetchDisponibilidade(id, showZero, includeAll);
+             });
+
+             $('#estoqueSearch').on('input', filterEstoqueRows);
+             $('#estoqueFilterTipo').on('change', filterEstoqueRows);
+             
+             // Checkboxes de disponibilidade também devem disparar refresh
+             $('#estoqueShowZero, #estoqueIncludeAll').on('change', function() {
+                  var id = $('#estoqueModalProdutoId').val();
+                  if (id) fetchDisponibilidade(id, $('#estoqueShowZero').is(':checked'), $('#estoqueIncludeAll').is(':checked'));
              });
 
              var selectedCategoryId = 0;

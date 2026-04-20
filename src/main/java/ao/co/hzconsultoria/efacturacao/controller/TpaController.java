@@ -17,10 +17,10 @@ public class TpaController {
 
     // Configurações padrão que podem ser injetadas do application.properties
     // ou trazidas via Database para cada Loja / PDV
-    @Value("${pdv.hardware.tpa.ip}")
+    @Value("${pdv.hardware.tpa.ip:192.168.1.100}")
     private String tpaDefaultIp;
 
-    @Value("${pdv.hardware.tpa.porta}")
+    @Value("${pdv.hardware.tpa.porta:9000}")
     private int tpaDefaultPorta;
 
     /**
