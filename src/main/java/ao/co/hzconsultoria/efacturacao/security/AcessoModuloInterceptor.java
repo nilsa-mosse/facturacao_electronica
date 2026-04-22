@@ -51,9 +51,9 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
         }
 
         if (userId != null) {
+            // Validar acesso através da Tabela de Permissões para todos os utilizadores não-SuperAdmin
             Optional<PermissaoModulo> perm = permissaoRepo.findByModuloAndUsuario_Id(modulo, userId);
             if (perm.isPresent() && !perm.get().isAtivo()) {
-                // Evitar loop: se já estivermos no dashboard, permitir o acesso básico para mostrar a mensagem de erro
                 if (uri.equals("/dashboard")) {
                     return true;
                 }
@@ -73,7 +73,10 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
         if (uri.startsWith("/guias") || uri.startsWith("/notas") || uri.startsWith("/factura-eletronica") || uri.startsWith("/configuracoes/saft")) return "FACTURACAO";
         if (uri.startsWith("/despesas") || uri.startsWith("/financeiro")) return "FINANCEIRO";
         
-        // Administração (inclui todos os outros em /configuracoes que não sejam saft)
+        // Controlo de Acesso é permitido a qualquer utilizador autenticado (não requer módulo ADMINISTRACAO)
+        if (uri.startsWith("/configuracoes/controlo-acesso")) return null;
+        
+        // Restantes configurações (Empresa, Utilizadores, AGT, etc.) requerem módulo ADMINISTRACAO
         if (uri.startsWith("/configuracoes")) return "ADMINISTRACAO";
         
         return null;

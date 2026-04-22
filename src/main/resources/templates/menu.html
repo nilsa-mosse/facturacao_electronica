@@ -369,6 +369,17 @@
             </li>
           </th:block>
 
+          <!-- CONTROLO DE ACESSO (Visível para ADMIN, fora do módulo ADMINISTRACAO) -->
+          <th:block th:if="${isAdmin and !isSuperAdmin}">
+            <li class="nav-header">GESTÃO DE ACESSOS</li>
+            <li class="nav-item">
+              <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link">
+                <i class="nav-icon fas fa-user-shield text-info"></i>
+                <p>Controlo de Acesso</p>
+              </a>
+            </li>
+          </th:block>
+
           <!-- SUPER ADMIN SECTION -->
           <th:block th:if="${isSuperAdmin}">
             <li class="nav-header text-warning">PAINEL GLOBAL (SaaS)</li>

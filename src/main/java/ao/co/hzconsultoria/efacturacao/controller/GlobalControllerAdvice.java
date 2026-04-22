@@ -56,6 +56,13 @@ public class GlobalControllerAdvice {
             }
         }
         model.addAttribute("isSuperAdmin", isSuperAdmin);
+        // Expor papel Admin para uso nos templates de menu
+        if (auth != null && auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
+            String roleAtual = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getRole();
+            model.addAttribute("isAdmin", "ADMIN".equals(roleAtual));
+        } else {
+            model.addAttribute("isAdmin", false);
+        }
 
         // Injetar permissões de acesso
         if (auth != null && auth.isAuthenticated() && !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
@@ -73,7 +80,10 @@ public class GlobalControllerAdvice {
             model.addAttribute("modulo_FINANCEIRO", false);
             model.addAttribute("modulo_ADMINISTRACAO", false);
             
-            // SUPERADMIN tem acesso a tudo por padrão
+            boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+            // SUPERADMIN tem acesso a tudo por padrão (Incluindo Painel Global e Administração)
             if (isSuperAdmin) {
                 model.addAttribute("modulo_DASHBOARD", true);
                 model.addAttribute("modulo_VENDAS", true);
@@ -82,7 +92,9 @@ public class GlobalControllerAdvice {
                 model.addAttribute("modulo_FACTURACAO", true);
                 model.addAttribute("modulo_FINANCEIRO", true);
                 model.addAttribute("modulo_ADMINISTRACAO", true);
-            } else {
+            } 
+            // Para todos os outros (ADMIN, USER, OPERADOR), o acesso é determinado pela Tabela de Permissões
+            else {
                 Long userId = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getId();
                 java.util.List<ao.co.hzconsultoria.efacturacao.model.PermissaoModulo> permissoes = permissaoRepo.findByUsuario_Id(userId);
                 for (ao.co.hzconsultoria.efacturacao.model.PermissaoModulo p : permissoes) {

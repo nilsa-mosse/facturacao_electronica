@@ -20,6 +20,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/configuracoes")
@@ -604,12 +605,20 @@ public class ConfiguracaoController {
         if (usuarioId != null) {
             User user = userRepository.findById(usuarioId).orElse(null);
             if (user != null) {
-                // Garantir que todas as permissões base existam para este usuário
+                // Garantir que todas as permissões base existam e estejam corretas para este usuário
                 for (String modulo : modulos) {
-                    if (!permissaoModuloRepository.findByModuloAndUsuario_Id(modulo, usuarioId).isPresent()) {
-                        boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
-                        boolean ativo = isAdmin || "VENDAS".equals(modulo);
-                        permissaoModuloRepository.save(new PermissaoModulo(modulo, user, ativo));
+                    Optional<PermissaoModulo> opt = permissaoModuloRepository.findByModuloAndUsuario_Id(modulo, usuarioId);
+                    boolean isAdmin = "ADMIN".equals(user.getRole());
+                    boolean deveEstarAtivo = (isAdmin && !"ADMINISTRACAO".equals(modulo)) || "VENDAS".equals(modulo);
+                    
+                    if (!opt.isPresent()) {
+                        // Se não existe, cria com o default
+                        permissaoModuloRepository.save(new PermissaoModulo(modulo, user, deveEstarAtivo));
+                    } else if (isAdmin && deveEstarAtivo && !opt.get().isAtivo()) {
+                        // Se é ADMIN e o módulo básico está desativado, força a ativação "por default"
+                        PermissaoModulo p = opt.get();
+                        p.setAtivo(true);
+                        permissaoModuloRepository.save(p);
                     }
                 }
                 
