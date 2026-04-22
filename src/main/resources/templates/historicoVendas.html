@@ -105,6 +105,7 @@
                                         <th>Tipo documento</th>
                                         <th>Cliente / NIF</th>
                                         <th class="text-end">Total Geral</th>
+                                        <th class="text-center">Pagamento</th>
                                         <th class="text-center">Estado</th>
                                         <th class="text-center pe-4">Acções</th>
                                     </tr>
@@ -132,6 +133,20 @@
                                             <span class="fw-800 text-dark" th:text="${#numbers.formatDecimal(compra.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
                                         </td>
                                         <td class="text-center">
+                                            <div th:if="${compra.formaPagamento != null}">
+                                                <span class="badge rounded-pill px-2 py-1" 
+                                                      th:classappend="${compra.formaPagamento.contains('MULTICAIXA') ? 'bg-info' : 'bg-success'}"
+                                                      th:text="${compra.formaPagamento}"></span>
+                                                <div th:if="${compra.referenciaMulticaixa != null and !compra.referenciaMulticaixa.isEmpty()}" class="small text-muted mt-1">
+                                                    <i class="fas fa-barcode me-1"></i> <span th:text="${compra.referenciaMulticaixa}"></span>
+                                                </div>
+                                                <div th:if="${compra.bancoMulticaixa != null and !compra.bancoMulticaixa.isEmpty()}" class="small text-primary fw-bold" style="font-size: 0.7rem;">
+                                                    <span th:text="${compra.bancoMulticaixa}"></span>
+                                                </div>
+                                            </div>
+                                            <span th:unless="${compra.formaPagamento != null}" class="badge bg-secondary">CASH</span>
+                                        </td>
+                                        <td class="text-center">
                                             <span th:if="${compra.status == 'EMITIDA'}" class="badge bg-soft-success text-success border border-success px-3 py-2 rounded-pill">
                                                 <i class="fas fa-check-circle me-1"></i> Emitida
                                             </span>
@@ -153,23 +168,23 @@
                                                    class="btn btn-white btn-sm border-0" title="Ver Detalhes">
                                                     <i class="fas fa-eye text-info"></i>
                                                 </a>
-                                                <!-- Editar / Rectificar -->
-                                                <a th:if="${compra.status == 'EMITIDA'}" 
+                                                <!-- Editar / Rectificar (Só Admin) -->
+                                                <a th:if="${isAdmin and compra.status == 'EMITIDA'}" 
                                                    th:href="@{'/historico-vendas/rectificar/' + ${compra.id}}" 
                                                    class="btn btn-white btn-sm border-0 border-start" 
                                                    title="Editar / Rectificar Factura">
                                                     <i class="fas fa-edit text-warning"></i>
                                                 </a>
-                                                <!-- Anular com Justificativa -->
-                                                <a th:if="${compra.status == 'EMITIDA'}" 
+                                                <!-- Anular com Justificativa (Só Admin) -->
+                                                <a th:if="${isAdmin and compra.status == 'EMITIDA'}" 
                                                    href="javascript:void(0)" 
                                                    th:onclick="'abrirModalAnular(' + ${compra.id} + ')'"
                                                    class="btn btn-white btn-sm border-0 border-start" 
                                                    title="Anular Factura">
                                                     <i class="fas fa-trash-alt text-danger"></i>
                                                 </a>
-                                                <!-- Restaurar -->
-                                                <a th:if="${compra.status == 'CANCELADA'}" 
+                                                <!-- Restaurar (Só Admin) -->
+                                                <a th:if="${isAdmin and compra.status == 'CANCELADA'}" 
                                                    th:href="@{'/historico-vendas/restaurar/' + ${compra.id}}" 
                                                    class="btn btn-white btn-sm border-0 border-start" 
                                                    title="Restaurar Factura"

@@ -29,8 +29,8 @@
                         <div class="card-header">
                             <h3 class="card-title">Configurar Contas Administrativas</h3>
                             <div class="card-tools">
-                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario">
-                                    <i class="fas fa-plus"></i> Novo Administrador
+                                <button type="button" class="btn btn-warning rounded-pill px-4 btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario">
+                                    <i class="fas fa-plus-circle me-1"></i> Novo Administrador
                                 </button>
                             </div>
                         </div>
@@ -48,40 +48,55 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="u : ${usuarios}">
-                                        <td th:text="${u.nome}"></td>
-                                        <td th:text="${u.login}"></td>
+                                        <td th:text="${u.nome}" class="fw-bold text-dark"></td>
+                                        <td th:text="${u.login}" class="text-muted"></td>
                                         <td>
-                                            <span th:classappend="${u.role == 'SUPERADMIN' ? 'badge badge-danger' : 'badge badge-primary'}"
+                                            <span th:classappend="${u.role == 'SUPERADMIN' ? 'bg-danger' : 'bg-primary'}"
+                                                  class="badge rounded-pill px-3 py-2 shadow-sm"
                                                   th:text="${u.role}"></span>
                                         </td>
                                         <td>
-                                            <span th:if="${u.ativo}" class="badge badge-success">Ativo</span>
-                                            <span th:unless="${u.ativo}" class="badge badge-secondary">Inativo</span>
+                                            <span th:if="${u.ativo}" class="badge bg-success rounded-pill px-3 shadow-sm">
+                                                <i class="fas fa-check-circle me-1 small"></i>Ativo
+                                            </span>
+                                            <span th:unless="${u.ativo}" class="badge bg-secondary rounded-pill px-3 shadow-sm">
+                                                <i class="fas fa-times-circle me-1 small"></i>Inativo
+                                            </span>
                                         </td>
                                         <td>
-                                            <span th:if="${u.empresa}" th:text="${u.empresa.nome}" class="text-bold text-primary"></span>
-                                            <span th:unless="${u.empresa}" class="text-muted small">Sem empresa (Desassociado)</span>
+                                            <div th:if="${u.empresa}" class="d-flex align-items-center">
+                                                <i class="fas fa-building text-primary me-2"></i>
+                                                <span th:text="${u.empresa.nome}" class="fw-bold text-primary"></span>
+                                            </div>
+                                            <span th:unless="${u.empresa}" class="text-muted small italic">
+                                                <i class="fas fa-link-slash me-1"></i>Desassociado
+                                            </span>
                                         </td>
                                         <td>
-                                            <div class="btn-group">
-                                                <button class="btn btn-info btn-sm btn-editar"
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-info rounded-pill px-3 btn-editar shadow-sm"
                                                         th:data-id="${u.id}"
                                                         th:data-nome="${u.nome}"
                                                         th:data-login="${u.login}"
                                                         th:data-role="${u.role}"
                                                         th:data-empresa="${u.empresa?.id}"
-                                                        th:data-ativo="${u.ativo}">
-                                                    <i class="fas fa-edit"></i> Editar
+                                                        th:data-ativo="${u.ativo}"
+                                                        title="Editar Utilizador">
+                                                    <i class="fas fa-edit"></i>
                                                 </button>
                                                 
                                                 <a th:if="${u.empresa != null}" th:href="@{/superadmin/usuarios/desassociar/{id}(id=${u.id})}" 
-                                                   class="btn btn-warning btn-sm" onclick="return confirm('Desassociar este utilizador da empresa?')">
-                                                    <i class="fas fa-unlink"></i> Desassociar
+                                                   class="btn btn-sm btn-outline-warning rounded-pill px-3 shadow-sm" 
+                                                   onclick="return confirm('Desassociar este utilizador da empresa?')"
+                                                   title="Desassociar Empresa">
+                                                    <i class="fas fa-unlink"></i>
                                                 </a>
-
+        
                                                 <a th:href="@{/superadmin/usuarios/eliminar/{id}(id=${u.id})}" 
-                                                   class="btn btn-danger btn-sm" onclick="return confirm('Eliminar permanentemente este utilizador?')">
-                                                    <i class="fas fa-trash"></i> Remover
+                                                   class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" 
+                                                   onclick="return confirm('Eliminar permanentemente este utilizador?')"
+                                                   title="Eliminar Utilizador">
+                                                    <i class="fas fa-trash"></i>
                                                 </a>
                                             </div>
                                         </td>

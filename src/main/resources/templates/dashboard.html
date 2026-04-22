@@ -197,7 +197,25 @@
 
     <script th:src="@{/plugins/chartjs/chart.min.js}"></script>
     <script th:src="@{/plugins/chartjs/chartjs-plugin-datalabels.min.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script th:inline="javascript">
+        // Alerta de Acesso Negado
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('error') === 'access_denied') {
+                const modulo = urlParams.get('module') || '';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Acesso Restrito',
+                    text: 'Lamentamos, mas o seu perfil não tem permissão para aceder ao módulo: ' + modulo,
+                    confirmButtonColor: '#007bff'
+                });
+                // Limpar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
         // 1. Gráfico de Vendas 30 Dias
         var vendasUltimos30Dias = /*[[${vendasUltimos30Dias}]]*/ {};
         var labels30 = Object.keys(vendasUltimos30Dias).map(function (dateStr) {

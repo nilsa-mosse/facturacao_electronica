@@ -20,6 +20,9 @@ public class SecurityConfig {
     @Autowired
     private CustomAuthenticationFailureHandler failureHandler;
 
+    @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -52,7 +55,7 @@ public class SecurityConfig {
             .formLogin()
                 .loginPage("/login")
                 .failureHandler(failureHandler)
-                .defaultSuccessUrl("/dashboard", true)
+                .successHandler(successHandler)
                 .permitAll()
             .and()
             .logout()

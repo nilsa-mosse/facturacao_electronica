@@ -29,8 +29,11 @@
 
                     <!-- Tabela de Utilizadores -->
                     <div class="card card-outline card-dark">
-                         <div class="card-header border-0">
+                         <div class="card-header border-0 d-flex justify-content-between align-items-center">
                             <h3 class="card-title" th:text="#{config.utilizadores.listagem}">Listagem de Utilizadores</h3>
+                            <button class="btn btn-dark shadow-sm btn-sm rounded-pill px-4 ms-auto" onclick="novoUtilizador()">
+                                <i class="fas fa-user-plus me-1"></i> Cadastrar Novo Utilizador
+                            </button>
                         </div>
                         <div class="card-body table-responsive p-0">
                             <table class="table table-striped table-valign-middle">
@@ -38,32 +41,46 @@
                                     <tr>
                                         <th th:text="#{config.utilizadores.nome}">Nome</th>
                                         <th th:text="#{config.utilizadores.login}">Login</th>
+                                        <th>Empresa</th>
+                                        <th>Estabelecimentos</th>
                                         <th th:text="#{config.utilizadores.perfil}">Perfil (Role)</th>
                                         <th th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="u : ${utilizadores}">
-                                        <td th:text="${u.nome}">João Silva</td>
-                                        <td th:text="${u.login}">jsilva</td>
+                                        <td th:text="${u.nome}" class="fw-bold text-dark"></td>
+                                        <td th:text="${u.login}" class="text-muted"></td>
+                                        <td th:text="${u.empresa != null ? u.empresa.nome : 'N/A'}"></td>
                                         <td>
-                                            <span class="badge"
-                                                th:classappend="${u.role == 'ADMIN' ? 'bg-danger' : 'bg-info'}"
+                                            <div class="d-flex flex-wrap gap-1">
+                                                <span th:each="est : ${u.estabelecimentos}" 
+                                                      class="badge bg-light border text-dark fw-normal"
+                                                      th:text="${est.nome}"></span>
+                                                <span th:if="${#lists.isEmpty(u.estabelecimentos)}" class="text-muted small italicText">Nenhum associado</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 shadow-sm"
+                                                th:classappend="${u.role == 'ADMIN' ? 'bg-danger' : 'bg-primary'}"
                                                 th:text="${u.role}">ADMIN</span>
                                         </td>
                                          <td>
-                                             <div class="btn-group">
-                                                 <button class="btn btn-sm btn-outline-info btn-editar-local"
+                                             <div class="d-flex gap-2">
+                                                 <button class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm btn-editar-local"
                                                          th:data-id="${u.id}"
                                                          th:data-nome="${u.nome}"
                                                          th:data-login="${u.login}"
-                                                         th:data-role="${u.role}">
-                                                     <i class="fas fa-edit"></i> Editar
+                                                         th:data-role="${u.role}"
+                                                         th:data-estabelecimentos="${#strings.arrayJoin(u.estabelecimentos.![id], ',')}"
+                                                         title="Editar Utilizador">
+                                                     <i class="fas fa-edit"></i>
                                                  </button>
                                                  <a th:href="@{'/configuracoes/utilizadores/eliminar/' + ${u.id}}"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    th:onclick="return confirm([[#{config.utilizadores.confirmar_eliminar}]])">
-                                                    <i class="fas fa-trash"></i> Eliminar
+                                                    class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm"
+                                                    th:onclick="return confirm([[#{config.utilizadores.confirmar_eliminar}]])"
+                                                    title="Eliminar Utilizador">
+                                                    <i class="fas fa-trash"></i>
                                                  </a>
                                              </div>
                                          </td>
@@ -73,53 +90,59 @@
                         </div>
                     </div>
 
-                    <!-- Formulário Novo Utilizador -->
-                    <div class="card card-outline card-secondary">
-                         <div class="card-header">
-                            <h3 class="card-title" id="formHeader" th:text="#{config.utilizadores.novo}">Novo Utilizador</h3>
-                        </div>
-                        <form th:action="@{/configuracoes/utilizadores/salvar}" method="post">
-                            <input type="hidden" id="userId" name="id">
-                            <div class="card-body">
-                                <div class="row">
-                                     <div class="form-group col-md-3">
-                                        <label th:text="#{config.utilizadores.nome}">Nome Completo</label>
-                                        <input type="text" class="form-control" id="uNome" name="nome" required>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label th:text="#{config.utilizadores.login}">Login de Acesso</label>
-                                        <input type="text" class="form-control" id="uLogin" name="login" required>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label th:text="#{config.utilizadores.senha}">Palavra-passe</label>
-                                        <input type="password" class="form-control" id="uSenha" name="senha" placeholder="Palavra-passe">
-                                        <small class="text-muted" id="senhaHelp">Obrigatório para novos utilizadores.</small>
-                                    </div>
-                                    <div class="form-group col-md-3">
-                                        <label th:text="#{config.utilizadores.perfil}">Perfil (Role)</label>
-                                        <select class="form-select" id="uRole" name="role" required>
-                                            <option value="OPERADOR">OPERADOR (Ponto de Venda)</option>
-                                            <option value="CONSULTOR">CONSULTOR (Apenas Leitura)</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-12 mt-3">
-                                        <label>Atribuir Estabelecimentos da Empresa</label>
-                                        <select class="form-select" id="uEst" name="estabelecimentoIds" multiple="multiple" size="5">
-                                            <option th:each="est : ${estabelecimentos}" 
-                                                    th:value="${est.id}" 
-                                                    th:text="${est.nome} + ' (' + ${est.tipo} + ')'"></option>
-                                        </select>
-                                        <small class="text-info"><i class="fas fa-info-circle me-1"></i>Estes utilizadores apenas verão dados relativos aos estabelecimentos selecionados.</small>
-                                    </div>
+                    <!-- Modal Utilizador -->
+                    <div class="modal fade" id="modalUtilizador" tabindex="-1" aria-labelledby="modalUtilizadorLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-dark text-white">
+                                    <h5 class="modal-title" id="formHeader">Novo Utilizador</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
+                                <form th:action="@{/configuracoes/utilizadores/salvar}" method="post">
+                                    <input type="hidden" id="userId" name="id">
+                                    <div class="modal-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{config.utilizadores.nome}">Nome Completo</label>
+                                                <input type="text" class="form-control" id="uNome" name="nome" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{config.utilizadores.login}">Login de Acesso</label>
+                                                <input type="text" class="form-control" id="uLogin" name="login" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{config.utilizadores.senha}">Palavra-passe</label>
+                                                <input type="password" class="form-control" id="uSenha" name="senha" placeholder="Palavra-passe">
+                                                <small class="text-muted d-block" id="senhaHelp">Obrigatório para novos utilizadores.</small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" th:text="#{config.utilizadores.perfil}">Perfil (Role)</label>
+                                                <select class="form-select" id="uRole" name="role" required>
+                                                    <option value="OPERADOR">OPERADOR (Ponto de Venda)</option>
+                                                    <option value="CONSULTOR">CONSULTOR (Apenas Leitura)</option>
+                                                    <option th:if="${isSuperAdmin}" value="ADMIN">ADMINISTRADOR (Gestão)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-12 mt-3">
+                                                <label class="form-label">Atribuir Estabelecimentos da Empresa</label>
+                                                <select class="form-select" id="uEst" name="estabelecimentoIds" multiple="multiple" size="5">
+                                                    <option th:each="est : ${estabelecimentos}" 
+                                                            th:value="${est.id}" 
+                                                            th:text="${est.nome} + ' (' + ${est.tipo} + ')'"></option>
+                                                </select>
+                                                <small class="text-info d-block mt-1"><i class="fas fa-info-circle me-1"></i>Estes utilizadores apenas verão dados relativos aos estabelecimentos selecionados.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-dark shadow-sm">
+                                            <i class="fas fa-save me-1"></i> Gravar Utilizador
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
-                             <div class="card-footer">
-                                <button type="submit" class="btn btn-secondary shadow-sm">
-                                    <i class="fas fa-save me-1"></i> Gravar Utilizador
-                                </button>
-                                <button type="button" class="btn btn-link btn-sm text-muted" onclick="limpar()">Limpar</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -127,9 +150,12 @@
     </div>
 
     <script th:inline="javascript">
+        const modal = new bootstrap.Modal(document.getElementById('modalUtilizador'));
+
         $(document).ready(function() {
             $('.btn-editar-local').on('click', function() {
                 const btn = $(this);
+                limpar();
                 document.getElementById('userId').value = btn.data('id');
                 document.getElementById('uNome').value = btn.data('nome');
                 document.getElementById('uLogin').value = btn.data('login');
@@ -137,9 +163,24 @@
                 document.getElementById('formHeader').innerText = "Editar Utilizador";
                 document.getElementById('uSenha').required = false;
                 document.getElementById('senhaHelp').innerText = "Deixe vazio para manter a senha actual.";
-                window.scrollTo(0, document.body.scrollHeight);
+                
+                // Pré-selecionar estabelecimentos
+                const ests = String(btn.data('estabelecimentos')).split(',');
+                const estSelect = document.getElementById('uEst');
+                for (let i = 0; i < estSelect.options.length; i++) {
+                    if (ests.includes(estSelect.options[i].value)) {
+                        estSelect.options[i].selected = true;
+                    }
+                }
+
+                modal.show();
             });
         });
+
+        function novoUtilizador() {
+            limpar();
+            modal.show();
+        }
 
         function limpar() {
             document.getElementById('userId').value = "";
@@ -150,6 +191,12 @@
             document.getElementById('formHeader').innerText = "Novo Utilizador";
             document.getElementById('uSenha').required = true;
             document.getElementById('senhaHelp').innerText = "Obrigatório para novos utilizadores.";
+            
+            // Limpar estabelecimentos
+            const estSelect = document.getElementById('uEst');
+            for (let i = 0; i < estSelect.options.length; i++) {
+                estSelect.options[i].selected = false;
+            }
         }
     </script>
 </body>

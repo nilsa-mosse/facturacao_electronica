@@ -39,7 +39,7 @@ public class CarrinhoController {
     @Autowired
     private VendaService vendaService;
 
-    @GetMapping("/")
+    @GetMapping("/venda-tradicional")
     public String index(
             @RequestParam(value = "categoriaId", required = false) Long categoriaId,
             @RequestParam(value = "pesquisa", required = false) String pesquisa,
@@ -85,7 +85,7 @@ public class CarrinhoController {
     public String finalizarVenda(RedirectAttributes redirectAttributes) {
         if (carrinho.getItens().isEmpty()) {
             redirectAttributes.addFlashAttribute("mensagemErro", "O carrinho está vazio.");
-            return "redirect:/";
+            return "redirect:/venda-tradicional";
         }
         // Convert Carrinho to Compra
         Compra compra = new Compra();
@@ -108,7 +108,7 @@ public class CarrinhoController {
 
         redirectAttributes.addFlashAttribute("mensagemSucesso", "Venda finalizada com sucesso!");
         // Redirect to the home page
-        return "redirect:/";
+        return "redirect:/venda-tradicional";
     }
 
     @GetMapping("/buscarProduto")

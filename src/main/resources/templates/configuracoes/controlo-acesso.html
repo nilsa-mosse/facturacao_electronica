@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1><i class="fas fa-user-shield me-2 text-primary"></i>Controlo de Acesso</h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- Lista de Utilizadores -->
+                        <div class="col-md-4">
+                            <div class="card card-outline card-primary shadow-sm">
+                                <div class="card-header">
+                                    <h3 class="card-title">Utilizadores</h3>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        <a th:each="user : ${usuarios}" 
+                                           th:href="@{/configuracoes/controlo-acesso(usuarioId=${user.id})}"
+                                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                           th:classappend="${usuarioSelecionado != null && usuarioSelecionado.id == user.id ? 'active' : ''}">
+                                            <div>
+                                                <i class="fas fa-user me-2"></i>
+                                                <span th:text="${user.nome}">Nome</span>
+                                                <br>
+                                                <small class="text-muted" th:classappend="${usuarioSelecionado != null && usuarioSelecionado.id == user.id ? 'text-white' : ''}" 
+                                                       th:text="${user.login}">Login</small>
+                                            </div>
+                                            <span class="badge bg-secondary rounded-pill" th:text="${user.role}">Role</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Matriz de Permissões -->
+                        <div class="col-md-8">
+                            <div class="card card-outline card-primary shadow-sm" th:if="${usuarioSelecionado != null}">
+                                <div class="card-header border-0">
+                                    <h3 class="card-title">
+                                        Permissões para: <b th:text="${usuarioSelecionado.nome}">Utilizador</b>
+                                    </h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" onclick="salvarPermissoes()">
+                                            <i class="fas fa-save me-1"></i> Gravar Alterações
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0" id="tabelaPermissoes">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-4">Módulo do Sistema</th>
+                                                    <th class="text-center" style="width: 150px;">Acesso</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="modulo : ${modulosList}">
+                                                    <td class="ps-4 fw-bold">
+                                                        <i class="fas fa-cube me-2 text-muted"></i>
+                                                        <span th:text="${modulo}">MODULO</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="form-check form-switch d-inline-block">
+                                                            <input class="form-check-input perm-checkbox" type="checkbox" 
+                                                                   th:data-modulo="${modulo}" 
+                                                                   th:checked="${permsMap != null && permsMap.get(modulo) != null ? permsMap.get(modulo) : false}">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white text-muted small">
+                                    <i class="fas fa-info-circle me-1"></i> 
+                                    Alterações nestas permissões afectam imediatamente o acesso do utilizador aos módulos seleccionados.
+                                </div>
+                            </div>
+                            
+                            <div class="card shadow-sm" th:if="${usuarioSelecionado == null}">
+                                <div class="card-body text-center py-5 text-muted">
+                                    <i class="fas fa-mouse-pointer fa-3x mb-3"></i>
+                                    <h5>Seleccione um utilizador à esquerda para gerir as suas permissões.</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const usuarioId = /*[[${usuarioSelecionado != null ? usuarioSelecionado.id : null}]]*/ null;
+
+        function salvarPermissoes() {
+            if (!usuarioId) return;
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Gravando...';
+
+            const permissoes = [];
+            document.querySelectorAll('.perm-checkbox').forEach(cb => {
+                permissoes.push({
+                    modulo: cb.getAttribute('data-modulo'),
+                    ativo: cb.checked
+                });
+            });
+
+            const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+            const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+            fetch('/configuracoes/controlo-acesso/salvar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({
+                    usuarioId: usuarioId,
+                    permissoes: permissoes
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso',
+                        text: 'Permissões do utilizador actualizadas!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Erro', 'Ocorreu um erro ao salvar.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Erro', 'Falha na comunicação com o servidor.', 'error');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+        /*]]>*/
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+
+</html>

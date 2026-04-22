@@ -56,7 +56,14 @@ public class Compra {
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
 
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private User usuario;
+
     // Getters and Setters
+    public User getUsuario() { return usuario; }
+    public void setUsuario(User usuario) { this.usuario = usuario; }
+
     public Empresa getEmpresa() { return empresa; }
     public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
 

@@ -52,6 +52,17 @@ public class HistoricoController {
         int pageSize = 10;
         List<Compra> todasAsCompras = compraRepository.findAll();
         
+        // Restrição por Utilizador (Operadores só vêm o seu histórico)
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPERADMIN"));
+        
+        if (!isAdmin && auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
+            Long userId = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getId();
+            todasAsCompras = todasAsCompras.stream()
+                .filter(c -> c.getUsuario() != null && c.getUsuario().getId().equals(userId))
+                .collect(Collectors.toList());
+        }
+        
         // Estatísticas para os cards
         long totalVendas = todasAsCompras.size();
         long emitidasCount = todasAsCompras.stream().filter(c -> "EMITIDA".equals(c.getStatus())).count();
@@ -120,6 +131,7 @@ public class HistoricoController {
         model.addAttribute("dataFim", dataFim);
         model.addAttribute("pesquisa", pesquisa);
         model.addAttribute("tipo", tipo);
+        model.addAttribute("isAdmin", isAdmin); // Passar permissão para o template
         return "historicoVendas";
     }
 
@@ -129,6 +141,14 @@ public class HistoricoController {
             @RequestParam(value = "motivo", required = false) String motivo, 
             RedirectAttributes redirectAttributes) {
             
+        // Validação de Segurança
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPERADMIN"));
+        if (!isAdmin) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Acesso negado: Apenas administradores podem anular facturas.");
+            return "redirect:/historico-vendas";
+        }
+
         if (id == null || motivo == null || motivo.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Dados inválidos para anulação.");
             return "redirect:/historico-vendas";
@@ -144,6 +164,14 @@ public class HistoricoController {
 
     @GetMapping("/historico-vendas/rectificar/{id}")
     public String prepararRectificacao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        // Validação de Segurança
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPERADMIN"));
+        if (!isAdmin) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Acesso negado: Apenas administradores podem rectificar facturas.");
+            return "redirect:/historico-vendas";
+        }
+
         Optional<Compra> compraOpt = compraRepository.findById(id);
         if (compraOpt.isPresent()) {
             Compra original = compraOpt.get();
@@ -199,6 +227,14 @@ public class HistoricoController {
 
     @GetMapping("/historico-vendas/restaurar/{id}")
     public String restaurarVenda(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        // Validação de Segurança
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPERADMIN"));
+        if (!isAdmin) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Acesso negado: Apenas administradores podem restaurar facturas.");
+            return "redirect:/historico-vendas";
+        }
+
         if (vendaService.restaurarVenda(id)) {
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Factura restaurada com sucesso.");
         } else {

@@ -46,6 +46,8 @@ public class ConfiguracaoController {
     @Autowired
     private RegimeFiscalRepository regimeFiscalRepository;
     @Autowired
+    private PermissaoModuloRepository permissaoModuloRepository;
+    @Autowired
     private MessageSource messageSource;
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.AgtService agtService;
@@ -109,9 +111,19 @@ public class ConfiguracaoController {
     @GetMapping("/utilizadores")
     public String utilizadores(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        model.addAttribute("utilizadores", userRepository.findByEmpresa_Id(empresaId));
-        model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
+
+        if (isSuperAdmin) {
+            model.addAttribute("utilizadores", userRepository.findAll());
+            model.addAttribute("estabelecimentos", estabelecimentoRepository.findAll());
+        } else {
+            model.addAttribute("utilizadores", userRepository.findByEmpresa_Id(empresaId));
+            model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
+        }
+        
         model.addAttribute("novoUsuario", new User());
+        model.addAttribute("isSuperAdmin", isSuperAdmin);
         return "configuracoes/utilizadores";
     }
 
@@ -569,5 +581,70 @@ public class ConfiguracaoController {
             }
         }
         return "redirect:/configuracoes/estabelecimentos";
+    }
+
+    // ─── Controlo de Acesso ──────────────────────────────────────────────────
+    @GetMapping("/controlo-acesso")
+    public String controloAcesso(@RequestParam(value = "usuarioId", required = false) Long usuarioId, Model model) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
+
+        List<User> usuarios;
+        if (isSuperAdmin) {
+            usuarios = userRepository.findAll();
+        } else {
+            usuarios = userRepository.findByEmpresa_Id(empresaId);
+        }
+        model.addAttribute("usuarios", usuarios);
+
+        List<String> modulos = java.util.Arrays.asList("DASHBOARD", "VENDAS", "STOCK", "ENTIDADES", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO");
+        model.addAttribute("modulosList", modulos);
+
+        if (usuarioId != null) {
+            User user = userRepository.findById(usuarioId).orElse(null);
+            if (user != null) {
+                // Garantir que todas as permissões base existam para este usuário
+                for (String modulo : modulos) {
+                    if (!permissaoModuloRepository.findByModuloAndUsuario_Id(modulo, usuarioId).isPresent()) {
+                        boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+                        boolean ativo = isAdmin || "VENDAS".equals(modulo);
+                        permissaoModuloRepository.save(new PermissaoModulo(modulo, user, ativo));
+                    }
+                }
+                
+                model.addAttribute("usuarioSelecionado", user);
+                Map<String, Boolean> permsMap = new HashMap<>();
+                permissaoModuloRepository.findByUsuario_Id(usuarioId).forEach(p -> {
+                    permsMap.put(p.getModulo(), p.isAtivo());
+                });
+                model.addAttribute("permsMap", permsMap);
+            }
+        }
+        
+        return "configuracoes/controlo-acesso";
+    }
+
+    @PostMapping("/controlo-acesso/salvar")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> salvarControloAcesso(@RequestBody Map<String, Object> payload) {
+        Long usuarioId = Long.valueOf(payload.get("usuarioId").toString());
+        List<Map<String, Object>> permissoes = (List<Map<String, Object>>) payload.get("permissoes");
+        
+        User user = userRepository.findById(usuarioId).orElse(null);
+        if (user != null) {
+            for (Map<String, Object> p : permissoes) {
+                String modulo = (String) p.get("modulo");
+                boolean ativo = (boolean) p.get("ativo");
+                
+                permissaoModuloRepository.findByModuloAndUsuario_Id(modulo, usuarioId).ifPresent(perm -> {
+                    perm.setAtivo(ativo);
+                    permissaoModuloRepository.save(perm);
+                });
+            }
+        }
+        Map<String, Object> res = new HashMap<>();
+        res.put("sucesso", true);
+        return ResponseEntity.ok(res);
     }
 }

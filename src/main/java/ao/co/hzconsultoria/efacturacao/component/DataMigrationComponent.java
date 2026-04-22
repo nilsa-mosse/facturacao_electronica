@@ -41,6 +41,9 @@ public class DataMigrationComponent implements CommandLineRunner {
 
     @Autowired
     private EstabelecimentoRepository estabelecimentoRepository;
+    
+    @Autowired
+    private PermissaoModuloRepository permissaoRepo;
 
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
@@ -102,6 +105,9 @@ public class DataMigrationComponent implements CommandLineRunner {
             System.out.println(">>> Utilizador 'superadmin' criado (senha: super123).");
         }
 
+        // 4. Garantir Permissões de Módulos Padrão
+        inicializarPermissoesModulos();
+
         // 4. Migração de dados órfãos (se existirem de versões anteriores)
         migrarDadosOrfaos(target);
 
@@ -117,5 +123,25 @@ public class DataMigrationComponent implements CommandLineRunner {
         compraRepository.findAll().stream().filter(comp -> comp.getEmpresa() == null).forEach(comp -> { comp.setEmpresa(target); compraRepository.save(comp); });
         serieRepository.findAll().stream().filter(s -> s.getEmpresa() == null).forEach(s -> { s.setEmpresa(target); serieRepository.save(s); });
         despesaRepository.findAll().stream().filter(d -> d.getEmpresa() == null).forEach(d -> { d.setEmpresa(target); despesaRepository.save(d); });
+    }
+
+    private void inicializarPermissoesModulos() {
+        String[] modulos = {"DASHBOARD", "VENDAS", "STOCK", "ENTIDADES", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO"};
+        List<User> usuarios = userRepository.findAll();
+        
+        for (User user : usuarios) {
+            if ("ROLE_SUPERADMIN".equals(user.getRole())) continue; // SuperAdmin não precisa de registos de permissão
+            
+            for (String modulo : modulos) {
+                if (!permissaoRepo.findByModuloAndUsuario_Id(modulo, user.getId()).isPresent()) {
+                    boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+                    // ADMIN tem acesso a tudo. Outros apenas a VENDAS por padrão.
+                    boolean ativo = isAdmin || (modulo.equals("VENDAS"));
+                    
+                    permissaoRepo.save(new PermissaoModulo(modulo, user, ativo));
+                }
+            }
+        }
+        System.out.println(">>> Permissões de módulos inicializadas por utilizador.");
     }
 }

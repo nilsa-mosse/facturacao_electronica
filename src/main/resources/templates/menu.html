@@ -102,608 +102,291 @@
     <div class="sidebar">
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Dashboard Menu -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-chart-line"></i>
-              <p>
-                <th:block th:text="#{menu.dashboard}">Dashboard</th:block>
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a th:href="@{/dashboard}" class="nav-link">
-                  <i class="fas fa-th-large nav-icon"></i>
-                  <p th:text="#{menu.dashboard.visao_geral}">Visão Geral</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/dashboard/estatisticas}" class="nav-link">
-                  <i class="fas fa-chart-bar nav-icon"></i>
-                  <p th:text="#{menu.dashboard.estatisticas}">Estatísticas</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/dashboard/relatorios}" class="nav-link">
-                  <i class="fas fa-file-invoice nav-icon"></i>
-                  <p th:text="#{menu.dashboard.relatorios}">Relatórios</p>
-                </a>
-              </li>
-            </ul>
-          </li>
+          <!-- HOME MODULE (OPERATORS) -->
+          <th:block th:if="${!modulo_DASHBOARD}">
+            <li class="nav-header">GERAL</li>
+            <li class="nav-item">
+              <a th:href="@{/home}" class="nav-link">
+                <i class="nav-icon fas fa-home"></i>
+                <p>Página Inicial</p>
+              </a>
+            </li>
+          </th:block>
 
-          <!-- VENDAS Menu -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-shopping-cart"></i>
-              <p>
-                <th:block th:text="#{menu.vendas}">Vendas</th:block>
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a th:href="@{/pos}" class="nav-link">
-                  <i class="fas fa-cash-register nav-icon"></i>
-                  <p th:text="#{menu.vendas.pos}">POS(Ponto de Vendas)</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/historico-vendas}" class="nav-link">
-                  <i class="fas fa-history nav-icon"></i>
-                  <p th:text="#{menu.vendas.historico}">Histórico de Vendas</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/devolucoes}" class="nav-link">
-                  <i class="fas fa-undo nav-icon"></i>
-                  <p>Devolucoes</p>
-                </a>
-              </li>
-            </ul>
-          </li>
+          <!-- DASHBOARD MODULE -->
+          <th:block th:if="${modulo_DASHBOARD}">
+            <li class="nav-header">PAINEL DE CONTROLO</li>
+            <li class="nav-item">
+              <a th:href="@{/dashboard}" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p th:text="#{menu.dashboard}">Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/dashboard/estatisticas}" class="nav-link">
+                <i class="nav-icon fas fa-chart-line"></i>
+                <p th:text="#{menu.dashboard.estatisticas}">Estatísticas</p>
+              </a>
+            </li>
+          </th:block>
 
-          <!-- Cadastros Menu -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-edit"></i>
-              <p>
-                <th:block th:text="#{menu.cadastros}">Cadastros</th:block>
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <!-- Clientes Submenu -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-users nav-icon"></i>
-                  <p th:text="#{menu.clientes}">Clientes<i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/clientes/listar}" class="nav-link">
-                      <i class="fas fa-list nav-icon"></i>
-                      <p th:text="#{menu.clientes.lista}">Lista de Clientes</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/clientes/adicionar}" class="nav-link">
-                      <i class="fas fa-user-plus nav-icon"></i>
-                      <p th:text="#{menu.clientes.adicionar}">Adicionar Cliente</p>
-                    </a>
-                  </li>
+          <!-- SALES MODULE -->
+          <th:block th:if="${modulo_VENDAS}">
+            <li class="nav-header">VENDAS & OPERAÇÕES</li>
+            <li class="nav-item">
+              <a th:href="@{/pos}" class="nav-link bg-primary shadow-sm mb-1">
+                <i class="nav-icon fas fa-cash-register"></i>
+                <p><b>Ponto de Venda (POS)</b></p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/historico-vendas}" class="nav-link">
+                <i class="nav-icon fas fa-history"></i>
+                <p th:text="#{menu.vendas.historico}">Histórico de Vendas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/devolucoes}" class="nav-link">
+                <i class="nav-icon fas fa-undo"></i>
+                <p>Devoluções / Reembolsos</p>
+              </a>
+            </li>
+          </th:block>
 
-                  <li class="nav-item">
-                    <a th:href="@{/clientes/historico}" class="nav-link">
-                      <i class="fas fa-user-tag nav-icon"></i>
-                      <p th:text="#{menu.clientes.historico}">Histórico de Compras</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <!-- Fornecedores Submenu -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-truck nav-icon"></i>
-                  <p th:text="#{menu.fornecedores}">Fornecedores<i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/fornecedores/listar}" class="nav-link">
-                      <i class="fas fa-list nav-icon"></i>
-                      <p th:text="#{menu.fornecedores.lista}">Lista de Fornecedores</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/fornecedores/adicionar}" class="nav-link">
-                      <i class="fas fa-truck-loading nav-icon"></i>
-                      <p th:text="#{menu.fornecedores.adicionar}">Adicionar Fornecedor</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
+          <!-- INVENTORY MODULE -->
+          <th:block th:if="${modulo_STOCK}">
+            <li class="nav-header">GESTÃO DE STOCK</li>
+            <li class="nav-item has-treeview">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-boxes"></i>
+                <p>
+                  Produtos & Serviços
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a th:href="@{/produtos/listar}" class="nav-link">
+                    <i class="fas fa-list nav-icon"></i>
+                    <p>Lista de Produtos</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/cadastroProduto}" class="nav-link">
+                    <i class="fas fa-plus nav-icon"></i>
+                    <p>Novo Produto</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/inventario}" class="nav-link">
+                    <i class="fas fa-warehouse nav-icon"></i>
+                    <p>Inventário Atual</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item has-treeview">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-exchange-alt"></i>
+                <p>
+                  Movimentações
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a th:href="@{/stock/entrada}" class="nav-link">
+                    <i class="fas fa-sign-in-alt nav-icon"></i>
+                    <p>Entradas</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/stock/saida}" class="nav-link">
+                    <i class="fas fa-sign-out-alt nav-icon"></i>
+                    <p>Saídas</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/stock/ajuste}" class="nav-link">
+                    <i class="fas fa-tools nav-icon"></i>
+                    <p>Ajustes de Stock</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/stock/alertas}" class="nav-link text-danger">
+                <i class="nav-icon fas fa-exclamation-triangle"></i>
+                <p>
+                  Alertas de Ruptura
+                  <span class="right badge bg-danger">STOCK BAIXO</span>
+                </p>
+              </a>
+            </li>
+          </th:block>
 
+          <!-- ENTITIES MODULE -->
+          <th:block th:if="${modulo_ENTIDADES}">
+            <li class="nav-header">ENTIDADES</li>
+            <li class="nav-item">
+              <a th:href="@{/clientes/listar}" class="nav-link">
+                <i class="nav-icon fas fa-users"></i>
+                <p>Clientes</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/fornecedores/listar}" class="nav-link">
+                <i class="nav-icon fas fa-truck"></i>
+                <p>Fornecedores</p>
+              </a>
+            </li>
+          </th:block>
 
+          <!-- BILLING MODULE -->
+          <th:block th:if="${modulo_FACTURACAO}">
+            <li class="nav-header">FACTURAÇÃO & FISCAL</li>
+            <li class="nav-item">
+              <a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link">
+                <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                <p>Facturas Emitidas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/guias/listar}" class="nav-link">
+                <i class="nav-icon fas fa-map-marked-alt"></i>
+                <p>Guias de Remessa</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/notas/listar}" class="nav-link">
+                <i class="nav-icon fas fa-sticky-note"></i>
+                <p>Notas de Crédito / Débito</p>
+              </a>
+            </li>
+            <li class="nav-item has-treeview">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-shield-alt"></i>
+                <p>
+                  Gestão AGT & SAF-T
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a th:href="@{/factura-eletronica/estado}" class="nav-link">
+                    <i class="fas fa-satellite-dish nav-icon"></i>
+                    <p>Estado de Comunicação</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/saft}" class="nav-link">
+                    <i class="fas fa-file-export nav-icon"></i>
+                    <p>Exportar SAF-T (AO)</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link">
+                    <i class="fas fa-gavel nav-icon"></i>
+                    <p>Regime Fiscal</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </th:block>
 
+          <!-- FINANCIAL MODULE -->
+          <th:block th:if="${modulo_FINANCEIRO}">
+            <li class="nav-header">FINANCEIRO</li>
+            <li class="nav-item">
+              <a th:href="@{/despesas/listar}" class="nav-link">
+                <i class="nav-icon fas fa-receipt"></i>
+                <p>Gestão de Despesas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/financeiro/fluxo-caixa}" class="nav-link">
+                <i class="nav-icon fas fa-chart-area"></i>
+                <p>Fluxo de Caixa</p>
+              </a>
+            </li>
+          </th:block>
 
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-boxes nav-icon"></i>
-                  <p th:text="#{menu.produtos}">Produtos/Serviços<i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/produtos/listar}" class="nav-link">
-                      <i class="fas fa-list nav-icon"></i>
-                      <p th:text="#{menu.produtos.lista}">Lista de Produtos</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/cadastroProduto}" class="nav-link">
-                      <i class="fas fa-plus-circle nav-icon"></i>
-                      <p th:text="#{menu.produtos.adicionar}">Adicionar Produto</p>
-                    </a>
-                  </li>
-
-
-
-                  <!-- Categorias Menu -->
-                  <li class="nav-item has-treeview">
-                    <a href="#" class="nav-link">
-                      <i class="nav-icon fas fa-tags"></i>
-                      <p th:text="#{menu.produtos.categorias}">Categorias<i class="right fas fa-angle-left"></i></p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                      <li class="nav-item" th:each="cat : ${categorias}">
-                        <a th:href="@{/produtos(cat=${cat.id})}" class="nav-link">
-                          <i class="fas fa-tag nav-icon"></i>
-                          <p th:text="${cat.nome}"></p>
-                        </a>
-                      </li>
-                    </ul>
-                  </li>
-
-                  <li class="nav-item">
-                    <a th:href="@{/precos}" class="nav-link">
-                      <i class="fas fa-tag nav-icon"></i>
-                      <p th:text="#{menu.produtos.precos}">Preços</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/inventario}" class="nav-link">
-                      <i class="fas fa-warehouse nav-icon"></i>
-                      <p th:text="#{menu.produtos.inventario}">Inventário</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-
-            </ul>
-          </li>
-
-
-
-
-
-          <!-- Facturaçao Menu -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-file-invoice-dollar"></i>
-              <p>
-                <th:block th:text="#{menu.facturacao}">3. Facturação</th:block><i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <!-- Clientes Submenu -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-file-invoice nav-icon"></i>
-                  <p>
-                    <th:block th:text="#{menu.facturacao.facturas}">Facturas</th:block>
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link">
-                      <i class="fas fa-list nav-icon"></i>
-                      <p th:text="#{menu.facturacao.emitidas}">Facturas Emitidas</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-
-
-
-
-
-
-              <!-- FACTURAS AGT Submenu -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-cloud-upload-alt nav-icon"></i>
-                  <p>
-                    <th:block th:text="#{menu.facturacao.agt}">Facturas AGT</th:block><i
-                      class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-
-                  <li class="nav-item">
-                    <a th:href="@{/factura-eletronica/estado}" class="nav-link"
-                      title="Em processamento, Validada, Rejeitada">
-                      <i class="fas fa-satellite-dish nav-icon"></i>
-                      <p>Estado AGT</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/configuracoes/saft}" class="nav-link">
-                      <i class="fas fa-file-export nav-icon"></i>
-                      <p>Gestão de SAF-T</p>
-                    </a>
-                  </li>
-
-                </ul>
-              </li>
-              <!-- Guias Submenu -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-map-marked-alt nav-icon"></i>
-                  <p>
-                    <th:block th:text="#{menu.facturacao.guias}">Guias e Notas</th:block>
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/guias/nova}" class="nav-link">
-                      <i class="fas fa-plus nav-icon"></i>
-                      <p>Nova Guia de Remessa</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/guias/listar}" class="nav-link">
-                      <i class="fas fa-list nav-icon"></i>
-                      <p>Listar Guias de Remessa</p>
-                    </a>
-                  </li>
-                  <li class="nav-item border-top mt-2 pt-2">
-                    <a th:href="@{/notas/listar}" class="nav-link">
-                      <i class="fas fa-file-invoice nav-icon"></i>
-                      <p>Notas de Crédito / Débito</p>
-                    </a>
-                  </li>
-
-                </ul>
-              </li>
-
-            </ul>
-          </li>
-          <!-- FINAL DO MEUN FACTURACAO:  -->
-
-
-
-
-
-
-
-
-
-          <!-- 4. Inventário / Stock Menu -->
-
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-boxes"></i>
-              <p>
-                <th:block th:text="#{menu.inventario}">4. Inventário / Stock</th:block>
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <!-- Movimentos de Stock Submenu -->
-
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-exchange-alt nav-icon"></i>
-                  <p>
-                    <th:block th:text="#{menu.inventario.movimentos}">Movimentos de Stock</th:block>
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/stock/entrada}" class="nav-link">
-                      <i class="fas fa-sign-in-alt nav-icon"></i>
-                      <p>Entrada</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/stock/saida}" class="nav-link">
-                      <i class="fas fa-sign-out-alt nav-icon"></i>
-                      <p>Saídas</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/stock/ajuste}" class="nav-link">
-                      <i class="fas fa-tools nav-icon"></i>
-                      <p>Ajustes</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/stock/historico}" class="nav-link">
-                      <i class="fas fa-history nav-icon"></i>
-                      <p>Histórico</p>
-                    </a>
-                  </li>
-
-                </ul>
-              </li>
-              <!-- Relatórios Submenu -->
-
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-file-alt nav-icon"></i>
-                  <p>
-                    <th:block th:text="#{menu.inventario.relatorios}">Relatórios</th:block>
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/stock/saldos}" class="nav-link">
-                      <i class="fas fa-balance-scale nav-icon"></i>
-                      <p>Saldo Por Produto</p>
-                    </a>
-                  </li>
-                  <li class="nav-item pt-2 border-top border-danger border-opacity-25 mt-1">
-                    <a th:href="@{/stock/alertas}" class="nav-link text-danger"
-                      style="background: rgba(220,53,69,0.05);">
-                      <i class="fas fa-exclamation-triangle nav-icon text-danger"></i>
-                      <p class="fw-bold">
-                        Alertas de Ruptura
-                        <span class="right badge bg-danger badge-pulse">URGENTE</span>
-                      </p>
-                    </a>
-                  </li>
-
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <!-- FINAL DO MEUN 4. Inventário / Stock:  -->
-
-
-
-
-
-          <!-- 5. Pagamentos / RecebimentosMenu -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-hand-holding-usd"></i>
-              <p>
-                <th:block th:text="#{menu.pagamentos}">5. Pagamentos / Recebimentos</th:block>
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <!-- Movimentos de Stock Submenu -->
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-user-shield nav-icon"></i>
-                  <p>
-                    <th:block th:text="#{menu.pagamentos.clientes}">Pagamentos de Clientes</th:block>
-                    <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a th:href="@{/clientes/listar}" class="nav-link">
-                      <i class="fas fa-money-bill-wave nav-icon"></i>
-                      <p th:text="#{menu.pagamentos.registar}">Registar Recebimento</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a th:href="@{/clientes/adicionar}" class="nav-link">
-                      <i class="fas fa-user-plus nav-icon"></i>
-                      <p th:text="#{menu.pagamentos.historico}">Histórico</p>
-                    </a>
-                  </li>
-
-
-                </ul>
-              </li>
-              <!-- Relatórios Submenu -->
-              <li class="nav-item">
-                <a th:href="@{/despesas/listar}" class="nav-link">
-                  <i class="fas fa-receipt nav-icon"></i>
-                  <p th:text="#{menu.despesas}">Gestão de Despesas</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/financeiro/fluxo-caixa}" class="nav-link">
-                  <i class="fas fa-chart-area nav-icon"></i>
-                  <p th:text="#{menu.fluxo_caixa}">Fluxo de Caixa</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-calendar-check nav-icon"></i>
-                  <p>Quotas / Parcelamentos</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!-- FINAL DO MEUN 5. Pagamentos / Recebimentos  -->
-
-
-
-          <!-- 6. Configurações Menu -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-cogs"></i>
-              <p>
-                <th:block th:text="#{menu.configuracoes}">6. Configurações</th:block>
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/empresa}" class="nav-link">
-                  <i class="fas fa-id-card nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.empresa}">Dados da Empresa</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/utilizadores}" class="nav-link">
-                  <i class="fas fa-users-cog nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.utilizadores}">Utilizadores e Perfis</p>
-                </a>
-              </li>
-              <!--
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/impostos}" class="nav-link">
-                  <i class="fas fa-percent nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.impostos}">Impostos e Taxas</p>
-                </a>
-              </li>
-               -->
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/series}" class="nav-link">
-                  <i class="fas fa-list-ol nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.series}">Séries de Faturação</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/moedas}" class="nav-link">
-                  <i class="fas fa-coins nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.moedas}">Moedas e Câmbios</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/pagamentos}" class="nav-link">
-                  <i class="fas fa-credit-card nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.pagamentos}">Métodos de Pagamento</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/estabelecimentos}" class="nav-link">
-                  <i class="fas fa-store nav-icon"></i>
-                  <p>Estabelecimentos</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/geral}" class="nav-link">
-                  <i class="fas fa-cog nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.geral}">Parâmetros Gerais</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/servidor}" class="nav-link">
-                  <i class="fas fa-server nav-icon"></i>
-                  <p>Servidor e Rede</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/email}" class="nav-link">
-                  <i class="fas fa-envelope-open-text nav-icon"></i>
-                  <p>Email (SMTP)</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/banco-dados}" class="nav-link">
-                  <i class="fas fa-database nav-icon"></i>
-                  <p>Base de Dados</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/storage}" class="nav-link">
-                  <i class="fas fa-hdd nav-icon"></i>
-                  <p>Storage</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/seguranca}" class="nav-link">
-                  <i class="fas fa-lock nav-icon"></i>
-                  <p>Segurança</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link">
-                  <i class="fas fa-network-wired nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.agt}">Comunicação AGT</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!-- FINAL DO MENU 6. Configurações -->
+          <!-- CONFIGURATIONS MODULE -->
+          <th:block th:if="${modulo_ADMINISTRACAO}">
+            <li class="nav-header">ADMINISTRAÇÃO</li>
+            <li class="nav-item has-treeview">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-cogs"></i>
+                <p>
+                  Definições do Sistema
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/empresa}" class="nav-link">
+                    <i class="fas fa-id-card nav-icon"></i>
+                    <p>Dados da Empresa</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/utilizadores}" class="nav-link">
+                    <i class="fas fa-users-cog nav-icon"></i>
+                    <p>Utilizadores e Perfis</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link">
+                    <i class="fas fa-user-shield nav-icon text-info"></i>
+                    <p>Controlo de Acesso</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/estabelecimentos}" class="nav-link">
+                    <i class="fas fa-store nav-icon"></i>
+                    <p>Estabelecimentos</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/series}" class="nav-link">
+                    <i class="fas fa-list-ol nav-icon"></i>
+                    <p>Séries de Faturação</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link">
+                    <i class="fas fa-network-wired nav-icon"></i>
+                    <p>Configurar AGT</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/geral}" class="nav-link">
+                    <i class="fas fa-sliders-h nav-icon"></i>
+                    <p>Parâmetros Avançados</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </th:block>
 
           <!-- SUPER ADMIN SECTION -->
-          <li th:if="${isSuperAdmin}" class="nav-header mt-3 text-warning">PAINEL GLOBAL</li>
-          <li th:if="${isSuperAdmin}" class="nav-item">
-            <a th:href="@{/superadmin/dashboard}" class="nav-link bg-warning text-dark">
-              <i class="nav-icon fas fa-globe"></i>
-              <p>Gestão de Empresas (SaaS)</p>
-            </a>
-          </li>
-          <li th:if="${isSuperAdmin}" class="nav-item">
-            <a th:href="@{/superadmin/usuarios}" class="nav-link bg-warning text-dark mt-2">
-              <i class="nav-icon fas fa-users"></i>
-              <p>Contas dos Admins (Global)</p>
-            </a>
-          </li>
+          <th:block th:if="${isSuperAdmin}">
+            <li class="nav-header text-warning">PAINEL GLOBAL (SaaS)</li>
+            <li class="nav-item">
+              <a th:href="@{/superadmin/dashboard}" class="nav-link bg-warning text-dark">
+                <i class="nav-icon fas fa-globe"></i>
+                <p>Gestão de Empresas</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/superadmin/usuarios}" class="nav-link bg-warning text-dark mt-1">
+                <i class="nav-icon fas fa-user-shield"></i>
+                <p>Admins Globais</p>
+              </a>
+            </li>
+          </th:block>
 
-
-
-
-
-
-
-
-
-          <!-- 6. Configurações Fiscais Menu -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-cogs"></i>
-              <p>
-                <th:block th:text="#{menu.configuracoes.fiscais}">6. Configurações Fiscais - AGT</th:block>
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link">
-                  <i class="fas fa-percent nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.fiscais.impostos}">Impostos</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link">
-                  <i class="fas fa-hand-holding-usd nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.fiscais.taxas}">Taxas</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link">
-                  <i class="fas fa-gavel nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/configuracoes/fiscais/retencoes}" class="nav-link">
-                  <i class="fas fa-hand-holding-usd nav-icon"></i>
-                  <p th:text="#{menu.configuracoes.fiscais.retencoes}">Retenções</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!-- FINAL DO MENU 6. Configurações Fiscais -->
-
-
-
-
-
-          <li class="nav-header mt-3">SISTEMA</li>
+          <li class="nav-header">SISTEMA</li>
           <li class="nav-item">
             <a href="javascript:void(0)" class="nav-link text-danger"
               onclick="document.getElementById('logoutFormSidebar').submit();">
@@ -711,7 +394,6 @@
               <p>Terminar Sessão</p>
             </a>
             <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none">
-              <!-- CSRF token will be automatically added by Thymeleaf -->
             </form>
           </li>
         </ul>

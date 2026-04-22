@@ -26,6 +26,9 @@ public class VendaService {
     private ProdutoRepository produtoRepository;
 
     @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.UserRepository userRepository;
+
+    @Autowired
     private StockService stockService;
 
     @Autowired
@@ -66,6 +69,13 @@ public class VendaService {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         ao.co.hzconsultoria.efacturacao.model.Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
         compra.setEmpresa(empresa);
+
+        // Associar Utilizador Logado
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
+            Long userId = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getId();
+            userRepository.findById(userId).ifPresent(compra::setUsuario);
+        }
 
         if (compra.getItens() == null || compra.getItens().isEmpty()) {
             throw new IllegalArgumentException("Compra must have at least one item");
