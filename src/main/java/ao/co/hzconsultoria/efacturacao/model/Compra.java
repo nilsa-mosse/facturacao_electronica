@@ -52,7 +52,14 @@ public class Compra {
     @ManyToOne(fetch = FetchType.LAZY)
     private Compra faturaReferencia;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
     // Getters and Setters
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Cliente getCliente() {
         return cliente;
     }

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1><i class="fas fa-database me-2"></i>Base de Dados</h1>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Base de Dados</li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <i class="fas fa-check-circle me-1"></i>
+                    <span th:text="${mensagem}">Configurações actualizadas!</span>
+                </div>
+
+                <!-- Info Banner -->
+                <div class="callout callout-warning mb-4">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Atenção:</strong> Alterações ao pool de ligações e timeouts entram em vigor apenas após
+                    reiniciar o servidor. Alterações incorrectas podem causar falhas de ligação à base de dados.
+                </div>
+
+                <form th:action="@{/configuracoes/banco-dados/salvar}" th:object="${cfg}" method="post">
+
+                    <!-- Tipo de BD -->
+                    <div class="card card-outline card-primary mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-hdd me-2"></i>Motor de Base de Dados</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-database me-1 text-muted"></i>Tipo de BD</label>
+                                    <select class="form-select" th:field="*{tipoBD}">
+                                        <option value="MySQL">MySQL</option>
+                                        <option value="PostgreSQL">PostgreSQL</option>
+                                        <option value="MariaDB">MariaDB</option>
+                                        <option value="H2">H2 (desenvolvimento)</option>
+                                        <option value="Oracle">Oracle</option>
+                                        <option value="SQLServer">SQL Server</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-folder me-1 text-muted"></i>Schema Padrão</label>
+                                    <input type="text" class="form-control" th:field="*{schema}"
+                                           placeholder="efacturacao">
+                                    <small class="text-muted">Nome do schema ou base de dados a utilizar.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeouts -->
+                    <div class="card card-outline card-warning mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-hourglass-half me-2"></i>Timeouts</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-clock me-1 text-muted"></i>Timeout de Ligação (ms)</label>
+                                    <input type="number" class="form-control" th:field="*{connectionTimeout}"
+                                           min="1000" step="1000" placeholder="30000">
+                                    <small class="text-muted">Tempo máximo para estabelecer ligação (padrão: 30 000 ms).</small>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-stopwatch me-1 text-muted"></i>Timeout de Query (ms)</label>
+                                    <input type="number" class="form-control" th:field="*{queryTimeout}"
+                                           min="1000" step="1000" placeholder="60000">
+                                    <small class="text-muted">Tempo máximo de execução de uma query.</small>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-bed me-1 text-muted"></i>Idle Timeout (ms)</label>
+                                    <input type="number" class="form-control" th:field="*{idleTimeout}"
+                                           min="1000" step="1000" placeholder="30000">
+                                    <small class="text-muted">Tempo em que uma ligação inactiva é fechada.</small>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-infinity me-1 text-muted"></i>Max Lifetime (ms)</label>
+                                    <input type="number" class="form-control" th:field="*{maxLifetime}"
+                                           min="1000" step="1000" placeholder="60000">
+                                    <small class="text-muted">Tempo de vida máximo de uma ligação no pool.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connection Pool -->
+                    <div class="card card-outline card-info mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-project-diagram me-2"></i>Pool de Ligações (HikariCP)</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-arrow-down me-1 text-muted"></i>Pool Mínimo (minimum-idle)</label>
+                                    <input type="number" class="form-control" th:field="*{poolMin}"
+                                           min="1" max="100" placeholder="5">
+                                    <small class="text-muted">Número mínimo de ligações mantidas no pool.</small>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-arrow-up me-1 text-muted"></i>Pool Máximo (maximum-pool-size)</label>
+                                    <input type="number" class="form-control" th:field="*{poolMax}"
+                                           min="1" max="500" placeholder="20">
+                                    <small class="text-muted">Número máximo de ligações no pool.</small>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-center">
+                                    <div class="callout callout-info mb-0 w-100">
+                                        <strong>Recomendação:</strong><br>
+                                        Produção: <code>min=5 / max=20</code><br>
+                                        Alto tráfego: <code>min=10 / max=50</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-1"></i>Guardar Configurações
+                        </button>
+                        <a th:href="@{/configuracoes/banco-dados}" class="btn btn-secondary">
+                            <i class="fas fa-undo me-1"></i>Cancelar
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+    </div>
+    </div>
+</body>
+</html>

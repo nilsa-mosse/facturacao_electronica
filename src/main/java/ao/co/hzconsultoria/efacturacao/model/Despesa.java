@@ -23,6 +23,18 @@ public class Despesa {
 
     private String faturaPath;
 
+    @javax.persistence.ManyToOne
+    @javax.persistence.JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
+    public Empresa getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(Empresa empresa) {
+        this.empresa = empresa;
+    }
+
     public Despesa() {}
 
     public Long getId() {

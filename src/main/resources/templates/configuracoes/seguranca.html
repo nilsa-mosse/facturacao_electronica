@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1><i class="fas fa-lock me-2"></i>Segurança do Sistema</h1>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Segurança</li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <i class="fas fa-check-circle me-1"></i>
+                    <span th:text="${mensagem}">Configurações actualizadas!</span>
+                </div>
+
+                <form th:action="@{/configuracoes/seguranca/salvar}" th:object="${cfg}" method="post">
+
+                    <!-- Sessão -->
+                    <div class="card card-outline card-primary mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-user-clock me-2"></i>Sessão e Autenticação</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-hourglass-end me-1 text-muted"></i>Expiração de Sessão (minutos)</label>
+                                    <input type="number" class="form-control" th:field="*{tempoExpiracaoSessao}"
+                                           min="1" max="1440" placeholder="30">
+                                    <small class="text-muted">Inactividade após a qual o utilizador é desligado automaticamente.</small>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-user-lock me-1 text-muted"></i>Tentativas de Login Máximas</label>
+                                    <input type="number" class="form-control" th:field="*{tentativasLoginMax}"
+                                           min="1" max="20" placeholder="5">
+                                    <small class="text-muted">Conta bloqueada após este número de tentativas falhadas.</small>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-ban me-1 text-muted"></i>Duração do Bloqueio (minutos)</label>
+                                    <input type="number" class="form-control" th:field="*{lockoutDuracao}"
+                                           min="1" max="1440" placeholder="15">
+                                    <small class="text-muted">Tempo que a conta fica bloqueada após exceder tentativas.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Política de Password -->
+                    <div class="card card-outline card-warning mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-key me-2"></i>Política de Password</h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Nível de política -->
+                            <div class="form-group mb-3">
+                                <label class="fw-bold"><i class="fas fa-tachometer-alt me-1 text-muted"></i>Nível de Segurança</label>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-md-4">
+                                        <label class="border rounded-3 p-3 w-100 text-center"
+                                               th:classappend="${cfg.politicaPassword == 'FRACA'} ? 'border-secondary bg-secondary bg-opacity-10' : ''"
+                                               style="cursor:pointer;">
+                                            <input type="radio" name="politicaPassword" value="FRACA"
+                                                   th:checked="${cfg.politicaPassword == 'FRACA'}"
+                                                   class="form-check-input me-1">
+                                            <span class="badge bg-secondary mb-1">FRACA</span><br>
+                                            <small class="text-muted">Só comprimento mínimo</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="border rounded-3 p-3 w-100 text-center"
+                                               th:classappend="${cfg.politicaPassword == 'MEDIA'} ? 'border-warning bg-warning bg-opacity-10' : ''"
+                                               style="cursor:pointer;">
+                                            <input type="radio" name="politicaPassword" value="MEDIA"
+                                                   th:checked="${cfg.politicaPassword == 'MEDIA'}"
+                                                   class="form-check-input me-1">
+                                            <span class="badge bg-warning text-dark mb-1">MÉDIA</span><br>
+                                            <small class="text-muted">Letras maiúsculas + números</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="border rounded-3 p-3 w-100 text-center"
+                                               th:classappend="${cfg.politicaPassword == 'FORTE'} ? 'border-success bg-success bg-opacity-10' : ''"
+                                               style="cursor:pointer;">
+                                            <input type="radio" name="politicaPassword" value="FORTE"
+                                                   th:checked="${cfg.politicaPassword == 'FORTE'}"
+                                                   class="form-check-input me-1">
+                                            <span class="badge bg-success mb-1">FORTE</span><br>
+                                            <small class="text-muted">Maiúsculas + números + especiais</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="form-group col-md-3">
+                                    <label><i class="fas fa-ruler me-1 text-muted"></i>Comprimento Mínimo</label>
+                                    <input type="number" class="form-control" th:field="*{comprimentoMinPassword}"
+                                           min="4" max="32" placeholder="8">
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="fw-bold d-block mb-2">Requisitos adicionais</label>
+                                    <div class="d-flex flex-wrap gap-4 mt-1">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="requireUppercase"
+                                                   th:field="*{requireUppercase}">
+                                            <label class="form-check-label" for="requireUppercase">
+                                                <i class="fas fa-font me-1 text-primary"></i>Letras Maiúsculas
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="requireNumbers"
+                                                   th:field="*{requireNumbers}">
+                                            <label class="form-check-label" for="requireNumbers">
+                                                <i class="fas fa-hashtag me-1 text-warning"></i>Números
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="requireSpecialChars"
+                                                   th:field="*{requireSpecialChars}">
+                                            <label class="form-check-label" for="requireSpecialChars">
+                                                <i class="fas fa-asterisk me-1 text-danger"></i>Caracteres Especiais (!@#$...)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2FA e IP Whitelist -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card card-outline card-info mb-4">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-mobile-alt me-2"></i>Autenticação de 2 Factores (2FA)</h3>
+                                    <div class="card-tools">
+                                        <div class="form-check form-switch mt-1">
+                                            <input class="form-check-input" type="checkbox" id="twoFactorAtivo"
+                                                   th:field="*{twoFactorAtivo}">
+                                            <label class="form-check-label fw-bold" for="twoFactorAtivo"
+                                                   th:text="${cfg.twoFactorAtivo} ? 'Activado' : 'Desactivado'"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i class="fas fa-shield-alt fa-3x text-info"></i>
+                                        <div>
+                                            <p class="mb-1 text-muted small">
+                                                Quando activo, os utilizadores terão de confirmar o login
+                                                com um segundo factor (app de autenticação ou SMS).
+                                            </p>
+                                            <span th:if="${cfg.twoFactorAtivo}"
+                                                  class="badge bg-success">2FA ACTIVO</span>
+                                            <span th:unless="${cfg.twoFactorAtivo}"
+                                                  class="badge bg-secondary">2FA INACTIVO</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card card-outline card-danger mb-4">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-network-wired me-2"></i>IP Whitelist</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label><i class="fas fa-filter me-1 text-muted"></i>IPs Permitidos</label>
+                                        <textarea class="form-control" th:field="*{ipWhitelist}" rows="3"
+                                                  placeholder="192.168.1.100, 10.0.0.0/24"></textarea>
+                                        <small class="text-muted">
+                                            IPs separados por vírgula ou em notação CIDR.<br>
+                                            <strong>Deixe em branco para permitir todos os IPs.</strong>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs de Acesso -->
+                    <div class="card card-outline card-secondary mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-list-alt me-2"></i>Auditoria e Logs</h3>
+                            <div class="card-tools">
+                                <div class="form-check form-switch mt-1">
+                                    <input class="form-check-input" type="checkbox" id="logAcessosAtivo"
+                                           th:field="*{logAcessosAtivo}">
+                                    <label class="form-check-label fw-bold" for="logAcessosAtivo">
+                                        Registo de acessos
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Quando activo, cada login, logout e operação sensível é registada no log de auditoria
+                                para rastreabilidade e conformidade.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fas fa-save me-1"></i>Guardar Configurações de Segurança
+                        </button>
+                        <a th:href="@{/configuracoes/seguranca}" class="btn btn-secondary">
+                            <i class="fas fa-undo me-1"></i>Cancelar
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+        </section>
+    </div>
+    </div>
+</body>
+</html>

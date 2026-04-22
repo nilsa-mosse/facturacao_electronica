@@ -4,6 +4,7 @@ import ao.co.hzconsultoria.efacturacao.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import java.time.LocalDateTime;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +18,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+        String role = user.getRole();
+        if (role != null && !role.startsWith("ROLE_")) {
+            role = "ROLE_" + role;
+        }
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 
     @Override
@@ -32,13 +37,22 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() { return true; }
+    
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() { 
+        if (user.getBloqueadoAte() == null) return true;
+        return LocalDateTime.now().isAfter(user.getBloqueadoAte());
+    }
+
     @Override
     public boolean isCredentialsNonExpired() { return true; }
+    
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() { return user.isAtivo(); }
 
     public String getNome() { return user.getNome(); }
     public String getRole() { return user.getRole(); }
+    public Long getEmpresaId() { 
+        return (user.getEmpresa() != null) ? user.getEmpresa().getId() : null; 
+    }
 }

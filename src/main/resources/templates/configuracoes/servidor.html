@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1><i class="fas fa-server me-2"></i>Configuração de Servidor e Rede</h1>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Servidor e Rede</li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <!-- Alert -->
+                <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <i class="fas fa-check-circle me-1"></i>
+                    <span th:text="${mensagem}">Configurações actualizadas com sucesso!</span>
+                </div>
+
+                <form th:action="@{/configuracoes/servidor/salvar}" th:object="${cfg}" method="post">
+
+                    <!-- Porta e Hostname -->
+                    <div class="card card-outline card-primary mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-network-wired me-2"></i>Porta e Hostname</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-3">
+                                    <label><i class="fas fa-plug me-1 text-muted"></i>Porta da Aplicação</label>
+                                    <input type="number" class="form-control" th:field="*{porta}"
+                                           min="1" max="65535" placeholder="8080">
+                                    <small class="text-muted">Porta HTTP usada pelo servidor embarcado.</small>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-globe me-1 text-muted"></i>Hostname / Domínio</label>
+                                    <input type="text" class="form-control" th:field="*{hostname}"
+                                           placeholder="localhost">
+                                    <small class="text-muted">Nome do host ou domínio público (ex: facturacao.empresa.ao).</small>
+                                </div>
+                                <div class="form-group col-md-5">
+                                    <label><i class="fas fa-link me-1 text-muted"></i>Base URL</label>
+                                    <input type="text" class="form-control" th:field="*{baseUrl}"
+                                           placeholder="http://localhost:8080">
+                                    <small class="text-muted">Usada em emails e nas respostas da API (ex: https://facturacao.empresa.ao).</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proxy / Reverse Proxy -->
+                    <div class="card card-outline card-warning mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-random me-2"></i>Proxy / Reverse Proxy</h3>
+                            <div class="card-tools">
+                                <div class="custom-control custom-switch mt-1">
+                                    <input type="checkbox" class="custom-control-input" id="proxySwitch"
+                                           th:field="*{proxyHabilitado}"
+                                           onchange="toggleProxy(this.checked)">
+                                    <label class="custom-control-label fw-bold" for="proxySwitch">Habilitar Proxy</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" id="proxyFields"
+                             th:style="${cfg.proxyHabilitado} ? '' : 'opacity:0.4; pointer-events:none'">
+                            <div class="row">
+                                <div class="form-group col-md-8">
+                                    <label><i class="fas fa-server me-1 text-muted"></i>Endereço do Proxy / Nginx</label>
+                                    <input type="text" class="form-control" th:field="*{proxyHost}"
+                                           placeholder="nginx.interno ou 192.168.1.1">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-door-open me-1 text-muted"></i>Porta do Proxy</label>
+                                    <input type="number" class="form-control" th:field="*{proxyPorta}"
+                                           min="1" max="65535" placeholder="80">
+                                </div>
+                            </div>
+                            <div class="callout callout-info mt-2 mb-0">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Utilize esta secção para configurar o endereço do Nginx, Apache ou outro reverse proxy que
+                                encaminha pedidos para esta aplicação.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CORS -->
+                    <div class="card card-outline card-info mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-shield-alt me-2"></i>CORS – Origens Permitidas</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label><i class="fas fa-globe-africa me-1 text-muted"></i>Origens permitidas (CORS)</label>
+                                <input type="text" class="form-control" th:field="*{corsOrigensPermitidas}"
+                                       placeholder="* ou https://app.empresa.ao, https://admin.empresa.ao">
+                                <small class="text-muted">
+                                    Use <code>*</code> para permitir todas as origens, ou especifique URLs separadas por vírgula.
+                                    Recomenda-se restringir em produção.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-1"></i>Guardar Configurações
+                        </button>
+                        <a th:href="@{/configuracoes/servidor}" class="btn btn-secondary">
+                            <i class="fas fa-undo me-1"></i>Cancelar
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+    </div>
+    </div>
+
+    <script>
+        function toggleProxy(enabled) {
+            const fields = document.getElementById('proxyFields');
+            fields.style.opacity = enabled ? '1' : '0.4';
+            fields.style.pointerEvents = enabled ? 'auto' : 'none';
+        }
+    </script>
+</body>
+</html>

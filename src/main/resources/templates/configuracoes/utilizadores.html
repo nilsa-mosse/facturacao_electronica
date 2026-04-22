@@ -51,13 +51,22 @@
                                                 th:classappend="${u.role == 'ADMIN' ? 'bg-danger' : 'bg-info'}"
                                                 th:text="${u.role}">ADMIN</span>
                                         </td>
-                                        <td>
-                                             <a th:href="@{'/configuracoes/utilizadores/eliminar/' + ${u.id}}"
-                                                class="btn btn-sm btn-outline-danger"
-                                                th:onclick="return confirm([[#{config.utilizadores.confirmar_eliminar}]])">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </td>
+                                         <td>
+                                             <div class="btn-group">
+                                                 <button class="btn btn-sm btn-outline-info btn-editar-local"
+                                                         th:data-id="${u.id}"
+                                                         th:data-nome="${u.nome}"
+                                                         th:data-login="${u.login}"
+                                                         th:data-role="${u.role}">
+                                                     <i class="fas fa-edit"></i> Editar
+                                                 </button>
+                                                 <a th:href="@{'/configuracoes/utilizadores/eliminar/' + ${u.id}}"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    th:onclick="return confirm([[#{config.utilizadores.confirmar_eliminar}]])">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                 </a>
+                                             </div>
+                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -67,38 +76,48 @@
                     <!-- Formulário Novo Utilizador -->
                     <div class="card card-outline card-secondary">
                          <div class="card-header">
-                            <h3 class="card-title" th:text="#{config.utilizadores.novo}">Novo Utilizador</h3>
+                            <h3 class="card-title" id="formHeader" th:text="#{config.utilizadores.novo}">Novo Utilizador</h3>
                         </div>
-                        <form th:action="@{/configuracoes/utilizadores/salvar}" th:object="${novoUsuario}"
-                            method="post">
+                        <form th:action="@{/configuracoes/utilizadores/salvar}" method="post">
+                            <input type="hidden" id="userId" name="id">
                             <div class="card-body">
                                 <div class="row">
                                      <div class="form-group col-md-3">
                                         <label th:text="#{config.utilizadores.nome}">Nome Completo</label>
-                                        <input type="text" class="form-control" th:field="*{nome}" required>
+                                        <input type="text" class="form-control" id="uNome" name="nome" required>
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label th:text="#{config.utilizadores.login}">Login de Acesso</label>
-                                        <input type="text" class="form-control" th:field="*{login}" required>
+                                        <input type="text" class="form-control" id="uLogin" name="login" required>
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label th:text="#{config.utilizadores.senha}">Palavra-passe</label>
-                                        <input type="password" class="form-control" th:field="*{senha}" required>
+                                        <input type="password" class="form-control" id="uSenha" name="senha" placeholder="Palavra-passe">
+                                        <small class="text-muted" id="senhaHelp">Obrigatório para novos utilizadores.</small>
                                     </div>
                                     <div class="form-group col-md-3">
                                         <label th:text="#{config.utilizadores.perfil}">Perfil (Role)</label>
-                                        <select class="form-select" th:field="*{role}">
-                                            <option value="ADMIN">ADMIN</option>
-                                            <option value="OPERADOR">OPERADOR</option>
-                                            <option value="CONSULTOR">CONSULTOR</option>
+                                        <select class="form-select" id="uRole" name="role" required>
+                                            <option value="OPERADOR">OPERADOR (Ponto de Venda)</option>
+                                            <option value="CONSULTOR">CONSULTOR (Apenas Leitura)</option>
                                         </select>
+                                    </div>
+                                    <div class="form-group col-md-12 mt-3">
+                                        <label>Atribuir Estabelecimentos da Empresa</label>
+                                        <select class="form-select" id="uEst" name="estabelecimentoIds" multiple="multiple" size="5">
+                                            <option th:each="est : ${estabelecimentos}" 
+                                                    th:value="${est.id}" 
+                                                    th:text="${est.nome} + ' (' + ${est.tipo} + ')'"></option>
+                                        </select>
+                                        <small class="text-info"><i class="fas fa-info-circle me-1"></i>Estes utilizadores apenas verão dados relativos aos estabelecimentos selecionados.</small>
                                     </div>
                                 </div>
                             </div>
                              <div class="card-footer">
-                                <button type="submit" class="btn btn-secondary"><i
-                                        class="fas fa-save me-1"></i><span th:text="#{config.utilizadores.btn.adicionar}">Adicionar
-                                    Utilizador</span></button>
+                                <button type="submit" class="btn btn-secondary shadow-sm">
+                                    <i class="fas fa-save me-1"></i> Gravar Utilizador
+                                </button>
+                                <button type="button" class="btn btn-link btn-sm text-muted" onclick="limpar()">Limpar</button>
                             </div>
                         </form>
                     </div>
@@ -107,8 +126,32 @@
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <!-- Scripts already loaded via menu :: head -->
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            $('.btn-editar-local').on('click', function() {
+                const btn = $(this);
+                document.getElementById('userId').value = btn.data('id');
+                document.getElementById('uNome').value = btn.data('nome');
+                document.getElementById('uLogin').value = btn.data('login');
+                document.getElementById('uRole').value = btn.data('role');
+                document.getElementById('formHeader').innerText = "Editar Utilizador";
+                document.getElementById('uSenha').required = false;
+                document.getElementById('senhaHelp').innerText = "Deixe vazio para manter a senha actual.";
+                window.scrollTo(0, document.body.scrollHeight);
+            });
+        });
+
+        function limpar() {
+            document.getElementById('userId').value = "";
+            document.getElementById('uNome').value = "";
+            document.getElementById('uLogin').value = "";
+            document.getElementById('uRole').selectedIndex = 0;
+            document.getElementById('uSenha').value = "";
+            document.getElementById('formHeader').innerText = "Novo Utilizador";
+            document.getElementById('uSenha').required = true;
+            document.getElementById('senhaHelp').innerText = "Obrigatório para novos utilizadores.";
+        }
+    </script>
 </body>
 
 </html>

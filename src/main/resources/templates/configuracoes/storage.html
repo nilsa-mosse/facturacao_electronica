@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1><i class="fas fa-hdd me-2"></i>Storage – Ficheiros e Documentos</h1>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Storage</li>
+                </ol>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <i class="fas fa-check-circle me-1"></i>
+                    <span th:text="${mensagem}">Configurações actualizadas!</span>
+                </div>
+
+                <form th:action="@{/configuracoes/storage/salvar}" th:object="${cfg}" method="post">
+
+                    <!-- Tipo de Storage -->
+                    <div class="card card-outline card-primary mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-cloud me-2"></i>Tipo de Storage</h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Radio Cards -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="storage-card w-100 border rounded-3 p-3"
+                                           th:classappend="${cfg.tipoStorage == 'LOCAL'} ? ' border-primary bg-primary bg-opacity-10' : ''"
+                                           style="cursor:pointer;">
+                                        <input type="radio" name="tipoStorage" value="LOCAL"
+                                               class="form-check-input me-2"
+                                               th:checked="${cfg.tipoStorage == 'LOCAL'}"
+                                               onchange="toggleStoragePanel('LOCAL')">
+                                        <i class="fas fa-server fa-2x text-primary float-end"></i>
+                                        <strong class="d-block">Local</strong>
+                                        <small class="text-muted">Ficheiros armazenados no servidor onde a aplicação está instalada.</small>
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="storage-card w-100 border rounded-3 p-3"
+                                           th:classappend="${cfg.tipoStorage == 'CLOUD'} ? ' border-success bg-success bg-opacity-10' : ''"
+                                           style="cursor:pointer;">
+                                        <input type="radio" name="tipoStorage" value="CLOUD"
+                                               class="form-check-input me-2"
+                                               th:checked="${cfg.tipoStorage == 'CLOUD'}"
+                                               onchange="toggleStoragePanel('CLOUD')">
+                                        <i class="fas fa-cloud fa-2x text-success float-end"></i>
+                                        <strong class="d-block">Cloud</strong>
+                                        <small class="text-muted">AWS S3, Google Cloud Storage ou Azure Blob Storage.</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Local Storage Settings -->
+                    <div class="card card-outline card-info mb-4" id="panelLocal"
+                         th:style="${cfg.tipoStorage == 'CLOUD'} ? 'display:none' : ''">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-folder-open me-2"></i>Configuração Local</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label><i class="fas fa-folder me-1 text-muted"></i>Caminho Base de Uploads</label>
+                                <input type="text" class="form-control" th:field="*{caminhoBase}"
+                                       placeholder="uploads/">
+                                <small class="text-muted">
+                                    Caminho relativo à raiz da aplicação ou caminho absoluto (ex: <code>/var/efacturacao/uploads/</code>).
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cloud Settings -->
+                    <div class="card card-outline card-success mb-4" id="panelCloud"
+                         th:style="${cfg.tipoStorage != 'CLOUD'} ? 'display:none' : ''">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-cloud-upload-alt me-2"></i>Configuração Cloud</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-cloud me-1 text-muted"></i>Provedor Cloud</label>
+                                    <select class="form-select" th:field="*{cloudProvider}">
+                                        <option value="">-- Seleccionar --</option>
+                                        <option value="S3">AWS S3</option>
+                                        <option value="GCS">Google Cloud Storage</option>
+                                        <option value="AZURE">Azure Blob Storage</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-box me-1 text-muted"></i>Bucket / Container</label>
+                                    <input type="text" class="form-control" th:field="*{cloudBucket}"
+                                           placeholder="efacturacao-docs">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-map-marker-alt me-1 text-muted"></i>Região</label>
+                                    <input type="text" class="form-control" th:field="*{cloudRegion}"
+                                           placeholder="us-east-1 ou europe-west1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Limites e Backup -->
+                    <div class="card card-outline card-warning mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-sliders-h me-2"></i>Limites e Backup</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-file me-1 text-muted"></i>Tamanho Máximo por Ficheiro (MB)</label>
+                                    <input type="number" class="form-control" th:field="*{tamanhoMaxFicheiro}"
+                                           min="1" max="500" placeholder="10">
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-file-archive me-1 text-muted"></i>Tamanho Máximo de Pedido (MB)</label>
+                                    <input type="number" class="form-control" th:field="*{tamanhoMaxRequest}"
+                                           min="1" max="1000" placeholder="20">
+                                    <small class="text-muted">Total de todos os ficheiros num único upload.</small>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label><i class="fas fa-shield-alt me-1 text-muted"></i>Estratégia de Backup</label>
+                                    <select class="form-select" th:field="*{estrategiaBackup}">
+                                        <option value="DESATIVADO">Desativado</option>
+                                        <option value="DIARIO">Diário (meia-noite)</option>
+                                        <option value="SEMANAL">Semanal (Domingo)</option>
+                                        <option value="MENSAL">Mensal (dia 1)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-1"></i>Guardar Configurações
+                        </button>
+                        <a th:href="@{/configuracoes/storage}" class="btn btn-secondary">
+                            <i class="fas fa-undo me-1"></i>Cancelar
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </section>
+    </div>
+    </div>
+
+    <script>
+        function toggleStoragePanel(tipo) {
+            document.getElementById('panelLocal').style.display = (tipo === 'LOCAL') ? '' : 'none';
+            document.getElementById('panelCloud').style.display = (tipo === 'CLOUD') ? '' : 'none';
+        }
+    </script>
+</body>
+</html>

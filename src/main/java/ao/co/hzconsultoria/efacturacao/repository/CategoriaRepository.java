@@ -11,9 +11,9 @@ import java.util.List;
 
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
-    Categoria findByNome(String nome);
-    Page<Categoria> findAll(Pageable pageable);
+    Categoria findByNomeAndEmpresa_Id(String nome, Long empresaId);
+    Page<Categoria> findByEmpresa_Id(Long empresaId, Pageable pageable);
 
-    @Cacheable("categorias")
-    List<Categoria> findAll();
+    @Cacheable("categorias_por_empresa")
+    List<Categoria> findByEmpresa_Id(Long empresaId);
 }

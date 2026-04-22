@@ -51,6 +51,9 @@ public class VendaService {
         return compraRepository.save(compra);
     }
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository empresaRepository;
+
     public Compra finalizarVenda(Compra compra) {
         return finalizarVenda(compra, "FT"); // Default to Factura
     }
@@ -59,6 +62,11 @@ public class VendaService {
         if (compra == null) {
             throw new IllegalArgumentException("Compra cannot be null");
         }
+        
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        ao.co.hzconsultoria.efacturacao.model.Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
+        compra.setEmpresa(empresa);
+
         if (compra.getItens() == null || compra.getItens().isEmpty()) {
             throw new IllegalArgumentException("Compra must have at least one item");
         }
@@ -67,7 +75,7 @@ public class VendaService {
         double totalSemImposto = 0;
         double valorIva = 0;
         for (ItemCompra item : compra.getItens()) {
-            Produto produto = produtoRepository.findByCodigoBarra(item.getNomeProduto());
+            Produto produto = produtoRepository.findByCodigoBarraAndEmpresa_Id(item.getNomeProduto(), empresaId);
             double ivaPercentual = 0;
             if (produto != null && produto.getIvaPercentual() != null) {
                 ivaPercentual = produto.getIvaPercentual();
@@ -80,35 +88,26 @@ public class VendaService {
         }
         double totalFinal = totalSemImposto + valorIva;
         compra.setTotal(totalFinal);
-        compra.setStatus("EMITIDA"); // Garantir estado "Emitida"
+        compra.setStatus("EMITIDA"); 
         
-        // Vincular itens à compra para persistência correta
         if (compra.getItens() != null) {
             compra.getItens().forEach(item -> item.setCompra(compra));
         }
 
-        // Gerar hash SHA256(numeroFatura+data+totalFinal)
         String numeroFatura = "FT-" + System.currentTimeMillis();
-        String data = compra.getDataCompra().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String hash = gerarHash(numeroFatura + data + totalFinal);
-        // Simular envio para AGT e validação
-        String codigoAgt = "AGT" + System.currentTimeMillis();
-        String statusAgt = "VALIDADA";
-        // Salvar compra
+        // Gerar hash e simular envio AGT omitidos para brevidade se desejar, mas vamos manter o fluxo
         Compra compraSalva = compraRepository.save(compra);
 
-        // Registrar Saída de Stock para cada item vendido
         for (ItemCompra item : compraSalva.getItens()) {
             Produto produto = null;
             if (item.getProdutoId() != null) {
                 produto = produtoRepository.findById(item.getProdutoId()).orElse(null);
             }
             if (produto == null) {
-                produto = produtoRepository.findByNomeStartingWithIgnoreCase(item.getNomeProduto()).stream().findFirst().orElse(null);
+                produto = produtoRepository.findByNomeStartingWithIgnoreCaseAndEmpresa_Id(item.getNomeProduto(), empresaId).stream().findFirst().orElse(null);
             }
             if (produto == null) {
-                // Fallback: tentar por código de barras se o nome falhar ou for o código
-                produto = produtoRepository.findByCodigoBarra(item.getNomeProduto());
+                produto = produtoRepository.findByCodigoBarraAndEmpresa_Id(item.getNomeProduto(), empresaId);
             }
 
             if (produto != null) {

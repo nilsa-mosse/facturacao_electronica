@@ -10,15 +10,17 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
-    Produto findByCodigoBarra(String codigoBarra);
+    List<Produto> findByEmpresa_Id(Long empresaId);
+    Page<Produto> findByEmpresa_Id(Long empresaId, Pageable pageable);
     
-    Page<Produto> findAll(Pageable pageable);
+    Produto findByCodigoBarraAndEmpresa_Id(String codigoBarra, Long empresaId);
     
-    Page<Produto> findByCategoria_Nome(String nome, Pageable pageable);
-    Page<Produto> findByCategoria_Id(Long id, Pageable pageable);
+    Page<Produto> findByCategoria_IdAndEmpresa_Id(Long categoriaId, Long empresaId, Pageable pageable);
     
-    List<Produto> findByNomeStartingWithIgnoreCase(String nome);
+    List<Produto> findByNomeContainingIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
+    
+    List<Produto> findByNomeStartingWithIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM Produto p WHERE p.quantidadeEstoque <= p.estoqueMinimo")
-    List<Produto> findProdutosComStockBaixo();
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Produto p WHERE p.empresa.id = :empresaId AND p.quantidadeEstoque <= p.estoqueMinimo")
+    List<Produto> findProdutosComStockBaixo(Long empresaId);
 }

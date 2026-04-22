@@ -24,7 +24,14 @@ public class Serie {
 
     private String descricao;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
     // Getters and Setters
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

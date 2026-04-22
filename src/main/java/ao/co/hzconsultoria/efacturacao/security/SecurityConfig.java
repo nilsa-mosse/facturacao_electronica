@@ -17,6 +17,9 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    private CustomAuthenticationFailureHandler failureHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -33,8 +36,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+            .authenticationProvider(authenticationProvider())
             .authorizeRequests()
-                .antMatchers("/login", "/assets/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia", "/finalizarVenda").permitAll()
+                .antMatchers("/login", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia", "/finalizarVenda").permitAll()
+                .antMatchers("/superadmin/**").hasRole("SUPERADMIN")
                 .anyRequest().authenticated()
             .and()
             .csrf()
@@ -46,6 +51,7 @@ public class SecurityConfig {
             .and()
             .formLogin()
                 .loginPage("/login")
+                .failureHandler(failureHandler)
                 .defaultSuccessUrl("/dashboard", true)
                 .permitAll()
             .and()

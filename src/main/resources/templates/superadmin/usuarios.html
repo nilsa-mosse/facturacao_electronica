@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <h1><i class="fas fa-users-cog me-2"></i>Gestão Global de Utilizadores (SaaS)</h1>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="icon fas fa-check me-2"></i> <span th:text="${mensagem}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <div th:if="${mensagem_erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="icon fas fa-exclamation-triangle me-2"></i> <span th:text="${mensagem_erro}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <div class="card card-warning card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title">Configurar Contas Administrativas</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario">
+                                    <i class="fas fa-plus"></i> Novo Administrador
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Login</th>
+                                        <th>Perfil</th>
+                                        <th>Estado</th>
+                                        <th>Empresa Associada</th>
+                                        <th>Acções</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="u : ${usuarios}">
+                                        <td th:text="${u.nome}"></td>
+                                        <td th:text="${u.login}"></td>
+                                        <td>
+                                            <span th:classappend="${u.role == 'SUPERADMIN' ? 'badge badge-danger' : 'badge badge-primary'}"
+                                                  th:text="${u.role}"></span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${u.ativo}" class="badge badge-success">Ativo</span>
+                                            <span th:unless="${u.ativo}" class="badge badge-secondary">Inativo</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${u.empresa}" th:text="${u.empresa.nome}" class="text-bold text-primary"></span>
+                                            <span th:unless="${u.empresa}" class="text-muted small">Sem empresa (Desassociado)</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-info btn-sm btn-editar"
+                                                        th:data-id="${u.id}"
+                                                        th:data-nome="${u.nome}"
+                                                        th:data-login="${u.login}"
+                                                        th:data-role="${u.role}"
+                                                        th:data-empresa="${u.empresa?.id}"
+                                                        th:data-ativo="${u.ativo}">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                                
+                                                <a th:if="${u.empresa != null}" th:href="@{/superadmin/usuarios/desassociar/{id}(id=${u.id})}" 
+                                                   class="btn btn-warning btn-sm" onclick="return confirm('Desassociar este utilizador da empresa?')">
+                                                    <i class="fas fa-unlink"></i> Desassociar
+                                                </a>
+
+                                                <a th:href="@{/superadmin/usuarios/eliminar/{id}(id=${u.id})}" 
+                                                   class="btn btn-danger btn-sm" onclick="return confirm('Eliminar permanentemente este utilizador?')">
+                                                    <i class="fas fa-trash"></i> Remover
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modalUsuario" tabindex="-1">
+            <div class="modal-dialog">
+                <form th:action="@{/superadmin/usuarios/salvar}" method="post">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title">Configurar Utilizador</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="usuarioId" name="id">
+                            <div class="form-group">
+                                <label>Nome Completo</label>
+                                <input type="text" id="formNome" name="nome" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Login (Username)</label>
+                                <input type="text" id="formLogin" name="login" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Palavra-passe</label>
+                                <input type="password" name="senha" class="form-control" placeholder="Deixar vazio se não quiser alterar">
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-8">
+                                    <label>Perfil de Acesso</label>
+                                    <select id="formRole" name="role" class="form-control" required>
+                                        <option value="SUPERADMIN">SUPERADMIN (Global)</option>
+                                        <option value="ADMIN" selected>ADMIN (Empresa)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label>Estado</label>
+                                    <div class="custom-control custom-switch mt-2">
+                                        <input type="checkbox" class="custom-control-input" id="formAtivo" name="ativo" checked>
+                                        <label class="custom-control-label" for="formAtivo">Ativo</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Empresa Associada</label>
+                                <select id="formEmpresa" name="empresaId" class="form-control">
+                                    <option value="">-- Sem Empresa (Desassociado) --</option>
+                                    <option th:each="e : ${empresas}" th:value="${e.id}" th:text="${e.nome}"></option>
+                                </select>
+                                <small class="text-muted">A desassociação remove o acesso à empresa.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="submit" class="btn btn-warning">Gravar Alterações</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            // Inicializar o modal do Bootstrap 5
+            const modalEl = document.getElementById('modalUsuario');
+            const userModal = new bootstrap.Modal(modalEl);
+
+            $('.btn-editar').on('click', function() {
+                const btn = $(this);
+                document.getElementById('usuarioId').value = btn.data('id');
+                document.getElementById('formNome').value = btn.data('nome');
+                document.getElementById('formLogin').value = btn.data('login');
+                document.getElementById('formRole').value = btn.data('role');
+                document.getElementById('formEmpresa').value = btn.data('empresa') || "";
+                document.getElementById('formAtivo').checked = btn.data('ativo');
+                
+                userModal.show();
+            });
+
+            // Limpar formulário ao clicar em "Novo"
+            $('[data-bs-target="#modalUsuario"]').on('click', function() {
+                if (!$(this).hasClass('btn-editar')) {
+                    document.getElementById('usuarioId').value = "";
+                    document.getElementById('formNome').value = "";
+                    document.getElementById('formLogin').value = "";
+                    document.getElementById('formRole').value = "ADMIN";
+                    document.getElementById('formEmpresa').value = "";
+                    document.getElementById('formAtivo').checked = true;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

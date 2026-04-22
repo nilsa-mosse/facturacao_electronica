@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1><i class="fas fa-store me-2"></i>Gestão de Estabelecimentos</h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <i class="fas fa-check-circle me-1"></i>
+                        <span th:text="${mensagem}"></span>
+                    </div>
+
+                    <div class="card card-outline card-dark">
+                        <div class="card-header border-0">
+                            <h3 class="card-title">Listagem de Lojas e Armazéns</h3>
+                        </div>
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-striped table-valign-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Endereço</th>
+                                        <th th:if="${isSuperAdmin}">Empresa</th>
+                                        <th>Estado</th>
+                                        <th>Acções</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="e : ${estabelecimentos}">
+                                        <td th:text="${e.nome}">Sede</td>
+                                        <td>
+                                            <span class="badge" th:classappend="${e.tipo == 'LOJA' ? 'bg-primary' : 'bg-warning'}" th:text="${e.tipo}">LOJA</span>
+                                        </td>
+                                        <td th:text="${e.endereco}">Luanda</td>
+                                        <td th:if="${isSuperAdmin}" th:text="${e.empresa?.nome}">Empresa</td>
+                                        <td>
+                                            <span class="badge" th:classappend="${e.visivel ? 'bg-success' : 'bg-secondary'}" th:text="${e.visivel ? 'Ativo' : 'Inativo'}">Ativo</span>
+                                        </td>
+                                        <td>
+                                            <a th:href="@{'/configuracoes/estabelecimentos/eliminar/' + ${e.id}}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Deseja eliminar este estabelecimento?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card card-outline card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title">Registar Novo Estabelecimento</h3>
+                        </div>
+                        <form th:action="@{/configuracoes/estabelecimentos/salvar}" th:object="${novoEstabelecimento}" method="post">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div th:if="${isSuperAdmin}" class="form-group col-md-12 mb-3 text-danger fw-bold">
+                                         Modo SuperAdmin: Você pode associar este estabelecimento a qualquer empresa.
+                                    </div>
+
+                                    <div th:if="${isSuperAdmin}" class="form-group col-md-4">
+                                        <label>Associar à Empresa</label>
+                                        <select class="form-select" name="empresaSelecionadaId" required>
+                                            <option th:each="emp : ${empresas}" th:value="${emp.id}" th:text="${emp.nome}"></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>Nome do Estabelecimento</label>
+                                        <input type="text" class="form-control" th:field="*{nome}" required>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label>Tipo</label>
+                                        <select class="form-select" th:field="*{tipo}">
+                                            <option value="LOJA">LOJA</option>
+                                            <option value="ARMAZEM">ARMAZÉM</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-12 mt-3">
+                                        <label>Endereço Completo</label>
+                                        <input type="text" class="form-control" th:field="*{endereco}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-secondary"><i class="fas fa-save me-1"></i>Guardar Estabelecimento</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

@@ -16,7 +16,14 @@ public class Categoria {
     @JsonManagedReference
     private List<Produto> produtos;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
     // Getters e Setters
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Long getId() {
         return id;
     }

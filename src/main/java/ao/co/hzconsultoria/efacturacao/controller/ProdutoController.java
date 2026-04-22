@@ -44,17 +44,14 @@ public class ProdutoController {
 
     @GetMapping("/cadastroProduto")
     public String cadastroProduto(Model model) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("produto", new Produto());
-        model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
+        model.addAttribute("categorias", categoriaRepository.findByEmpresa_Id(empresaId));
         model.addAttribute("impostos", impostoRepository.findAll());
-        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
-        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
-                : "GERAL";
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal() : "GERAL";
         model.addAttribute("regimeFiscal", regimeFiscal);
-
-        System.out.println("Regime fiscal da empresa: " + regimeFiscal);
-
         return "cadastroProduto";
     }
 
@@ -68,6 +65,7 @@ public class ProdutoController {
             @RequestParam(value = "imagem", required = false) MultipartFile imagem,
             @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
             Model model) throws IOException {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = new Produto();
         produto.setNome(nome);
         produto.setDescricao(descricao);
@@ -75,31 +73,32 @@ public class ProdutoController {
         produto.setQuantidadeEstoque(quantidadeEstoque);
         produto.setCodigoBarra(codigoBarra);
         produto.setIvaPercentual(ivaPercentual);
+        
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        produto.setEmpresa(empresa);
+
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
-        // Salva primeiro para gerar o ID
+        
         produtoRepository.save(produto);
         if (imagem != null && !imagem.isEmpty()) {
             produto.setImagemBlob(imagem.getBytes());
-            produto.setImagem("/produto/imagem/" + produto.getId()); // Caminho correto
-            produtoRepository.save(produto); // Salva novamente com imagem
+            produto.setImagem("/produto/imagem/" + produto.getId());
+            produtoRepository.save(produto);
         }
-        model.addAttribute("mensagem",
-                messageSource.getMessage("msg.produto.salvo", null, LocaleContextHolder.getLocale()));
-        Pageable pageable = PageRequest.of(0, 20);
-        model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
+        
+        model.addAttribute("mensagem", messageSource.getMessage("msg.produto.salvo", null, LocaleContextHolder.getLocale()));
+        model.addAttribute("categorias", categoriaRepository.findByEmpresa_Id(empresaId));
         model.addAttribute("impostos", impostoRepository.findAll());
-        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
-        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
-                : "Regime Geral";
-        model.addAttribute("regimeFiscal", regimeFiscal);
+        model.addAttribute("regimeFiscal", (empresa != null) ? empresa.getRegimeFiscal() : "Regime Geral");
         return "cadastroProduto";
     }
 
     @GetMapping(value = "/produto/imagem/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getImagem(@PathVariable Long id) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id).orElse(null);
-        if (produto != null && produto.getImagemBlob() != null) {
+        if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId) && produto.getImagemBlob() != null) {
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(produto.getImagemBlob());
         }
         return ResponseEntity.notFound().build();
@@ -107,15 +106,20 @@ public class ProdutoController {
 
     @GetMapping("/produtos/detalhes/{id}")
     public String detalhesProduto(@PathVariable Long id, Model model) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id).orElse(new Produto());
-        Pageable pageable = PageRequest.of(0, 50);
+        
+        // Segurança: verificar se o produto pertence à empresa
+        if (produto.getEmpresa() != null && !produto.getEmpresa().getId().equals(empresaId)) {
+            return "redirect:/produtos/listar";
+        }
+
         model.addAttribute("produto", produto);
-        model.addAttribute("categorias", categoriaRepository.findAll(pageable).getContent());
+        model.addAttribute("categorias", categoriaRepository.findByEmpresa_Id(empresaId));
         model.addAttribute("impostos", impostoRepository.findAll());
-        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
-        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
-                : "Regime Geral";
-        model.addAttribute("regimeFiscal", regimeFiscal);
+        
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
+        model.addAttribute("regimeFiscal", (empresa != null) ? empresa.getRegimeFiscal() : "Regime Geral");
         return "detalhesProduto";
     }
 
@@ -132,11 +136,15 @@ public class ProdutoController {
             @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
             RedirectAttributes redirectAttributes) throws IOException {
 
-        // Buscar o produto pelo ID
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
 
-        // Atualizar campos
+        // Segurança
+        if (produto.getEmpresa() != null && !produto.getEmpresa().getId().equals(empresaId)) {
+            return "redirect:/produtos/listar";
+        }
+
         produto.setNome(nome);
         produto.setDescricao(descricao);
         produto.setPreco(preco);
@@ -144,38 +152,41 @@ public class ProdutoController {
         produto.setCodigoBarra(codigoBarra);
         produto.setIvaPercentual(ivaPercentual);
 
-        // Atualizar categoria
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
 
-        // Atualizar imagem se houver upload
         if (imagem != null && !imagem.isEmpty()) {
             produto.setImagemBlob(imagem.getBytes());
             produto.setImagem("/produto/imagem/" + produto.getId());
         }
 
-        // Salvar alterações no banco
         produtoRepository.save(produto);
 
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.produto.atualizado", null, LocaleContextHolder.getLocale()));
-        // Redirecionar para a listagem com os dados atualizados
         return "redirect:/produtos/listar";
     }
 
     @GetMapping("/produtos/apagar/{id}")
     public String apagarProduto(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        produtoRepository.deleteById(id);
-        redirectAttributes.addFlashAttribute("mensagem",
-                messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Produto produto = produtoRepository.findById(id).orElse(null);
+        
+        if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId)) {
+            produtoRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("mensagem",
+                    messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
+        }
+        
         return "redirect:/produtos/listar";
     }
 
     @GetMapping("/api/produtos/pesquisar")
     public ResponseEntity<java.util.List<Produto>> pesquisarProdutos(@RequestParam("nome") String nome) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         if (nome == null || nome.length() < 1) {
             return ResponseEntity.ok(new java.util.ArrayList<>());
         }
-        return ResponseEntity.ok(produtoRepository.findByNomeStartingWithIgnoreCase(nome));
+        return ResponseEntity.ok(produtoRepository.findByNomeContainingIgnoreCaseAndEmpresa_Id(nome, empresaId));
     }
 }

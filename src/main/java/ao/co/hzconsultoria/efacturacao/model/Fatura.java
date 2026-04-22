@@ -22,6 +22,13 @@ public class Fatura {
     private String codigoAgt;
     private String tipoDocumento; // FT, FR, FP (Pro-forma)
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

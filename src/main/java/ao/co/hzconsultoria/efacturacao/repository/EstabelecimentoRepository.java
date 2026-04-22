@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface EstabelecimentoRepository extends JpaRepository<Estabelecimento, Long> {
     List<Estabelecimento> findByVisivelTrue();
+    List<Estabelecimento> findByEmpresa_Id(Long empresaId);
 }

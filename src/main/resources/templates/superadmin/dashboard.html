@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head">
+    <title>SaaS Dashboard | SuperAdmin</title>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper" style="background: #f4f6f9;">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-4 align-items-end">
+                        <div class="col-sm-6">
+                            <h1 class="fw-bold text-dark" style="letter-spacing: -1px;">
+                                <i class="fas fa-microchip text-primary me-2"></i>SaaS Management Console
+                            </h1>
+                            <p class="text-muted mb-0">Monitoramento global e gestão multi-tenant de infraestrutura.</p>
+                        </div>
+                        <div class="col-sm-6 text-end">
+                             <span class="badge bg-primary px-3 py-2 rounded-pill shadow-sm">
+                                <i class="fas fa-shield-alt me-1"></i> Modo Super Administrador
+                             </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    
+                    <!-- Top Stats Grid -->
+                    <div class="row">
+                        <div class="col-lg-4 col-12">
+                            <div class="card shadow-sm border-0 bg-gradient-primary" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); border-radius: 15px; color: white; overflow: hidden;">
+                                <div class="card-body p-4 position-relative">
+                                    <div class="position-absolute" style="right: -10px; bottom: -10px; opacity: 0.2; font-size: 5rem;">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <h6 class="text-uppercase small fw-bold opacity-75">Empresas Activas</h6>
+                                    <h2 class="display-4 fw-bold mb-0" th:text="${totalEmpresas}">0</h2>
+                                    <p class="mt-2 mb-0 small"><i class="fas fa-check-circle me-1"></i> Infraestrutura operacional</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 col-12">
+                            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); border-radius: 15px; color: white; overflow: hidden;">
+                                <div class="card-body p-4 position-relative">
+                                    <div class="position-absolute" style="right: -10px; bottom: -10px; opacity: 0.2; font-size: 5rem;">
+                                        <i class="fas fa-server"></i>
+                                    </div>
+                                    <h6 class="text-uppercase small fw-bold opacity-75">Estado dos Servidores</h6>
+                                    <h2 class="display-4 fw-bold mb-0">100%</h2>
+                                    <p class="mt-2 mb-0 small"><i class="fas fa-bolt me-1"></i> Latência: 24ms</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-12">
+                            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%); border-radius: 15px; color: white; overflow: hidden;">
+                                <div class="card-body p-4 position-relative">
+                                    <div class="position-absolute" style="right: -10px; bottom: -10px; opacity: 0.2; font-size: 5rem;">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <h6 class="text-uppercase small fw-bold opacity-75">Integridade de Dados</h6>
+                                    <h2 class="display-4 fw-bold mb-0">Óptima</h2>
+                                    <p class="mt-2 mb-0 small"><i class="fas fa-sync me-1"></i> Último backup: há 2h</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Card -->
+                    <div class="card shadow-sm border-0 mt-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-bottom-0 py-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="fw-bold m-0 text-dark">Tenant Directory</h4>
+                                    <p class="text-muted small mb-0">Lista completa de empresas registadas no ecossistema.</p>
+                                </div>
+                                <a th:href="@{/superadmin/empresas/nova}" class="btn btn-primary shadow-sm px-4 rounded-pill">
+                                    <i class="fas fa-plus me-2"></i>Registar Nova Empresa
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead style="background: #f8f9fc;">
+                                        <tr class="text-muted text-uppercase small fw-bold">
+                                            <th class="ps-4">ID</th>
+                                            <th>Empresa</th>
+                                            <th>NIF / Identificação</th>
+                                            <th>Regime Fiscal</th>
+                                            <th>Estado</th>
+                                            <th class="pe-4 text-end">Gerir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="e : ${empresas}">
+                                            <td class="ps-4 text-muted" th:text="${e.id}">1</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 shadow-sm border" style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-building text-primary"></i>
+                                                    </div>
+                                                    <span class="fw-bold text-dark" th:text="${e.nome}">Nome da Empresa</span>
+                                                </div>
+                                            </td>
+                                            <td th:text="${e.nif}">5000000000</td>
+                                            <td>
+                                                <span class="badge" 
+                                                      th:classappend="${e.regimeFiscal == 'GERAL' ? 'bg-indigo' : 'bg-lightblue'}"
+                                                      th:text="${e.regimeFiscal}">GERAL</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="bg-success rounded-circle me-2" style="width: 10px; height: 10px;"></span>
+                                                    <span class="small fw-bold text-success">Ativo</span>
+                                                </div>
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                                <div class="btn-group shadow-sm rounded">
+                                                    <a th:href="@{/superadmin/empresas/editar/{id}(id=${e.id})}" class="btn btn-sm btn-white border">
+                                                        <i class="fas fa-pen text-primary"></i>
+                                                    </a>
+                                                    <a th:href="@{/superadmin/empresas/eliminar/{id}(id=${e.id})}" class="btn btn-sm btn-white border border-start-0" 
+                                                       onclick="return confirm('ATENÇÃO: Eliminar uma empresa removerá todos os seus dados. Confirmar?')">
+                                                        <i class="fas fa-trash text-danger"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white py-3 border-top-0 text-center">
+                             <p class="text-muted small mb-0">Totalizando <strong th:text="${totalEmpresas}">0</strong> tenants operacionais.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+        
+        <footer class="main-footer bg-white border-0 text-center small text-muted">
+            <strong>&copy; 2026 SaaS Engine v2.0</strong> | Console de Administração de Infraestrutura Multi-Tenant.
+        </footer>
+    </div>
+</body>
+</html>

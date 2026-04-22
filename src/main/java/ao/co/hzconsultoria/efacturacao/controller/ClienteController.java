@@ -30,7 +30,8 @@ public class ClienteController {
     // Processar cadastro
     @PostMapping("/adicionar")
     public String cadastrarCliente(@ModelAttribute Cliente cliente, RedirectAttributes redirectAttributes) {
-        clienteService.salvar(cliente);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        clienteService.salvar(cliente, empresaId);
         redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.cliente.salvo", null, LocaleContextHolder.getLocale()));
         return "redirect:/clientes/listar";
     }
@@ -38,14 +39,19 @@ public class ClienteController {
     // Listar clientes
     @GetMapping("/listar")
     public String listarClientes(Model model) {
-        model.addAttribute("clientes", clienteService.listarTodos());
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        model.addAttribute("clientes", clienteService.listarTodos(empresaId));
         return "listarClientes";
     }
 
     // Exibir formulário de edição
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
-        Cliente cliente = clienteService.buscarPorId(id);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Cliente cliente = clienteService.buscarPorId(id, empresaId);
+        if (cliente == null) {
+            return "redirect:/clientes/listar";
+        }
         model.addAttribute("cliente", cliente);
         return "cadastroEdicaoCliente";
     }
@@ -53,7 +59,8 @@ public class ClienteController {
     // Atualizar cliente
     @PostMapping("/atualizar")
     public String atualizarCliente(@ModelAttribute Cliente cliente, RedirectAttributes redirectAttributes) {
-        clienteService.atualizar(cliente);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        clienteService.atualizar(cliente, empresaId);
         redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.cliente.atualizado", null, LocaleContextHolder.getLocale()));
         return "redirect:/clientes/listar";
     }

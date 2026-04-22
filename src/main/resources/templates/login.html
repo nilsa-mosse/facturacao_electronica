@@ -3,8 +3,9 @@
 
 <head>
     <title>Login - E-Facturação</title>
-    <th:block th:replace="layout :: head"></th:block>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.75);
@@ -330,7 +331,10 @@
                 <form th:action="@{/login}" method="post">
                     <!-- Mensagens de Feedback -->
                     <div th:if="${param.error}" class="alert alert-danger mb-4 shadow-sm">
-                        <i class="fas fa-circle-exclamation"></i> Usuário ou senha incorretos.
+                        <i class="fas fa-circle-exclamation"></i>
+                        <span th:if="${#strings.contains(param.error, 'login.error.bloqueado')}">Conta bloqueada temporariamente por excesso de tentativas.</span>
+                        <span th:if="${#strings.contains(param.error, 'login.error.desativado')}">A sua conta foi desativada pelo administrador.</span>
+                        <span th:if="${!#strings.contains(param.error, 'login.error.bloqueado') && !#strings.contains(param.error, 'login.error.desativado')}">Utilizador ou palavra-passe incorretos.</span>
                     </div>
                     <div th:if="${param.logout}" class="alert alert-primary mb-4 shadow-sm">
                         <i class="fas fa-circle-check"></i> Sessão encerrada com sucesso.

@@ -189,8 +189,8 @@ public class GuiaRemessaService {
         PdfWriter.getInstance(doc, new FileOutputStream(filePath));
         doc.open();
 
-        List<Empresa> empresas = empresaRepository.findAll();
-        Empresa configEmpresa = empresas.isEmpty() ? new Empresa() : empresas.get(0);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Empresa configEmpresa = empresaRepository.findById(empresaId).orElse(new Empresa());
 
         java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
         Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
@@ -319,6 +319,8 @@ public class GuiaRemessaService {
         compra.setStatus("EMITIDA");
         compra.setTipoDocumento("FT");
 
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+
         List<ao.co.hzconsultoria.efacturacao.model.ItemCompra> itens = guia.getItens().stream().map(ig -> {
             ao.co.hzconsultoria.efacturacao.model.ItemCompra ic = new ao.co.hzconsultoria.efacturacao.model.ItemCompra();
             ic.setNomeProduto(ig.getNomeProduto());
@@ -326,7 +328,7 @@ public class GuiaRemessaService {
             
             // Tentar buscar preço real do produto
             double preco = 0.0;
-            java.util.List<Produto> prods = produtoRepository.findByNomeStartingWithIgnoreCase(ig.getNomeProduto());
+            java.util.List<Produto> prods = produtoRepository.findByNomeStartingWithIgnoreCaseAndEmpresa_Id(ig.getNomeProduto(), empresaId);
             if (prods != null && !prods.isEmpty()) {
                 preco = prods.get(0).getPreco();
             }

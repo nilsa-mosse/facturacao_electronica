@@ -27,9 +27,14 @@ public class Produto {
     @JoinColumn(name = "estado_id")
     private Estado estado;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
 
     // Getters e Setters
-    
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Estado getEstado() {
         // A matemática do stock tem supremacia absoluta sobre a chave gravada, vacinando corrupção.
         if (this.quantidadeEstoque != null && this.quantidadeEstoque <= 0) {

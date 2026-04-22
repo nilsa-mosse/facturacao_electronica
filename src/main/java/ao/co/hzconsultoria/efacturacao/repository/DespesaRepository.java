@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface DespesaRepository extends JpaRepository<Despesa, Long> {
     List<Despesa> findByDataDespesaBetween(LocalDate start, LocalDate end);
+    List<Despesa> findByEmpresa_Id(Long empresaId);
 }

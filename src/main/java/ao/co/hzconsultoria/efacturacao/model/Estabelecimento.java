@@ -16,7 +16,17 @@ public class Estabelecimento {
     private String tipo; // LOJA or ARMAZEM
     private Boolean visivel = true;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
     // Getters e Setters
+    public Boolean getVisivel() { return visivel; }
+    public void setVisivel(Boolean visivel) { this.visivel = visivel; }
+
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

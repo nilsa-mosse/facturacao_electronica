@@ -40,22 +40,23 @@ public class FacturaEletronicaController {
             @RequestParam(required = false) String nif,
             Model model) {
 
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+
         // Normalizar filtros para a query
         String statusFilter = (status != null && !status.isEmpty() && !status.equals("TODOS")) ? status : null;
         String nifFilter = (nif != null && !nif.isEmpty()) ? nif : null;
 
-        List<Fatura> facturas = faturaRepository.findByFilters(statusFilter, dataInicio, dataFim, nifFilter);
+        List<Fatura> facturas = faturaRepository.findByFilters(empresaId, statusFilter, dataInicio, dataFim, nifFilter);
 
-        // Estatísticas para os KPI Cards (baseadas na lista filtrada ou total? 
-        // Geralmente KPIs mostram o estado global ou o filtrado. Vamos mostrar o global para contexto.)
-        List<Fatura> todas = faturaRepository.findAll();
-        long totalCount = todas.size();
-        long validadasCount = todas.stream().filter(f -> "VALIDADA".equals(f.getStatus())).count();
-        long falhasCount = todas.stream().filter(f -> "FALHA_ENVIO".equals(f.getStatus())).count();
-        long pendentesCount = todas.stream().filter(f -> "PENDENTE".equals(f.getStatus())).count();
+        // Estatísticas para os KPI Cards
+        List<Fatura> todasDaEmpresa = faturaRepository.findByEmpresa_Id(empresaId);
+        long totalCount = todasDaEmpresa.size();
+        long validadasCount = todasDaEmpresa.stream().filter(f -> "VALIDADA".equals(f.getStatus())).count();
+        long falhasCount = todasDaEmpresa.stream().filter(f -> "FALHA_ENVIO".equals(f.getStatus())).count();
+        long pendentesCount = todasDaEmpresa.stream().filter(f -> "PENDENTE".equals(f.getStatus())).count();
 
         // Dados da Empresa para o Regime Fiscal
-        Empresa empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
         String regimeFiscal = (empresa != null) ? empresa.getRegimeFiscal() : "Regime Geral";
 
         model.addAttribute("facturas", facturas);

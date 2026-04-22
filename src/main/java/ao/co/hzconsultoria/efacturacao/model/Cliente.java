@@ -1,9 +1,6 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.*;
 
 @Entity
 public class Cliente {
@@ -16,7 +13,14 @@ public class Cliente {
     private String telefone;
     private String endereco;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
     // Getters e Setters
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Long getId() {
         return id;
     }

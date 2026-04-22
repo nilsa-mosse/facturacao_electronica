@@ -1,6 +1,7 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +24,10 @@ public class User {
     @Column(nullable = false)
     private String role;
 
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
     // Estabelecimentos visíveis para este usuário
     @ManyToMany
     @JoinTable(name = "usuario_estabelecimento",
@@ -30,7 +35,16 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "estabelecimento_id"))
     private Set<Estabelecimento> estabelecimentos = new HashSet<>();
 
+    private int tentativasLogin = 0;
+
+    private LocalDateTime bloqueadoAte;
+
+    private boolean ativo = true;
+
     // Getters e Setters
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -48,4 +62,13 @@ public class User {
 
     public Set<Estabelecimento> getEstabelecimentos() { return estabelecimentos; }
     public void setEstabelecimentos(Set<Estabelecimento> estabelecimentos) { this.estabelecimentos = estabelecimentos; }
+
+    public int getTentativasLogin() { return tentativasLogin; }
+    public void setTentativasLogin(int tentativasLogin) { this.tentativasLogin = tentativasLogin; }
+
+    public LocalDateTime getBloqueadoAte() { return bloqueadoAte; }
+    public void setBloqueadoAte(LocalDateTime bloqueadoAte) { this.bloqueadoAte = bloqueadoAte; }
+
+    public boolean isAtivo() { return ativo; }
+    public void setAtivo(boolean ativo) { this.ativo = ativo; }
 }
