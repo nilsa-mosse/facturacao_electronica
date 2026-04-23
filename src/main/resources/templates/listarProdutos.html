@@ -1,108 +1,354 @@
-<head th:replace="menu :: head"></head>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:replace="menu :: head"></th:block>
+
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --warning: #f72585;
+      --info: #4895ef;
+      --dark: #0f172a;
+      --light: #f8fafc;
+      --glass: rgba(255, 255, 255, 0.9);
+    }
+
+    body.dark-mode {
+      --light: #0f172a;
+      --glass: rgba(15, 23, 42, 0.8);
+    }
+
+    .content-wrapper {
+      background: var(--light);
+      padding: 30px;
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 24px;
+      padding: 40px;
+      color: white;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 40px rgba(67, 97, 238, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease;
+      height: 100%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    .filter-card {
+      background: var(--glass);
+      border-radius: 20px;
+      padding: 25px;
+      border: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      margin-bottom: 30px;
+    }
+
+    .table-card {
+      background: white;
+      border-radius: 24px;
+      border: none;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .custom-table thead th {
+      background: #f8fafc;
+      border-bottom: 1px solid #edf2f7;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      padding: 20px;
+    }
+
+    .custom-table tbody td {
+      padding: 20px;
+      vertical-align: middle;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .product-img {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .badge-premium {
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-edit { background: #e0e7ff; color: #4361ee; }
+    .btn-edit:hover { background: #4361ee; color: white; }
+    .btn-delete { background: #fee2e2; color: #ef4444; }
+    .btn-delete:hover { background: #ef4444; color: white; }
+
+    .search-input {
+      border-radius: 12px;
+      border: 2px solid #f1f5f9;
+      padding: 12px 20px;
+      background: #f8fafc;
+      transition: all 0.3s;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+    }
+
+    .promo-pulse {
+      animation: pulse 2s infinite;
+    }
+
+    /* Soft Background Utilities */
+    .bg-primary-soft { background-color: rgba(67, 97, 238, 0.1) !important; }
+    .bg-success-soft { background-color: rgba(76, 201, 240, 0.1) !important; }
+    .bg-danger-soft { background-color: rgba(239, 68, 68, 0.1) !important; }
+    .bg-warning-soft { background-color: rgba(247, 37, 133, 0.1) !important; }
+
+    .fw-900 { font-weight: 900 !important; }
+    .fw-800 { font-weight: 800 !important; }
+    .fw-700 { font-weight: 700 !important; }
+
+    @keyframes pulse {
+
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(247, 37, 133, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(247, 37, 133, 0); }
+    }
+  </style>
+</head>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
   <div class="wrapper">
-    <!-- Topbar-->
     <nav th:replace="menu :: topbar"></nav>
-
-    <!-- Sidebar -->
     <aside th:replace="menu :: sidebar" class="main-sidebar"></aside>
 
-    <!-- Conteúdo principal -->
     <div class="content-wrapper">
-
-      <div class="container-fluid px-4">
-
-        <!-- Cabeçalho -->
-        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-          <h3 class="fw-bold mb-2 mb-md-0" th:text="#{produtos.gestao.titulo}">📦 Gestão de Produtos</h3>
-          <a href="/produtos/novo" class="btn btn-primary shadow-sm" th:text="#{produtos.btn.novo}">+ Novo Produto</a>
-        </div>
-
-        <!-- Alerta de Mensagem -->
-        <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${mensagem}">Mensagem de sucesso</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-
-        <!-- Filtros -->
-        <div class="card shadow-sm border-0 mb-4">
-          <div class="card-body">
-            <form th:action="@{/produtos/listar}" method="get">
-              <div class="row g-3">
-
-                <div class="col-md-5">
-                  <div class="input-group">
-                    <span class="input-group-text bg-white">🔎</span>
-                    <input type="text" name="busca" class="form-control" th:placeholder="#{produtos.filtro.pesquisar}"
-                      th:value="${busca}">
-                  </div>
-                </div>
-
-                <div class="col-md-4">
-                  <select name="cat" class="form-select">
-                    <option value="" th:selected="${categoriaSelecionada == null}" th:text="#{produtos.filtro.todas_categorias}">Todas categorias</option>
-                    <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
-                      th:selected="${catObj.id == categoriaSelecionada}">
-                    </option>
-                  </select>
-                </div>
-
-                <div class="col-md-3 d-grid">
-                  <button class="btn btn-dark" th:text="#{produtos.filtro.btn}">Filtrar</button>
-                </div>
-
-              </div>
-            </form>
+      <div class="container-fluid">
+        
+        <!-- Header Section -->
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-4">
+          <div>
+            <h1 class="fw-900 mb-2" style="font-size: 2.5rem; letter-spacing: -1px;">Gestão de Artigos</h1>
+            <p class="opacity-75 mb-0 fs-5">Controle o seu inventário e preços com precisão.</p>
+          </div>
+          <div class="d-flex gap-3">
+            <a href="/produtos/novo" class="btn btn-white btn-lg fw-800 px-4 py-3 rounded-4 shadow-lg text-primary">
+              <i class="fas fa-plus-circle me-2"></i> NOVO ARTIGO
+            </a>
           </div>
         </div>
 
-        <!-- Tabela -->
-        <div class="card shadow-sm border-0">
-          <div class="card-body p-0 table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-light">
-                 <tr>
-                  <th th:text="#{pos.cart.produto}">Produto</th>
-                  <th th:text="#{column.categoria}">Categoria</th>
-                  <th th:text="#{listagem.produtos.sku}">Código</th>
-                  <th th:text="#{column.preco}">Preço</th>
-                  <th th:text="#{column.estoque}">Stock</th>
+        <!-- Alertas de Feedback -->
+        <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 15px; background: rgba(76, 201, 240, 0.15); color: #0b5a75;">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-3 fa-lg"></i>
+            <span class="fw-700" th:text="${mensagem}"></span>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 15px; background: rgba(239, 68, 68, 0.15); color: #842029;">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+            <span class="fw-700" th:text="${erro}"></span>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="row g-4 mb-5">
+          <div class="col-md-4">
+            <div class="stat-card">
+              <div class="stat-icon bg-primary-soft text-primary">
+                <i class="fas fa-box"></i>
+              </div>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Total de Produtos</h6>
+              <h3 class="fw-900 mb-0" th:text="${produtos.size()}">0</h3>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-card">
+              <div class="stat-icon bg-danger-soft text-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Stock Baixo</h6>
+              <h3 class="fw-900 mb-0">Verificar</h3>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="stat-card">
+              <div class="stat-icon bg-warning-soft text-warning">
+                <i class="fas fa-fire"></i>
+              </div>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Em Promoção</h6>
+              <h3 class="fw-900 mb-0">Automático</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filter-card">
+          <form th:action="@{/produtos/listar}" method="get">
+            <div class="row g-3 align-items-center">
+              <div class="col-md-5">
+                <div class="position-relative">
+                  <i class="fas fa-search position-absolute text-muted" style="left: 20px; top: 18px;"></i>
+                  <input type="text" name="busca" class="form-control search-input ps-5" 
+                         th:placeholder="#{produtos.filtro.pesquisar}" th:value="${busca}">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <select name="cat" class="form-select search-input">
+                  <option value="" th:selected="${categoriaSelecionada == null}" th:text="#{produtos.filtro.todas_categorias}">Todas categorias</option>
+                  <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
+                          th:selected="${catObj.id == categoriaSelecionada}"></option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-primary btn-lg flex-grow-1 rounded-3 fw-700">FILTRAR</button>
+                  <div class="dropdown" th:if="${(busca != null and !busca.isEmpty() or categoriaSelecionada != null) and !produtos.isEmpty()}">
+                    <button class="btn btn-outline-primary btn-lg dropdown-toggle rounded-3 fw-700" type="button" id="dropdownExport" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="fas fa-download"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" aria-labelledby="dropdownExport" style="border-radius: 12px;">
+                      <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" onclick="exportar('json')"><i class="fas fa-file-signature text-info me-2"></i> JSON</a></li>
+                      <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" onclick="exportar('excel')"><i class="fas fa-file-excel text-success me-2"></i> EXCEL</a></li>
+                      <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" onclick="exportar('pdf')"><i class="fas fa-file-pdf text-danger me-2"></i> PDF</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Main Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="table custom-table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>Artigo</th>
+                  <th>Categoria</th>
+                  <th>SKU / Código</th>
+                  <th>Preço Base</th>
+                  <th>Stock</th>
                   <th>Estado</th>
-                  <th th:text="#{produto.iva}">IVA (%)</th>
-                  <th class="text-end" th:text="#{column.acoes}">Ações</th>
+                  <th class="text-end">Ações</th>
                 </tr>
               </thead>
               <tbody id="tabela-produtos">
                 <tr th:each="produto : ${produtos}" th:id="'produto-' + ${produto.id}">
+
                   <td>
                     <div class="d-flex align-items-center gap-3">
-                      <img th:if="${produto.imagemBlob != null}" th:src="@{/produto/imagem/{id}(id=${produto.id})}"
-                        class="product-img">
+                      <img th:if="${produto.imagem != null}" th:src="@{${produto.imagem}}" class="product-img">
+                      <img th:if="${produto.imagem == null && produto.imagemBlob != null}" th:src="@{/produto/imagem/{id}(id=${produto.id})}" class="product-img">
+                      <div th:if="${produto.imagem == null && produto.imagemBlob == null}" class="product-img bg-light d-flex align-items-center justify-content-center text-muted">
+                        <i class="fas fa-image"></i>
+                      </div>
                       <div>
-                        <div class="fw-semibold" th:text="${produto.nome}"></div>
-                        <small class="text-muted" th:text="${produto.descricao}"></small>
+                        <div class="fw-800 text-dark" th:text="${produto.nome}">Nome</div>
+                        <div th:if="${produto.emPromocao}" class="badge bg-warning text-dark mt-1 promo-pulse" style="font-size: 0.6rem; font-weight: 800;">
+                          <i class="fas fa-percent me-1"></i> EM PROMOÇÃO
+                        </div>
                       </div>
                     </div>
                   </td>
-                   <td th:text="${produto.categoria != null ? produto.categoria.nome : #messages.msg('produtos.tabela.sem_categoria')}"></td>
-                  <td th:text="${produto.codigoBarra}"></td>
-                  <td><span class="badge bg-success" th:text="${produto.preco} + ' Kz'"></span></td>
                   <td>
-                    <span class="badge" th:classappend="${produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5} ? 'bg-danger' : 'bg-primary'"
-                      th:text="${produto.quantidadeEstoque}"></span>
+                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill fw-700" 
+                          th:text="${produto.categoria != null ? produto.categoria.nome : 'Geral'}"></span>
+                  </td>
+                  <td class="font-monospace text-muted" th:text="${produto.codigoBarra}">-</td>
+                  <td>
+                    <div class="fw-800 text-primary" th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00</div>
                   </td>
                   <td>
-                    <span class="badge" th:classappend="${!produto.disponivel} ? 'bg-danger' : 'bg-success'"
-                      th:text="${produto.estado != null ? produto.estado.nome : 'DISPONÍVEL'}"></span>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="progress flex-grow-1" style="height: 6px; width: 60px; border-radius: 10px;">
+                        <div class="progress-bar" role="progressbar" 
+                             th:style="'width: ' + (${produto.quantidadeEstoque != null ? (produto.quantidadeEstoque > 100 ? 100 : produto.quantidadeEstoque) : 0}) + '%'"
+                             th:classappend="${produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5 ? 'bg-danger' : 'bg-success'}"></div>
+                      </div>
+                      <span class="fw-700" th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '0'}">0</span>
+
+                    </div>
                   </td>
-                  <td th:text="${produto.ivaPercentual != null ? produto.ivaPercentual + '%': '-'}"></td>
+                  <td>
+                    <span class="badge-premium" th:classappend="${!produto.disponivel} ? 'bg-danger-soft text-danger' : 'bg-success-soft text-success'">
+                      <i class="fas" th:classappend="${!produto.disponivel} ? 'fa-times-circle' : 'fa-check-circle'"></i>
+                      <span th:text="${produto.estado != null ? produto.estado.nome : 'DISPONÍVEL'}"></span>
+                    </span>
+                  </td>
                   <td class="text-end">
-                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                      th:data-bs-target="${'#detalhesModal_' + produto.id}">✏️</button>
-                    <button class="btn btn-sm btn-outline-danger"
-                      th:onclick="|apagarProduto('${produto.id}')|">🗑️</button>
+                    <button class="btn-action btn-edit me-2" data-bs-toggle="modal" th:data-bs-target="${'#detalhesModal_' + produto.id}">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-action btn-delete" th:onclick="|apagarProduto('${produto.id}')|">
+                      <i class="fas fa-trash"></i>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -113,59 +359,63 @@
       </div>
     </div>
 
-    <!-- MODAIS (Edit Produto) -->
+    <!-- Modals Section -->
     <div th:each="produto : ${produtos}">
-      <div class="modal fade" th:id="${'detalhesModal_' + produto.id}">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data"
-              onsubmit="return atualizarProdutos(event, this)">
-               <div class="modal-header">
-                <h5 class="modal-title" th:text="#{produto.editar.titulo}">Editar Produto</h5>
+      <div class="modal fade" th:id="${'detalhesModal_' + produto.id}" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+            <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data" onsubmit="return atualizarProdutos(event, this)">
+              <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-800" style="font-size: 1.5rem; letter-spacing: -0.5px;">Editar Artigo</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
-              <div class="modal-body">
+              <div class="modal-body p-4 pt-0">
                 <input type="hidden" name="id" th:value="${produto.id}">
-                <div class="row g-3">
+                <div class="row g-4">
                   <div class="col-md-6">
-                    <label>Nome</label>
-                    <input type="text" name="nome" class="form-control" th:value="${produto.nome}" required>
+                    <label class="form-label fw-700">Nome do Artigo</label>
+                    <input type="text" name="nome" class="form-control search-input" th:value="${produto.nome}" required>
                   </div>
                   <div class="col-md-6">
-                    <label>Preço</label>
-                    <input type="number" name="preco" class="form-control" th:value="${produto.preco}" required>
+                    <label class="form-label fw-700">Preço de Venda (Kz)</label>
+                    <input type="number" step="0.01" name="preco" class="form-control search-input" th:value="${produto.preco}" required>
                   </div>
                   <div class="col-md-12">
-                    <label>Descrição</label>
-                    <textarea name="descricao" class="form-control" rows="2" th:text="${produto.descricao}"
-                      required></textarea>
+                    <label class="form-label fw-700">Descrição Detalhada</label>
+                    <textarea name="descricao" class="form-control search-input" rows="3" th:text="${produto.descricao}"></textarea>
                   </div>
                   <div class="col-md-6">
-                    <label>Categoria</label>
-                    <select name="categoriaId" class="form-select" required>
+                    <label class="form-label fw-700">Categoria</label>
+                    <select name="categoriaId" class="form-select search-input">
                       <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
-                        th:selected="${produto.categoria != null && produto.categoria.id == catObj.id}"></option>
+                              th:selected="${produto.categoria != null && produto.categoria.id == catObj.id}"></option>
                     </select>
                   </div>
                   <div class="col-md-6">
-                    <label>Stock</label>
-                    <input type="number" name="quantidadeEstoque" class="form-control"
-                      th:value="${produto.quantidadeEstoque}" required>
-                  </div>
-                   <div class="col-md-6">
-                    <label th:text="#{produto.codigo_barra}">Código de Barra</label>
-                    <input type="text" name="codigoBarra" class="form-control" th:value="${produto.codigoBarra}"
-                      required>
+                    <label class="form-label fw-700">Stock Inicial</label>
+                    <input type="number" name="quantidadeEstoque" class="form-control search-input" th:value="${produto.quantidadeEstoque}" required>
                   </div>
                   <div class="col-md-6">
-                    <label th:text="#{produto.imagem}">Imagem</label>
-                    <input type="file" name="imagem" class="form-control">
+                    <label class="form-label fw-700">Código SKU / EAN</label>
+                    <input type="text" name="codigoBarra" class="form-control search-input" th:value="${produto.codigoBarra}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-700">Imagem do Artigo</label>
+                    <input type="file" name="imagem" class="form-control search-input">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-700 text-info">Data de Fabrico</label>
+                    <input type="date" name="dataFabrico" class="form-control search-input border-info-subtle" th:value="${produto.dataFabrico}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-700 text-danger">Data de Expiração</label>
+                    <input type="date" name="dataExpiracao" class="form-control search-input border-danger-subtle" th:value="${produto.dataExpiracao}">
                   </div>
                 </div>
               </div>
-               <div class="modal-footer">
-                <button class="btn btn-success" th:text="#{form.salvar}">Salvar</button>
-                <button class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{form.fechar}">Fechar</button>
+              <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light px-4 py-2 fw-700 rounded-3" data-bs-dismiss="modal">CANCELAR</button>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-800 rounded-3 shadow-lg">GUARDAR ALTERAÇÕES</button>
               </div>
             </form>
           </div>
@@ -174,11 +424,7 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <!-- Scripts already loaded in menu :: head -->
-  <script th:src="@{/plugins/fontawesome/js/all.min.js}"></script>
-
-   <script th:inline="javascript">
+  <script th:inline="javascript">
     function apagarProduto(id) {
       if (confirm([[#{msg.confirmar_excluir}]])) {
         fetch('/produtos/apagar/' + id)
@@ -205,8 +451,19 @@
         });
       return false;
     }
+    function exportar(formato) {
+      const buscaInput = document.querySelector('input[name="busca"]');
+      const catSelect = document.querySelector('select[name="cat"]');
+      const busca = buscaInput ? buscaInput.value : '';
+      const cat = catSelect ? catSelect.value : '';
+      const url = `/produtos/exportar?formato=${formato}&busca=${encodeURIComponent(busca)}&cat=${cat}`;
+      console.log('Exportando para:', url);
+      window.location.assign(url);
+    }
   </script>
-
 </body>
+</html>
+
+
 
 </html>

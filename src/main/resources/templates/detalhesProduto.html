@@ -230,7 +230,23 @@
                         </div>
                     </div>
 
+                    <!-- Datas Section -->
+                    <div class="section-title">
+                        <i class="fas fa-calendar-alt"></i> Datas de Validade
+                    </div>
+                    <div class="row g-4 mb-5">
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Fabrico</label>
+                            <input type="date" name="dataFabrico" class="form-control input-premium" th:value="${produto.dataFabrico}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Expiração</label>
+                            <input type="date" name="dataExpiracao" class="form-control input-premium" th:value="${produto.dataExpiracao}">
+                        </div>
+                    </div>
+
                     <!-- Visual Update -->
+
                     <div class="section-title">
                         <i class="fas fa-camera"></i> Actualizar Imagem
                     </div>

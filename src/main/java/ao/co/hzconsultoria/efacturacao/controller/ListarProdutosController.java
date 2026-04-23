@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
+
 
 @Controller
 public class ListarProdutosController {
@@ -28,12 +30,13 @@ public class ListarProdutosController {
                                  @RequestParam(value = "busca", required = false) String busca,
                                  @RequestParam(value = "page", defaultValue = "0") int page,
                                  Model model) {
+        Long empresaId = SecurityUtils.getCurrentEmpresaId();
         Pageable pageable = PageRequest.of(page, 10);
         Page<Produto> produtosPage;
         if (cat != null) {
-            produtosPage = produtoRepository.findByCategoria_Id(cat, pageable);
+            produtosPage = produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
         } else {
-            produtosPage = produtoRepository.findAll(pageable);
+            produtosPage = produtoRepository.findByEmpresa_Id(empresaId, pageable);
         }
         List<Produto> produtos = produtosPage.getContent();
         if (busca != null && !busca.isEmpty()) {
@@ -41,7 +44,9 @@ public class ListarProdutosController {
                 .filter(p -> p.getNome().toLowerCase().contains(busca.toLowerCase()))
                 .collect(Collectors.toList());
         }
-        List<Categoria> categorias = categoriaRepository.findAll(PageRequest.of(0, 50)).getContent();
+        List<Categoria> categorias = categoriaRepository.findAll();
+
+
         model.addAttribute("produtos", produtos);
         model.addAttribute("produtosPage", produtosPage);
         model.addAttribute("categorias", categorias);
@@ -55,12 +60,13 @@ public class ListarProdutosController {
                                         @RequestParam(value = "busca", required = false) String busca,
                                         @RequestParam(value = "page", defaultValue = "0") int page,
                                         Model model) {
+        Long empresaId = SecurityUtils.getCurrentEmpresaId();
         Pageable pageable = PageRequest.of(page, 10);
         Page<Produto> produtosPage;
         if (cat != null) {
-            produtosPage = produtoRepository.findByCategoria_Id(cat, pageable);
+            produtosPage = produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
         } else {
-            produtosPage = produtoRepository.findAll(pageable);
+            produtosPage = produtoRepository.findByEmpresa_Id(empresaId, pageable);
         }
         List<Produto> produtos = produtosPage.getContent();
         if (busca != null && !busca.isEmpty()) {
@@ -68,7 +74,9 @@ public class ListarProdutosController {
                     .filter(p -> p.getNome().toLowerCase().contains(busca.toLowerCase()))
                     .collect(Collectors.toList());
         }
-        List<Categoria> categorias = categoriaRepository.findAll(PageRequest.of(0, 50)).getContent();
+        List<Categoria> categorias = categoriaRepository.findAll();
+
+
         model.addAttribute("produtos", produtos);
         model.addAttribute("produtosPage", produtosPage);
         model.addAttribute("categorias", categorias);

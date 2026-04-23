@@ -35,6 +35,11 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "estabelecimento_id"))
     private Set<Estabelecimento> estabelecimentos = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "usuario_permissoes", joinColumns = @JoinColumn(name = "usuario_id"))
+    @Column(name = "permissao")
+    private Set<String> permissoes = new HashSet<>();
+
     private int tentativasLogin = 0;
 
     private LocalDateTime bloqueadoAte;
@@ -42,6 +47,9 @@ public class User {
     private boolean ativo = true;
 
     // Getters e Setters
+    public Set<String> getPermissoes() { return permissoes; }
+    public void setPermissoes(Set<String> permissoes) { this.permissoes = permissoes; }
+
     public Empresa getEmpresa() { return empresa; }
     public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
 

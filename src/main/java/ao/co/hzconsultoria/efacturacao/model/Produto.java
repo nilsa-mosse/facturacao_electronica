@@ -3,6 +3,8 @@ package ao.co.hzconsultoria.efacturacao.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+
 
 @Entity
 public class Produto {
@@ -17,6 +19,7 @@ public class Produto {
     private String imagem;
     private String codigoBarra;
     @Lob
+    @Column(columnDefinition="LONGBLOB")
     private byte[] imagemBlob;
     private Double ivaPercentual;
     @ManyToOne
@@ -26,6 +29,13 @@ public class Produto {
     @ManyToOne
     @JoinColumn(name = "estado_id")
     private Estado estado;
+
+    private LocalDate dataFabrico;
+    private LocalDate dataExpiracao;
+    private boolean emPromocao = false;
+    private String unidadeMedida;
+
+
 
     @ManyToOne
     @JoinColumn(name = "empresa_id")
@@ -150,4 +160,38 @@ public class Produto {
     public void setEstoqueMinimo(Double estoqueMinimo) {
         this.estoqueMinimo = estoqueMinimo;
     }
+
+    public LocalDate getDataFabrico() {
+        return dataFabrico;
+    }
+
+    public void setDataFabrico(LocalDate dataFabrico) {
+        this.dataFabrico = dataFabrico;
+    }
+
+    public LocalDate getDataExpiracao() {
+        return dataExpiracao;
+    }
+
+    public void setDataExpiracao(LocalDate dataExpiracao) {
+        this.dataExpiracao = dataExpiracao;
+    }
+
+    public boolean isEmPromocao() {
+        return emPromocao;
+    }
+
+    public void setEmPromocao(boolean emPromocao) {
+        this.emPromocao = emPromocao;
+    }
+
+    public String getUnidadeMedida() {
+        return unidadeMedida;
+    }
+
+    public void setUnidadeMedida(String unidadeMedida) {
+        this.unidadeMedida = unidadeMedida;
+    }
+
+
 }

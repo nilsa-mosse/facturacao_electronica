@@ -16,6 +16,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     Produto findByCodigoBarraAndEmpresa_Id(String codigoBarra, Long empresaId);
     
     Page<Produto> findByCategoria_IdAndEmpresa_Id(Long categoriaId, Long empresaId, Pageable pageable);
+    List<Produto> findByCategoria_IdAndEmpresa_Id(Long categoriaId, Long empresaId);
     
     List<Produto> findByNomeContainingIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
     
@@ -23,4 +24,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Produto p WHERE p.empresa.id = :empresaId AND p.quantidadeEstoque <= p.estoqueMinimo")
     List<Produto> findProdutosComStockBaixo(Long empresaId);
-}
+
+    List<Produto> findByDataExpiracaoBeforeAndEmPromocaoFalse(java.time.LocalDate date);
+}

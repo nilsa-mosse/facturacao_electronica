@@ -71,35 +71,32 @@ public class GlobalControllerAdvice {
                 role = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getRole();
             }
             
-            // Inicializar todos como falso por padrão
-            model.addAttribute("modulo_DASHBOARD", false);
-            model.addAttribute("modulo_VENDAS", false);
-            model.addAttribute("modulo_STOCK", false);
-            model.addAttribute("modulo_ENTIDADES", false);
-            model.addAttribute("modulo_FACTURACAO", false);
-            model.addAttribute("modulo_FINANCEIRO", false);
-            model.addAttribute("modulo_ADMINISTRACAO", false);
+            // Injetar permissões de acesso granulares (RBAC)
+            boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
             
-            boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-            // SUPERADMIN tem acesso a tudo por padrão (Incluindo Painel Global e Administração)
-            if (isSuperAdmin) {
-                model.addAttribute("modulo_DASHBOARD", true);
-                model.addAttribute("modulo_VENDAS", true);
-                model.addAttribute("modulo_STOCK", true);
-                model.addAttribute("modulo_ENTIDADES", true);
-                model.addAttribute("modulo_FACTURACAO", true);
-                model.addAttribute("modulo_FINANCEIRO", true);
-                model.addAttribute("modulo_ADMINISTRACAO", true);
-            } 
-            // Para todos os outros (ADMIN, USER, OPERADOR), o acesso é determinado pela Tabela de Permissões
-            else {
-                Long userId = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getId();
-                java.util.List<ao.co.hzconsultoria.efacturacao.model.PermissaoModulo> permissoes = permissaoRepo.findByUsuario_Id(userId);
-                for (ao.co.hzconsultoria.efacturacao.model.PermissaoModulo p : permissoes) {
-                    model.addAttribute("modulo_" + p.getModulo(), p.isAtivo());
-                }
+            if (isSuperAdmin || isAdmin) {
+                // Admin e SuperAdmin têm acesso a tudo por padrão
+                ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
+                    model.addAttribute("modulo_" + modulo, true);
+                    itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), true));
+                });
+            } else if (auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
+                ao.co.hzconsultoria.efacturacao.security.CustomUserDetails userDetails = (ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal();
+                java.util.Set<String> perms = userDetails.getPermissions();
+                
+                ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
+                    boolean hasModulo = false;
+                    for (ao.co.hzconsultoria.efacturacao.config.ModuloItens.ItemDef item : itens) {
+                        String key = modulo + "_" + item.getChave();
+                        if (perms != null && perms.contains(key)) {
+                            model.addAttribute("modulo_" + key, true);
+                            hasModulo = true;
+                        }
+                    }
+                    if (hasModulo) {
+                        model.addAttribute("modulo_" + modulo, true);
+                    }
+                });
             }
         }
     }

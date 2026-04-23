@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- CSRF Tokens para AJAX -->
-  <meta name="_csrf" th:content="${_csrf?.token}"/>
-  <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+  <meta name="_csrf" th:content="${_csrf?.token}" />
+  <meta name="_csrf_header" th:content="${_csrf?.headerName}" />
   <title>Sistema de Facturação Eletrónica</title>
 
   <!-- jQuery -->
@@ -363,6 +363,36 @@
                   <a th:href="@{/configuracoes/geral}" class="nav-link">
                     <i class="fas fa-sliders-h nav-icon"></i>
                     <p>Parâmetros Avançados</p>
+                  </a>
+                </li>
+                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SERVIDOR}">
+                  <a th:href="@{/configuracoes/servidor}" class="nav-link">
+                    <i class="fas fa-server nav-icon"></i>
+                    <p>Servidor e Rede</p>
+                  </a>
+                </li>
+                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_EMAIL}">
+                  <a th:href="@{/configuracoes/email}" class="nav-link">
+                    <i class="fas fa-envelope-open-text nav-icon"></i>
+                    <p>Configuração de Email</p>
+                  </a>
+                </li>
+                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_BANCO_DADOS}">
+                  <a th:href="@{/configuracoes/banco-dados}" class="nav-link">
+                    <i class="fas fa-database nav-icon"></i>
+                    <p>Base de Dados</p>
+                  </a>
+                </li>
+                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_STORAGE}">
+                  <a th:href="@{/configuracoes/storage}" class="nav-link">
+                    <i class="fas fa-hdd nav-icon"></i>
+                    <p>Armazenamento (Storage)</p>
+                  </a>
+                </li>
+                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SEGURANCA}">
+                  <a th:href="@{/configuracoes/seguranca}" class="nav-link">
+                    <i class="fas fa-lock nav-icon"></i>
+                    <p>Segurança e Logs</p>
                   </a>
                 </li>
               </ul>

@@ -53,6 +53,7 @@ public class CustomUserDetails implements UserDetails {
     public String getNome() { return user.getNome(); }
     public String getRole() { return user.getRole(); }
     public Long getId() { return user.getId(); }
+    public java.util.Set<String> getPermissions() { return user.getPermissoes(); }
     public Long getEmpresaId() { 
         return (user.getEmpresa() != null) ? user.getEmpresa().getId() : null; 
     }

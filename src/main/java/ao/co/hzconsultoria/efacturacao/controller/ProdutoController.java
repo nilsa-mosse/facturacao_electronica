@@ -22,8 +22,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Controller
 public class ProdutoController {
@@ -36,18 +44,23 @@ public class ProdutoController {
     @Autowired
     private ImpostoRepository impostoRepository;
 
+    @Value("${app.upload.dir:./uploads/produtos/}")
+    private String uploadDir;
+
     @Autowired
     private EmpresaRepository empresaRepository;
 
     @Autowired
     private MessageSource messageSource;
 
-    @GetMapping("/cadastroProduto")
+    @GetMapping({"/cadastroProduto", "/produtos/novo"})
+
     public String cadastroProduto(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("produto", new Produto());
-        model.addAttribute("categorias", categoriaRepository.findByEmpresa_Id(empresaId));
+        model.addAttribute("categorias", categoriaRepository.findAll());
+
         model.addAttribute("impostos", impostoRepository.findAll());
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
         String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal() : "GERAL";
@@ -56,6 +69,7 @@ public class ProdutoController {
     }
 
     @PostMapping("/salvarProduto")
+    @Transactional
     public String salvarProduto(@RequestParam("nome") String nome,
             @RequestParam("descricao") String descricao,
             @RequestParam("preco") double preco,
@@ -64,7 +78,11 @@ public class ProdutoController {
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam(value = "imagem", required = false) MultipartFile imagem,
             @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
-            Model model) throws IOException {
+            @RequestParam(value = "dataFabrico", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFabrico,
+            @RequestParam(value = "dataExpiracao", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataExpiracao,
+            @RequestParam(value = "unidadeMedida", required = false) String unidadeMedida,
+            RedirectAttributes redirectAttributes) {
+
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = new Produto();
         produto.setNome(nome);
@@ -73,6 +91,11 @@ public class ProdutoController {
         produto.setQuantidadeEstoque(quantidadeEstoque);
         produto.setCodigoBarra(codigoBarra);
         produto.setIvaPercentual(ivaPercentual);
+        produto.setDataFabrico(dataFabrico);
+        produto.setDataExpiracao(dataExpiracao);
+        produto.setUnidadeMedida(unidadeMedida);
+
+
         
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
         produto.setEmpresa(empresa);
@@ -80,18 +103,28 @@ public class ProdutoController {
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
         
-        produtoRepository.save(produto);
-        if (imagem != null && !imagem.isEmpty()) {
-            produto.setImagemBlob(imagem.getBytes());
-            produto.setImagem("/produto/imagem/" + produto.getId());
+        try {
             produtoRepository.save(produto);
+            
+            if (imagem != null && !imagem.isEmpty()) {
+                String fileName = UUID.randomUUID().toString() + "_" + imagem.getOriginalFilename();
+                Path path = Paths.get(uploadDir + fileName);
+                Files.createDirectories(path.getParent());
+                Files.write(path, imagem.getBytes());
+                
+                produto.setImagem("/uploads/produtos/" + fileName);
+                produto.setImagemBlob(imagem.getBytes());
+                produtoRepository.save(produto);
+            }
+            
+            redirectAttributes.addFlashAttribute("mensagem", "Produto '" + produto.getNome() + "' cadastrado com sucesso!");
+            return "redirect:/produtos/novo";
+            
+        } catch (Exception e) {
+            System.err.println("Erro ao cadastrar produto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("erro", "Erro ao cadastrar produto: " + e.getMessage());
+            return "redirect:/produtos/novo";
         }
-        
-        model.addAttribute("mensagem", messageSource.getMessage("msg.produto.salvo", null, LocaleContextHolder.getLocale()));
-        model.addAttribute("categorias", categoriaRepository.findByEmpresa_Id(empresaId));
-        model.addAttribute("impostos", impostoRepository.findAll());
-        model.addAttribute("regimeFiscal", (empresa != null) ? empresa.getRegimeFiscal() : "Regime Geral");
-        return "cadastroProduto";
     }
 
     @GetMapping(value = "/produto/imagem/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -115,7 +148,8 @@ public class ProdutoController {
         }
 
         model.addAttribute("produto", produto);
-        model.addAttribute("categorias", categoriaRepository.findByEmpresa_Id(empresaId));
+        model.addAttribute("categorias", categoriaRepository.findAll());
+
         model.addAttribute("impostos", impostoRepository.findAll());
         
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
@@ -134,7 +168,11 @@ public class ProdutoController {
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam(value = "imagem", required = false) MultipartFile imagem,
             @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
+            @RequestParam(value = "dataFabrico", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFabrico,
+            @RequestParam(value = "dataExpiracao", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataExpiracao,
+            @RequestParam(value = "unidadeMedida", required = false) String unidadeMedida,
             RedirectAttributes redirectAttributes) throws IOException {
+
 
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id)
@@ -151,19 +189,37 @@ public class ProdutoController {
         produto.setQuantidadeEstoque(quantidadeEstoque);
         produto.setCodigoBarra(codigoBarra);
         produto.setIvaPercentual(ivaPercentual);
+        produto.setDataFabrico(dataFabrico);
+        produto.setDataExpiracao(dataExpiracao);
+        produto.setUnidadeMedida(unidadeMedida);
+
 
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
 
         if (imagem != null && !imagem.isEmpty()) {
-            produto.setImagemBlob(imagem.getBytes());
-            produto.setImagem("/produto/imagem/" + produto.getId());
+            try {
+                String fileName = UUID.randomUUID().toString() + "_" + imagem.getOriginalFilename();
+                Path path = Paths.get(uploadDir + fileName);
+                Files.createDirectories(path.getParent());
+                Files.write(path, imagem.getBytes());
+                
+                produto.setImagem("/uploads/produtos/" + fileName);
+                produto.setImagemBlob(imagem.getBytes());
+                System.out.println("====== IMAGEM EDITADA NO DISCO: " + path.toAbsolutePath() + " ======");
+            } catch (IOException e) {
+                System.err.println("Erro ao editar imagem no disco: " + e.getMessage());
+            }
         }
 
-        produtoRepository.save(produto);
+        try {
+            produtoRepository.save(produto);
+            redirectAttributes.addFlashAttribute("mensagem", "Produto '" + produto.getNome() + "' atualizado com sucesso!");
+        } catch (Exception e) {
+            System.err.println("Erro ao salvar produto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("erro", "Erro ao atualizar produto: " + e.getMessage());
+        }
 
-        redirectAttributes.addFlashAttribute("mensagem",
-                messageSource.getMessage("msg.produto.atualizado", null, LocaleContextHolder.getLocale()));
         return "redirect:/produtos/listar";
     }
 
