@@ -21,6 +21,7 @@ import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.service.FaturaService;
 import ao.co.hzconsultoria.efacturacao.service.GuiaRemessaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
+import ao.co.hzconsultoria.efacturacao.service.ProdutoService;
 import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa; 
 
 
@@ -45,10 +46,14 @@ public class CompraController {
     @Autowired
     private ClienteRepository clienteRepository;
 
+    @Autowired
+    private ProdutoService produtoService;
+
     @GetMapping("/pos")
     public String abrirPDV(Model model) {
     	 Pageable pageable = PageRequest.of(0, 60);
         List<Produto> produtos = produtoRepository.findAll(pageable).getContent();
+        
         model.addAttribute("produtos", produtos);
         model.addAttribute("categorias", categoriaRepository.findAll());
         // Passa lista de clientes para o modal de identificacao

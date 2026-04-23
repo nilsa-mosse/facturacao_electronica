@@ -290,13 +290,12 @@
             <table class="table custom-table table-hover mb-0">
               <thead>
                 <tr>
-                  <th>Artigo</th>
-                  <th>Categoria</th>
-                  <th>SKU / Código</th>
-                  <th>Preço Base</th>
-                  <th>Stock</th>
-                  <th>Estado</th>
-                  <th class="text-end">Ações</th>
+                  <th style="width: auto;">Nome do Artigo</th>
+                  <th class="text-center" style="width: 15%;">Expiração</th>
+                  <th class="text-center" style="width: 15%;">Preço Unitário</th>
+                  <th class="text-center" style="width: 10%;">Stock</th>
+                  <th class="text-center" style="width: 10%;">Estado</th>
+                  <th class="text-end" style="width: 1%; white-space: nowrap;">Ações</th>
                 </tr>
               </thead>
               <tbody id="tabela-produtos">
@@ -316,33 +315,40 @@
                         </div>
                       </div>
                     </div>
+                            <td class="text-center">
+                    <span th:if="${produto.dataExpiracao != null}" 
+                          class="badge rounded-pill fw-700" 
+                          th:classappend="${produto.pertoDeExpirar ? 'bg-danger-soft text-danger' : 'bg-light text-muted'}"
+                          th:text="${#temporals.format(produto.dataExpiracao, 'dd/MM/yyyy')}"></span>
+                    <span th:if="${produto.dataExpiracao == null}" class="text-muted small">N/D</span>
                   </td>
-                  <td>
-                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill fw-700" 
-                          th:text="${produto.categoria != null ? produto.categoria.nome : 'Geral'}"></span>
-                  </td>
-                  <td class="font-monospace text-muted" th:text="${produto.codigoBarra}">-</td>
-                  <td>
+                  <td class="text-center">
                     <div class="fw-800 text-primary" th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00</div>
                   </td>
-                  <td>
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="progress flex-grow-1" style="height: 6px; width: 60px; border-radius: 10px;">
+                  <td class="text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                      <div class="progress" style="height: 6px; width: 40px; border-radius: 10px;">
                         <div class="progress-bar" role="progressbar" 
                              th:style="'width: ' + (${produto.quantidadeEstoque != null ? (produto.quantidadeEstoque > 100 ? 100 : produto.quantidadeEstoque) : 0}) + '%'"
                              th:classappend="${produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5 ? 'bg-danger' : 'bg-success'}"></div>
                       </div>
                       <span class="fw-700" th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '0'}">0</span>
-
                     </div>
                   </td>
-                  <td>
+                  <td class="text-center">
                     <span class="badge-premium" th:classappend="${!produto.disponivel} ? 'bg-danger-soft text-danger' : 'bg-success-soft text-success'">
                       <i class="fas" th:classappend="${!produto.disponivel} ? 'fa-times-circle' : 'fa-check-circle'"></i>
                       <span th:text="${produto.estado != null ? produto.estado.nome : 'DISPONÍVEL'}"></span>
                     </span>
                   </td>
-                  <td class="text-end">
+         </td>
+                  <td class="text-end" style="white-space: nowrap;">
+                    <button th:if="${produto.pertoDeExpirar && !produto.emPromocao}" 
+                            class="btn-action bg-warning-soft text-warning me-2" 
+                            th:onclick="|promoverProduto('${produto.id}')|" 
+                            title="Colocar em Promoção">
+                      <i class="fas fa-fire"></i>
+                    </button>
                     <button class="btn-action btn-edit me-2" data-bs-toggle="modal" th:data-bs-target="${'#detalhesModal_' + produto.id}">
                       <i class="fas fa-edit"></i>
                     </button>
@@ -425,6 +431,24 @@
   </div>
 
   <script th:inline="javascript">
+    function promoverProduto(id) {
+      const novoPreco = prompt("Defina o novo preço promocional (em Kz):");
+      if (novoPreco === null) return; // Cancelado
+      
+      if (novoPreco && !isNaN(novoPreco) && parseFloat(novoPreco) > 0) {
+        fetch('/api/produtos/promover/' + id + '?novoPreco=' + novoPreco)
+          .then(response => {
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              alert("Erro ao promover produto. Verifique se o preço é válido.");
+            }
+          });
+      } else {
+        alert("Por favor, insira um preço válido maior que zero.");
+      }
+    }
+
     function apagarProduto(id) {
       if (confirm([[#{msg.confirmar_excluir}]])) {
         fetch('/produtos/apagar/' + id)

@@ -107,9 +107,6 @@ public class ProdutoController {
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
         
-        // Aplica promoção automática se estiver perto de expirar
-        produtoService.aplicarRegraPromocao(produto);
-        
         try {
             produtoRepository.save(produto);
             
@@ -204,9 +201,6 @@ public class ProdutoController {
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
 
-        // Aplica promoção automática se estiver perto de expirar
-        produtoService.aplicarRegraPromocao(produto);
-
         if (imagem != null && !imagem.isEmpty()) {
             try {
                 String fileName = UUID.randomUUID().toString() + "_" + imagem.getOriginalFilename();
@@ -254,5 +248,21 @@ public class ProdutoController {
             return ResponseEntity.ok(new java.util.ArrayList<>());
         }
         return ResponseEntity.ok(produtoRepository.findByNomeContainingIgnoreCaseAndEmpresa_Id(nome, empresaId));
+    }
+
+    @GetMapping("/api/produtos/promover/{id}")
+    @Transactional
+    public ResponseEntity<?> promoverProduto(@PathVariable Long id, @RequestParam("novoPreco") Double novoPreco) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Produto produto = produtoRepository.findById(id).orElse(null);
+        
+        if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId)) {
+            produto.setPrecoOriginal(produto.getPreco());
+            produto.setPreco(novoPreco);
+            produto.setEmPromocao(true);
+            produtoRepository.save(produto);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(403).build();
     }
 }

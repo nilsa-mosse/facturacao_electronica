@@ -34,6 +34,7 @@ public class Produto {
     private LocalDate dataExpiracao;
     private boolean emPromocao = false;
     private String unidadeMedida;
+    private Double precoOriginal;
 
 
 
@@ -193,5 +194,18 @@ public class Produto {
         this.unidadeMedida = unidadeMedida;
     }
 
+    public Double getPrecoOriginal() {
+        return precoOriginal;
+    }
+
+    public void setPrecoOriginal(Double precoOriginal) {
+        this.precoOriginal = precoOriginal;
+    }
+
+    @Transient
+    public boolean isPertoDeExpirar() {
+        if (dataExpiracao == null) return false;
+        return dataExpiracao.isBefore(java.time.LocalDate.now().plusMonths(1));
+    }
 
 }

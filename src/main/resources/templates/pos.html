@@ -475,7 +475,15 @@
     z-index: 5;
     backdrop-filter: grayscale(1);
   }
-</style>
+    @keyframes pulse-gold {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
+    .animate-pulse {
+      animation: pulse-gold 2s infinite;
+    }
+  </style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
   <div class="wrapper">
@@ -525,6 +533,12 @@
                     <div class="btn-quick-add-float" th:if="${produto.disponivel}">
                       <i class="fas fa-plus"></i>
                     </div>
+                    <!-- Badge de Promoção -->
+                    <div th:if="${produto.emPromocao}" class="position-absolute top-0 start-0 m-2">
+                      <span class="badge rounded-pill bg-warning text-dark shadow-sm fw-bold animate-pulse">
+                        <i class="fas fa-fire me-1"></i> PROMO
+                      </span>
+                    </div>
                   </div>
 
                   <div class="product-info">
@@ -534,6 +548,7 @@
                         <span th:text="${produto.preco}">0</span>
                       </div>
                       <span th:if="${!produto.disponivel}" class="badge bg-danger">ESGOTADO</span>
+                      <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i class="fas fa-percent me-1"></i> PROMO</span>
                       <span
                         th:if="${produto.disponivel && (produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5)}"
                         class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> BAIXO</span>
@@ -559,6 +574,7 @@
             <div class="d-flex gap-2 align-items-center">
               <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold" onclick="abrirModalVendasSuspensas()" title="Recuperar Vendas Suspensas">
                 <i class="fas fa-history me-1"></i> <span style="font-size: 0.7rem;">SUSPENSAS</span>
+                <span id="suspendedCountBadge" class="badge bg-warning text-dark rounded-pill ms-1" style="font-size: 0.6rem; display: none;">0</span>
               </button>
               <span id="cartCountBadge" class="badge bg-primary rounded-pill">0 Itens</span>
             </div>
@@ -1113,11 +1129,13 @@
         removeItem(index);
       }
       renderCart();
+      atualizarContadorSuspensas();
     }
 
     function removeItem(index) {
       cart.splice(index, 1);
       renderCart();
+      atualizarContadorSuspensas();
     }
 
     // Filtrar linhas da tabela do modal por texto (client-side)
@@ -1895,6 +1913,18 @@
 
       let vendasSuspensasCache = [];
 
+      function atualizarContadorSuspensas() {
+        $.get('/api/vendas-suspensas', function (vendas) {
+          const count = vendas.length;
+          const badge = $('#suspendedCountBadge');
+          if (count > 0) {
+            badge.text(count).show();
+          } else {
+            badge.hide();
+          }
+        });
+      }
+
       function suspenderVenda() {
         if (cart.length === 0) {
           alert("O carrinho está vazio.");
@@ -1915,6 +1945,7 @@
             alert("Venda suspensa com sucesso!");
             cart = [];
             renderCart();
+            atualizarContadorSuspensas();
             var modal = bootstrap.Modal.getInstance(document.getElementById('modalCheckout'));
             if (modal) modal.hide();
           },
@@ -1986,6 +2017,7 @@
           url: '/api/vendas-suspensas/' + id,
           method: 'DELETE',
           success: function () {
+            atualizarContadorSuspensas();
             if (!quiet) abrirModalVendasSuspensas();
           }
         });
