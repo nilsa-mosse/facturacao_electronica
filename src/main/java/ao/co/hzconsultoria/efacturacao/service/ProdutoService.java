@@ -27,14 +27,21 @@ public class ProdutoService {
         List<Produto> produtosParaPromocao = produtoRepository.findByDataExpiracaoBeforeAndEmPromocaoFalse(limite);
         
         for (Produto produto : produtosParaPromocao) {
-            produto.setEmPromocao(true);
-            // Aqui poderíamos aplicar uma lógica de desconto se necessário
-            // Por exemplo: produto.setPreco(produto.getPreco() * 0.8);
+            aplicarRegraPromocao(produto);
         }
         
         if (!produtosParaPromocao.isEmpty()) {
             produtoRepository.saveAll(produtosParaPromocao);
-            System.out.println("Automated Promotion: " + produtosParaPromocao.size() + " produtos colocados em promoção devido à proximidade da expiração.");
+            System.out.println("Automated Promotion: " + produtosParaPromocao.size() + " produtos colocados em promoção.");
+        }
+    }
+
+    public void aplicarRegraPromocao(Produto produto) {
+        if (produto.getDataExpiracao() != null) {
+            LocalDate limite = LocalDate.now().plusMonths(1);
+            if (produto.getDataExpiracao().isBefore(limite)) {
+                produto.setEmPromocao(true);
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import ao.co.hzconsultoria.efacturacao.repository.ImpostoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
+import ao.co.hzconsultoria.efacturacao.service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -52,6 +53,9 @@ public class ProdutoController {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private ProdutoService produtoService;
 
     @GetMapping({"/cadastroProduto", "/produtos/novo"})
 
@@ -102,6 +106,9 @@ public class ProdutoController {
 
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
+        
+        // Aplica promoção automática se estiver perto de expirar
+        produtoService.aplicarRegraPromocao(produto);
         
         try {
             produtoRepository.save(produto);
@@ -196,6 +203,9 @@ public class ProdutoController {
 
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
+
+        // Aplica promoção automática se estiver perto de expirar
+        produtoService.aplicarRegraPromocao(produto);
 
         if (imagem != null && !imagem.isEmpty()) {
             try {

@@ -556,7 +556,12 @@
           <div class="cart-header d-flex justify-content-between align-items-center">
             <h4 class="fw-bold mb-0"><i class="fas fa-shopping-basket me-2 text-primary"></i><span
                 th:text="#{pos.carrinho.titulo}">Carrinho</span></h4>
-            <span id="cartCountBadge" class="badge bg-primary rounded-pill">0 Itens</span>
+            <div class="d-flex gap-2 align-items-center">
+              <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold" onclick="abrirModalVendasSuspensas()" title="Recuperar Vendas Suspensas">
+                <i class="fas fa-history me-1"></i> <span style="font-size: 0.7rem;">SUSPENSAS</span>
+              </button>
+              <span id="cartCountBadge" class="badge bg-primary rounded-pill">0 Itens</span>
+            </div>
           </div>
 
           <div class="cart-items-container" id="cartItemsList">
@@ -837,6 +842,9 @@
           </button>
           <button type="button" class="btn btn-ghost-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">
             <i class="fas fa-shopping-cart me-2"></i> Alterar
+          </button>
+          <button type="button" class="btn btn-outline-warning rounded-pill px-4 fw-bold" style="border-width: 2px;" onclick="suspenderVenda()">
+            <i class="fas fa-pause-circle me-2"></i> SUSPENDER
           </button>
 
           <div class="ms-auto">
@@ -1885,6 +1893,109 @@
       window.confirmarEmissaoGuia = confirmarEmissaoGuia;
       window.abrirModalTransporte = abrirModalTransporte;
 
+      let vendasSuspensasCache = [];
+
+      function suspenderVenda() {
+        if (cart.length === 0) {
+          alert("O carrinho está vazio.");
+          return;
+        }
+
+        const payload = {
+          clienteNome: obterNomeCliente(),
+          itensJson: JSON.stringify(cart)
+        };
+
+        $.ajax({
+          url: '/api/vendas-suspensas',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function () {
+            alert("Venda suspensa com sucesso!");
+            cart = [];
+            renderCart();
+            var modal = bootstrap.Modal.getInstance(document.getElementById('modalCheckout'));
+            if (modal) modal.hide();
+          },
+          error: function (xhr) {
+            alert("Erro ao suspender venda: " + (xhr.responseText || "Erro de rede/servidor"));
+          }
+        });
+      }
+
+      function abrirModalVendasSuspensas() {
+        $.get('/api/vendas-suspensas', function (vendas) {
+          vendasSuspensasCache = vendas;
+          const list = $('#listaVendasSuspensas');
+          list.empty();
+          if (vendas.length === 0) {
+            list.append('<div class="text-center p-4 text-muted">Nenhuma venda suspensa.</div>');
+          } else {
+            vendas.forEach(v => {
+              const data = new Date(v.dataHora).toLocaleString();
+              const row = `
+                <div class="card mb-2 border-0 shadow-sm rounded-3">
+                  <div class="card-body d-flex justify-content-between align-items-center p-3">
+                    <div>
+                      <div class="fw-bold text-dark">${v.clienteNome}</div>
+                      <small class="text-muted"><i class="far fa-clock me-1"></i> ${data}</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-sm btn-primary rounded-pill" onclick="restaurarVendaSuspensa(${v.id})">
+                        <i class="fas fa-undo me-1"></i> Restaurar
+                      </button>
+                      <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="eliminarVendaSuspensa(${v.id})">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>`;
+              list.append(row);
+            });
+          }
+          new bootstrap.Modal(document.getElementById('modalVendasSuspensas')).show();
+        });
+      }
+
+      function restaurarVendaSuspensa(id) {
+        const venda = vendasSuspensasCache.find(v => v.id === id);
+        if (!venda) return;
+
+        if (cart.length > 0) {
+          if (!confirm("O carrinho actual tem itens. Deseja substituí-los pela venda suspensa?")) {
+            return;
+          }
+        }
+        
+        try {
+          cart = JSON.parse(venda.itensJson);
+          renderCart();
+          eliminarVendaSuspensa(id, true);
+          var modal = bootstrap.Modal.getInstance(document.getElementById('modalVendasSuspensas'));
+          if (modal) modal.hide();
+        } catch (e) {
+          console.error("Erro ao processar itens da venda suspensa", e);
+          alert("Erro ao restaurar itens.");
+        }
+      }
+
+      function eliminarVendaSuspensa(id, quiet = false) {
+        if (!quiet && !confirm("Deseja eliminar esta venda suspensa?")) return;
+        $.ajax({
+          url: '/api/vendas-suspensas/' + id,
+          method: 'DELETE',
+          success: function () {
+            if (!quiet) abrirModalVendasSuspensas();
+          }
+        });
+      }
+
+      window.suspenderVenda = suspenderVenda;
+      window.abrirModalVendasSuspensas = abrirModalVendasSuspensas;
+      window.restaurarVendaSuspensa = restaurarVendaSuspensa;
+      window.eliminarVendaSuspensa = eliminarVendaSuspensa;
+
       $('#finalizarCompra').click(function () {
         processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#finalizarCompra');
       });
@@ -1894,6 +2005,26 @@
       });
     });
   </script>
+  <!-- MODAL VENDAS SUSPENSAS -->
+  <div class="modal fade" id="modalVendasSuspensas" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-header bg-warning text-dark border-0">
+          <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i> Vendas Suspensas</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4" style="background: #f8fafc; max-height: 60vh; overflow-y: auto;">
+          <div id="listaVendasSuspensas">
+            <!-- Gerado via JS -->
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>

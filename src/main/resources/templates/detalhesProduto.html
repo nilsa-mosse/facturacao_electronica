@@ -228,6 +228,16 @@
                             <label class="form-label">Stock Actual</label>
                             <input type="number" name="quantidadeEstoque" class="form-control input-premium" th:value="${produto.quantidadeEstoque}" min="0" required>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Unidade de Medida</label>
+                            <select name="unidadeMedida" class="form-select input-premium">
+                                <option value="Unidade (UN)" th:selected="${produto.unidadeMedida == 'Unidade (UN)'}">Unidade (UN)</option>
+                                <option value="Peça (PÇ)" th:selected="${produto.unidadeMedida == 'Peça (PÇ)'}">Peça (PÇ)</option>
+                                <option value="Item" th:selected="${produto.unidadeMedida == 'Item'}">Item</option>
+                                <option value="Caixa" th:selected="${produto.unidadeMedida == 'Caixa'}">Caixa</option>
+                                <option value="Pacote" th:selected="${produto.unidadeMedida == 'Pacote'}">Pacote</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Datas Section -->

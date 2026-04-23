@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .ignoringAntMatchers("/api/compras/proforma")
                 .ignoringAntMatchers("/api/compras/guia")
                 .ignoringAntMatchers("/finalizarVenda")
+                .ignoringAntMatchers("/api/vendas-suspensas/**")
             .and()
             .formLogin()
                 .loginPage("/login")
