@@ -304,11 +304,17 @@
                     <div class="input-group-premium">
                       <i class="fas fa-boxes"></i>
                       <select name="unidadeMedida" class="form-select input-premium">
-                        <option value="Unidade (UN)" th:selected="${produto != null and produto.unidadeMedida == 'Unidade (UN)'}">Unidade (UN)</option>
-                        <option value="Peça (PÇ)" th:selected="${produto != null and produto.unidadeMedida == 'Peça (PÇ)'}">Peça (PÇ)</option>
-                        <option value="Item" th:selected="${produto != null and produto.unidadeMedida == 'Item'}">Item</option>
-                        <option value="Caixa" th:selected="${produto != null and produto.unidadeMedida == 'Caixa'}">Caixa</option>
-                        <option value="Pacote" th:selected="${produto != null and produto.unidadeMedida == 'Pacote'}">Pacote</option>
+                        <option value="Unidade (UN)"
+                          th:selected="${produto != null and produto.unidadeMedida == 'Unidade (UN)'}">Unidade (UN)
+                        </option>
+                        <option value="Peça (PÇ)"
+                          th:selected="${produto != null and produto.unidadeMedida == 'Peça (PÇ)'}">Peça (PÇ)</option>
+                        <option value="Item" th:selected="${produto != null and produto.unidadeMedida == 'Item'}">Item
+                        </option>
+                        <option value="Caixa" th:selected="${produto != null and produto.unidadeMedida == 'Caixa'}">
+                          Caixa</option>
+                        <option value="Pacote" th:selected="${produto != null and produto.unidadeMedida == 'Pacote'}">
+                          Pacote</option>
                       </select>
                     </div>
                   </div>
@@ -345,21 +351,41 @@
                       <i class="fas fa-percent"></i>
                       <select name="ivaPercentual" class="form-select input-premium">
                         <option value="0">Isento / Não Aplicável</option>
+                        <!-- Regime Geral -->
                         <th:block th:if="${regimeFiscal == 'GERAL'}">
                           <option th:each="imp : ${impostos}"
                             th:if="${imp.percentagem != null and (imp.percentagem.floatValue() == 14.0 or imp.percentagem.floatValue() == 1.0)}"
                             th:value="${imp.percentagem}" th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'">
                           </option>
                         </th:block>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <!-- Regime Simplificado -->
                         <th:block th:if="${regimeFiscal == 'SIMPLIFICADO'}">
                           <option th:each="imp : ${impostos}"
                             th:if="${imp.percentagem != null and (imp.percentagem.floatValue() == 7.0 or imp.percentagem.floatValue() == 1.0)}"
                             th:value="${imp.percentagem}" th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'">
                           </option>
                         </th:block>
-                        <th:block th:if="${regimeFiscal == 'EXCLUSAO'}">
+
+                        <!-- Regime de Exclusão -->
+                        <th:block th:if="${regimeFiscal == 'EXCLUSAO' or regimeFiscal == 'Regime de Exclusão'}">
                           <option th:each="imp : ${impostos}"
-                            th:if="${imp.percentagem != null and (imp.percentagem.floatValue() == 1.0)}"
+                            th:if="${imp.percentagem != null and (imp.percentagem.doubleValue() == 1.0)}"
                             th:value="${imp.percentagem}" th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'">
                           </option>
                         </th:block>

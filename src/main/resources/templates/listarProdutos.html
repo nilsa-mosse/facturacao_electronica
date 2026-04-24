@@ -315,7 +315,8 @@
                         </div>
                       </div>
                     </div>
-                            <td class="text-center">
+                  </td>
+                  <td class="text-center">
                     <span th:if="${produto.dataExpiracao != null}" 
                           class="badge rounded-pill fw-700" 
                           th:classappend="${produto.pertoDeExpirar ? 'bg-danger-soft text-danger' : 'bg-light text-muted'}"
@@ -341,7 +342,6 @@
                       <span th:text="${produto.estado != null ? produto.estado.nome : 'DISPONÍVEL'}"></span>
                     </span>
                   </td>
-         </td>
                   <td class="text-end" style="white-space: nowrap;">
                     <button th:if="${produto.pertoDeExpirar && !produto.emPromocao}" 
                             class="btn-action bg-warning-soft text-warning me-2" 
@@ -404,6 +404,41 @@
                   <div class="col-md-6">
                     <label class="form-label fw-700">Código SKU / EAN</label>
                     <input type="text" name="codigoBarra" class="form-control search-input" th:value="${produto.codigoBarra}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-700">Taxa de IVA (%) <span class="badge bg-light text-muted ms-1" th:text="${regimeFiscal}"></span></label>
+                    <select name="ivaPercentual" class="form-select search-input">
+                        <option value="0" th:selected="${produto.ivaPercentual == 0}">Isento / Não Aplicável</option>
+                        <!-- Regime Geral -->
+                        <th:block th:if="${regimeFiscal == 'GERAL' or regimeFiscal == 'Regime Geral'}">
+                          <option th:each="imp : ${impostos}"
+                            th:if="${imp.percentagem != null and (imp.percentagem.doubleValue() == 14.0 or imp.percentagem.doubleValue() == 1.0)}"
+                            th:value="${imp.percentagem}" 
+                            th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'"
+                            th:selected="${produto.ivaPercentual != null and produto.ivaPercentual.doubleValue() == imp.percentagem.doubleValue()}">
+                          </option>
+                        </th:block>
+
+                        <!-- Regime Simplificado -->
+                        <th:block th:if="${regimeFiscal == 'SIMPLIFICADO' or regimeFiscal == 'Regime Simplificado'}">
+                          <option th:each="imp : ${impostos}"
+                            th:if="${imp.percentagem != null and (imp.percentagem.doubleValue() == 7.0 or imp.percentagem.doubleValue() == 1.0)}"
+                            th:value="${imp.percentagem}" 
+                            th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'"
+                            th:selected="${produto.ivaPercentual != null and produto.ivaPercentual.doubleValue() == imp.percentagem.doubleValue()}">
+                          </option>
+                        </th:block>
+
+                        <!-- Regime de Exclusão -->
+                        <th:block th:if="${regimeFiscal == 'EXCLUSAO' or regimeFiscal == 'Regime de Exclusão'}">
+                          <option th:each="imp : ${impostos}"
+                            th:if="${imp.percentagem != null and (imp.percentagem.doubleValue() == 1.0)}"
+                            th:value="${imp.percentagem}" 
+                            th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'"
+                            th:selected="${produto.ivaPercentual != null and produto.ivaPercentual.doubleValue() == imp.percentagem.doubleValue()}">
+                          </option>
+                        </th:block>
+                    </select>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-700">Imagem do Artigo</label>

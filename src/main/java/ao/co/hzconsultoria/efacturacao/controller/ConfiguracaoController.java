@@ -476,8 +476,9 @@ public class ConfiguracaoController {
                     "Para empresas com facturação inferior a 7.5 Milhões de Kz.", "fas fa-ban"));
         }
 
-        List<Empresa> empresas = empresaRepository.findAll();
-        model.addAttribute("empresa", empresas.isEmpty() ? new Empresa() : empresas.get(0));
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(new Empresa()) : new Empresa();
+        model.addAttribute("empresa", empresa);
         model.addAttribute("regimes", regimeFiscalRepository.findAll());
         model.addAttribute("novoRegime", new RegimeFiscal());
         return "configuracoes/fiscais/regime_fiscal";
@@ -485,12 +486,18 @@ public class ConfiguracaoController {
 
     @PostMapping("/fiscais/regime-fiscal/salvar")
     public String salvarRegimeFiscal(@RequestParam String regime, RedirectAttributes redirectAttributes) {
-        List<Empresa> empresas = empresaRepository.findAll();
-        if (!empresas.isEmpty()) {
-            Empresa e = empresas.get(0);
-            e.setRegimeFiscal(regime);
-            empresaRepository.save(e);
-            redirectAttributes.addFlashAttribute("mensagem", "Regime Fiscal actualizado com sucesso!");
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            Empresa e = empresaRepository.findById(empresaId).orElse(null);
+            if (e != null) {
+                e.setRegimeFiscal(regime);
+                empresaRepository.save(e);
+                redirectAttributes.addFlashAttribute("mensagem", "Regime Fiscal actualizado com sucesso!");
+            } else {
+                redirectAttributes.addFlashAttribute("erro", "Empresa não encontrada.");
+            }
+        } else {
+            redirectAttributes.addFlashAttribute("erro", "Não foi possível identificar a empresa do utilizador.");
         }
         return "redirect:/configuracoes/fiscais/regime-fiscal";
     }

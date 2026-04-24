@@ -1,9 +1,13 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
-import ao.co.hzconsultoria.efacturacao.model.Categoria;
-import ao.co.hzconsultoria.efacturacao.model.Produto;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ImpostoRepository;
+import ao.co.hzconsultoria.efacturacao.model.Categoria;
+import ao.co.hzconsultoria.efacturacao.model.Produto;
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
+import ao.co.hzconsultoria.efacturacao.model.Imposto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +28,10 @@ public class ListarProdutosController {
     private ProdutoRepository produtoRepository;
     @Autowired
     private CategoriaRepository categoriaRepository;
+    @Autowired
+    private EmpresaRepository empresaRepository;
+    @Autowired
+    private ImpostoRepository impostoRepository;
 
     @GetMapping("/produtos/listar")
     public String listarProdutos(@RequestParam(value = "cat", required = false) Long cat,
@@ -52,6 +60,16 @@ public class ListarProdutosController {
         model.addAttribute("categorias", categorias);
         model.addAttribute("categoriaSelecionada", cat);
         model.addAttribute("busca", busca);
+
+        String regimeFiscal = "GERAL";
+        if (empresaId != null) {
+            Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+            if (empresa != null && empresa.getRegimeFiscal() != null) {
+                regimeFiscal = empresa.getRegimeFiscal();
+            }
+        }
+        model.addAttribute("regimeFiscal", regimeFiscal);
+        model.addAttribute("impostos", impostoRepository.findAll());
         return "listarProdutos";
     }
 

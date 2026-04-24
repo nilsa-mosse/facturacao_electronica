@@ -33,7 +33,6 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Controller
 public class ProdutoController {
     @Autowired
@@ -57,7 +56,7 @@ public class ProdutoController {
     @Autowired
     private ProdutoService produtoService;
 
-    @GetMapping({"/cadastroProduto", "/produtos/novo"})
+    @GetMapping({ "/cadastroProduto", "/produtos/novo" })
 
     public String cadastroProduto(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
@@ -67,7 +66,11 @@ public class ProdutoController {
 
         model.addAttribute("impostos", impostoRepository.findAll());
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
-        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal() : "GERAL";
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
+                : "GERAL";
+
+        System.out.println("REGIME FISCAL: " + regimeFiscal);
+
         model.addAttribute("regimeFiscal", regimeFiscal);
         return "cadastroProduto";
     }
@@ -99,31 +102,30 @@ public class ProdutoController {
         produto.setDataExpiracao(dataExpiracao);
         produto.setUnidadeMedida(unidadeMedida);
 
-
-        
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
         produto.setEmpresa(empresa);
 
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
-        
+
         try {
             produtoRepository.save(produto);
-            
+
             if (imagem != null && !imagem.isEmpty()) {
                 String fileName = UUID.randomUUID().toString() + "_" + imagem.getOriginalFilename();
                 Path path = Paths.get(uploadDir + fileName);
                 Files.createDirectories(path.getParent());
                 Files.write(path, imagem.getBytes());
-                
+
                 produto.setImagem("/uploads/produtos/" + fileName);
                 produto.setImagemBlob(imagem.getBytes());
                 produtoRepository.save(produto);
             }
-            
-            redirectAttributes.addFlashAttribute("mensagem", "Produto '" + produto.getNome() + "' cadastrado com sucesso!");
+
+            redirectAttributes.addFlashAttribute("mensagem",
+                    "Produto '" + produto.getNome() + "' cadastrado com sucesso!");
             return "redirect:/produtos/novo";
-            
+
         } catch (Exception e) {
             System.err.println("Erro ao cadastrar produto: " + e.getMessage());
             redirectAttributes.addFlashAttribute("erro", "Erro ao cadastrar produto: " + e.getMessage());
@@ -135,7 +137,8 @@ public class ProdutoController {
     public ResponseEntity<byte[]> getImagem(@PathVariable Long id) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id).orElse(null);
-        if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId) && produto.getImagemBlob() != null) {
+        if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId)
+                && produto.getImagemBlob() != null) {
             return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(produto.getImagemBlob());
         }
         return ResponseEntity.notFound().build();
@@ -145,7 +148,7 @@ public class ProdutoController {
     public String detalhesProduto(@PathVariable Long id, Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id).orElse(new Produto());
-        
+
         // Segurança: verificar se o produto pertence à empresa
         if (produto.getEmpresa() != null && !produto.getEmpresa().getId().equals(empresaId)) {
             return "redirect:/produtos/listar";
@@ -155,9 +158,13 @@ public class ProdutoController {
         model.addAttribute("categorias", categoriaRepository.findAll());
 
         model.addAttribute("impostos", impostoRepository.findAll());
-        
+
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
-        model.addAttribute("regimeFiscal", (empresa != null) ? empresa.getRegimeFiscal() : "Regime Geral");
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
+                : "GERAL";
+
+        System.out.println("DETALHES DO PRODUTO: " + regimeFiscal);
+        model.addAttribute("regimeFiscal", regimeFiscal);
         return "detalhesProduto";
     }
 
@@ -176,7 +183,6 @@ public class ProdutoController {
             @RequestParam(value = "dataExpiracao", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataExpiracao,
             @RequestParam(value = "unidadeMedida", required = false) String unidadeMedida,
             RedirectAttributes redirectAttributes) throws IOException {
-
 
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id)
@@ -197,7 +203,6 @@ public class ProdutoController {
         produto.setDataExpiracao(dataExpiracao);
         produto.setUnidadeMedida(unidadeMedida);
 
-
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);
 
@@ -207,7 +212,7 @@ public class ProdutoController {
                 Path path = Paths.get(uploadDir + fileName);
                 Files.createDirectories(path.getParent());
                 Files.write(path, imagem.getBytes());
-                
+
                 produto.setImagem("/uploads/produtos/" + fileName);
                 produto.setImagemBlob(imagem.getBytes());
                 System.out.println("====== IMAGEM EDITADA NO DISCO: " + path.toAbsolutePath() + " ======");
@@ -218,7 +223,8 @@ public class ProdutoController {
 
         try {
             produtoRepository.save(produto);
-            redirectAttributes.addFlashAttribute("mensagem", "Produto '" + produto.getNome() + "' atualizado com sucesso!");
+            redirectAttributes.addFlashAttribute("mensagem",
+                    "Produto '" + produto.getNome() + "' atualizado com sucesso!");
         } catch (Exception e) {
             System.err.println("Erro ao salvar produto: " + e.getMessage());
             redirectAttributes.addFlashAttribute("erro", "Erro ao atualizar produto: " + e.getMessage());
@@ -231,13 +237,13 @@ public class ProdutoController {
     public String apagarProduto(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id).orElse(null);
-        
+
         if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId)) {
             produtoRepository.deleteById(id);
             redirectAttributes.addFlashAttribute("mensagem",
                     messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
         }
-        
+
         return "redirect:/produtos/listar";
     }
 
@@ -255,7 +261,7 @@ public class ProdutoController {
     public ResponseEntity<?> promoverProduto(@PathVariable Long id, @RequestParam("novoPreco") Double novoPreco) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Produto produto = produtoRepository.findById(id).orElse(null);
-        
+
         if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId)) {
             produto.setPrecoOriginal(produto.getPreco());
             produto.setPreco(novoPreco);
