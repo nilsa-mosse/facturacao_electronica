@@ -27,6 +27,9 @@ public class Compra {
     // Dados do cliente para a factura (pode ser FK ou Consumidor Final)
     private String nomeCliente;
     private String nifCliente;
+    private String moradaCliente;
+    private String telefoneCliente;
+    private String emailCliente;
     private String formaPagamento; // CASH, TPA, TRANSFERENCIA, CASH+TPA, etc.
 
     // Detalhes MULTICAIXA (Angola)
@@ -241,5 +244,29 @@ public class Compra {
 
     public void setFaturaReferencia(Compra faturaReferencia) {
         this.faturaReferencia = faturaReferencia;
+    }
+
+    public String getMoradaCliente() {
+        return moradaCliente;
+    }
+
+    public void setMoradaCliente(String moradaCliente) {
+        this.moradaCliente = moradaCliente;
+    }
+
+    public String getTelefoneCliente() {
+        return telefoneCliente;
+    }
+
+    public void setTelefoneCliente(String telefoneCliente) {
+        this.telefoneCliente = telefoneCliente;
+    }
+
+    public String getEmailCliente() {
+        return emailCliente;
+    }
+
+    public void setEmailCliente(String emailCliente) {
+        this.emailCliente = emailCliente;
     }
 }

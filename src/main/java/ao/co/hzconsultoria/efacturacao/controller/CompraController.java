@@ -137,15 +137,40 @@ public class CompraController {
                 compra.setCliente(c);
                 compra.setNomeCliente(c.getNome());
                 compra.setNifCliente(c.getNif() != null ? c.getNif() : "999999999");
+                compra.setMoradaCliente(c.getEndereco());
+                compra.setTelefoneCliente(c.getTelefone());
+                compra.setEmailCliente(c.getEmail());
             });
         } else {
-            if (compra.getNomeCliente() == null || compra.getNomeCliente().trim().isEmpty()) {
+            if (compra.getNomeCliente() == null || compra.getNomeCliente().trim().isEmpty() || "Consumidor Final".equalsIgnoreCase(compra.getNomeCliente())) {
                 compra.setNomeCliente("Consumidor Final");
-            }
-            if (compra.getNifCliente() == null || compra.getNifCliente().trim().isEmpty()) {
                 compra.setNifCliente("999999999");
+                compra.setCliente(null);
+            } else {
+                // É um novo cliente registado no POS
+                Cliente novoCliente = new Cliente();
+                novoCliente.setNome(compra.getNomeCliente());
+                novoCliente.setNif(compra.getNifCliente() != null ? compra.getNifCliente() : "999999999");
+                novoCliente.setEndereco(compra.getMoradaCliente());
+                novoCliente.setTelefone(compra.getTelefoneCliente());
+                novoCliente.setEmail(compra.getEmailCliente());
+                
+                // Associar empresa ao novo cliente
+                Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+                if (empresaId != null) {
+                    ao.co.hzconsultoria.efacturacao.model.Empresa empresa = new ao.co.hzconsultoria.efacturacao.model.Empresa();
+                    empresa.setId(empresaId);
+                    novoCliente.setEmpresa(empresa);
+                }
+                
+                try {
+                    Cliente salvo = clienteRepository.save(novoCliente);
+                    compra.setCliente(salvo);
+                } catch (Exception e) {
+                    // Se falhar ao salvar (ex: NIF duplicado), apenas mantemos os dados na compra
+                    compra.setCliente(null);
+                }
             }
-            compra.setCliente(null);
         }
     }
 }
