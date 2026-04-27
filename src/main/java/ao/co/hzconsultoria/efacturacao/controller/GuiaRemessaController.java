@@ -74,11 +74,11 @@ public class GuiaRemessaController {
         java.util.Map<String, String> res = new java.util.HashMap<>();
         if (guia != null) {
             // Garantir que o PDF existe (fallback para guias antigas)
-            File pdfFile = new File("src/main/resources/static/guias/" + guia.getNumeroGuia() + ".pdf");
+            File pdfFile = new File("./uploads/guias/" + guia.getNumeroGuia() + ".pdf");
             if (!pdfFile.exists()) {
                 guiaRemessaService.salvar(guia); // Isto dispara a geração do PDF
             }
-            res.put("url", "/guias/" + guia.getNumeroGuia() + ".pdf");
+            res.put("url", "/uploads/guias/" + guia.getNumeroGuia() + ".pdf");
         }
         return res;
     }

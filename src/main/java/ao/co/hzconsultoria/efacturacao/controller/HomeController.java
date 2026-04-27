@@ -14,11 +14,18 @@ public class HomeController {
     @Autowired
     private CompraRepository compraRepository;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.CaixaService caixaService;
+
     @GetMapping("/home")
     public String home(Authentication auth, Model model) {
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
             model.addAttribute("vendas", compraRepository.findByUsuario_IdOrderByDataCompraDesc(user.getId()));
+            
+            // Informações do Caixa
+            model.addAttribute("caixaAberto", caixaService.getCaixaAbertoAtual());
+            model.addAttribute("isCaixaAberto", caixaService.isCaixaAberto());
         }
         return "home-operador";
     }

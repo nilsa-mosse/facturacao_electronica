@@ -21,6 +21,14 @@
 
             <section class="content">
                 <div class="container-fluid">
+                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <i class="fas fa-check-circle me-1"></i> <span th:text="${mensagem}"></span>
+                    </div>
+                    <div th:if="${mensagem_erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <i class="fas fa-exclamation-triangle me-1"></i> <span th:text="${mensagem_erro}"></span>
+                    </div>
                     <div class="row mt-4 mb-5 justify-content-center">
                         <div class="col-lg-10">
                             <div class="text-center mb-5">
@@ -31,35 +39,70 @@
                     </div>
 
                     <div class="row justify-content-center">
-                        <!-- Nova Venda (POS) -->
-                        <div class="col-md-5 mb-4 d-flex">
-                            <a th:href="@{/pos}" class="text-decoration-none w-100">
+                        
+                        <!-- Botão ABRIR CAIXA (Se estiver fechado) -->
+                        <div class="col-md-5 mb-4 d-flex" th:if="${!isCaixaAberto}">
+                            <a th:href="@{/caixa/abertura}" class="text-decoration-none w-100">
                                 <div class="card bg-success text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
                                     style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
-                                    <i class="fas fa-cash-register"
+                                    <i class="fas fa-unlock"
                                         style="position: absolute; right: -10px; bottom: -20px; font-size: 14rem; opacity: 0.15; transform: rotate(-10deg);"></i>
                                     <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
                                         style="z-index: 1;">
-                                        <i class="fas fa-shopping-cart fa-4x mb-3"></i>
-                                        <h2 class="fw-bold fs-1 m-0">Aceder ao POS</h2>
-                                        <p class="fs-5 mt-2 mb-0">Ponto de Venda e Emissão de Faturas</p>
+                                        <i class="fas fa-box-open fa-4x mb-3"></i>
+                                        <h2 class="fw-bold fs-1 m-0">Abrir Caixa</h2>
+                                        <p class="fs-5 mt-2 mb-0">Inicie o seu turno de trabalho</p>
                                     </div>
                                 </div>
                             </a>
                         </div>
 
-                        <!-- Histórico de Vendas -->
-                        <div class="col-md-5 mb-4 d-flex">
+                        <!-- Botão ACEDER AO POS (Se estiver aberto) -->
+                        <div class="col-md-4 mb-4 d-flex" th:if="${isCaixaAberto}">
+                            <a th:href="@{/pos}" class="text-decoration-none w-100">
+                                <div class="card bg-success text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
+                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
+                                    <i class="fas fa-cash-register"
+                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 12rem; opacity: 0.15; transform: rotate(-10deg);"></i>
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
+                                        style="z-index: 1;">
+                                        <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                                        <h2 class="fw-bold fs-2 m-0">Aceder ao POS</h2>
+                                        <p class="fs-6 mt-2 mb-0">Vendas e Faturas</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Histórico de Vendas (Sempre visível) -->
+                        <div class="col-md-4 mb-4 d-flex">
                             <a th:href="@{/historico-vendas}" class="text-decoration-none w-100">
                                 <div class="card bg-info text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
                                     style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
                                     <i class="fas fa-history"
-                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 14rem; opacity: 0.15; transform: rotate(-10deg);"></i>
+                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 12rem; opacity: 0.15; transform: rotate(-10deg);"></i>
                                     <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
                                         style="z-index: 1;">
-                                        <i class="fas fa-list-alt fa-4x mb-3"></i>
-                                        <h2 class="fw-bold fs-1 m-0">Histórico de Vendas</h2>
-                                        <p class="fs-5 mt-2 mb-0">Consultar vendas e reimprimir faturas</p>
+                                        <i class="fas fa-list-alt fa-3x mb-3"></i>
+                                        <h2 class="fw-bold fs-2 m-0">Histórico</h2>
+                                        <p class="fs-6 mt-2 mb-0">Consultas e 2ª vias</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Botão FECHAR CAIXA (Se estiver aberto) -->
+                        <div class="col-md-4 mb-4 d-flex" th:if="${isCaixaAberto}">
+                            <a th:href="@{/caixa/fecho}" class="text-decoration-none w-100">
+                                <div class="card bg-danger text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
+                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
+                                    <i class="fas fa-lock"
+                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 12rem; opacity: 0.15; transform: rotate(-10deg);"></i>
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
+                                        style="z-index: 1;">
+                                        <i class="fas fa-power-off fa-3x mb-3"></i>
+                                        <h2 class="fw-bold fs-2 m-0">Fechar Caixa</h2>
+                                        <p class="fs-6 mt-2 mb-0">Encerramento de turno</p>
                                     </div>
                                 </div>
                             </a>

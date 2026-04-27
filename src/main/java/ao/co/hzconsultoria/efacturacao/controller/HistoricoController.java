@@ -255,7 +255,7 @@ public class HistoricoController {
             
             if (!faturas.isEmpty()) {
                 Map<String, String> res = new HashMap<>();
-                res.put("url", "/faturas/" + faturas.get(0).getNumeroFatura() + ".pdf");
+                res.put("url", "/uploads/faturas/" + faturas.get(0).getNumeroFatura() + ".pdf");
                 return ResponseEntity.ok(res);
             }
         }

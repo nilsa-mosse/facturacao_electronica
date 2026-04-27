@@ -1,5 +1,6 @@
 package ao.co.hzconsultoria.efacturacao.service;
 
+import ao.co.hzconsultoria.efacturacao.model.Caixa;
 import ao.co.hzconsultoria.efacturacao.model.Carrinho;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.ItemCompra;
@@ -36,6 +37,9 @@ public class VendaService {
 
     @Autowired
     private NotaCreditoService notaCreditoService;
+
+    @Autowired
+    private CaixaService caixaService;
 
     public Compra finalizarVenda(List<Carrinho> carrinho) {
         Compra compra = new Compra();
@@ -151,6 +155,20 @@ public class VendaService {
 
         // Salvar fatura fiscal e gerar PDF
         faturaService.emitirDocumento(compraSalva, tipoDocumento);
+
+        // Registrar no Caixa se for um documento que movimenta valores (FT/FR)
+        if (!"FP".equals(tipoDocumento)) {
+            try {
+                Caixa caixaAberto = caixaService.getCaixaAbertoAtual();
+                if (caixaAberto != null) {
+                    Double multicaixa = compraSalva.getValorPagoMulticaixa() != null ? compraSalva.getValorPagoMulticaixa() : 0.0;
+                    Double numerario = compraSalva.getTotal() - multicaixa;
+                    caixaService.registarVendaNoCaixa(caixaAberto, numerario, multicaixa);
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao registrar venda no caixa: " + e.getMessage());
+            }
+        }
 
         return compraSalva;
     }

@@ -1644,13 +1644,15 @@
               if (typeof response === 'string') {
                 try {
                   var parsed = JSON.parse(response);
-                  actualPdfPath = parsed.pdfPath || parsed.url || parsed.caminho;
+                  actualPdfPath = parsed.pdfPath || parsed.url || parsed.caminho || parsed.path;
                 } catch(e) {
                   // Se for HTML ou texto limpo, assumimos que é o path se contiver '/'
-                  if (response.indexOf('/') !== -1) actualPdfPath = response;
+                  if (response.indexOf('/') !== -1 && response.indexOf('<html') === -1) {
+                      actualPdfPath = response.trim();
+                  }
                 }
               } else if (response && typeof response === 'object') {
-                actualPdfPath = response.pdfPath || response.url || response.caminho;
+                actualPdfPath = response.pdfPath || response.url || response.caminho || response.path;
               }
 
               // Limpar Resumo Final conforme solicitado

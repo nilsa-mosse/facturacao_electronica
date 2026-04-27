@@ -21,6 +21,7 @@ import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ClienteRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
+import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 import ao.co.hzconsultoria.efacturacao.service.FaturaService;
 import ao.co.hzconsultoria.efacturacao.service.GuiaRemessaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
@@ -52,8 +53,19 @@ public class CompraController {
     @Autowired
     private ProdutoService produtoService;
 
+    @Autowired
+    private FaturaRepository faturaRepository;
+
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.CaixaService caixaService;
+
     @GetMapping("/pos")
-    public String abrirPDV(Model model) {
+    public String abrirPDV(Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        if (!caixaService.isCaixaAberto()) {
+            ra.addFlashAttribute("mensagem_erro", "Atenção: O caixa está fechado. Tem de fazer a abertura do caixa antes de realizar vendas.");
+            return "redirect:/caixa/abertura";
+        }
+
     	 Pageable pageable = PageRequest.of(0, 60);
         List<Produto> produtos = produtoRepository.findAll(pageable).getContent();
         
@@ -61,6 +73,9 @@ public class CompraController {
         model.addAttribute("categorias", categoriaRepository.findAll());
         // Passa lista de clientes para o modal de identificacao
         model.addAttribute("clientes", clienteRepository.findAll());
+        
+        // Passa a instância do caixa aberto para exibir saldo ou número do caixa
+        model.addAttribute("caixaAberto", caixaService.getCaixaAbertoAtual());
         return "pos";
     }
 
@@ -84,10 +99,17 @@ public class CompraController {
         compra.getItens().forEach(item -> item.setCompra(compra));
         resolverCliente(compra);
         Compra compraSalva = vendaService.finalizarVenda(compra);
-        Fatura fatura = faturaService.emitirFatura(compraSalva);
-        String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
+        // vendaService.finalizarVenda já chama faturaService.emitirDocumento internamente (visto no VendaService.java:156)
+        // Por isso, não chamamos faturaService.emitirFatura(compraSalva) aqui para evitar duplicados.
+        
+        // Tentar obter a fatura gerada para retornar o número correto
+        java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
+        String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "DOC-" + compraSalva.getId();
+        
+        String pdfFile = "/uploads/faturas/" + numeroDoc + ".pdf";
         java.util.Map<String, String> response = new java.util.HashMap<>();
         response.put("pdfPath", pdfFile);
+        response.put("url", pdfFile);
         return ResponseEntity.ok(response);
     }
 
@@ -100,10 +122,15 @@ public class CompraController {
         compra.getItens().forEach(item -> item.setCompra(compra));
         resolverCliente(compra);
         Compra compraSalva = vendaService.finalizarVenda(compra, "FP");
-        Fatura fatura = faturaService.emitirProforma(compraSalva);
-        String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
+        // Assim como FT, FP já gera documento no VendaService
+        
+        java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
+        String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "FP-" + compraSalva.getId();
+
+        String pdfFile = "/uploads/faturas/" + numeroDoc + ".pdf";
         java.util.Map<String, String> response = new java.util.HashMap<>();
         response.put("pdfPath", pdfFile);
+        response.put("url", pdfFile);
         return ResponseEntity.ok(response);
     }
 
@@ -132,8 +159,11 @@ public class CompraController {
         // 3. Salvar para disparar geração de PDF e registo AGT
         guiaRemessaService.salvar(guia);
         
-        String pdfFile = "/guias/" + guia.getNumeroGuia() + ".pdf";
-        return ResponseEntity.ok().body(pdfFile);
+        String pdfFile = "/uploads/guias/" + guia.getNumeroGuia() + ".pdf";
+        java.util.Map<String, String> response = new java.util.HashMap<>();
+        response.put("pdfPath", pdfFile);
+        response.put("url", pdfFile);
+        return ResponseEntity.ok(response);
     }
 
     /**

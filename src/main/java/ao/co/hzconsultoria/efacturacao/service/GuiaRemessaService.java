@@ -169,16 +169,14 @@ public class GuiaRemessaService {
 
     private void gerarPdfGuia(GuiaRemessa guia) {
         try {
-            File dir1 = new File("src/main/resources/static/guias");
-            if (!dir1.exists()) dir1.mkdirs();
-            String filePath1 = "src/main/resources/static/guias/" + guia.getNumeroGuia() + ".pdf";
+            // Salva em ./uploads/guias (pasta externa)
+            File dir = new File("./uploads/guias");
+            if (!dir.exists()) dir.mkdirs();
+            
+            String filePath = "./uploads/guias/" + guia.getNumeroGuia() + ".pdf";
 
-            File dir2 = new File("target/classes/static/guias");
-            if (!dir2.exists()) dir2.mkdirs();
-            String filePath2 = "target/classes/static/guias/" + guia.getNumeroGuia() + ".pdf";
-
-            gerarPdf(filePath1, guia);
-            gerarPdf(filePath2, guia);
+            gerarPdf(filePath, guia);
+            log.info("PDF da Guia gerado em: {}", filePath);
         } catch (Exception e) {
             log.error("Erro crítico ao gerar PDF da Guia {}: ", guia.getNumeroGuia(), e);
         }

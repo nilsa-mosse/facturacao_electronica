@@ -179,21 +179,18 @@ public class FaturaService {
 
     private void gerarPdfFatura(Fatura fatura) {
         try {
-            // Salva em src/main/resources/static/faturas (para persistência futura)
-            File dir1 = new File("src/main/resources/static/faturas");
-            if (!dir1.exists())
-                dir1.mkdirs();
-            String filePath1 = "src/main/resources/static/faturas/" + fatura.getNumeroFatura() + ".pdf";
-            // Salva em target/classes/static/faturas (para servir via Spring Boot)
-            File dir2 = new File("target/classes/static/faturas");
-            if (!dir2.exists())
-                dir2.mkdirs();
-            String filePath2 = "target/classes/static/faturas/" + fatura.getNumeroFatura() + ".pdf";
+            // Salva em ./uploads/faturas (pasta externa, acessível via /uploads/faturas/**)
+            File dir = new File("./uploads/faturas");
+            if (!dir.exists())
+                dir.mkdirs();
+            
+            String filePath = "./uploads/faturas/" + fatura.getNumeroFatura() + ".pdf";
 
-            // Gera o PDF em ambos os locais
-            gerarPdf(filePath1, fatura);
-            gerarPdf(filePath2, fatura);
+            // Gera o PDF no local externo
+            gerarPdf(filePath, fatura);
+            log.info("PDF da fatura gerado em: {}", filePath);
         } catch (Exception e) {
+            log.error("Erro ao gerar PDF da fatura: {}", e.getMessage());
             e.printStackTrace();
         }
     }

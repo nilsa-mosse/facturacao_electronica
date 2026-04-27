@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+            <div class="card card-outline card-danger shadow-lg" style="width: 100%; max-width: 600px; border-radius: 15px;">
+                <div class="card-header text-center border-0 pt-4 pb-0">
+                    <div class="mx-auto bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mb-3 shadow" style="width: 80px; height: 80px;">
+                        <i class="fas fa-lock fa-2x"></i>
+                    </div>
+                    <h3 class="card-title w-100 fw-bold fs-4">Fecho de Caixa</h3>
+                    <p class="text-muted small">Efectue o encerramento do seu turno</p>
+                </div>
+                
+                <div class="card-body">
+                    <div th:if="${mensagem_erro}" class="alert alert-danger shadow-sm rounded-3">
+                        <i class="fas fa-exclamation-circle me-1"></i> <span th:text="${mensagem_erro}"></span>
+                    </div>
+
+                    <!-- Resumo do Sistema -->
+                    <div class="bg-light p-3 rounded-3 mb-4 border">
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">Resumo Informado pelo Sistema</h6>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <span class="text-muted d-block small">Fundo de Maneio:</span>
+                                <span class="fw-bold fs-5 text-dark" th:text="${#numbers.formatDecimal(caixa.saldoInicial, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <span class="text-muted d-block small">Vendas a Numerário:</span>
+                                <span class="fw-bold fs-5 text-success" th:text="${#numbers.formatDecimal(caixa.totalNumerario, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
+                            </div>
+                            <div class="col-12 mt-2 pt-2 border-top">
+                                <span class="text-muted fw-bold">Total Esperado na Gaveta:</span>
+                                <span class="fw-bold fs-4 text-primary float-end" th:text="${#numbers.formatDecimal(totalSistema, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/caixa/fechar}" method="post">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-danger"><i class="fas fa-hand-holding-usd me-1"></i> Valor Real Contado na Gaveta</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0 border-danger">AKZ</span>
+                                <input type="number" step="0.01" min="0" class="form-control border-start-0 ps-0 form-control-lg fw-bold border-danger text-danger" name="saldoFinalInformado" th:value="${totalSistema}" required>
+                            </div>
+                            <small class="text-muted d-block mt-2">Informe o valor exacto que contou fisicamente na gaveta.</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted"><i class="fas fa-comment-alt me-1"></i> Observações / Justificações</label>
+                            <textarea class="form-control" name="observacoes" rows="2" placeholder="Ex: Diferença justificada por erro no troco..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill shadow-sm fw-bold" onclick="return confirm('Tem certeza que deseja encerrar o caixa? Esta ação não pode ser desfeita.')">
+                                <i class="fas fa-lock me-2"></i> Confirmar Fecho
+                            </button>
+                            <a th:href="@{/home}" class="btn btn-light rounded-pill">Voltar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
