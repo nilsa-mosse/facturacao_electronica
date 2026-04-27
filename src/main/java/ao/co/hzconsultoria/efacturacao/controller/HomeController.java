@@ -21,6 +21,9 @@ public class HomeController {
     public String home(Authentication auth, Model model) {
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+            if ("GESTOR".equals(user.getRole())) {
+                return "redirect:/dashboard";
+            }
             model.addAttribute("vendas", compraRepository.findByUsuario_IdOrderByDataCompraDesc(user.getId()));
             
             // Informações do Caixa
@@ -33,10 +36,12 @@ public class HomeController {
     @GetMapping("/")
     public String root(Authentication auth) {
         if (auth != null) {
-            boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPERADMIN"));
+            boolean isManager = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || 
+                               a.getAuthority().equals("ROLE_SUPERADMIN") || 
+                               a.getAuthority().equals("ROLE_GESTOR"));
             
-            if (isAdmin) {
+            if (isManager) {
                 return "redirect:/dashboard";
             } else {
                 return "redirect:/home";

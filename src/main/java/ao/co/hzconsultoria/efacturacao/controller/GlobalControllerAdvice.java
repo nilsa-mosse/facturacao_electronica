@@ -65,7 +65,7 @@ public class GlobalControllerAdvice {
         // Expor papel Admin para uso nos templates de menu
         if (auth != null && auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
             String roleAtual = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getRole();
-            model.addAttribute("isAdmin", "ADMIN".equals(roleAtual));
+            model.addAttribute("isAdmin", "ADMIN".equals(roleAtual) || "GESTOR".equals(roleAtual));
         } else {
             model.addAttribute("isAdmin", false);
         }

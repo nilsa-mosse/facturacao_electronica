@@ -22,7 +22,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if (isSuperAdmin || isAdmin) {
+        boolean isGestor = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_GESTOR"));
+
+        if (isSuperAdmin || isAdmin || isGestor) {
             response.sendRedirect("/dashboard");
         } else {
             response.sendRedirect("/home");
