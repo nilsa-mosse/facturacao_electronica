@@ -45,19 +45,32 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
             return true; // Se não for um módulo mapeado, permitir acesso (ex: perfil do usuário)
         }
 
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        // Bloqueio estrito para Admin: Não entra no Painel Global
+        if (isAdmin && "PAINEL_GLOBAL".equals(modulo)) {
+            response.sendRedirect("/dashboard?error=access_denied&module=PAINEL_GLOBAL");
+            return false;
+        }
+
+        // Bloqueio estrito para Operadores/Users: Apenas VENDAS
+        if (!isAdmin && !"VENDAS".equals(modulo)) {
+            response.sendRedirect("/home?error=access_denied&module=" + modulo);
+            return false;
+        }
+
         Long userId = null;
         if (auth.getPrincipal() instanceof CustomUserDetails) {
             userId = ((CustomUserDetails) auth.getPrincipal()).getId();
         }
 
         if (userId != null) {
-            // Validar acesso através da Tabela de Permissões para todos os utilizadores não-SuperAdmin
+            // Validar acesso através da Tabela de Permissões para módulos permitidos ao Role
             Optional<PermissaoModulo> perm = permissaoRepo.findByModuloAndUsuario_Id(modulo, userId);
             if (perm.isPresent() && !perm.get().isAtivo()) {
-                if (uri.equals("/dashboard")) {
-                    return true;
-                }
-                response.sendRedirect("/dashboard?error=access_denied&module=" + modulo);
+                String redirectPath = isAdmin ? "/dashboard" : "/home";
+                response.sendRedirect(redirectPath + "?error=access_denied&module=" + modulo);
                 return false;
             }
         }
@@ -67,13 +80,14 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
 
     private String identificarModuloPorUri(String uri) {
         if (uri.startsWith("/dashboard")) return "DASHBOARD";
-        if (uri.startsWith("/pos") || uri.startsWith("/historico-vendas") || uri.startsWith("/devolucoes") || uri.startsWith("/finalizarVenda")) return "VENDAS";
+        if (uri.startsWith("/pos") || uri.startsWith("/historico-vendas") || uri.startsWith("/devolucoes") || uri.startsWith("/finalizarVenda") || uri.startsWith("/home")) return "VENDAS";
         if (uri.startsWith("/produtos") || uri.startsWith("/cadastroProduto") || uri.startsWith("/inventario") || uri.startsWith("/stock")) return "STOCK";
         if (uri.startsWith("/clientes") || uri.startsWith("/fornecedores")) return "ENTIDADES";
         if (uri.startsWith("/guias") || uri.startsWith("/notas") || uri.startsWith("/factura-eletronica") || uri.startsWith("/configuracoes/saft")) return "FACTURACAO";
         if (uri.startsWith("/despesas") || uri.startsWith("/financeiro")) return "FINANCEIRO";
+        if (uri.startsWith("/superadmin")) return "PAINEL_GLOBAL";
         
-        // Controlo de Acesso é permitido a qualquer utilizador autenticado (não requer módulo ADMINISTRACAO)
+        // Controlo de Acesso é permitido a qualquer utilizador administrativo
         if (uri.startsWith("/configuracoes/controlo-acesso")) return null;
         
         // Restantes configurações (Empresa, Utilizadores, AGT, etc.) requerem módulo ADMINISTRACAO

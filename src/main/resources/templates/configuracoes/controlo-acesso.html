@@ -74,7 +74,7 @@
                                                 <tr th:each="modulo : ${modulosList}">
                                                     <td class="ps-4 fw-bold">
                                                         <i class="fas fa-cube me-2 text-muted"></i>
-                                                        <span th:text="${modulo}">MODULO</span>
+                                                        <span th:text="${modulosLabels.get(modulo)}">MODULO</span>
                                                     </td>
                                                     <td class="text-center">
                                                         <div class="form-check form-switch d-inline-block">

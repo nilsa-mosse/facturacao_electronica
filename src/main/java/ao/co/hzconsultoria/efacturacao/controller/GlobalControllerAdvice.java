@@ -21,6 +21,12 @@ public class GlobalControllerAdvice {
 
     @ModelAttribute
     public void addAttributes(Model model) {
+        // Pré-inicializar todas as permissões como falso por padrão para evitar erros de null no Thymeleaf (SpringEL)
+        ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
+            model.addAttribute("modulo_" + modulo, false);
+            itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), false));
+        });
+
         String tema = "light";
         try {
             ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
@@ -74,27 +80,39 @@ public class GlobalControllerAdvice {
             // Injetar permissões de acesso granulares (RBAC)
             boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
             
-            if (isSuperAdmin || isAdmin) {
-                // Admin e SuperAdmin têm acesso a tudo por padrão
+            if (isSuperAdmin) {
+                // SuperAdmin tem acesso a tudo por padrão
                 ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
                     model.addAttribute("modulo_" + modulo, true);
                     itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), true));
                 });
+            } else if (isAdmin) {
+                // Admin tem acesso a tudo EXCEPTO o Painel Global (SaaS)
+                ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
+                    if (!modulo.equals("PAINEL_GLOBAL")) {
+                        model.addAttribute("modulo_" + modulo, true);
+                        itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), true));
+                    }
+                });
             } else if (auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
+                // Operadores e Users normais têm acesso apenas ao módulo VENDAS por padrão
                 ao.co.hzconsultoria.efacturacao.security.CustomUserDetails userDetails = (ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal();
                 java.util.Set<String> perms = userDetails.getPermissions();
                 
                 ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
-                    boolean hasModulo = false;
-                    for (ao.co.hzconsultoria.efacturacao.config.ModuloItens.ItemDef item : itens) {
-                        String key = modulo + "_" + item.getChave();
-                        if (perms != null && perms.contains(key)) {
-                            model.addAttribute("modulo_" + key, true);
-                            hasModulo = true;
+                    // Restrição estrita: Apenas VENDAS para Operadores, ignorando outras permissões no BD para segurança
+                    if (modulo.equals("VENDAS")) {
+                        boolean hasModulo = false;
+                        for (ao.co.hzconsultoria.efacturacao.config.ModuloItens.ItemDef item : itens) {
+                            String key = modulo + "_" + item.getChave();
+                            if (perms != null && perms.contains(key)) {
+                                model.addAttribute("modulo_" + key, true);
+                                hasModulo = true;
+                            }
                         }
-                    }
-                    if (hasModulo) {
-                        model.addAttribute("modulo_" + modulo, true);
+                        if (hasModulo) {
+                            model.addAttribute("modulo_" + modulo, true);
+                        }
                     }
                 });
             }

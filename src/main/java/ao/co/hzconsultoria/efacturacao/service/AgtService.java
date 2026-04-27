@@ -72,9 +72,12 @@ public class AgtService {
         }
 
         // 2. Buscar dados da empresa emissora
-        List<Empresa> empresas = empresaRepository.findAll();
-        String nifEmissor = empresas.isEmpty() ? "0000000000" : empresas.get(0).getNif();
-        String nomeEmissor = empresas.isEmpty() ? "Empresa" : empresas.get(0).getNome();
+        Empresa empresaEmissora = fatura.getEmpresa();
+        if (empresaEmissora == null && fatura.getCompra() != null) {
+            empresaEmissora = fatura.getCompra().getEmpresa();
+        }
+        String nifEmissor = (empresaEmissora == null || empresaEmissora.getNif() == null) ? "0000000000" : empresaEmissora.getNif();
+        String nomeEmissor = (empresaEmissora == null || empresaEmissora.getNome() == null) ? "Empresa" : empresaEmissora.getNome();
 
         // 3. Construir o payload JSON
         Map<String, Object> payload = construirPayload(fatura, nifEmissor, nomeEmissor, config.getModo());

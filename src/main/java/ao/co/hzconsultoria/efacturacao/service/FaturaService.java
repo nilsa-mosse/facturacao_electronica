@@ -6,8 +6,10 @@ import ao.co.hzconsultoria.efacturacao.model.Carrinho;
 import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
+import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoEmpresa;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoEmpresaRepository;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
@@ -18,10 +20,14 @@ import com.lowagie.text.FontFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -47,6 +53,15 @@ public class FaturaService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    @Autowired
+    private ConfiguracaoEmpresaService configuracaoEmpresaService;
+
+    @Autowired
+    private ConfiguracaoEmpresaRepository configuracaoEmpresaRepository;
+
+    @Value("${app.upload.logo.dir:./uploads/logo/}")
+    private String logoUploadDir;
+
     public Fatura emitirFatura(Compra compra) {
         return emitirDocumento(compra, "FT");
     }
@@ -58,6 +73,9 @@ public class FaturaService {
     public Fatura emitirDocumento(Compra compra, String tipo) {
         Fatura fatura = new Fatura();
         fatura.setCompra(compra);
+        if (compra != null && compra.getEmpresa() != null) {
+            fatura.setEmpresa(compra.getEmpresa());
+        }
         fatura.setTipoDocumento(tipo);
         String prefixo = tipo + "-";
         String numeroFatura = prefixo + System.currentTimeMillis();
@@ -180,15 +198,61 @@ public class FaturaService {
         }
     }
 
+    /**
+     * Resolve o caminho absoluto de uma imagem armazenada em /uploads/
+     * Converte uma URL relativa como "/uploads/logo/..." em um caminho absoluto acessível
+     */
+    private String resolverCaminhoImagem(String caminhoRelativo) {
+        if (caminhoRelativo == null || caminhoRelativo.isEmpty()) {
+            return null;
+        }
+
+        // Se já é um caminho absoluto, retorna como está
+        if (new File(caminhoRelativo).isAbsolute()) {
+            return caminhoRelativo;
+        }
+
+        // Remove a barra inicial se existir (/uploads/logo/... -> uploads/logo/...)
+        String caminhoLimpo = caminhoRelativo.startsWith("/") ? caminhoRelativo.substring(1) : caminhoRelativo;
+
+        // Resolve a partir do diretório raiz do projeto
+        Path projectRoot = Paths.get("").toAbsolutePath().normalize();
+
+        // Constrói o caminho absoluto completo
+        Path imagemPath = projectRoot.resolve(caminhoLimpo).normalize();
+
+        // Verifica se o arquivo existe antes de retornar
+        if (Files.exists(imagemPath)) {
+            return imagemPath.toString();
+        }
+
+        log.warn("Arquivo de imagem não encontrado: {}", imagemPath);
+        return null;
+    }
+
     private void gerarPdf(String filePath, Fatura fatura) throws Exception {
         Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
         PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(filePath));
         doc.open();
 
         // Dados da Empresa (Dinâmico)
-        java.util.List<Empresa> empresas = empresaRepository.findAll();
-        Empresa configEmpresa = empresas.isEmpty() ? new Empresa() : empresas.get(0);
-        if (empresas.isEmpty()) {
+        Empresa configEmpresa = fatura.getEmpresa();
+        if (configEmpresa == null && fatura.getCompra() != null) {
+            configEmpresa = fatura.getCompra().getEmpresa();
+        }
+        
+        if (configEmpresa == null) {
+            java.util.List<Empresa> empresas = empresaRepository.findAll();
+            configEmpresa = empresas.isEmpty() ? new Empresa() : empresas.get(0);
+        }
+        
+        // Obter configurações específicas da empresa
+        ConfiguracaoEmpresa configuracao = null;
+        if (configEmpresa.getId() != null) {
+            configuracao = configuracaoEmpresaService.obterConfiguracao(configEmpresa.getId());
+        }
+        
+        if (configEmpresa.getId() == null || configEmpresa.getNome() == null || configEmpresa.getNome().isEmpty()) {
             configEmpresa.setNome("MINHA EMPRESA (Configurar nas definições)");
             configEmpresa.setNif("999999999");
             configEmpresa.setEndereco("Endereço não configurado");
@@ -233,13 +297,21 @@ public class FaturaService {
         try {
             String logoPath = configEmpresa.getLogotipo();
             if (logoPath != null && !logoPath.isEmpty()) {
-                Image logo = Image.getInstance(logoPath);
-                logo.scaleToFit(200, 200);
-                logoCell = new PdfPCell(logo);
+                // Converte a URL relativa (/uploads/logo/...) para caminho absoluto
+                String caminhoAbsoluto = resolverCaminhoImagem(logoPath);
+                if (caminhoAbsoluto != null && !caminhoAbsoluto.isEmpty()) {
+                    Image logo = Image.getInstance(caminhoAbsoluto);
+                    logo.scaleToFit(200, 200);
+                    logoCell = new PdfPCell(logo);
+                } else {
+                    logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                    log.warn("Não foi possível carregar o logotipo: {}", logoPath);
+                }
             } else {
                 logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
             }
         } catch (Exception e) {
+            log.error("Erro ao processar logotipo: {}", e.getMessage());
             logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
         }
         logoCell.setBorder(0);
@@ -412,9 +484,18 @@ public class FaturaService {
         Paragraph p = new Paragraph("OBRIGADO PELA PREFERÊNCIA", bold);
         p.setAlignment(Element.ALIGN_RIGHT);
         thanksCell.addElement(p);
-        Paragraph p2 = new Paragraph("Os bens/serviços foram colocados à disposição na data do documento.", smallFont);
-        p2.setAlignment(Element.ALIGN_RIGHT);
-        thanksCell.addElement(p2);
+        
+        // Adicionar rodapé personalizado se configurado
+        if (configuracao != null && configuracao.isUsarRodapéPersonalizadoEmDocumentos() && 
+            configuracao.getRodapePersonalizado() != null && !configuracao.getRodapePersonalizado().isEmpty()) {
+            Paragraph pRodape = new Paragraph(configuracao.getRodapePersonalizado(), smallFont);
+            pRodape.setAlignment(Element.ALIGN_RIGHT);
+            thanksCell.addElement(pRodape);
+        } else {
+            Paragraph p2 = new Paragraph("Os bens/serviços foram colocados à disposição na data do documento.", smallFont);
+            p2.setAlignment(Element.ALIGN_RIGHT);
+            thanksCell.addElement(p2);
+        }
         footerTable.addCell(thanksCell);
 
         doc.add(footerTable);

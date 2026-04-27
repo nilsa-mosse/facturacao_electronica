@@ -12,8 +12,20 @@ public class ModuloItens {
      * Mapa imutável: módulo → lista ordenada de items (chave, rótulo).
      */
     public static final Map<String, List<ItemDef>> ITENS_POR_MODULO;
+    public static final Map<String, String> MODULO_LABELS;
 
     static {
+        Map<String, String> labels = new LinkedHashMap<>();
+        labels.put("DASHBOARD", "DASHBOARD");
+        labels.put("VENDAS", "VENDAS & OPERAÇÕES");
+        labels.put("STOCK", "GESTÃO DE STOCK");
+        labels.put("ENTIDADES", "ENTIDADES");
+        labels.put("FACTURACAO", "FACTURAÇÃO & FISCAL");
+        labels.put("FINANCEIRO", "FINANCEIRO");
+        labels.put("ADMINISTRACAO", "ADMINISTRAÇÃO");
+        labels.put("PAINEL_GLOBAL", "PAINEL GLOBAL (SaaS)");
+        MODULO_LABELS = Collections.unmodifiableMap(labels);
+
         Map<String, List<ItemDef>> m = new LinkedHashMap<>();
 
         m.put("DASHBOARD", Arrays.asList(
@@ -63,12 +75,14 @@ public class ModuloItens {
                 new ItemDef("ESTABELECIMENTOS",  "Estabelecimentos",      "fas fa-store"),
                 new ItemDef("CONTROLO_ACESSO",   "Controlo de Acesso",    "fas fa-user-shield"),
                 new ItemDef("CONFIGURACOES",     "Configurações Gerais",  "fas fa-sliders-h"),
-                new ItemDef("CONFIGURACOES_AGT", "Comunicação AGT",       "fas fa-plug"),
-                new ItemDef("SERVIDOR",          "Servidor e Rede",       "fas fa-server"),
-                new ItemDef("EMAIL",             "Configuração de Email", "fas fa-envelope-open-text"),
-                new ItemDef("BANCO_DADOS",       "Base de Dados",         "fas fa-database"),
-                new ItemDef("STORAGE",           "Armazenamento (Storage)", "fas fa-hdd"),
-                new ItemDef("SEGURANCA",         "Segurança e Logs",      "fas fa-lock")
+                new ItemDef("CONFIGURACOES_AGT", "Comunicação AGT",       "fas fa-plug")
+        ));
+
+        m.put("PAINEL_GLOBAL", Arrays.asList(
+                new ItemDef("EMPRESAS",          "Gestão de Empresas",    "fas fa-city"),
+                new ItemDef("PLANOS",            "Planos e Subscrições",  "fas fa-credit-card"),
+                new ItemDef("LOGS_SISTEMA",       "Logs do Sistema",       "fas fa-file-medical-alt"),
+                new ItemDef("RECURSOS_SRV",      "Recursos do Servidor",  "fas fa-microchip")
         ));
 
         ITENS_POR_MODULO = Collections.unmodifiableMap(m);

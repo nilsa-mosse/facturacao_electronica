@@ -78,10 +78,71 @@
                         </div>
                     </div>
 
+                    <!-- Tabela de Vendas Recentes -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card shadow-sm border-0" style="border-radius: 15px;">
+                                <div class="card-header bg-white py-3" style="border-radius: 15px 15px 0 0;">
+                                    <h5 class="card-title fw-bold mb-0 text-primary">
+                                        <i class="fas fa-list-ul me-2"></i> Minhas Transações Recentes
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="ps-4 py-3">Data/Hora</th>
+                                                    <th>Documento</th>
+                                                    <th>Cliente</th>
+                                                    <th class="text-end">Total</th>
+                                                    <th class="text-center">Estado</th>
+                                                    <th class="pe-4 text-center">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="v : ${vendas}">
+                                                    <td class="ps-4">
+                                                        <div class="fw-bold" th:text="${#temporals.format(v.dataCompra, 'dd/MM/yyyy')}"></div>
+                                                        <small class="text-muted" th:text="${#temporals.format(v.dataCompra, 'HH:mm')}"></small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-light text-dark border" th:text="${v.tipoDocumento}">FR</span>
+                                                        <span class="fw-bold ms-1" th:text="${'#' + v.id}">#1</span>
+                                                    </td>
+                                                    <td th:text="${v.nomeCliente}">Consumidor Final</td>
+                                                    <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(v.total, 1, 'POINT', 2, 'COMMA') + ' Kz'}">0,00 Kz</td>
+                                                    <td class="text-center">
+                                                        <span class="badge rounded-pill px-3" 
+                                                              th:classappend="${v.status == 'EMITIDA' ? 'bg-success' : (v.status == 'CANCELADA' ? 'bg-danger' : 'bg-warning')}"
+                                                              th:text="${v.status}">EMITIDA</span>
+                                                    </td>
+                                                    <td class="pe-4 text-center">
+                                                        <a th:href="@{/api/compras/download/{id}(id=${v.id})}" target="_blank" class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" title="Descarregar PDF">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                <tr th:if="${#lists.isEmpty(vendas)}">
+                                                    <td colspan="6" class="text-center py-5">
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
+                                                            Nenhuma venda realizada ainda.
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Mensagem Informativa -->
                     <div class="row mt-5">
                         <div class="col-md-12">
-                            <div class="alert alert-info bg-white border-info shadow-sm">
+                            <div class="alert alert-info bg-white border-info shadow-sm" style="border-radius: 12px;">
                                 <h5><i class="icon fas fa-info"></i> Dica do Dia</h5>
                                 Utilize o atalho <b>F2</b> dentro do POS para pesquisar produtos rapidamente por código ou nome.
                             </div>

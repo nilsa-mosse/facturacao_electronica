@@ -32,8 +32,11 @@ public class CategoriaProdutoController {
                           Model model) {
         Pageable pageable = PageRequest.of(page, 10);
         Page<Produto> produtosPage;
-        if (cat != null) {
-            produtosPage = produtoRepository.findByCategoria_Id(cat, pageable);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (cat != null && empresaId != null) {
+            produtosPage = produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
+        } else if (empresaId != null) {
+            produtosPage = produtoRepository.findByEmpresa_Id(empresaId, pageable);
         } else {
             produtosPage = produtoRepository.findAll(pageable);
         }

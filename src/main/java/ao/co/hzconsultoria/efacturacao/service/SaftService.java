@@ -65,7 +65,14 @@ public class SaftService {
         Element header = doc.createElement("Header");
         root.appendChild(header);
 
-        Empresa emp = empresaRepository.findAll().stream().findFirst().orElse(new Empresa());
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Empresa emp = null;
+        if (empresaId != null) {
+            emp = empresaRepository.findById(empresaId).orElse(null);
+        }
+        if (emp == null) {
+            emp = empresaRepository.findAll().stream().findFirst().orElse(new Empresa());
+        }
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         appendChild(doc, header, "AuditFileVersion", "1.01_01");

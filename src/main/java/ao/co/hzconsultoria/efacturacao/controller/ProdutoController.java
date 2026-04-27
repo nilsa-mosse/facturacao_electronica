@@ -1,11 +1,17 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
+import java.util.List;
+
 import ao.co.hzconsultoria.efacturacao.model.Categoria;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
+import ao.co.hzconsultoria.efacturacao.model.Estoque;
+import ao.co.hzconsultoria.efacturacao.model.Estabelecimento;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ImpostoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.EstoqueRepository;
+import ao.co.hzconsultoria.efacturacao.repository.EstabelecimentoRepository;
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +62,12 @@ public class ProdutoController {
     @Autowired
     private ProdutoService produtoService;
 
+    @Autowired
+    private EstoqueRepository estoqueRepository;
+
+    @Autowired
+    private EstabelecimentoRepository estabelecimentoRepository;
+
     @GetMapping({ "/cadastroProduto", "/produtos/novo" })
 
     public String cadastroProduto(Model model) {
@@ -91,6 +103,11 @@ public class ProdutoController {
             RedirectAttributes redirectAttributes) {
 
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId == null) {
+            redirectAttributes.addFlashAttribute("erro", "Erro: Sessão expirada ou empresa não identificada.");
+            return "redirect:/produtos/novo";
+        }
+
         Produto produto = new Produto();
         produto.setNome(nome);
         produto.setDescricao(descricao);
@@ -111,6 +128,18 @@ public class ProdutoController {
         try {
             produtoRepository.save(produto);
 
+            // Criar relação inicial com a tabela de estoque por estabelecimento
+            List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findByEmpresa_Id(empresaId);
+            if (!estabelecimentos.isEmpty()) {
+                Estabelecimento principal = estabelecimentos.get(0);
+                Estoque estoque = new Estoque();
+                estoque.setProduto(produto);
+                estoque.setEstabelecimento(principal);
+                estoque.setQuantidade(quantidadeEstoque != null ? quantidadeEstoque : 0.0);
+                estoque.setUpdatedAt(java.time.LocalDateTime.now());
+                estoqueRepository.save(estoque);
+            }
+
             if (imagem != null && !imagem.isEmpty()) {
                 String fileName = UUID.randomUUID().toString() + "_" + imagem.getOriginalFilename();
                 Path path = Paths.get(uploadDir + fileName);
@@ -127,8 +156,9 @@ public class ProdutoController {
             return "redirect:/produtos/novo";
 
         } catch (Exception e) {
+            e.printStackTrace(); // Log completo no console do servidor
             System.err.println("Erro ao cadastrar produto: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("erro", "Erro ao cadastrar produto: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("erro", "Erro ao cadastrar produto: " + (e.getMessage() != null ? e.getMessage() : "Erro interno de persistência"));
             return "redirect:/produtos/novo";
         }
     }
@@ -223,6 +253,21 @@ public class ProdutoController {
 
         try {
             produtoRepository.save(produto);
+
+            // Sincronizar com a tabela de estoque
+            List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findByEmpresa_Id(empresaId);
+            if (!estabelecimentos.isEmpty()) {
+                Estabelecimento principal = estabelecimentos.get(0);
+                Estoque estoque = estoqueRepository.findByProdutoAndEstabelecimento(produto, principal)
+                        .orElse(new Estoque());
+                
+                estoque.setProduto(produto);
+                estoque.setEstabelecimento(principal);
+                estoque.setQuantidade(quantidadeEstoque != null ? quantidadeEstoque : 0.0);
+                estoque.setUpdatedAt(java.time.LocalDateTime.now());
+                estoqueRepository.save(estoque);
+            }
+
             redirectAttributes.addFlashAttribute("mensagem",
                     "Produto '" + produto.getNome() + "' atualizado com sucesso!");
         } catch (Exception e) {
@@ -239,6 +284,10 @@ public class ProdutoController {
         Produto produto = produtoRepository.findById(id).orElse(null);
 
         if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId)) {
+            // Limpar stock relacionado antes de apagar o produto
+            List<Estoque> estoques = estoqueRepository.findByProduto(produto);
+            estoqueRepository.deleteAll(estoques);
+            
             produtoRepository.deleteById(id);
             redirectAttributes.addFlashAttribute("mensagem",
                     messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
@@ -267,6 +316,26 @@ public class ProdutoController {
             produto.setPreco(novoPreco);
             produto.setEmPromocao(true);
             produtoRepository.save(produto);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(403).build();
+    }
+
+    @GetMapping("/api/produtos/retirar-promocao/{id}")
+    @Transactional
+    public ResponseEntity<?> retirarPromocao(@PathVariable Long id) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Produto produto = produtoRepository.findById(id).orElse(null);
+
+        if (produto != null && produto.getEmpresa() != null && produto.getEmpresa().getId().equals(empresaId)) {
+            if (produto.isEmPromocao()) {
+                if (produto.getPrecoOriginal() != null) {
+                    produto.setPreco(produto.getPrecoOriginal());
+                }
+                produto.setPrecoOriginal(null);
+                produto.setEmPromocao(false);
+                produtoRepository.save(produto);
+            }
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(403).build();

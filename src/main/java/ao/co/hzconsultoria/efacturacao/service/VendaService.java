@@ -61,6 +61,7 @@ public class VendaService {
         return finalizarVenda(compra, "FT"); // Default to Factura
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public Compra finalizarVenda(Compra compra, String tipoDocumento) {
         if (compra == null) {
             throw new IllegalArgumentException("Compra cannot be null");
@@ -120,15 +121,21 @@ public class VendaService {
                 produto = produtoRepository.findByCodigoBarraAndEmpresa_Id(item.getNomeProduto(), empresaId);
             }
 
-            if (produto != null) {
+            if (produto == null) {
+                System.err.println("AVISO CRÍTICO: Produto não encontrado para a venda! NomeProduto: " + item.getNomeProduto() + ", ProdutoId: " + item.getProdutoId());
+            }
+
+            if (produto != null && !"FP".equals(tipoDocumento)) {
                 String descricaoMov = "Venda / Facturação (" + tipoDocumento + ") - " + compraSalva.getFormaPagamento();
                 if (compraSalva.getReferenciaMulticaixa() != null && !compraSalva.getReferenciaMulticaixa().isEmpty()) {
                     descricaoMov += " (Ref: " + compraSalva.getReferenciaMulticaixa() + ")";
                 }
 
+                int qtd = item.getQuantidade() != null ? item.getQuantidade() : 1;
+                
                 stockService.registrarMovimento(
                     produto.getId(), 
-                    item.getQuantidade().doubleValue(), 
+                    (double) qtd, 
                     "SAIDA", 
                     descricaoMov, 
                     numeroFatura, 
@@ -137,6 +144,8 @@ public class VendaService {
                     null, 
                     produto.getPreco()
                 );
+            } else {
+                System.err.println("AVISO CRÍTICO: Produto ignorado na baixa de stock por ser nulo ou tratar-se de Proforma.");
             }
         }
 

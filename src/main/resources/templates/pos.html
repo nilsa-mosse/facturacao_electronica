@@ -260,6 +260,7 @@
     max-width: 800px;
     padding: 0 20px;
   }
+
   .wizard-progress-bar {
     position: absolute;
     top: 20px;
@@ -269,6 +270,7 @@
     background: #e2e8f0;
     z-index: 1;
   }
+
   .wizard-progress-fill {
     position: absolute;
     top: 0;
@@ -278,6 +280,7 @@
     width: 0%;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .step-item {
     z-index: 2;
     background: white;
@@ -294,6 +297,7 @@
     position: relative;
     box-shadow: 0 0 0 4px white;
   }
+
   .step-item.active {
     border-color: #e0e7ff;
     background: var(--pos-primary);
@@ -301,11 +305,13 @@
     transform: scale(1.1);
     box-shadow: 0 0 0 4px white, 0 10px 15px -3px rgba(67, 97, 238, 0.3);
   }
+
   .step-item.completed {
     background: #10b981;
     border-color: #d1fae5;
     color: white;
   }
+
   .step-label {
     position: absolute;
     top: 50px;
@@ -317,19 +323,22 @@
     letter-spacing: 0.05em;
     transition: color 0.3s ease;
   }
+
   .step-item.active .step-label {
     color: var(--pos-primary);
   }
+
   .step-item.completed .step-label {
     color: #10b981;
   }
-  
+
   .wizard-step {
     display: none;
     opacity: 0;
     transform: translateX(20px);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .wizard-step.active {
     display: block;
     opacity: 1;
@@ -340,7 +349,7 @@
   #modalCheckout .modal-content {
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   #modalCheckout .modal-dialog {
     transition: max-width 0.3s ease;
   }
@@ -354,16 +363,17 @@
     border-radius: 24px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
   }
-  
+
   .step-header {
     padding: 24px 32px;
     border-bottom: 1px solid #f1f5f9;
   }
-  
+
   .step-body {
     padding: 32px;
   }
-    color: white;
+
+  color: white;
   }
 
   .doc-name {
@@ -433,19 +443,22 @@
     overflow: hidden;
     cursor: pointer;
   }
-  .payment-method-option .btn-check:checked + label {
+
+  .payment-method-option .btn-check:checked+label {
     background-color: white !important;
     border-color: var(--pos-primary) !important;
     transform: scale(1.02);
     box-shadow: 0 10px 20px -5px rgba(67, 97, 238, 0.15);
   }
+
   .payment-method-option .check-icon {
     opacity: 0;
     transform: scale(0.5);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--pos-primary);
   }
-  .payment-method-option .btn-check:checked + label .check-icon {
+
+  .payment-method-option .btn-check:checked+label .check-icon {
     opacity: 1;
     transform: scale(1);
   }
@@ -614,15 +627,28 @@
     z-index: 5;
     backdrop-filter: grayscale(1);
   }
-    @keyframes pulse-gold {
-      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
-      70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
-      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+
+  @keyframes pulse-gold {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
     }
-    .animate-pulse {
-      animation: pulse-gold 2s infinite;
+
+    70% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
     }
-  </style>
+
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
+  }
+
+  .animate-pulse {
+    animation: pulse-gold 2s infinite;
+  }
+</style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
   <div class="wrapper">
@@ -642,120 +668,126 @@
                   <input type="text" id="search" class="form-control border-0 bg-transparent"
                     th:placeholder="#{pos.procurar}" style="box-shadow: none;">
                 </div>
-  
+
                 <!-- Categorias Reais -->
                 <div class="d-flex gap-2 overflow-auto pb-2 hide-scrollbar" id="categoryFilters">
-                <button class="btn btn-sm btn-primary rounded-pill px-4 fw-bold filter-category shadow-sm"
-                  data-category="0">Todos</button>
-                <button th:each="cat : ${categorias}"
-                  class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold filter-category text-nowrap bg-white shadow-sm"
-                  th:data-category="${cat.id}" th:text="${cat.nome}">Categoria</button>
+                  <button class="btn btn-sm btn-primary rounded-pill px-4 fw-bold filter-category shadow-sm"
+                    data-category="0">Todos</button>
+                  <button th:each="cat : ${categorias}"
+                    class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold filter-category text-nowrap bg-white shadow-sm"
+                    th:data-category="${cat.id}" th:text="${cat.nome}">Categoria</button>
+                </div>
               </div>
-            </div>
 
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4" id="productList">
-              <div class="col product-item" th:each="produto : ${produtos}"
-                th:attr="data-category-id=${produto.categoria != null ? produto.categoria.id : 0}">
-                <div class="product-card"
-                  th:classappend="${produto.disponivel ? 'btn-quick-add active-card' : 'product-disabled'}"
-                  th:style="${produto.disponivel ? 'cursor: pointer;' : ''}" th:data-id="${produto.id}"
-                  th:data-nome="${produto.nome}" th:data-preco="${produto.preco}" th:data-iva="${produto.ivaPercentual}"
-                  th:data-stock="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : ''}">
+              <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4" id="productList">
+                <div class="col product-item" th:each="produto : ${produtos}"
+                  th:attr="data-category-id=${produto.categoria != null ? produto.categoria.id : 0}">
+                  <div class="product-card"
+                    th:classappend="${produto.disponivel ? 'btn-quick-add active-card' : 'product-disabled'}"
+                    th:style="${produto.disponivel ? 'cursor: pointer;' : ''}" th:data-id="${produto.id}"
+                    th:data-nome="${produto.nome}" th:data-preco="${produto.preco}"
+                    th:data-iva="${produto.ivaPercentual}"
+                    th:data-stock="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : ''}">
 
-                  <div class="product-img-container">
-                    <div th:if="${!produto.disponivel}" class="out-of-stock-overlay clickable-when-disabled"
-                      th:data-id="${produto.id}" th:data-nome="${produto.nome}"
-                      style="pointer-events:auto;cursor:pointer;">
-                      ESGOTADO
-                    </div>
-                    <img
-                      th:src="${produto.imagem != null && !produto.imagem.isEmpty() ? produto.imagem : '/dist/img/no-image.png'}"
-                      class="product-img" alt="Produto">
-                    <div class="btn-quick-add-float" th:if="${produto.disponivel}">
-                      <i class="fas fa-plus"></i>
-                    </div>
-                    <!-- Badge de Promoção -->
-                    <div th:if="${produto.emPromocao}" class="position-absolute top-0 start-0 m-2">
-                      <span class="badge rounded-pill bg-warning text-dark shadow-sm fw-bold animate-pulse">
-                        <i class="fas fa-fire me-1"></i> PROMO
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="product-info">
-                    <div class="product-name text-truncate" th:text="${produto.nome}">Nome do Produto</div>
-                    <div class="d-flex justify-content-between align-items-center mt-2">
-                      <div class="product-price">
-                        <span th:text="${produto.preco}">0</span>
+                    <div class="product-img-container">
+                      <div th:if="${!produto.disponivel}" class="out-of-stock-overlay clickable-when-disabled"
+                        th:data-id="${produto.id}" th:data-nome="${produto.nome}"
+                        style="pointer-events:auto;cursor:pointer;">
+                        ESGOTADO
                       </div>
-                      <span th:if="${!produto.disponivel}" class="badge bg-danger">ESGOTADO</span>
-                      <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i class="fas fa-percent me-1"></i> PROMO</span>
-                      <span
-                        th:if="${produto.disponivel && (produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5)}"
-                        class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> BAIXO</span>
+                      <img
+                        th:src="${produto.imagem != null && !produto.imagem.isEmpty() ? produto.imagem : '/dist/img/no-image.png'}"
+                        class="product-img" alt="Produto">
+                      <div class="btn-quick-add-float" th:if="${produto.disponivel}">
+                        <i class="fas fa-plus"></i>
+                      </div>
+                      <!-- Badge de Promoção -->
+                      <div th:if="${produto.emPromocao}" class="position-absolute top-0 start-0 m-2">
+                        <span class="badge rounded-pill bg-warning text-dark shadow-sm fw-bold animate-pulse">
+                          <i class="fas fa-fire me-1"></i> PROMO
+                        </span>
+                      </div>
                     </div>
-                    <div class="small text-muted mt-1 fw-bold d-flex justify-content-between">
-                      <span>Stock: <span
-                          th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '∞'}">0</span></span>
-                      <span th:if="${produto.ivaPercentual != null}" class="text-info">IVA <span
-                          th:text="${produto.ivaPercentual}">0</span>%</span>
+
+                    <div class="product-info">
+                      <div class="product-name text-truncate" th:text="${produto.nome}">Nome do Produto</div>
+                      <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div class="product-price">
+                          <span th:text="${produto.preco}">0</span>
+                        </div>
+                        <span th:if="${!produto.disponivel}" class="badge bg-danger">ESGOTADO</span>
+                        <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i
+                            class="fas fa-percent me-1"></i> PROMO</span>
+                        <span
+                          th:if="${produto.disponivel && (produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5)}"
+                          class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i>
+                          BAIXO</span>
+                      </div>
+                      <div class="small text-muted mt-1 fw-bold d-flex justify-content-between">
+                        <span>Stock: <span
+                            th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '∞'}">0</span></span>
+                        <span th:if="${produto.ivaPercentual != null}" class="text-info">IVA <span
+                            th:text="${produto.ivaPercentual}">0</span>%</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Seção de Carrinho -->
-        <div class="cart-section">
-          <div class="cart-header d-flex justify-content-between align-items-center">
-            <h4 class="fw-bold mb-0"><i class="fas fa-shopping-basket me-2 text-primary"></i><span
-                th:text="#{pos.carrinho.titulo}">Carrinho</span></h4>
-            <div class="d-flex gap-2 align-items-center">
-              <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold" onclick="abrirModalVendasSuspensas()" title="Recuperar Vendas Suspensas">
-                <i class="fas fa-history me-1"></i> <span style="font-size: 0.7rem;">SUSPENSAS</span>
-                <span id="suspendedCountBadge" class="badge bg-warning text-dark rounded-pill ms-1" style="font-size: 0.6rem; display: none;">0</span>
+          <!-- Seção de Carrinho -->
+          <div class="cart-section">
+            <div class="cart-header d-flex justify-content-between align-items-center">
+              <h4 class="fw-bold mb-0"><i class="fas fa-shopping-basket me-2 text-primary"></i><span
+                  th:text="#{pos.carrinho.titulo}">Carrinho</span></h4>
+              <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold"
+                  onclick="abrirModalVendasSuspensas()" title="Recuperar Vendas Suspensas">
+                  <i class="fas fa-history me-1"></i> <span style="font-size: 0.7rem;">SUSPENSAS</span>
+                  <span id="suspendedCountBadge" class="badge bg-warning text-dark rounded-pill ms-1"
+                    style="font-size: 0.6rem; display: none;">0</span>
+                </button>
+                <span id="cartCountBadge" class="badge bg-primary rounded-pill">0 Itens</span>
+              </div>
+            </div>
+
+            <div class="cart-items-container" id="cartItemsList">
+              <!-- Gerado via JS -->
+            </div>
+
+            <div class="cart-footer">
+              <div class="cart-summary shadow-sm mb-4">
+                <div class="summary-row">
+                  <span class="text-muted" th:text="#{pos.total.sem_imposto}">Subtotal</span>
+                  <span class="fw-bold" id="totalSemImposto">0.00 Kz</span>
+                </div>
+                <div class="summary-row">
+                  <span class="text-muted" th:text="#{pos.iva}">IVA Acumulado</span>
+                  <span class="fw-bold text-info" id="valorIva">0.00 Kz</span>
+                </div>
+                <div class="summary-row summary-total">
+                  <span th:text="#{pos.total}">Total Final</span>
+                  <span id="totalFinal">0.00 Kz</span>
+                </div>
+              </div>
+
+              <button type="button" id="btnContinuar" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm"
+                onclick="abrirModalCheckout()">
+                <i class="fas fa-arrow-right me-2"></i> Continuar
               </button>
-              <span id="cartCountBadge" class="badge bg-primary rounded-pill">0 Itens</span>
+
             </div>
-          </div>
-
-          <div class="cart-items-container" id="cartItemsList">
-            <!-- Gerado via JS -->
-          </div>
-
-          <div class="cart-footer">
-            <div class="cart-summary shadow-sm mb-4">
-              <div class="summary-row">
-                <span class="text-muted" th:text="#{pos.total.sem_imposto}">Subtotal</span>
-                <span class="fw-bold" id="totalSemImposto">0.00 Kz</span>
-              </div>
-              <div class="summary-row">
-                <span class="text-muted" th:text="#{pos.iva}">IVA Acumulado</span>
-                <span class="fw-bold text-info" id="valorIva">0.00 Kz</span>
-              </div>
-              <div class="summary-row summary-total">
-                <span th:text="#{pos.total}">Total Final</span>
-                <span id="totalFinal">0.00 Kz</span>
-              </div>
-            </div>
-
-            <button type="button" id="btnContinuar" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm"
-              onclick="abrirModalCheckout()">
-              <i class="fas fa-arrow-right me-2"></i> Continuar
-            </button>
-
           </div>
         </div>
-      </div>
       </div> <!-- Fim de posMainView -->
 
       <!-- VISTA 2: ECRÃ DE CHECKOUT (WIZARD) -->
-      <div id="checkoutWizardView" class="d-none" style="background: #f8fafc; min-height: 100vh; position: relative; z-index: 10;">
+      <div id="checkoutWizardView" class="d-none"
+        style="background: #f8fafc; min-height: 100vh; position: relative; z-index: 10;">
         <!-- Header Fixo do Checkout -->
-        <div class="checkout-header py-4 px-5 text-white d-flex justify-content-between align-items-center" 
-             style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+        <div class="checkout-header py-4 px-5 text-white d-flex justify-content-between align-items-center"
+          style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
           <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-shopping-bag me-3"></i> Revisão da Compra</h4>
             <small class="opacity-75">Finalize a sua venda em poucos passos</small>
@@ -796,7 +828,14 @@
                         <h5 class="fw-bold mb-0 text-dark">Confirmar Pedido</h5>
                         <small class="text-muted">Revise os itens antes de emitir o documento</small>
                       </div>
-                      <span class="badge bg-soft-info rounded-pill px-3 py-2" id="badgeTotalItens" style="font-size: 0.8rem;">0 itens</span>
+                      <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-soft-info rounded-pill px-3 py-2" id="badgeTotalItens"
+                          style="font-size: 0.8rem;">0 itens</span>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3"
+                          onclick="voltarParaPos()">
+                          <i class="fas fa-plus-circle me-1"></i> ADICIONAR MAIS
+                        </button>
+                      </div>
                     </div>
                     <div class="step-body p-0">
                       <div class="table-responsive" style="max-height: 450px;">
@@ -806,14 +845,16 @@
                               <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Produto</th>
                               <th class="text-center py-3 text-uppercase small fw-bold text-muted">Qtd</th>
                               <th class="text-end py-3 text-uppercase small fw-bold text-muted">Unitário</th>
-                              <th class="text-end pe-4 py-3 text-uppercase small fw-bold text-muted">Total</th>
+                              <th class="text-end py-3 text-uppercase small fw-bold text-muted">Total</th>
+                              <th class="text-end pe-4 py-3 text-uppercase small fw-bold text-muted"></th>
                             </tr>
                           </thead>
                           <tbody id="modalCartBody"></tbody>
                         </table>
                       </div>
                     </div>
-                    <div class="card-footer bg-light bg-opacity-50 border-top-0 p-4" style="border-radius: 0 0 24px 24px;">
+                    <div class="card-footer bg-light bg-opacity-50 border-top-0 p-4"
+                      style="border-radius: 0 0 24px 24px;">
                       <div class="row justify-content-end">
                         <div class="col-12 col-md-5">
                           <div class="d-flex justify-content-between mb-2">
@@ -849,10 +890,12 @@
                     <div class="step-body">
                       <!-- Tipo de Documento -->
                       <div class="mb-5">
-                        <label class="form-label small fw-bold text-muted text-uppercase mb-3 d-block" style="letter-spacing: 1px;">Documento Fiscal</label>
+                        <label class="form-label small fw-bold text-muted text-uppercase mb-3 d-block"
+                          style="letter-spacing: 1px;">Documento Fiscal</label>
                         <div class="row g-3" id="docTypeSelector">
                           <div class="col-12 col-md-6 col-xl-3">
-                            <div class="doc-type-card active p-3" data-type="FR" data-url="/api/compras/single" data-name="Factura/Recibo">
+                            <div class="doc-type-card active p-3" data-type="FR" data-url="/api/compras/single"
+                              data-name="Factura/Recibo">
                               <div class="d-flex align-items-center gap-3">
                                 <div class="doc-type-icon">
                                   <i class="fas fa-file-invoice-dollar"></i>
@@ -865,7 +908,8 @@
                             </div>
                           </div>
                           <div class="col-12 col-md-6 col-xl-3">
-                            <div class="doc-type-card p-3" data-type="FT" data-url="/api/compras/single" data-name="Factura">
+                            <div class="doc-type-card p-3" data-type="FT" data-url="/api/compras/single"
+                              data-name="Factura">
                               <div class="d-flex align-items-center gap-3">
                                 <div class="doc-type-icon">
                                   <i class="fas fa-file-invoice"></i>
@@ -878,7 +922,8 @@
                             </div>
                           </div>
                           <div class="col-12 col-md-6 col-xl-3">
-                            <div class="doc-type-card p-3" data-type="FP" data-url="/api/compras/proforma" data-name="Pró-forma">
+                            <div class="doc-type-card p-3" data-type="FP" data-url="/api/compras/proforma"
+                              data-name="Pró-forma">
                               <div class="d-flex align-items-center gap-3">
                                 <div class="doc-type-icon">
                                   <i class="fas fa-file-alt"></i>
@@ -891,7 +936,8 @@
                             </div>
                           </div>
                           <div class="col-12 col-md-6 col-xl-3">
-                            <div class="doc-type-card p-3" data-type="GR" data-url="/api/compras/guia" data-name="Guia Remessa">
+                            <div class="doc-type-card p-3" data-type="GR" data-url="/api/compras/guia"
+                              data-name="Guia Remessa">
                               <div class="d-flex align-items-center gap-3">
                                 <div class="doc-type-icon">
                                   <i class="fas fa-truck"></i>
@@ -913,39 +959,49 @@
                             <i class="fas fa-user-circle me-2 text-primary"></i> Cliente
                           </h6>
                           <div class="btn-group p-1 bg-white rounded-pill shadow-sm">
-                            <button type="button" class="btn btn-primary btn-sm px-3 rounded-pill" id="btnClienteExistente" onclick="toggleClienteMode('existente')">Existente</button>
-                            <button type="button" class="btn btn-light btn-sm px-3 rounded-pill" id="btnClienteNovo" onclick="toggleClienteMode('novo')">Novo Registo</button>
+                            <button type="button" class="btn btn-primary btn-sm px-3 rounded-pill"
+                              id="btnClienteExistente" onclick="toggleClienteMode('existente')">Existente</button>
+                            <button type="button" class="btn btn-light btn-sm px-3 rounded-pill" id="btnClienteNovo"
+                              onclick="toggleClienteMode('novo')">Novo Registo</button>
                           </div>
                         </div>
-                        
+
                         <div id="painelClienteExistente">
                           <select id="selectCliente" class="form-select border-0 shadow-sm py-3 px-4 rounded-4">
                             <option value="">-- Consumidor Final (999999999) --</option>
-                            <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.nome + ' — NIF: ' + c.nif}"></option>
+                            <option th:each="c : ${clientes}" th:value="${c.id}"
+                              th:text="${c.nome + ' — NIF: ' + c.nif}"></option>
                           </select>
                         </div>
-                        
+
                         <div id="painelClienteNovo" style="display: none;">
                           <div class="row g-3">
                             <div class="col-md-6">
                               <label class="form-label small fw-bold text-muted">Nome Completo *</label>
-                              <input type="text" id="novoClienteNome" class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="Ex: João Silva">
+                              <input type="text" id="novoClienteNome"
+                                class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="Ex: João Silva">
                             </div>
                             <div class="col-md-6">
                               <label class="form-label small fw-bold text-muted">NIF / BI *</label>
-                              <input type="text" id="novoClienteNif" class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="999999999">
+                              <input type="text" id="novoClienteNif"
+                                class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="999999999">
                             </div>
                             <div class="col-md-12">
                               <label class="form-label small fw-bold text-muted">Morada Completa</label>
-                              <input type="text" id="novoClienteMorada" class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="Rua, Bairro, Cidade">
+                              <input type="text" id="novoClienteMorada"
+                                class="form-control border-0 shadow-sm py-2 rounded-3"
+                                placeholder="Rua, Bairro, Cidade">
                             </div>
                             <div class="col-md-6">
                               <label class="form-label small fw-bold text-muted">Contacto Telefónico</label>
-                              <input type="text" id="novoClienteTelefone" class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="+244 ...">
+                              <input type="text" id="novoClienteTelefone"
+                                class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="+244 ...">
                             </div>
                             <div class="col-md-6">
                               <label class="form-label small fw-bold text-muted">Endereço de Email</label>
-                              <input type="email" id="novoClienteEmail" class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="cliente@exemplo.com">
+                              <input type="email" id="novoClienteEmail"
+                                class="form-control border-0 shadow-sm py-2 rounded-3"
+                                placeholder="cliente@exemplo.com">
                             </div>
                           </div>
                         </div>
@@ -968,11 +1024,14 @@
                     <div class="step-body">
                       <div class="row g-5">
                         <div class="col-md-6">
-                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block" style="letter-spacing: 1px;">Método de Pagamento</label>
+                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block"
+                            style="letter-spacing: 1px;">Método de Pagamento</label>
                           <div class="d-flex flex-column gap-3 mb-4">
                             <div class="payment-method-option">
-                              <input type="checkbox" class="btn-check pagamento-check" id="pagCASH" value="CASH" autocomplete="off" checked>
-                              <label for="pagCASH" class="btn btn-outline-success w-100 py-4 d-flex align-items-center gap-3 text-start rounded-4 border-2">
+                              <input type="checkbox" class="btn-check pagamento-check" id="pagCASH" value="CASH"
+                                autocomplete="off" checked>
+                              <label for="pagCASH"
+                                class="btn btn-outline-success w-100 py-4 d-flex align-items-center gap-3 text-start rounded-4 border-2">
                                 <div class="bg-success-subtle text-success p-3 rounded-circle shadow-sm">
                                   <i class="fas fa-money-bill-wave fa-xl"></i>
                                 </div>
@@ -986,8 +1045,10 @@
                               </label>
                             </div>
                             <div class="payment-method-option">
-                              <input type="checkbox" class="btn-check pagamento-check" id="pagMULTICAIXA" value="MULTICAIXA" autocomplete="off">
-                              <label for="pagMULTICAIXA" class="btn btn-outline-primary w-100 py-4 d-flex align-items-center gap-3 text-start rounded-4 border-2">
+                              <input type="checkbox" class="btn-check pagamento-check" id="pagMULTICAIXA"
+                                value="MULTICAIXA" autocomplete="off">
+                              <label for="pagMULTICAIXA"
+                                class="btn btn-outline-primary w-100 py-4 d-flex align-items-center gap-3 text-start rounded-4 border-2">
                                 <div class="bg-primary-subtle text-primary p-3 rounded-circle shadow-sm">
                                   <i class="fas fa-credit-card fa-xl"></i>
                                 </div>
@@ -1004,7 +1065,8 @@
 
                           <div id="painelMulticaixa" class="bg-white p-4 rounded-4 shadow-sm border d-none mt-4">
                             <h6 class="fw-bold mb-4 text-primary d-flex align-items-center">
-                              <span class="bg-primary-subtle p-2 rounded-3 me-2"><i class="fas fa-terminal text-primary"></i></span>
+                              <span class="bg-primary-subtle p-2 rounded-3 me-2"><i
+                                  class="fas fa-terminal text-primary"></i></span>
                               Terminal de Pagamento (TPA)
                             </h6>
                             <div class="mb-4">
@@ -1021,15 +1083,19 @@
                               <div class="col-6">
                                 <label class="form-label small fw-bold text-muted">Valor no Cartão</label>
                                 <div class="input-group">
-                                  <span class="input-group-text border-0 bg-primary-subtle text-primary fw-bold">Kz</span>
-                                  <input type="number" id="multicaixaValorPago" class="form-control border-light bg-light fw-bold" step="0.01">
+                                  <span
+                                    class="input-group-text border-0 bg-primary-subtle text-primary fw-bold">Kz</span>
+                                  <input type="number" id="multicaixaValorPago"
+                                    class="form-control border-light bg-light fw-bold" step="0.01">
                                 </div>
                               </div>
                               <div class="col-6">
                                 <label class="form-label small fw-bold text-muted">Troco / Cash</label>
                                 <div class="input-group">
-                                  <span class="input-group-text border-0 bg-success-subtle text-success fw-bold">Kz</span>
-                                  <input type="text" id="mistoCashRestante" class="form-control border-light bg-white fw-bold text-success" readonly>
+                                  <span
+                                    class="input-group-text border-0 bg-success-subtle text-success fw-bold">Kz</span>
+                                  <input type="text" id="mistoCashRestante"
+                                    class="form-control border-light bg-white fw-bold text-success" readonly>
                                 </div>
                               </div>
                             </div>
@@ -1037,13 +1103,16 @@
                         </div>
 
                         <div class="col-md-6 ps-md-5">
-                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block" style="letter-spacing: 1px;">Resumo Final</label>
-                          <div class="bg-dark text-white p-4 rounded-4 shadow-lg mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block"
+                            style="letter-spacing: 1px;">Resumo Final</label>
+                          <div class="bg-dark text-white p-4 rounded-4 shadow-lg mb-4"
+                            style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
                             <div class="d-flex justify-content-between mb-3 opacity-75">
                               <span>Total Bruto</span>
                               <span class="fw-bold" id="resumoTotalBruto">0.00 Kz</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-3 text-warning" id="linhaComissaoTPA" style="display: none !important;">
+                            <div class="d-flex justify-content-between mb-3 text-warning" id="linhaComissaoTPA"
+                              style="display: none !important;">
                               <span>Taxa TPA (1.5%)</span>
                               <span id="multicaixaComissao" class="fw-bold">- 0.00 Kz</span>
                             </div>
@@ -1053,13 +1122,15 @@
                               <span id="multicaixaValorLiquido" class="h2 fw-bold text-info mb-0">0.00 Kz</span>
                             </div>
                           </div>
-                          
-                          <div class="p-4 rounded-4 bg-primary-subtle bg-opacity-10 border border-primary border-opacity-10">
+
+                          <div
+                            class="p-4 rounded-4 bg-primary-subtle bg-opacity-10 border border-primary border-opacity-10">
                             <div class="d-flex gap-3">
                               <i class="fas fa-shield-alt text-primary fs-4"></i>
                               <div>
                                 <h6 class="fw-bold text-primary mb-1">Certificação AGT</h6>
-                                <p class="small text-muted mb-0">Este documento será assinado digitalmente e comunicado às autoridades fiscais.</p>
+                                <p class="small text-muted mb-0">Este documento será assinado digitalmente e comunicado
+                                  às autoridades fiscais.</p>
                               </div>
                             </div>
                           </div>
@@ -1074,18 +1145,22 @@
 
           <!-- Footer do Checkout -->
           <div class="checkout-footer-nav d-flex justify-content-center gap-3 mt-5 pb-5">
-            <button type="button" class="btn btn-ghost-danger rounded-pill px-4 py-2 fw-bold" onclick="cancelarCompra()">
+            <button type="button" class="btn btn-ghost-danger rounded-pill px-4 py-2 fw-bold"
+              onclick="cancelarCompra()">
               <i class="fas fa-times me-2"></i> ANULAR
             </button>
-            <button type="button" class="btn btn-ghost-secondary rounded-pill px-4 py-2 fw-bold" onclick="suspenderVenda()">
+            <button type="button" class="btn btn-ghost-secondary rounded-pill px-4 py-2 fw-bold"
+              onclick="suspenderVenda()">
               <i class="fas fa-pause me-2"></i> SUSPENDER
             </button>
             <div class="d-flex gap-3 ms-md-auto">
-              <button type="button" class="btn btn-outline-secondary rounded-pill px-5 py-2 fw-bold d-none" id="btnAnteriorWizard" onclick="changeStep(-1)">
+              <button type="button" class="btn btn-outline-secondary rounded-pill px-5 py-2 fw-bold d-none"
+                id="btnAnteriorWizard" onclick="changeStep(-1)">
                 <i class="fas fa-arrow-left me-2"></i> ANTERIOR
               </button>
-              
-              <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold" id="btnProximoWizard" onclick="changeStep(1)">
+
+              <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold" id="btnProximoWizard"
+                onclick="changeStep(1)">
                 PRÓXIMO PASSO <i class="fas fa-arrow-right ms-2"></i>
               </button>
 
@@ -1106,1182 +1181,1139 @@
       <span id="t-proforma-baixar" th:text="#{pos.proforma.baixar}"></span>
     </div>
 
-  <!-- Modal: Simulação de TPA Multicaixa -->
-  <div class="modal fade" id="modalTPA" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-      <div class="modal-content text-center shadow-lg" style="border-radius: 20px; border: 4px solid #1a1d20;">
-        <div class="modal-header bg-dark text-white" style="border-radius: 15px 15px 0 0;">
-          <h6 class="modal-title w-100 fw-bold font-monospace"><i class="fas fa-terminal me-2"></i>TPA MULTICAIXA</h6>
-        </div>
-        <div class="modal-body p-4" style="background: #e9ecef;">
-          <div id="tpaDisplay" class="bg-success text-white p-3 mb-4 font-monospace fw-bold shadow-inset"
-            style="border-radius: 8px; font-size: 1.1rem; min-height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.4);">
-            <span style="font-size: 0.8rem; opacity: 0.8;">MONTANTE</span>
-            <span id="tpaMontante" style="font-size: 1.3rem;">0.00 Kz</span>
+
+    <!-- Modal: Detalhes de Transporte (Guia de Remessa) -->
+    <div class="modal fade" id="modalTransporteGuia" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+          <div class="modal-header border-0 p-4 pb-0">
+            <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
+              <i class="fas fa-truck me-3 text-info"></i>
+              Detalhes de Transporte
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-          <div id="tpaStatus" class="font-monospace fw-bold text-dark mb-4" style="font-size: 0.9rem;">
-            APROXIME OU INSIRA O CARTÃO
-          </div>
-          <div style="height: 60px; display: flex; align-items: center; justify-content: center;">
-            <div class="spinner-border text-primary" role="status" id="tpaSpinner"
-              style="width: 2.5rem; height: 2.5rem;">
-              <span class="visually-hidden">A processar...</span>
+          <div class="modal-body p-4">
+            <div class="row g-4">
+              <!-- Coluna 1: Informação Geral -->
+              <div class="col-12 col-md-6 border-end">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">Informação Logística</h6>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Nome do Motorista *</label>
+                  <input type="text" id="guiaMotorista" class="form-control form-control-sm" placeholder="Nome completo"
+                    style="border-radius: 8px;">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Matrícula da Viatura *</label>
+                  <input type="text" id="guiaMatricula" class="form-control form-control-sm"
+                    placeholder="Ex: LD-00-00-AA" style="border-radius: 8px;">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Local de Carga</label>
+                  <input type="text" id="guiaLocalCarga" class="form-control form-control-sm"
+                    placeholder="Onde os produtos saem" style="border-radius: 8px;">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Local de Descarga</label>
+                  <input type="text" id="guiaLocalDescarga" class="form-control form-control-sm"
+                    placeholder="Onde os produtos serão entregues" style="border-radius: 8px;">
+                </div>
+              </div>
+
+              <!-- Coluna 2: Artigos a Transportar -->
+              <div class="col-12 col-md-6 bg-light bg-opacity-50 p-3" style="border-radius: 12px;">
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">Artigos do Carrinho</h6>
+                <div class="table-responsive" style="max-height: 250px;">
+                  <table class="table table-sm table-borderless align-middle">
+                    <thead class="bg-white border-bottom shadow-sm">
+                      <tr>
+                        <th class="small">Produto</th>
+                        <th class="small text-center">Qtd</th>
+                      </tr>
+                    </thead>
+                    <tbody id="listaArtigosTransporte">
+                      <!-- Preenchido via JS -->
+                    </tbody>
+                  </table>
+                </div>
+                <div class="alert alert-info border-0 mt-3 mb-0 py-2 px-3 small" style="border-radius: 8px;">
+                  <i class="fas fa-info-circle me-1"></i> Os itens acima serão convertidos automaticamente em registos
+                  de
+                  Guia de Remessa.
+                </div>
+              </div>
             </div>
-            <i class="fas fa-check-circle text-success" id="tpaSuccessIcon"
-              style="font-size: 3.5rem; display: none;"></i>
-            <i class="fas fa-times-circle text-danger" id="tpaErrorIcon" style="font-size: 3.5rem; display: none;"></i>
           </div>
-        </div>
-        <div class="modal-footer bg-dark p-3 justify-content-center" style="border-radius: 0 0 15px 15px;">
-          <div class="d-flex gap-2">
-            <div style="width: 25px; height: 12px; background: #dc3545; border-radius: 3px;"></div>
-            <div style="width: 25px; height: 12px; background: #ffc107; border-radius: 3px;"></div>
-            <div style="width: 25px; height: 12px; background: #28a745; border-radius: 3px;"></div>
+          <div class="modal-footer border-0 p-4 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow-sm"
+              onclick="confirmarEmissaoGuia()">
+              <i class="fas fa-check-circle me-1"></i> Gerar Guia de Remessa
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modal: Detalhes de Transporte (Guia de Remessa) -->
-  <div class="modal fade" id="modalTransporteGuia" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-        <div class="modal-header border-0 p-4 pb-0">
-          <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
-            <i class="fas fa-truck me-3 text-info"></i>
-            Detalhes de Transporte
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4">
-          <div class="row g-4">
-            <!-- Coluna 1: Informação Geral -->
-            <div class="col-12 col-md-6 border-end">
-              <h6 class="fw-bold text-muted text-uppercase small mb-3">Informação Logística</h6>
-              <div class="mb-3">
-                <label class="form-label small fw-bold">Nome do Motorista *</label>
-                <input type="text" id="guiaMotorista" class="form-control form-control-sm" placeholder="Nome completo"
-                  style="border-radius: 8px;">
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-bold">Matrícula da Viatura *</label>
-                <input type="text" id="guiaMatricula" class="form-control form-control-sm" placeholder="Ex: LD-00-00-AA"
-                  style="border-radius: 8px;">
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-bold">Local de Carga</label>
-                <input type="text" id="guiaLocalCarga" class="form-control form-control-sm"
-                  placeholder="Onde os produtos saem" style="border-radius: 8px;">
-              </div>
-              <div class="mb-3">
-                <label class="form-label small fw-bold">Local de Descarga</label>
-                <input type="text" id="guiaLocalDescarga" class="form-control form-control-sm"
-                  placeholder="Onde os produtos serão entregues" style="border-radius: 8px;">
+    <!-- Modal: Disponibilidade em Estabelecimentos -->
+    <div class="modal fade" id="estoqueModal" tabindex="-1" aria-labelledby="estoqueModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h5 class="modal-title mb-0" id="estoqueModalLabel">Disponibilidade</h5>
+              <small class="text-muted" id="estoqueModalSubtitle">Lojas / Armazéns</small>
+            </div>
+            <div class="ms-3 text-end" style="min-width:160px;">
+              <div id="estoqueSpinner" class="spinner-border text-primary d-none" role="status"
+                style="width:1.4rem;height:1.4rem;vertical-align:middle;"></div>
+              <div class="d-inline-block ms-2"><strong id="estoqueModalNomeSmall"></strong></div>
+              <div class="d-block small text-muted" style="font-size:0.78rem;"><span id="estoqueCount">--</span> locais
               </div>
             </div>
-
-            <!-- Coluna 2: Artigos a Transportar -->
-            <div class="col-12 col-md-6 bg-light bg-opacity-50 p-3" style="border-radius: 12px;">
-              <h6 class="fw-bold text-muted text-uppercase small mb-3">Artigos do Carrinho</h6>
-              <div class="table-responsive" style="max-height: 250px;">
-                <table class="table table-sm table-borderless align-middle">
-                  <thead class="bg-white border-bottom shadow-sm">
-                    <tr>
-                      <th class="small">Produto</th>
-                      <th class="small text-center">Qtd</th>
-                    </tr>
-                  </thead>
-                  <tbody id="listaArtigosTransporte">
-                    <!-- Preenchido via JS -->
-                  </tbody>
-                </table>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="estoqueModalProdutoId" value="" />
+            <div class="d-flex gap-2 mb-3 align-items-center">
+              <div class="flex-grow-1">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                  <input id="estoqueSearch" type="text" class="form-control border-start-0"
+                    placeholder="Pesquisar por nome, endereço ou tipo...">
+                </div>
               </div>
-              <div class="alert alert-info border-0 mt-3 mb-0 py-2 px-3 small" style="border-radius: 8px;">
-                <i class="fas fa-info-circle me-1"></i> Os itens acima serão convertidos automaticamente em registos de
-                Guia de Remessa.
+              <div style="width: 130px;">
+                <select id="estoqueFilterTipo" class="form-select form-select-sm">
+                  <option value="">Todos Tipos</option>
+                  <option value="LOJA">LOJA</option>
+                  <option value="ARMAZEM">ARMAZEM</option>
+                </select>
               </div>
+              <div class="form-check ms-2 mb-0">
+                <input class="form-check-input" type="checkbox" value="" id="estoqueShowZero">
+                <label class="form-check-label small" for="estoqueShowZero">Mostrar zeros</label>
+              </div>
+              <div class="form-check ms-2 mb-0">
+                <input class="form-check-input" type="checkbox" value="" id="estoqueIncludeAll">
+                <label class="form-check-label small" for="estoqueIncludeAll">Pesquisar todo o grupo</label>
+              </div>
+            </div>
+            <div class="mb-2"><strong id="estoqueModalNome"></strong></div>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Estabelecimento</th>
+                    <th>Endereço</th>
+                    <th class="text-end">Quantidade</th>
+                    <th>Tipo</th>
+                  </tr>
+                </thead>
+                <tbody id="estoqueModalBody">
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">Pesquisando...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="mt-2 small text-muted">
+              <span class="badge bg-success me-2">Disponível</span> locais com stock &nbsp; &nbsp;
+              <span class="badge bg-secondary me-2">Sem stock</span> locais com quantidade 0 &nbsp; &nbsp;
+              <span class="badge bg-warning text-dark">Oculto</span> estabelecimento marcado como não visível
             </div>
           </div>
-        </div>
-        <div class="modal-footer border-0 p-4 pt-0">
-          <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">
-            Cancelar
-          </button>
-          <button type="button" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow-sm"
-            onclick="confirmarEmissaoGuia()">
-            <i class="fas fa-check-circle me-1"></i> Gerar Guia de Remessa
-          </button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modal: Disponibilidade em Estabelecimentos -->
-  <div class="modal fade" id="estoqueModal" tabindex="-1" aria-labelledby="estoqueModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div>
-            <h5 class="modal-title mb-0" id="estoqueModalLabel">Disponibilidade</h5>
-            <small class="text-muted" id="estoqueModalSubtitle">Lojas / Armazéns</small>
-          </div>
-          <div class="ms-3 text-end" style="min-width:160px;">
-            <div id="estoqueSpinner" class="spinner-border text-primary d-none" role="status"
-              style="width:1.4rem;height:1.4rem;vertical-align:middle;"></div>
-            <div class="d-inline-block ms-2"><strong id="estoqueModalNomeSmall"></strong></div>
-            <div class="d-block small text-muted" style="font-size:0.78rem;"><span id="estoqueCount">--</span> locais
-            </div>
-          </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" id="estoqueModalProdutoId" value="" />
-          <div class="d-flex gap-2 mb-3 align-items-center">
-            <div class="flex-grow-1">
-              <div class="input-group input-group-sm">
-                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                <input id="estoqueSearch" type="text" class="form-control border-start-0"
-                  placeholder="Pesquisar por nome, endereço ou tipo...">
-              </div>
-            </div>
-            <div style="width: 130px;">
-              <select id="estoqueFilterTipo" class="form-select form-select-sm">
-                <option value="">Todos Tipos</option>
-                <option value="LOJA">LOJA</option>
-                <option value="ARMAZEM">ARMAZEM</option>
-              </select>
-            </div>
-            <div class="form-check ms-2 mb-0">
-              <input class="form-check-input" type="checkbox" value="" id="estoqueShowZero">
-              <label class="form-check-label small" for="estoqueShowZero">Mostrar zeros</label>
-            </div>
-            <div class="form-check ms-2 mb-0">
-              <input class="form-check-input" type="checkbox" value="" id="estoqueIncludeAll">
-              <label class="form-check-label small" for="estoqueIncludeAll">Pesquisar todo o grupo</label>
-            </div>
-          </div>
-          <div class="mb-2"><strong id="estoqueModalNome"></strong></div>
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Estabelecimento</th>
-                  <th>Endereço</th>
-                  <th class="text-end">Quantidade</th>
-                  <th>Tipo</th>
-                </tr>
-              </thead>
-              <tbody id="estoqueModalBody">
-                <tr>
-                  <td colspan="4" class="text-center text-muted">Pesquisando...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="mt-2 small text-muted">
-            <span class="badge bg-success me-2">Disponível</span> locais com stock &nbsp; &nbsp;
-            <span class="badge bg-secondary me-2">Sem stock</span> locais com quantidade 0 &nbsp; &nbsp;
-            <span class="badge bg-warning text-dark">Oculto</span> estabelecimento marcado como não visível
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+    <!-- JS Logic Refactored -->
+    <!-- JS Logic -->
+    <script>
+      var cart = [];
 
-  <!-- JS Logic Refactored -->
-  <!-- JS Logic -->
-  <script>
-    var cart = [];
+      function renderCart() {
+        var container = $("#cartItemsList");
+        container.empty();
+        var subtotal = 0;
+        var totalIva = 0;
+        var count = 0;
 
-    function renderCart() {
-      var container = $("#cartItemsList");
-      container.empty();
-      var subtotal = 0;
-      var totalIva = 0;
-      var count = 0;
-
-      cart.forEach(function (item, index) {
-        var itemTotal = item.qtd * item.preco;
-        subtotal += itemTotal;
-        totalIva += itemTotal * (item.ivaPercentual / 100);
-        count += item.qtd;
-
-        var cardHtml =
-          '<div class="cart-item-card">' +
-          '<div class="cart-item-info">' +
-          '<h6 class="fw-bold mb-1 small text-truncate" style="max-width: 150px;">' + item.nome + '</h6>' +
-          '<div class="text-muted small">' + item.preco.toFixed(2) + ' Kz</div>' +
-          '</div>' +
-          '<div class="d-flex align-items-center gap-3">' +
-          '<div class="cart-item-qty">' +
-          '<button class="qty-btn" onclick="decreaseQty(' + index + ')"><i class="fas fa-minus"></i></button>' +
-          '<span class="qty-count">' + item.qtd + '</span>' +
-          '<button class="qty-btn" onclick="increaseQty(' + index + ')"><i class="fas fa-plus"></i></button>' +
-          '</div>' +
-          '<button class="btn btn-sm btn-link text-danger p-0 border-0" onclick="removeItem(' + index + ')"><i class="fas fa-times"></i></button>' +
-          '</div>' +
-          '</div>';
-        container.append(cardHtml);
-      });
-
-      $("#cartCountBadge").text(count + " Itens");
-      $("#totalSemImposto").text(subtotal.toFixed(2) + " Kz");
-      $("#valorIva").text(totalIva.toFixed(2) + " Kz");
-      $("#totalFinal").text((subtotal + totalIva).toFixed(2) + " Kz");
-    }
-
-    function increaseQty(index) {
-      var item = cart[index];
-      if (item.stockMax !== undefined && item.qtd + 1 > item.stockMax) {
-        alert('Stock insuficiente!');
-        return;
-      }
-      item.qtd++;
-      renderCart();
-    }
-
-    function decreaseQty(index) {
-      if (cart[index].qtd > 1) {
-        cart[index].qtd--;
-      } else {
-        removeItem(index);
-      }
-      renderCart();
-      atualizarContadorSuspensas();
-    }
-
-    function removeItem(index) {
-      cart.splice(index, 1);
-      renderCart();
-      atualizarContadorSuspensas();
-    }
-
-    // Filtrar linhas da tabela do modal por texto (client-side)
-    function filterEstoqueRows() {
-      var term = ($('#estoqueSearch').val() || '').toLowerCase();
-      var tipo = $('#estoqueFilterTipo').val() || '';
-
-      $('#estoqueModalBody tr').each(function () {
-        var txt = $(this).attr('data-search') || '';
-        var rowTipo = $(this).attr('data-tipo') || '';
-
-        var matchesTerm = txt.toLowerCase().indexOf(term) !== -1;
-        var matchesTipo = tipo === '' || rowTipo === tipo;
-
-        if (matchesTerm && matchesTipo) $(this).show(); else $(this).hide();
-      });
-    }
-
-    // Listener para o novo filtro de tipo
-    $(document).on('change', '#estoqueFilterTipo', filterEstoqueRows);
-    $(document).on('input', '#estoqueSearch', filterEstoqueRows);
-
-    // Busca disponibilidade via API e popula o modal
-    function fetchDisponibilidade(produtoId, showZero, includeAll) {
-      var body = $('#estoqueModalBody');
-      var spinner = $('#estoqueSpinner');
-      $('#estoqueModalNomeSmall').text('');
-      $('#estoqueCount').text('--');
-      body.html('<tr><td colspan="4" class="text-center text-muted">Pesquisando...</td></tr>');
-      spinner.removeClass('d-none');
-
-      var url = '/api/produtos/' + produtoId + '/disponibilidade?showZero=' + (showZero ? 'true' : 'false') + '&includeAll=' + (includeAll ? 'true' : 'false');
-      fetch(url).then(function (resp) { if (!resp.ok) throw new Error('Erro'); return resp.json(); }).then(function (data) {
-        spinner.addClass('d-none');
-        body.empty();
-        $('#estoqueModalNomeSmall').text($('#estoqueModalNome').text());
-        if (!data || data.length === 0) {
-          $('#estoqueCount').text('0');
-          body.html('<tr><td colspan="4" class="text-center text-muted">Nenhum estabelecimento encontrado.</td></tr>');
-          return;
-        }
-        data.sort(function (a, b) {
-          var qa = a.quantidade == null ? 0 : a.quantidade;
-          var qb = b.quantidade == null ? 0 : b.quantidade;
-          return qb - qa;
-        });
-        $('#estoqueCount').text(data.length);
-        data.forEach(function (item) {
-          var quantidade = item.quantidade != null ? item.quantidade : 0;
-          var cls = quantidade > 0 ? 'text-success' : 'text-muted';
-          var visClass = item.visivel ? '' : 'opacity-50';
-          var visBadge = item.visivel ? '' : '<span class="badge bg-warning text-dark ms-1">Oculto</span>';
-          var rowTipo = item.tipo || '';
-          var rowSearch = (item.nome + ' ' + (item.endereco || '') + ' ' + rowTipo).toLowerCase();
-          var row = '<tr class="align-middle ' + visClass + '" data-search="' + rowSearch + '" data-tipo="' + rowTipo + '">' +
-            '<td>' + item.nome + (visBadge) + '</td>' +
-            '<td>' + (item.endereco || '') + '</td>' +
-            '<td class="text-end fw-bold ' + cls + '">' + quantidade + '</td>' +
-            '<td>' + (rowTipo) + '</td>' +
-            '</tr>';
-          body.append(row);
-        });
-        filterEstoqueRows();
-      }).catch(function (err) {
-        spinner.addClass('d-none');
-        body.html('<tr><td colspan="4" class="text-center text-danger">Erro ao pesquisar disponibilidade.</td></tr>');
-        console.error(err);
-      });
-    }
-
-    $(document).ready(function () {
-      // When clicking the red disabled quick-add or the overlay, open availability modal
-      $(document).on('click', '.clickable-when-disabled', function (e) {
-        var $el = $(this);
-        var id = parseInt($el.attr('data-id') || $el.data('id'));
-        var nome = $el.attr('data-nome') || $el.data('nome');
-        if (!id) return;
-        $('#estoqueModalProdutoId').val(id);
-        $('#estoqueModalNome').text(nome);
-        $('#estoqueModal').modal('show');
-        // trigger search using current checkbox states
-        var showZero = $('#estoqueShowZero').is(':checked');
-        var includeAll = $('#estoqueIncludeAll').is(':checked');
-        fetchDisponibilidade(id, showZero, includeAll);
-      });
-
-      $('#estoqueSearch').on('input', filterEstoqueRows);
-      $('#estoqueFilterTipo').on('change', filterEstoqueRows);
-
-      // Checkboxes de disponibilidade também devem disparar refresh
-      $('#estoqueShowZero, #estoqueIncludeAll').on('change', function () {
-        var id = $('#estoqueModalProdutoId').val();
-        if (id) fetchDisponibilidade(id, $('#estoqueShowZero').is(':checked'), $('#estoqueIncludeAll').is(':checked'));
-      });
-
-      var selectedCategoryId = 0;
-
-      // Handle product click
-      $(document).on('click', '.btn-quick-add', function () {
-        var $btn = $(this);
-        var id = parseInt($btn.data('id'));
-        var nome = $btn.data('nome');
-        var preco = parseFloat($btn.data('preco'));
-        var ivaPercentual = $btn.data('iva') ? parseFloat($btn.data('iva')) : 0;
-        var stockRaw = $btn.attr('data-stock');
-
-        var stockAtual = stockRaw === '' ? Infinity : parseFloat(stockRaw);
-        if (isNaN(stockAtual)) stockAtual = 0;
-
-        if (stockAtual <= 0) {
-          // Open modal to search availability in visible establishments
-          $('#estoqueModalProdutoId').val(id);
-          $('#estoqueModalNome').text(nome);
-          $('#estoqueModal').modal('show');
-          // trigger search (default: hide zeros)
-          fetchDisponibilidade(id, false);
-          return;
-        }
-
-        var item = null;
-        for (var i = 0; i < cart.length; i++) {
-          if (cart[i].id === id) {
-            item = cart[i];
-            break;
-          }
-        }
-
-        if (item) {
-          if (item.qtd + 1 > stockAtual) {
-            alert('Quantidade máxima atingida conforme o stock disponível.');
-            return;
-          }
-          item.qtd++;
-        } else {
-          cart.push({ id: id, nome: nome, preco: preco, qtd: 1, ivaPercentual: ivaPercentual, stockMax: stockAtual });
-          // Animate add
-          var originalHtml = $btn.html();
-          $btn.html('<i class="fas fa-check"></i>');
-          setTimeout(function () { $btn.html(originalHtml); }, 1000);
-        }
-        renderCart();
-      });
-
-      function filterProducts() {
-        var searchTerm = $('#search').val().toLowerCase();
-
-        $('.product-item').each(function () {
-          var productName = $(this).find('.product-name').text().toLowerCase();
-          var productCategoryId = parseInt($(this).data('category-id'));
-
-          var matchesSearch = productName.indexOf(searchTerm) !== -1;
-          var matchesCategory = (selectedCategoryId === 0 || productCategoryId === selectedCategoryId);
-
-          if (matchesSearch && matchesCategory) {
-            $(this).show();
-          } else {
-            $(this).hide();
-          }
-        });
-      }
-
-      // Search functionality
-      $('#search').on('input', filterProducts);
-
-      // Category Filter click
-      $('.filter-category').on('click', function () {
-        $('.filter-category').removeClass('btn-primary').addClass('btn-outline-dark');
-        $(this).removeClass('btn-outline-dark').addClass('btn-primary');
-
-        selectedCategoryId = parseInt($(this).data('category'));
-        filterProducts();
-      });
-
-      function processarVenda(url, successMsg, btnId, skipModalClose) {
-        if (cart.length === 0) {
-          alert('Carrinho vazio!');
-          return;
-        }
-
-        var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
-        var totalGeral = parseFloat(totalStr) || 0;
-
-        var itensCompra = [];
-        for (var j = 0; j < cart.length; j++) {
-          var it = cart[j];
-          itensCompra.push({
-            produtoId: it.id,
-            nomeProduto: it.nome,
-            quantidade: it.qtd,
-            preco: it.preco,
-            subtotal: it.qtd * it.preco
-          });
-        }
-
-        var vMulticaixa = 0;
-        var vCash = totalGeral;
-
-        if ($('#pagMULTICAIXA').is(':checked')) {
-          if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
-            vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
-            vCash = totalGeral - vMulticaixa;
-          } else {
-            vMulticaixa = totalGeral;
-            vCash = 0;
-          }
-        }
-
-        var compra = {
-          itens: itensCompra,
-          total: totalGeral,
-          formaPagamento: getFormaPagamento(),
-          nomeCliente: obterNomeCliente(),
-          nifCliente: obterNifCliente(),
-          cliente: obterClienteId(),
-
-          // Detalhes MULTICAIXA
-          valorPagoMulticaixa: vMulticaixa,
-          valorPagoCash: vCash,
-          bancoMulticaixa: $('#multicaixaBanco').val(),
-          referenciaMulticaixa: $('#multicaixaReferencia').val(),
-          comissaoMulticaixa: vMulticaixa * 0.015,
-          valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015),
-          
-          // Novos campos Cliente
-          moradaCliente: obterMoradaCliente(),
-          telefoneCliente: obterTelefoneCliente(),
-          emailCliente: obterEmailCliente()
-        };
-
-        var $btn = $(btnId);
-        var originalContent = $btn.html();
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> Processando...');
-
-        $.ajax({
-          url: url,
-          method: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify(compra),
-          success: function (pdfPath) {
-            if (!skipModalClose) {
-              alert(successMsg);
-            }
-
-            // Atualizar visualmente o stock dos itens vendidos no grid p/ vendas reais
-            if (url.indexOf('proforma') === -1) {
-              cart.forEach(function (item) {
-                var $btn = $('.btn-quick-add[data-id="' + item.id + '"]');
-                if ($btn.length > 0) {
-                  var currentStockStr = $btn.attr('data-stock');
-                  if (currentStockStr !== '') {
-                    var currentStock = parseFloat(currentStockStr);
-                    if (isNaN(currentStock)) currentStock = 0;
-                    var newStock = currentStock - item.qtd;
-                    $btn.attr('data-stock', newStock);
-
-                    var $card = $btn.closest('.product-card');
-                    // Atualiza o texto do stock na interface
-                    $card.find('.small.text-muted.mt-1.fw-bold span').text(newStock);
-
-                    // Aplica restrições se esgotado
-                    if (newStock <= 0) {
-                      $card.addClass('product-disabled');
-                      var $imgContainer = $card.find('.product-img-container');
-                      if ($imgContainer.find('.out-of-stock-overlay').length === 0) {
-                        $imgContainer.prepend('<div class="out-of-stock-overlay">ESGOTADO</div>');
-                      }
-                      $btn.addClass('bg-danger').css('cursor', 'not-allowed').html('<i class="fas fa-times"></i>');
-                      var $priceRow = $card.find('.d-flex.justify-content-between.align-items-center.mt-2');
-                      if ($priceRow.find('.badge.bg-danger').length === 0) {
-                        $priceRow.append('<span class="badge bg-danger">INDISPONÍVEL</span>');
-                      }
-                    }
-                  }
-                }
-              });
-            }
-
-            if (!skipModalClose) {
-              cart = [];
-              renderCart();
-            }
-
-            if (pdfPath) {
-              // Mostrar preview interno APENAS se skipModalClose for true (Pró-forma/Guia)
-              // Para vendas normais, não mostramos nada, conforme solicitado.
-              if (skipModalClose) {
-                mostrarPreviewInterno(pdfPath);
-              }
-            }
-          },
-          error: function (xhr) {
-            alert('Erro ao processar: ' + (xhr.responseText || 'Erro desconhecido'));
-          },
-          complete: function () {
-            $btn.prop('disabled', false).html(originalContent);
-          }
-        });
-      }
-
-      // ---- CHECKOUT VIEW SWITCHING ----
-
-      function abrirCheckoutView() {
-        if (cart.length === 0) {
-          alert('O carrinho está vazio. Adicione produtos primeiro.');
-          return;
-        }
-        
-        // Reset wizard state
-        currentWizardStep = 1;
-        $('.wizard-step').removeClass('active').hide();
-        $('#step1').addClass('active').show();
-        $('.step-item').removeClass('active completed');
-        $('.step-item[data-step="1"]').addClass('active');
-        $('#wizardProgress').css('width', '0%');
-        
-        $('#btnAnteriorWizard').addClass('d-none');
-        $('#btnProximoWizard').removeClass('d-none');
-        $('#btnFinalizarModal').addClass('d-none');
-
-        renderModalCart();
-        atualizarVisibilidadeMulticaixa();
-
-        // Switch Views with explicit show/hide
-        $('#posMainView').hide();
-        $('#checkoutWizardView').show().removeClass('d-none');
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
-      }
-
-      function voltarParaPos() {
-        $('#checkoutWizardView').hide();
-        $('#posMainView').show();
-      }
-
-      window.abrirModalCheckout = abrirCheckoutView; // Mantemos o nome antigo no botão para evitar quebra
-      window.voltarParaPos = voltarParaPos;
-
-      function renderModalCart() {
-        var tbody = $('#modalCartBody');
-        tbody.empty();
-        var subtotal = 0, totalIva = 0;
-
-        cart.forEach(function (item, idx) {
+        cart.forEach(function (item, index) {
           var itemTotal = item.qtd * item.preco;
           subtotal += itemTotal;
           totalIva += itemTotal * (item.ivaPercentual / 100);
+          count += item.qtd;
 
-          tbody.append(
-            '<tr>' +
-            '  <td class="ps-4 py-3"><div class="fw-bold text-dark">' + item.nome + '</div>' +
-            '    <small class="text-muted">' + item.preco.toFixed(2) + ' Kz / un.</small></td>' +
-            '  <td class="text-center">' +
-            '    <div class="d-flex align-items-center justify-content-center gap-3">' +
-            '      <button class="btn btn-sm btn-outline-secondary rounded-circle shadow-sm" onclick="modalDecreaseQty(' + idx + ')" style="width:32px;height:32px;padding:0;"><i class="fas fa-minus" style="font-size:10px;"></i></button>' +
-            '      <span class="fw-bold fs-6" id="modal-qty-' + idx + '">' + item.qtd + '</span>' +
-            '      <button class="btn btn-sm btn-outline-secondary rounded-circle shadow-sm" onclick="modalIncreaseQty(' + idx + ')" style="width:32px;height:32px;padding:0;"><i class="fas fa-plus" style="font-size:10px;"></i></button>' +
-            '    </div>' +
-            '  </td>' +
-            '  <td class="text-end">' + item.preco.toFixed(2) + ' Kz</td>' +
-            '  <td class="text-end pe-4 fw-bold text-primary">' + itemTotal.toFixed(2) + ' Kz</td>' +
-            '</tr>'
-          );
+          var cardHtml =
+            '<div class="cart-item-card">' +
+            '<div class="cart-item-info">' +
+            '<h6 class="fw-bold mb-1 small text-truncate" style="max-width: 150px;">' + item.nome + '</h6>' +
+            '<div class="text-muted small">' + item.preco.toFixed(2) + ' Kz</div>' +
+            '</div>' +
+            '<div class="d-flex align-items-center gap-3">' +
+            '<div class="cart-item-qty">' +
+            '<button class="qty-btn" onclick="decreaseQty(' + index + ')"><i class="fas fa-minus"></i></button>' +
+            '<span class="qty-count">' + item.qtd + '</span>' +
+            '<button class="qty-btn" onclick="increaseQty(' + index + ')"><i class="fas fa-plus"></i></button>' +
+            '</div>' +
+            '<button class="btn btn-sm btn-link text-danger p-0 border-0" onclick="removeItem(' + index + ')"><i class="fas fa-times"></i></button>' +
+            '</div>' +
+            '</div>';
+          container.append(cardHtml);
         });
 
-        var totalFinal = subtotal + totalIva;
-        $('#modalSubtotal').text(subtotal.toFixed(2) + ' Kz');
-        $('#modalIva').text(totalIva.toFixed(2) + ' Kz');
-        $('#modalTotal').text(totalFinal.toFixed(2) + ' Kz');
-        $('#resumoTotalBruto').text(totalFinal.toFixed(2) + ' Kz'); // Para o passo de pagamento
-        $('#badgeTotalItens').text(cart.length + (cart.length === 1 ? ' item' : ' itens'));
-        
-        // Actualizar valores de comissão e líquido sempre que o total mudar
-        if (typeof calcularComissaoMulticaixa === 'function') {
-            calcularComissaoMulticaixa();
-        }
+        $("#cartCountBadge").text(count + " Itens");
+        $("#totalSemImposto").text(subtotal.toFixed(2) + " Kz");
+        $("#valorIva").text(totalIva.toFixed(2) + " Kz");
+        $("#totalFinal").text((subtotal + totalIva).toFixed(2) + " Kz");
       }
 
-      let currentWizardStep = 1;
-
-      function changeStep(delta) {
-        const nextStep = currentWizardStep + delta;
-        
-        // Validação básica
-        if (delta > 0) {
-           if (currentWizardStep === 1 && cart.length === 0) {
-             alert('O carrinho está vazio.'); return;
-           }
-           if (currentWizardStep === 2) {
-             if ($('#painelClienteNovo').is(':visible')) {
-               if (!$('#novoClienteNome').val().trim() || !$('#novoClienteNif').val().trim()) {
-                 alert('Preencha o Nome e NIF do novo cliente.'); return;
-               }
-             }
-           }
-        }
-
-        if (nextStep < 1 || nextStep > 3) return;
-
-        $('.wizard-step').removeClass('active').hide();
-        
-        currentWizardStep = nextStep;
-        
-        $(`#step${currentWizardStep}`).addClass('active').show();
-        $(`.step-item[data-step="${currentWizardStep}"]`).addClass('active').removeClass('completed');
-
-        // Atualizar barra de progresso
-        const progressPercent = ((currentWizardStep - 1) / 2) * 100;
-        $('#wizardProgress').css('width', progressPercent + '%');
-
-        // Atualizar botões
-        if (currentWizardStep === 1) {
-          $('#btnAnteriorWizard').addClass('d-none');
-          $('#btnProximoWizard').removeClass('d-none');
-          $('#btnFinalizarModal').addClass('d-none');
-        } else if (currentWizardStep === 2) {
-          $('#btnAnteriorWizard').removeClass('d-none');
-          $('#btnProximoWizard').removeClass('d-none');
-          $('#btnFinalizarModal').addClass('d-none');
-        } else if (currentWizardStep === 3) {
-          $('#btnAnteriorWizard').removeClass('d-none');
-          $('#btnProximoWizard').addClass('d-none');
-          $('#btnFinalizarModal').removeClass('d-none');
-        }
-      }
-      window.changeStep = changeStep;
-
-      // Reset wizard logic removed from modal event since it's no longer a modal
-
-      window.modalIncreaseQty = function (idx) {
-        var item = cart[idx];
-        if (item.stockMax !== Infinity && item.qtd + 1 > item.stockMax) {
+      function increaseQty(index) {
+        var item = cart[index];
+        if (item.stockMax !== undefined && item.qtd + 1 > item.stockMax) {
           alert('Stock insuficiente!');
           return;
         }
         item.qtd++;
         renderCart();
-        renderModalCart();
-      };
+      }
 
-      window.modalDecreaseQty = function (idx) {
-        if (cart[idx].qtd > 1) {
-          cart[idx].qtd--;
+      function decreaseQty(index) {
+        if (cart[index].qtd > 1) {
+          cart[index].qtd--;
         } else {
-          cart.splice(idx, 1);
+          removeItem(index);
         }
         renderCart();
-        renderModalCart();
-        if (cart.length === 0) {
-          voltarParaPos();
-        }
-      };
-
-      // Seleccao Doc Type
-      $(document).on('click', '.doc-type-card', function () {
-        $('.doc-type-card').removeClass('active');
-        $(this).addClass('active');
-        $('#finalizarDocName').text($(this).data('name'));
-      });
-
-      function cancelarCompra() {
-        if (confirm('Tem a certeza que deseja cancelar esta compra? O carrinho será limpo.')) {
-          cart = [];
-          renderCart();
-          voltarParaPos();
-        }
+        atualizarContadorSuspensas();
       }
 
-      // Limitar checkboxes de pagamento a maximo 2
-      $(document).on('change', '.pagamento-check', function () {
-        var checked = $('.pagamento-check:checked');
-        if (checked.length > 2) {
-          $(this).prop('checked', false);
-          $('#aviso-pagamento').removeClass('d-none');
-          setTimeout(function () { $('#aviso-pagamento').addClass('d-none'); }, 3000);
-        }
-        // Garantir pelo menos 1 selecionado
-        if ($('.pagamento-check:checked').length === 0) {
-          $('#pagCASH').prop('checked', true);
-        }
+      function removeItem(index) {
+        cart.splice(index, 1);
+        renderCart();
+        atualizarContadorSuspensas();
+      }
 
-        atualizarVisibilidadeMulticaixa();
-      });
+      // Filtrar linhas da tabela do modal por texto (client-side)
+      function filterEstoqueRows() {
+        var term = ($('#estoqueSearch').val() || '').toLowerCase();
+        var tipo = $('#estoqueFilterTipo').val() || '';
 
-      function atualizarVisibilidadeMulticaixa() {
-        var checked = $('.pagamento-check:checked');
-        var hasMulticaixa = $('#pagMULTICAIXA').is(':checked');
-        var hasCash = $('#pagCASH').is(':checked');
+        $('#estoqueModalBody tr').each(function () {
+          var txt = $(this).attr('data-search') || '';
+          var rowTipo = $(this).attr('data-tipo') || '';
 
-        if (hasMulticaixa) {
-          $('#painelMulticaixa').removeClass('d-none');
-          if (checked.length > 1 && hasCash) {
-            $('#painelMistoMCX').removeClass('d-none');
-          } else {
-            $('#painelMistoMCX').addClass('d-none');
-            // Se for só MULTICAIXA, o valor é o total da compra
-            var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
-            $('#multicaixaValorPago').val(parseFloat(totalStr));
+          var matchesTerm = txt.toLowerCase().indexOf(term) !== -1;
+          var matchesTipo = tipo === '' || rowTipo === tipo;
+
+          if (matchesTerm && matchesTipo) $(this).show(); else $(this).hide();
+        });
+      }
+
+      // Listener para o novo filtro de tipo
+      $(document).on('change', '#estoqueFilterTipo', filterEstoqueRows);
+      $(document).on('input', '#estoqueSearch', filterEstoqueRows);
+
+      // Busca disponibilidade via API e popula o modal
+      function fetchDisponibilidade(produtoId, showZero, includeAll) {
+        var body = $('#estoqueModalBody');
+        var spinner = $('#estoqueSpinner');
+        $('#estoqueModalNomeSmall').text('');
+        $('#estoqueCount').text('--');
+        body.html('<tr><td colspan="4" class="text-center text-muted">Pesquisando...</td></tr>');
+        spinner.removeClass('d-none');
+
+        var url = '/api/produtos/' + produtoId + '/disponibilidade?showZero=' + (showZero ? 'true' : 'false') + '&includeAll=' + (includeAll ? 'true' : 'false');
+        fetch(url).then(function (resp) { if (!resp.ok) throw new Error('Erro'); return resp.json(); }).then(function (data) {
+          spinner.addClass('d-none');
+          body.empty();
+          $('#estoqueModalNomeSmall').text($('#estoqueModalNome').text());
+          if (!data || data.length === 0) {
+            $('#estoqueCount').text('0');
+            body.html('<tr><td colspan="4" class="text-center text-muted">Nenhum estabelecimento encontrado.</td></tr>');
+            return;
           }
-          calcularComissaoMulticaixa();
-        } else {
-          $('#painelMulticaixa').addClass('d-none');
-        }
-      }
-
-      function calcularComissaoMulticaixa() {
-        var valorPagoMCX = parseFloat($('#multicaixaValorPago').val()) || 0;
-        var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
-        var totalGeral = parseFloat(totalStr) || 0;
-
-        var cashRestante = totalGeral - valorPagoMCX;
-        if (cashRestante < 0) cashRestante = 0;
-        $('#mistoCashRestante').val(cashRestante.toFixed(2));
-
-        var comissao = valorPagoMCX * 0.015;
-        var liquido = totalGeral - comissao;
-
-        // Mostrar comissão apenas se houver pagamento via TPA
-        if (valorPagoMCX > 0) {
-            $('#linhaComissaoTPA').attr('style', 'display: flex !important;');
-        } else {
-            $('#linhaComissaoTPA').attr('style', 'display: none !important;');
-        }
-
-        $('#multicaixaComissao').text(comissao.toFixed(2) + ' Kz');
-        $('#multicaixaValorLiquido').text(liquido.toFixed(2) + ' Kz');
-      }
-
-      $('#multicaixaValorPago').on('input', calcularComissaoMulticaixa);
-
-      // Mostrar info do cliente selecionado
-      $('#selectCliente').on('change', function () {
-        var selectedOption = $(this).find('option:selected');
-        var nome = selectedOption.text();
-        var val = $(this).val();
-
-        if (val) {
-          // Cliente específico selecionado
-          var nifMatch = nome.match(/NIF:\s*([\w]+)/);
-          var nif = nifMatch ? nifMatch[1] : 'N/D';
-          var nomeLimpo = nome.split(' —')[0].trim();
-          $('#nomeClienteSel').text(nomeLimpo);
-          $('#nifClienteSel').text(nif);
-          $('#alertInfoCliente').css({ 'background': '#f0fdf4', 'color': '#166534' });
-        } else {
-          // Consumidor Final
-          $('#nomeClienteSel').text('Consumidor Final');
-          $('#nifClienteSel').text('999999999');
-          $('#alertInfoCliente').css({ 'background': '#fefce8', 'color': '#854d0e' });
-        }
-      });
-
-      function toggleClienteMode(modo) {
-        if (modo === 'existente') {
-          $('#painelClienteExistente').show();
-          $('#painelClienteNovo').hide();
-          $('#btnClienteExistente').removeClass('btn-light').addClass('btn-primary');
-          $('#btnClienteNovo').removeClass('btn-primary').addClass('btn-light');
-        } else {
-          $('#painelClienteExistente').hide();
-          $('#painelClienteNovo').show();
-          $('#btnClienteNovo').removeClass('btn-light').addClass('btn-primary');
-          $('#btnClienteExistente').removeClass('btn-primary').addClass('btn-light');
-        }
-      }
-      window.toggleClienteMode = toggleClienteMode;
-
-      function getFormaPagamento() {
-        var formas = [];
-        $('.pagamento-check:checked').each(function () { formas.push($(this).val()); });
-        return formas.length > 0 ? formas.join('+') : 'CASH';
-      }
-
-      // Retorna o nome do cliente conforme o modo activo (existente ou novo)
-      function obterNomeCliente() {
-        // Modo "novo cliente"
-        if ($('#painelClienteNovo').is(':visible')) {
-          var nome = $('#novoClienteNome').val().trim();
-          return nome !== '' ? nome : 'Consumidor Final';
-        }
-        // Modo "cliente existente"
-        var val = $('#selectCliente').val();
-        if (val) {
-          var texto = $('#selectCliente option:selected').text();
-          return texto.split(' \u2014')[0].trim();
-        }
-        return 'Consumidor Final';
-      }
-
-      // Retorna o NIF do cliente
-      function obterNifCliente() {
-        if ($('#painelClienteNovo').is(':visible')) {
-          var nif = $('#novoClienteNif').val().trim();
-          return nif !== '' ? nif : '999999999';
-        }
-        var val = $('#selectCliente').val();
-        if (val) {
-          var texto = $('#selectCliente option:selected').text();
-          var match = texto.match(/NIF:\s*([\w]+)/);
-          return match ? match[1] : '999999999';
-        }
-        return '999999999';
-      }
-
-      function obterMoradaCliente() {
-        if ($('#painelClienteNovo').is(':visible')) {
-          return $('#novoClienteMorada').val().trim();
-        }
-        return '';
-      }
-
-      function obterTelefoneCliente() {
-        if ($('#painelClienteNovo').is(':visible')) {
-          return $('#novoClienteTelefone').val().trim();
-        }
-        return '';
-      }
-
-      function obterEmailCliente() {
-        if ($('#painelClienteNovo').is(':visible')) {
-          return $('#novoClienteEmail').val().trim();
-        }
-        return '';
-      }
-
-      // Retorna o objecto {id: X} para clientes FK, ou null para Consumidor Final / novo
-      function obterClienteId() {
-        if ($('#painelClienteExistente').is(':visible')) {
-          var val = $('#selectCliente').val();
-          if (val && val !== '') {
-            return { id: parseInt(val) };
-          }
-        }
-        return null;
-      }
-
-
-      $('#btnFinalizarModal').click(function () {
-        var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
-        var total = parseFloat(totalStr);
-
-        var selectedDoc = $('.doc-type-card.active');
-        var docUrl = selectedDoc.data('url');
-        var docType = selectedDoc.data('type');
-
-        if ((docType === 'FR' || docType === 'FT') && $('.pagamento-check:checked').length > 1 && $('#pagMULTICAIXA').is(':checked') && $('#pagCASH').is(':checked')) {
-          var vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
-          if (vMulticaixa > total || vMulticaixa <= 0) {
-            alert('Valide o montante Multicaixa.'); return;
-          }
-        }
-
-        // Se MULTICAIXA estiver selecionado (em qualquer tipo de documento), processar TPA primeiro
-        if ($('#pagMULTICAIXA').is(':checked')) {
-          simularTPA(function (referencia) {
-            $('#multicaixaReferencia').val(referencia);
-            concluirFinalizacao(docUrl);
+          data.sort(function (a, b) {
+            var qa = a.quantidade == null ? 0 : a.quantidade;
+            var qb = b.quantidade == null ? 0 : b.quantidade;
+            return qb - qa;
           });
-        } else {
-          // Pagamento apenas em CASH ou outros sem TPA
-          concluirFinalizacao(docUrl);
-        }
-      });
-
-      function concluirFinalizacao(url) {
-        processarVenda(url, $('#t-msg-sucesso').text(), '#btnFinalizarModal');
-        // Ocultamos a vista de checkout ao finalizar com sucesso? 
-        // O processarVenda geralmente mostra o PDF e depois o user pode voltar ao POS
+          $('#estoqueCount').text(data.length);
+          data.forEach(function (item) {
+            var quantidade = item.quantidade != null ? item.quantidade : 0;
+            var cls = quantidade > 0 ? 'text-success' : 'text-muted';
+            var visClass = item.visivel ? '' : 'opacity-50';
+            var visBadge = item.visivel ? '' : '<span class="badge bg-warning text-dark ms-1">Oculto</span>';
+            var rowTipo = item.tipo || '';
+            var rowSearch = (item.nome + ' ' + (item.endereco || '') + ' ' + rowTipo).toLowerCase();
+            var row = '<tr class="align-middle ' + visClass + '" data-search="' + rowSearch + '" data-tipo="' + rowTipo + '">' +
+              '<td>' + item.nome + (visBadge) + '</td>' +
+              '<td>' + (item.endereco || '') + '</td>' +
+              '<td class="text-end fw-bold ' + cls + '">' + quantidade + '</td>' +
+              '<td>' + (rowTipo) + '</td>' +
+              '</tr>';
+            body.append(row);
+          });
+          filterEstoqueRows();
+        }).catch(function (err) {
+          spinner.addClass('d-none');
+          body.html('<tr><td colspan="4" class="text-center text-danger">Erro ao pesquisar disponibilidade.</td></tr>');
+          console.error(err);
+        });
       }
 
-      function simularTPA(callback) {
-        var vMulticaixa = 0;
-        var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
-        var total = parseFloat(totalStr);
+      $(document).ready(function () {
+        // When clicking the red disabled quick-add or the overlay, open availability modal
+        $(document).on('click', '.clickable-when-disabled', function (e) {
+          var $el = $(this);
+          var id = parseInt($el.attr('data-id') || $el.data('id'));
+          var nome = $el.attr('data-nome') || $el.data('nome');
+          if (!id) return;
+          $('#estoqueModalProdutoId').val(id);
+          $('#estoqueModalNome').text(nome);
+          $('#estoqueModal').modal('show');
+          // trigger search using current checkbox states
+          var showZero = $('#estoqueShowZero').is(':checked');
+          var includeAll = $('#estoqueIncludeAll').is(':checked');
+          fetchDisponibilidade(id, showZero, includeAll);
+        });
 
-        if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
-          vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
-          if (vMulticaixa <= 0) vMulticaixa = total;
-        } else {
-          vMulticaixa = total;
-        }
+        $('#estoqueSearch').on('input', filterEstoqueRows);
+        $('#estoqueFilterTipo').on('change', filterEstoqueRows);
 
-        // 1. Configuração Inicial do Modal de TPA
-        $('#tpaMontante').text(parseFloat(vMulticaixa).toFixed(2) + ' Kz');
-        $('#tpaErrorIcon').hide();
+        // Checkboxes de disponibilidade também devem disparar refresh
+        $('#estoqueShowZero, #estoqueIncludeAll').on('change', function () {
+          var id = $('#estoqueModalProdutoId').val();
+          if (id) fetchDisponibilidade(id, $('#estoqueShowZero').is(':checked'), $('#estoqueIncludeAll').is(':checked'));
+        });
 
-        var modalTPA = new bootstrap.Modal(document.getElementById('modalTPA'));
-        modalTPA.show();
+        var selectedCategoryId = 0;
 
-        // 2. Chamada ao Backend para falar com o Hardware Real
-        // Nota: O backend ficará "preso" aguardando a resposta física da máquina.
-        var tpaPayload = {
-          valor: vMulticaixa,
-          tipoOperacao: 'COMPRA',
-          idVenda: 'POS-' + Date.now()
-        };
+        // Handle product click
+        $(document).on('click', '.btn-quick-add', function () {
+          var $btn = $(this);
+          var id = parseInt($btn.data('id'));
+          var nome = $btn.data('nome');
+          var preco = parseFloat($btn.data('preco'));
+          var ivaPercentual = $btn.data('iva') ? parseFloat($btn.data('iva')) : 0;
+          var stockRaw = $btn.attr('data-stock');
 
-        $.ajax({
-          url: '/api/tpa/processar-pagamento',
-          method: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify(tpaPayload),
-          success: function (response) {
-            if (response.sucesso) {
-              $('#tpaStatus').text('PAGAMENTO APROVADO!');
-              $('#tpaSpinner').hide();
-              $('#tpaSuccessIcon').show();
+          var stockAtual = stockRaw === '' ? Infinity : parseFloat(stockRaw);
+          if (isNaN(stockAtual)) stockAtual = 0;
 
-              setTimeout(function () {
-                modalTPA.hide();
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open').css('padding-right', '');
+          if (stockAtual <= 0) {
+            // Open modal to search availability in visible establishments
+            $('#estoqueModalProdutoId').val(id);
+            $('#estoqueModalNome').text(nome);
+            $('#estoqueModal').modal('show');
+            // trigger search (default: hide zeros)
+            fetchDisponibilidade(id, false);
+            return;
+          }
 
-                // O campo de referência agora vem do borderô real da máquina
-                callback(response.referenciaBorderou);
-              }, 2000);
-            } else {
-              exibirErroTpa(response.mensagem || 'Operação Recusada.');
+          var item = null;
+          for (var i = 0; i < cart.length; i++) {
+            if (cart[i].id === id) {
+              item = cart[i];
+              break;
             }
-          },
-          error: function (xhr) {
-            var msg = 'Erro de comunicação com o servidor de hardware.';
-            if (xhr.status === 504) msg = 'Timeout: O cliente demorou muito a digitar o PIN.';
-            exibirErroTpa(msg);
           }
-        });
 
-        function exibirErroTpa(msg) {
-          $('#tpaStatus').text(msg.toUpperCase());
-          $('#tpaSpinner').hide();
-          $('#tpaErrorIcon').show();
-
-          // Permite fechar o modal de erro após 4 segundos para tentar novamente
-          setTimeout(function () {
-            modalTPA.hide();
-            $('.modal-backdrop').remove();
-            // Reabre o checkout
-            voltarParaPos(); // Ou manter no checkout mas avisar erro
-          }, 4000);
-        }
-      }
-
-      $('#btnEmitirProformaModal').click(function () {
-        processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal', true);
-        // Não fechamos o modal aqui, o skipModalClose=true lida com isso
-      });
-
-      $('#btnEmitirGuiaModal').click(function () {
-        abrirModalTransporte();
-      });
-
-      function abrirModalTransporte() {
-        var list = $('#listaArtigosTransporte');
-        list.empty();
-
-        cart.forEach(function (item) {
-          list.append('<tr>' +
-            '<td><div class="fw-bold text-dark">' + item.nome + '</div></td>' +
-            '<td class="text-center"><span class="badge bg-secondary rounded-pill">' + item.qtd + '</span></td>' +
-            '</tr>');
-        });
-
-        // Tentar preencher endereços padrões se disponíveis
-        $('#guiaLocalCarga').val('');
-        $('#guiaLocalDescarga').val($('#alertInfoCliente:visible').length ? $('#nomeClienteSel').text() : '');
-
-        var modalTrans = new bootstrap.Modal(document.getElementById('modalTransporteGuia'));
-        modalTrans.show();
-      }
-
-      function confirmarEmissaoGuia() {
-        var motorista = $('#guiaMotorista').val().trim();
-        var matricula = $('#guiaMatricula').val().trim();
-
-        if (!motorista || !matricula) {
-          alert('Por favor, preencha o motorista e a matrícula do veículo.');
-          return;
-        }
-
-        var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
-        var totalGeral = parseFloat(totalStr) || 0;
-        var vMulticaixa = 0;
-        var vCash = totalGeral;
-
-        if ($('#pagMULTICAIXA').is(':checked')) {
-          if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
-            vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
-            vCash = totalGeral - vMulticaixa;
+          if (item) {
+            if (item.qtd + 1 > stockAtual) {
+              alert('Quantidade máxima atingida conforme o stock disponível.');
+              return;
+            }
+            item.qtd++;
           } else {
-            vMulticaixa = totalGeral;
-            vCash = 0;
+            cart.push({ id: id, nome: nome, preco: preco, qtd: 1, ivaPercentual: ivaPercentual, stockMax: stockAtual });
+            // Animate add
+            var originalHtml = $btn.html();
+            $btn.html('<i class="fas fa-check"></i>');
+            setTimeout(function () { $btn.html(originalHtml); }, 1000);
           }
+          renderCart();
+        });
+
+        function filterProducts() {
+          var searchTerm = $('#search').val().toLowerCase();
+
+          $('.product-item').each(function () {
+            var productName = $(this).find('.product-name').text().toLowerCase();
+            var productCategoryId = parseInt($(this).data('category-id'));
+
+            var matchesSearch = productName.indexOf(searchTerm) !== -1;
+            var matchesCategory = (selectedCategoryId === 0 || productCategoryId === selectedCategoryId);
+
+            if (matchesSearch && matchesCategory) {
+              $(this).show();
+            } else {
+              $(this).hide();
+            }
+          });
         }
 
-        var items = cart.map(function (p) {
-          return {
-            produto: { id: p.id },
-            nomeProduto: p.nome,
-            quantidade: p.qtd,
-            preco: p.preco,
-            taxaIva: p.ivaPercentual,
-            subtotal: p.qtd * p.preco
+        // Search functionality
+        $('#search').on('input', filterProducts);
+
+        // Category Filter click
+        $('.filter-category').on('click', function () {
+          $('.filter-category').removeClass('btn-primary').addClass('btn-outline-dark');
+          $(this).removeClass('btn-outline-dark').addClass('btn-primary');
+
+          selectedCategoryId = parseInt($(this).data('category'));
+          filterProducts();
+        });
+
+        function processarVenda(url, successMsg, btnId, skipModalClose) {
+          if (cart.length === 0) {
+            alert('Carrinho vazio!');
+            return;
+          }
+
+          var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+          var totalGeral = parseFloat(totalStr) || 0;
+
+          var itensCompra = [];
+          for (var j = 0; j < cart.length; j++) {
+            var it = cart[j];
+            itensCompra.push({
+              produtoId: it.id,
+              nomeProduto: it.nome,
+              quantidade: it.qtd,
+              preco: it.preco,
+              subtotal: it.qtd * it.preco
+            });
+          }
+
+          var vMulticaixa = 0;
+          var vCash = totalGeral;
+
+          if ($('#pagMULTICAIXA').is(':checked')) {
+            if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
+              vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
+              vCash = totalGeral - vMulticaixa;
+            } else {
+              vMulticaixa = totalGeral;
+              vCash = 0;
+            }
+          }
+
+          var compra = {
+            itens: itensCompra,
+            total: totalGeral,
+            formaPagamento: getFormaPagamento(),
+            nomeCliente: obterNomeCliente(),
+            nifCliente: obterNifCliente(),
+            cliente: obterClienteId(),
+
+            // Detalhes MULTICAIXA
+            valorPagoMulticaixa: vMulticaixa,
+            valorPagoCash: vCash,
+            bancoMulticaixa: $('#multicaixaBanco').val(),
+            referenciaMulticaixa: $('#multicaixaReferencia').val(),
+            comissaoMulticaixa: vMulticaixa * 0.015,
+            valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015),
+
+            // Novos campos Cliente
+            moradaCliente: obterMoradaCliente(),
+            telefoneCliente: obterTelefoneCliente(),
+            emailCliente: obterEmailCliente()
           };
-        });
 
-        var payload = {
-          itens: items,
-          total: totalGeral,
-          formaPagamento: getFormaPagamento(),
-          nomeCliente: obterNomeCliente(),
-          nifCliente: obterNifCliente(),
-          cliente: obterClienteId(),
-          valorPagoMulticaixa: vMulticaixa,
-          valorPagoCash: vCash,
-          bancoMulticaixa: $('#multicaixaBanco').val(),
-          referenciaMulticaixa: $('#multicaixaReferencia').val(),
-          comissaoMulticaixa: vMulticaixa * 0.015,
-          valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015),
+          var $btn = $(btnId);
+          var originalContent = $btn.html();
+          $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> Processando...');
 
-          // Dados de Transporte
-          motorista: motorista,
-          matriculaViatura: matricula,
-          localCarga: $('#guiaLocalCarga').val(),
-          localDescarga: $('#guiaLocalDescarga').val(),
-          
-          // Novos campos Cliente
-          moradaCliente: obterMoradaCliente(),
-          telefoneCliente: obterTelefoneCliente(),
-          emailCliente: obterEmailCliente()
-        };
+          $.ajax({
+            url: url,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(compra),
+            success: function (response) {
+              console.log("Resposta integral da API:", response);
+              window.lastResponse = response;
+              var actualPdfPath = null;
 
-        $.ajax({
-          url: '/api/compras/guia',
-          type: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify(payload),
-          success: function (url) {
-            // No checkout view context, we don't need to re-open modal
+              if (typeof response === 'string') {
+                try {
+                  var parsed = JSON.parse(response);
+                  actualPdfPath = parsed.pdfPath || parsed.url || parsed.caminho;
+                } catch(e) {
+                  // Se for HTML ou texto limpo, assumimos que é o path se contiver '/'
+                  if (response.indexOf('/') !== -1) actualPdfPath = response;
+                }
+              } else if (response && typeof response === 'object') {
+                actualPdfPath = response.pdfPath || response.url || response.caminho;
+              }
 
-            setTimeout(function () {
-              mostrarPreviewInterno(url);
-              cart = [];
-              renderCart();
-            }, 500);
-          },
-          error: function (xhr) {
-            alert("Erro ao emitir Guia: " + (xhr.responseText || "Erro desconhecido"));
-          }
-        });
-      }
+              // Limpar Resumo Final conforme solicitado
+              try { limparResumoFinal(); } catch (e) { console.error("Erro ao limpar resumo:", e); }
 
-      function mostrarPreviewInterno(url) {
-        $('#checkoutFormRow').addClass('d-none');
-        $('#checkoutPreviewContainer').removeClass('d-none');
-        $('#checkoutPdfFrame').attr('src', url);
-        $('.checkout-footer-nav').addClass('d-none'); // Ocultar botões de finalizar enquanto vê PDF
-      }
+              console.log("Caminho do PDF extraído:", actualPdfPath);
 
-      function fecharPreviewInterno() {
-        $('#checkoutPreviewContainer').addClass('d-none');
-        $('#checkoutFormRow').removeClass('d-none');
-        $('.checkout-footer-nav').removeClass('d-none');
-        $('#checkoutPdfFrame').attr('src', '');
-      }
+              // Armazenar caminho do PDF para abrir ao clicar no botão
+              window.pdfFaturaUrl = actualPdfPath;
 
-      window.mostrarPreviewInterno = mostrarPreviewInterno;
-      window.fecharPreviewInterno = fecharPreviewInterno;
-      window.confirmarEmissaoGuia = confirmarEmissaoGuia;
-      window.abrirModalTransporte = abrirModalTransporte;
+              var btnDownload = $('#btnDownloadFatura');
+              btnDownload.removeClass('d-none btn-secondary btn-warning text-dark');
+              btnDownload.show();
 
-      let vendasSuspensasCache = [];
+              if (actualPdfPath && actualPdfPath.trim() !== '') {
+                btnDownload.addClass('btn-primary');
+                btnDownload.html('<i class="fas fa-file-pdf me-2"></i> DESCARREGAR DOCUMENTO');
+              } else {
+                btnDownload.addClass('btn-warning text-dark');
+                btnDownload.html('<i class="fas fa-exclamation-triangle me-2"></i> PDF INDISPONÍVEL (VER CONSOLA)');
+                console.error('Resposta do servidor:', window.lastResponse);
+              }
 
-      function atualizarContadorSuspensas() {
-        $.get('/api/vendas-suspensas', function (vendas) {
-          const count = vendas.length;
-          const badge = $('#suspendedCountBadge');
-          if (count > 0) {
-            badge.text(count).show();
-          } else {
-            badge.hide();
-          }
-        });
-      }
+              try {
+                var modalEl = document.getElementById('modalVendaSucesso');
+                var modalSucesso = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalSucesso.show();
+              } catch (e) {
+                console.error("Erro ao instanciar modal Bootstrap, usando jQuery fallback:", e);
+                $('#modalVendaSucesso').modal('show');
+              }
 
-      function suspenderVenda() {
-        if (cart.length === 0) {
-          alert("O carrinho está vazio.");
-          return;
+              // Atualizar visualmente o stock dos itens vendidos no grid p/ vendas reais
+              if (url.indexOf('proforma') === -1) {
+                cart.forEach(function (item) {
+                  var $btn = $('.btn-quick-add[data-id="' + item.id + '"]');
+                  if ($btn.length > 0) {
+                    var currentStockStr = $btn.attr('data-stock');
+                    if (currentStockStr !== '') {
+                      var currentStock = parseFloat(currentStockStr);
+                      if (isNaN(currentStock)) currentStock = 0;
+                      var newStock = currentStock - item.qtd;
+                      $btn.attr('data-stock', newStock);
+
+                      var $card = $btn.closest('.product-card');
+                      $card.find('.small.text-muted.mt-1.fw-bold span').text(newStock);
+
+                      if (newStock <= 0) {
+                        $card.addClass('product-disabled');
+                        var $imgContainer = $card.find('.product-img-container');
+                        if ($imgContainer.find('.out-of-stock-overlay').length === 0) {
+                          $imgContainer.prepend('<div class="out-of-stock-overlay">ESGOTADO</div>');
+                        }
+                        $btn.addClass('bg-danger').css('cursor', 'not-allowed').html('<i class="fas fa-times"></i>');
+                        var $priceRow = $card.find('.d-flex.justify-content-between.align-items-center.mt-2');
+                        if ($priceRow.find('.badge.bg-danger').length === 0) {
+                          $priceRow.append('<span class="badge bg-danger">INDISPONÍVEL</span>');
+                        }
+                      }
+                    }
+                  }
+                });
+              }
+
+              if (!skipModalClose) {
+                cart = [];
+                renderCart();
+              }
+            },
+            error: function (xhr) {
+              alert('Erro ao processar: ' + (xhr.responseText || 'Erro desconhecido'));
+            },
+            complete: function () {
+              $btn.prop('disabled', false).html(originalContent);
+            }
+          });
         }
 
-        const payload = {
-          clienteNome: obterNomeCliente(),
-          itensJson: JSON.stringify(cart)
+        // ---- CHECKOUT VIEW SWITCHING ----
+
+        function abrirCheckoutView() {
+          if (cart.length === 0) {
+            alert('O carrinho está vazio. Adicione produtos primeiro.');
+            return;
+          }
+
+          // Reset wizard state
+          currentWizardStep = 1;
+          $('.wizard-step').removeClass('active').hide();
+          $('#step1').addClass('active').show();
+          $('.step-item').removeClass('active completed');
+          $('.step-item[data-step="1"]').addClass('active');
+          $('#wizardProgress').css('width', '0%');
+
+          $('#btnAnteriorWizard').addClass('d-none');
+          $('#btnProximoWizard').removeClass('d-none');
+          $('#btnFinalizarModal').addClass('d-none');
+
+          renderModalCart();
+          atualizarVisibilidadeMulticaixa();
+
+          // Switch Views with explicit show/hide
+          $('#posMainView').hide();
+          $('#checkoutWizardView').show().removeClass('d-none');
+
+          // Scroll to top
+          window.scrollTo(0, 0);
+        }
+
+        function abrirPdfFatura() {
+          if (window.pdfFaturaUrl && window.pdfFaturaUrl.trim() !== '') {
+            window.open(window.pdfFaturaUrl, '_blank');
+          } else {
+            alert('O URL do PDF não está disponível. Verifique a consola do browser para mais detalhes.');
+            console.error('pdfFaturaUrl está vazio. Última resposta:', window.lastResponse);
+          }
+        }
+        window.abrirPdfFatura = abrirPdfFatura;
+
+        function voltarParaPos() {
+          $('#checkoutWizardView').hide();
+          $('#posMainView').show();
+          limparResumoFinal();
+        }
+
+        function limparResumoFinal() {
+          $('#resumoTotalBruto').text('0.00 Kz');
+          $('#multicaixaComissao').text('- 0.00 Kz');
+          $('#multicaixaValorLiquido').text('0.00 Kz');
+          $('#multicaixaValorPago').val('');
+          $('#multicaixaReferencia').val('');
+          $('#mistoCashRestante').val('');
+        }
+
+        window.abrirModalCheckout = abrirCheckoutView; // Mantemos o nome antigo no botão para evitar quebra
+        window.voltarParaPos = voltarParaPos;
+
+        function renderModalCart() {
+          var tbody = $('#modalCartBody');
+          tbody.empty();
+          var subtotal = 0, totalIva = 0;
+
+          cart.forEach(function (item, idx) {
+            var itemTotal = item.qtd * item.preco;
+            subtotal += itemTotal;
+            totalIva += itemTotal * (item.ivaPercentual / 100);
+
+            tbody.append(
+              '<tr>' +
+              '  <td class="ps-4 py-3"><div class="fw-bold text-dark">' + item.nome + '</div>' +
+              '    <small class="text-muted">' + item.preco.toFixed(2) + ' Kz / un.</small></td>' +
+              '  <td class="text-center">' +
+              '    <div class="d-flex align-items-center justify-content-center gap-3">' +
+              '      <button class="btn btn-sm btn-outline-secondary rounded-circle shadow-sm" onclick="modalDecreaseQty(' + idx + ')" style="width:32px;height:32px;padding:0;"><i class="fas fa-minus" style="font-size:10px;"></i></button>' +
+              '      <span class="fw-bold fs-6" id="modal-qty-' + idx + '">' + item.qtd + '</span>' +
+              '      <button class="btn btn-sm btn-outline-secondary rounded-circle shadow-sm" onclick="modalIncreaseQty(' + idx + ')" style="width:32px;height:32px;padding:0;"><i class="fas fa-plus" style="font-size:10px;"></i></button>' +
+              '    </div>' +
+              '  </td>' +
+              '  <td class="text-end">' + item.preco.toFixed(2) + ' Kz</td>' +
+              '  <td class="text-end fw-bold text-primary">' + itemTotal.toFixed(2) + ' Kz</td>' +
+              '  <td class="text-end pe-4">' +
+              '    <button class="btn btn-sm text-danger" onclick="modalRemoveItem(' + idx + ')"><i class="fas fa-trash-alt"></i></button>' +
+              '  </td>' +
+              '</tr>'
+            );
+          });
+
+          var totalFinal = subtotal + totalIva;
+          $('#modalSubtotal').text(subtotal.toFixed(2) + ' Kz');
+          $('#modalIva').text(totalIva.toFixed(2) + ' Kz');
+          $('#modalTotal').text(totalFinal.toFixed(2) + ' Kz');
+          $('#resumoTotalBruto').text(totalFinal.toFixed(2) + ' Kz'); // Para o passo de pagamento
+          $('#badgeTotalItens').text(cart.length + (cart.length === 1 ? ' item' : ' itens'));
+
+          // Actualizar valores de comissão e líquido sempre que o total mudar
+          if (typeof calcularComissaoMulticaixa === 'function') {
+            calcularComissaoMulticaixa();
+          }
+        }
+
+        let currentWizardStep = 1;
+
+        function changeStep(delta) {
+          const nextStep = currentWizardStep + delta;
+
+          // Validação básica
+          if (delta > 0) {
+            if (currentWizardStep === 1 && cart.length === 0) {
+              alert('O carrinho está vazio.'); return;
+            }
+            if (currentWizardStep === 2) {
+              if ($('#painelClienteNovo').is(':visible')) {
+                if (!$('#novoClienteNome').val().trim() || !$('#novoClienteNif').val().trim()) {
+                  alert('Preencha o Nome e NIF do novo cliente.'); return;
+                }
+              }
+            }
+          }
+
+          if (nextStep < 1 || nextStep > 3) return;
+
+          $('.wizard-step').removeClass('active').hide();
+
+          currentWizardStep = nextStep;
+
+          $(`#step${currentWizardStep}`).addClass('active').show();
+          $(`.step-item[data-step="${currentWizardStep}"]`).addClass('active').removeClass('completed');
+
+          // Atualizar barra de progresso
+          const progressPercent = ((currentWizardStep - 1) / 2) * 100;
+          $('#wizardProgress').css('width', progressPercent + '%');
+
+          // Atualizar botões
+          if (currentWizardStep === 1) {
+            $('#btnAnteriorWizard').addClass('d-none');
+            $('#btnProximoWizard').removeClass('d-none');
+            $('#btnFinalizarModal').addClass('d-none');
+          } else if (currentWizardStep === 2) {
+            $('#btnAnteriorWizard').removeClass('d-none');
+            $('#btnProximoWizard').removeClass('d-none');
+            $('#btnFinalizarModal').addClass('d-none');
+          } else if (currentWizardStep === 3) {
+            $('#btnAnteriorWizard').removeClass('d-none');
+            $('#btnProximoWizard').addClass('d-none');
+            $('#btnFinalizarModal').removeClass('d-none');
+          }
+        }
+        window.changeStep = changeStep;
+
+        // Reset wizard logic removed from modal event since it's no longer a modal
+
+        window.modalIncreaseQty = function (idx) {
+          var item = cart[idx];
+          if (item.stockMax !== Infinity && item.qtd + 1 > item.stockMax) {
+            alert('Stock insuficiente!');
+            return;
+          }
+          item.qtd++;
+          renderCart();
+          renderModalCart();
         };
 
-        $.ajax({
-          url: '/api/vendas-suspensas',
-          method: 'POST',
-          contentType: 'application/json',
-          data: JSON.stringify(payload),
-          success: function () {
-            alert("Venda suspensa com sucesso!");
+        window.modalDecreaseQty = function (idx) {
+          if (cart[idx].qtd > 1) {
+            cart[idx].qtd--;
+          } else {
+            cart.splice(idx, 1);
+          }
+          renderCart();
+          renderModalCart();
+          if (cart.length === 0) {
+            voltarParaPos();
+          }
+        };
+
+        window.modalRemoveItem = function (idx) {
+          if (confirm("Deseja remover este item do carrinho?")) {
+            cart.splice(idx, 1);
+            renderCart();
+            renderModalCart();
+            if (cart.length === 0) {
+              voltarParaPos();
+            }
+          }
+        };
+
+        // Seleccao Doc Type
+        $(document).on('click', '.doc-type-card', function () {
+          $('.doc-type-card').removeClass('active');
+          $(this).addClass('active');
+          $('#finalizarDocName').text($(this).data('name'));
+        });
+
+        function cancelarCompra() {
+          if (confirm('Tem a certeza que deseja cancelar esta compra? O carrinho será limpo.')) {
             cart = [];
             renderCart();
-            atualizarContadorSuspensas();
             voltarParaPos();
-          },
-          error: function (xhr) {
-            alert("Erro ao suspender venda: " + (xhr.responseText || "Erro de rede/servidor"));
+          }
+        }
+
+        // Limitar checkboxes de pagamento a maximo 2
+        $(document).on('change', '.pagamento-check', function () {
+          var checked = $('.pagamento-check:checked');
+          if (checked.length > 2) {
+            $(this).prop('checked', false);
+            $('#aviso-pagamento').removeClass('d-none');
+            setTimeout(function () { $('#aviso-pagamento').addClass('d-none'); }, 3000);
+          }
+          // Garantir pelo menos 1 selecionado
+          if ($('.pagamento-check:checked').length === 0) {
+            $('#pagCASH').prop('checked', true);
+          }
+
+          atualizarVisibilidadeMulticaixa();
+        });
+
+        function atualizarVisibilidadeMulticaixa() {
+          var checked = $('.pagamento-check:checked');
+          var hasMulticaixa = $('#pagMULTICAIXA').is(':checked');
+          var hasCash = $('#pagCASH').is(':checked');
+
+          if (hasMulticaixa) {
+            $('#painelMulticaixa').removeClass('d-none');
+            if (checked.length > 1 && hasCash) {
+              $('#painelMistoMCX').removeClass('d-none');
+            } else {
+              $('#painelMistoMCX').addClass('d-none');
+              // Se for só MULTICAIXA, o valor é o total da compra
+              var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+              $('#multicaixaValorPago').val(parseFloat(totalStr));
+            }
+            calcularComissaoMulticaixa();
+          } else {
+            $('#painelMulticaixa').addClass('d-none');
+          }
+        }
+
+        function calcularComissaoMulticaixa() {
+          var valorPagoMCX = parseFloat($('#multicaixaValorPago').val()) || 0;
+          var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+          var totalGeral = parseFloat(totalStr) || 0;
+
+          var cashRestante = totalGeral - valorPagoMCX;
+          if (cashRestante < 0) cashRestante = 0;
+          $('#mistoCashRestante').val(cashRestante.toFixed(2));
+
+          var comissao = valorPagoMCX * 0.015;
+          var liquido = totalGeral - comissao;
+
+          // Mostrar comissão apenas se houver pagamento via TPA
+          if (valorPagoMCX > 0) {
+            $('#linhaComissaoTPA').attr('style', 'display: flex !important;');
+          } else {
+            $('#linhaComissaoTPA').attr('style', 'display: none !important;');
+          }
+
+          $('#multicaixaComissao').text(comissao.toFixed(2) + ' Kz');
+          $('#multicaixaValorLiquido').text(liquido.toFixed(2) + ' Kz');
+        }
+
+        $('#multicaixaValorPago').on('input', calcularComissaoMulticaixa);
+
+        // Mostrar info do cliente selecionado
+        $('#selectCliente').on('change', function () {
+          var selectedOption = $(this).find('option:selected');
+          var nome = selectedOption.text();
+          var val = $(this).val();
+
+          if (val) {
+            // Cliente específico selecionado
+            var nifMatch = nome.match(/NIF:\s*([\w]+)/);
+            var nif = nifMatch ? nifMatch[1] : 'N/D';
+            var nomeLimpo = nome.split(' —')[0].trim();
+            $('#nomeClienteSel').text(nomeLimpo);
+            $('#nifClienteSel').text(nif);
+            $('#alertInfoCliente').css({ 'background': '#f0fdf4', 'color': '#166534' });
+          } else {
+            // Consumidor Final
+            $('#nomeClienteSel').text('Consumidor Final');
+            $('#nifClienteSel').text('999999999');
+            $('#alertInfoCliente').css({ 'background': '#fefce8', 'color': '#854d0e' });
           }
         });
-      }
 
-      function abrirModalVendasSuspensas() {
-        $.get('/api/vendas-suspensas', function (vendas) {
-          vendasSuspensasCache = vendas;
-          const list = $('#listaVendasSuspensas');
-          list.empty();
-          if (vendas.length === 0) {
-            list.append('<div class="text-center p-4 text-muted">Nenhuma venda suspensa.</div>');
+        function toggleClienteMode(modo) {
+          if (modo === 'existente') {
+            $('#painelClienteExistente').show();
+            $('#painelClienteNovo').hide();
+            $('#btnClienteExistente').removeClass('btn-light').addClass('btn-primary');
+            $('#btnClienteNovo').removeClass('btn-primary').addClass('btn-light');
           } else {
-            vendas.forEach(v => {
-              const data = new Date(v.dataHora).toLocaleString();
-              const row = `
+            $('#painelClienteExistente').hide();
+            $('#painelClienteNovo').show();
+            $('#btnClienteNovo').removeClass('btn-light').addClass('btn-primary');
+            $('#btnClienteExistente').removeClass('btn-primary').addClass('btn-light');
+          }
+        }
+        window.toggleClienteMode = toggleClienteMode;
+
+        function getFormaPagamento() {
+          var formas = [];
+          $('.pagamento-check:checked').each(function () { formas.push($(this).val()); });
+          return formas.length > 0 ? formas.join('+') : 'CASH';
+        }
+
+        // Retorna o nome do cliente conforme o modo activo (existente ou novo)
+        function obterNomeCliente() {
+          // Modo "novo cliente"
+          if ($('#painelClienteNovo').is(':visible')) {
+            var nome = $('#novoClienteNome').val().trim();
+            return nome !== '' ? nome : 'Consumidor Final';
+          }
+          // Modo "cliente existente"
+          var val = $('#selectCliente').val();
+          if (val) {
+            var texto = $('#selectCliente option:selected').text();
+            return texto.split(' \u2014')[0].trim();
+          }
+          return 'Consumidor Final';
+        }
+
+        // Retorna o NIF do cliente
+        function obterNifCliente() {
+          if ($('#painelClienteNovo').is(':visible')) {
+            var nif = $('#novoClienteNif').val().trim();
+            return nif !== '' ? nif : '999999999';
+          }
+          var val = $('#selectCliente').val();
+          if (val) {
+            var texto = $('#selectCliente option:selected').text();
+            var match = texto.match(/NIF:\s*([\w]+)/);
+            return match ? match[1] : '999999999';
+          }
+          return '999999999';
+        }
+
+        function obterMoradaCliente() {
+          if ($('#painelClienteNovo').is(':visible')) {
+            return $('#novoClienteMorada').val().trim();
+          }
+          return '';
+        }
+
+        function obterTelefoneCliente() {
+          if ($('#painelClienteNovo').is(':visible')) {
+            return $('#novoClienteTelefone').val().trim();
+          }
+          return '';
+        }
+
+        function obterEmailCliente() {
+          if ($('#painelClienteNovo').is(':visible')) {
+            return $('#novoClienteEmail').val().trim();
+          }
+          return '';
+        }
+
+        // Retorna o objecto {id: X} para clientes FK, ou null para Consumidor Final / novo
+        function obterClienteId() {
+          if ($('#painelClienteExistente').is(':visible')) {
+            var val = $('#selectCliente').val();
+            if (val && val !== '') {
+              return { id: parseInt(val) };
+            }
+          }
+          return null;
+        }
+
+
+        $('#btnFinalizarModal').click(function () {
+          var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+          var total = parseFloat(totalStr);
+
+          var selectedDoc = $('.doc-type-card.active');
+          var docUrl = selectedDoc.data('url');
+          var docType = selectedDoc.data('type');
+
+          if ((docType === 'FR' || docType === 'FT') && $('.pagamento-check:checked').length > 1 && $('#pagMULTICAIXA').is(':checked') && $('#pagCASH').is(':checked')) {
+            var vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
+            if (vMulticaixa > total || vMulticaixa <= 0) {
+              alert('Valide o montante Multicaixa.'); return;
+            }
+          }
+
+          // Se MULTICAIXA estiver selecionado, gerar referência fictícia e concluir diretamente
+          if ($('#pagMULTICAIXA').is(':checked')) {
+            var refSimulada = "SIM-" + Math.floor(Math.random() * 1000000);
+            $('#multicaixaReferencia').val(refSimulada);
+          }
+
+          concluirFinalizacao(docUrl);
+        });
+
+        function concluirFinalizacao(url) {
+          processarVenda(url, $('#t-msg-sucesso').text(), '#btnFinalizarModal');
+          // Ocultamos a vista de checkout ao finalizar com sucesso? 
+          // O processarVenda geralmente mostra o PDF e depois o user pode voltar ao POS
+        }
+
+
+        $('#btnEmitirProformaModal').click(function () {
+          processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal', true);
+          // Não fechamos o modal aqui, o skipModalClose=true lida com isso
+        });
+
+        $('#btnEmitirGuiaModal').click(function () {
+          abrirModalTransporte();
+        });
+
+        function abrirModalTransporte() {
+          var list = $('#listaArtigosTransporte');
+          list.empty();
+
+          cart.forEach(function (item) {
+            list.append('<tr>' +
+              '<td><div class="fw-bold text-dark">' + item.nome + '</div></td>' +
+              '<td class="text-center"><span class="badge bg-secondary rounded-pill">' + item.qtd + '</span></td>' +
+              '</tr>');
+          });
+
+          // Tentar preencher endereços padrões se disponíveis
+          $('#guiaLocalCarga').val('');
+          $('#guiaLocalDescarga').val($('#alertInfoCliente:visible').length ? $('#nomeClienteSel').text() : '');
+
+          var modalTrans = new bootstrap.Modal(document.getElementById('modalTransporteGuia'));
+          modalTrans.show();
+        }
+
+        function confirmarEmissaoGuia() {
+          var motorista = $('#guiaMotorista').val().trim();
+          var matricula = $('#guiaMatricula').val().trim();
+
+          if (!motorista || !matricula) {
+            alert('Por favor, preencha o motorista e a matrícula do veículo.');
+            return;
+          }
+
+          var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
+          var totalGeral = parseFloat(totalStr) || 0;
+          var vMulticaixa = 0;
+          var vCash = totalGeral;
+
+          if ($('#pagMULTICAIXA').is(':checked')) {
+            if ($('.pagamento-check:checked').length > 1 && $('#pagCASH').is(':checked')) {
+              vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
+              vCash = totalGeral - vMulticaixa;
+            } else {
+              vMulticaixa = totalGeral;
+              vCash = 0;
+            }
+          }
+
+          var items = cart.map(function (p) {
+            return {
+              produto: { id: p.id },
+              nomeProduto: p.nome,
+              quantidade: p.qtd,
+              preco: p.preco,
+              taxaIva: p.ivaPercentual,
+              subtotal: p.qtd * p.preco
+            };
+          });
+
+          var payload = {
+            itens: items,
+            total: totalGeral,
+            formaPagamento: getFormaPagamento(),
+            nomeCliente: obterNomeCliente(),
+            nifCliente: obterNifCliente(),
+            cliente: obterClienteId(),
+            valorPagoMulticaixa: vMulticaixa,
+            valorPagoCash: vCash,
+            bancoMulticaixa: $('#multicaixaBanco').val(),
+            referenciaMulticaixa: $('#multicaixaReferencia').val(),
+            comissaoMulticaixa: vMulticaixa * 0.015,
+            valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015),
+
+            // Dados de Transporte
+            motorista: motorista,
+            matriculaViatura: matricula,
+            localCarga: $('#guiaLocalCarga').val(),
+            localDescarga: $('#guiaLocalDescarga').val(),
+
+            // Novos campos Cliente
+            moradaCliente: obterMoradaCliente(),
+            telefoneCliente: obterTelefoneCliente(),
+            emailCliente: obterEmailCliente()
+          };
+
+          $.ajax({
+            url: '/api/compras/guia',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (url) {
+              // No checkout view context, we don't need to re-open modal
+
+              setTimeout(function () {
+                mostrarPreviewInterno(url);
+                cart = [];
+                renderCart();
+              }, 500);
+            },
+            error: function (xhr) {
+              alert("Erro ao emitir Guia: " + (xhr.responseText || "Erro desconhecido"));
+            }
+          });
+        }
+
+        function mostrarPreviewInterno(url) {
+          $('#checkoutFormRow').addClass('d-none');
+          $('#checkoutPreviewContainer').removeClass('d-none');
+          $('#checkoutPdfFrame').attr('src', url);
+          $('.checkout-footer-nav').addClass('d-none'); // Ocultar botões de finalizar enquanto vê PDF
+        }
+
+        function fecharPreviewInterno() {
+          $('#checkoutPreviewContainer').addClass('d-none');
+          $('#checkoutFormRow').removeClass('d-none');
+          $('.checkout-footer-nav').removeClass('d-none');
+          $('#checkoutPdfFrame').attr('src', '');
+        }
+
+        window.mostrarPreviewInterno = mostrarPreviewInterno;
+        window.fecharPreviewInterno = fecharPreviewInterno;
+        window.confirmarEmissaoGuia = confirmarEmissaoGuia;
+        window.abrirModalTransporte = abrirModalTransporte;
+
+        let vendasSuspensasCache = [];
+
+        function atualizarContadorSuspensas() {
+          $.get('/api/vendas-suspensas', function (vendas) {
+            const count = vendas.length;
+            const badge = $('#suspendedCountBadge');
+            if (count > 0) {
+              badge.text(count).show();
+            } else {
+              badge.hide();
+            }
+          });
+        }
+
+        function suspenderVenda() {
+          if (cart.length === 0) {
+            alert("O carrinho está vazio.");
+            return;
+          }
+
+          const payload = {
+            clienteNome: obterNomeCliente(),
+            itensJson: JSON.stringify(cart)
+          };
+
+          $.ajax({
+            url: '/api/vendas-suspensas',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function () {
+              alert("Venda suspensa com sucesso!");
+              cart = [];
+              renderCart();
+              atualizarContadorSuspensas();
+              voltarParaPos();
+            },
+            error: function (xhr) {
+              alert("Erro ao suspender venda: " + (xhr.responseText || "Erro de rede/servidor"));
+            }
+          });
+        }
+
+        function abrirModalVendasSuspensas() {
+          $.get('/api/vendas-suspensas', function (vendas) {
+            vendasSuspensasCache = vendas;
+            const list = $('#listaVendasSuspensas');
+            list.empty();
+            if (vendas.length === 0) {
+              list.append('<div class="text-center p-4 text-muted">Nenhuma venda suspensa.</div>');
+            } else {
+              vendas.forEach(v => {
+                const data = new Date(v.dataHora).toLocaleString();
+                const row = `
                 <div class="card mb-2 border-0 shadow-sm rounded-3">
                   <div class="card-body d-flex justify-content-between align-items-center p-3">
                     <div>
@@ -2298,80 +2330,107 @@
                     </div>
                   </div>
                 </div>`;
-              list.append(row);
-            });
+                list.append(row);
+              });
+            }
+            new bootstrap.Modal(document.getElementById('modalVendasSuspensas')).show();
+          });
+        }
+
+        function restaurarVendaSuspensa(id) {
+          const venda = vendasSuspensasCache.find(v => v.id === id);
+          if (!venda) return;
+
+          if (cart.length > 0) {
+            if (!confirm("O carrinho actual tem itens. Deseja substituí-los pela venda suspensa?")) {
+              return;
+            }
           }
-          new bootstrap.Modal(document.getElementById('modalVendasSuspensas')).show();
-        });
-      }
 
-      function restaurarVendaSuspensa(id) {
-        const venda = vendasSuspensasCache.find(v => v.id === id);
-        if (!venda) return;
-
-        if (cart.length > 0) {
-          if (!confirm("O carrinho actual tem itens. Deseja substituí-los pela venda suspensa?")) {
-            return;
+          try {
+            cart = JSON.parse(venda.itensJson);
+            renderCart();
+            eliminarVendaSuspensa(id, true);
+            var modal = bootstrap.Modal.getInstance(document.getElementById('modalVendasSuspensas'));
+            if (modal) modal.hide();
+          } catch (e) {
+            console.error("Erro ao processar itens da venda suspensa", e);
+            alert("Erro ao restaurar itens.");
           }
         }
-        
-        try {
-          cart = JSON.parse(venda.itensJson);
-          renderCart();
-          eliminarVendaSuspensa(id, true);
-          var modal = bootstrap.Modal.getInstance(document.getElementById('modalVendasSuspensas'));
-          if (modal) modal.hide();
-        } catch (e) {
-          console.error("Erro ao processar itens da venda suspensa", e);
-          alert("Erro ao restaurar itens.");
+
+        function eliminarVendaSuspensa(id, quiet = false) {
+          if (!quiet && !confirm("Deseja eliminar esta venda suspensa?")) return;
+          $.ajax({
+            url: '/api/vendas-suspensas/' + id,
+            method: 'DELETE',
+            success: function () {
+              atualizarContadorSuspensas();
+              if (!quiet) abrirModalVendasSuspensas();
+            }
+          });
         }
-      }
 
-      function eliminarVendaSuspensa(id, quiet = false) {
-        if (!quiet && !confirm("Deseja eliminar esta venda suspensa?")) return;
-        $.ajax({
-          url: '/api/vendas-suspensas/' + id,
-          method: 'DELETE',
-          success: function () {
-            atualizarContadorSuspensas();
-            if (!quiet) abrirModalVendasSuspensas();
-          }
+        window.suspenderVenda = suspenderVenda;
+        window.abrirModalVendasSuspensas = abrirModalVendasSuspensas;
+        window.restaurarVendaSuspensa = restaurarVendaSuspensa;
+        window.eliminarVendaSuspensa = eliminarVendaSuspensa;
+
+        $('#finalizarCompra').click(function () {
+          processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#finalizarCompra');
         });
-      }
 
-      window.suspenderVenda = suspenderVenda;
-      window.abrirModalVendasSuspensas = abrirModalVendasSuspensas;
-      window.restaurarVendaSuspensa = restaurarVendaSuspensa;
-      window.eliminarVendaSuspensa = eliminarVendaSuspensa;
-
-      $('#finalizarCompra').click(function () {
-        processarVenda('/api/compras/single', $('#t-msg-sucesso').text(), '#finalizarCompra');
+        $('#emitirProforma').click(function () {
+          processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#emitirProforma');
+        });
       });
-
-      $('#emitirProforma').click(function () {
-        processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#emitirProforma');
-      });
-    });
-  </script>
-  <!-- MODAL VENDAS SUSPENSAS -->
-  <div class="modal fade" id="modalVendasSuspensas" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-        <div class="modal-header bg-warning text-dark border-0">
-          <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i> Vendas Suspensas</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body p-4" style="background: #f8fafc; max-height: 60vh; overflow-y: auto;">
-          <div id="listaVendasSuspensas">
-            <!-- Gerado via JS -->
+    </script>
+    <!-- MODAL VENDAS SUSPENSAS -->
+    <div class="modal fade" id="modalVendasSuspensas" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+          <div class="modal-header bg-warning text-dark border-0">
+            <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i> Vendas Suspensas</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-        </div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Fechar</button>
+          <div class="modal-body p-4" style="background: #f8fafc; max-height: 60vh; overflow-y: auto;">
+            <div id="listaVendasSuspensas">
+              <!-- Gerado via JS -->
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Fechar</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+    <!-- MODAL VENDA SUCESSO -->
+    <div class="modal fade" id="modalVendaSucesso" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+          <div class="modal-body text-center p-5">
+            <div class="mb-4">
+              <div class="bg-success-subtle text-success p-3 rounded-circle d-inline-block shadow-sm">
+                <i class="fas fa-check-circle" style="font-size: 4rem;"></i>
+              </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-2">Venda Concluída!</h3>
+            <p class="text-muted mb-4">O documento foi gerado com sucesso. Pode descarregá-lo no botão abaixo ou
+              continuar para uma nova venda.</p>
+            <div class="d-grid gap-3">
+              <button type="button" id="btnDownloadFatura" onclick="abrirPdfFatura()"
+                class="btn btn-lg btn-primary rounded-pill fw-bold py-3 shadow-sm">
+                <i class="fas fa-file-pdf me-2"></i> DESCARREGAR DOCUMENTO
+              </button>
+              <button type="button" class="btn btn-outline-secondary rounded-pill fw-bold py-2" data-bs-dismiss="modal"
+                onclick="voltarParaPos()">
+                FECHAR E VOLTAR AO POS
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div> <!-- Fim de wrapper -->
 </body>
 

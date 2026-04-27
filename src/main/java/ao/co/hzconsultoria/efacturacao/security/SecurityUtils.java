@@ -20,4 +20,26 @@ public class SecurityUtils {
         }
         return null;
     }
+
+    /**
+     * Obtém a empresa do utilizador autenticado
+     * Útil para garantir que cada utilizador acessa apenas a sua empresa
+     */
+    public static CustomUserDetails getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+            return (CustomUserDetails) auth.getPrincipal();
+        }
+        return null;
+    }
+
+    /**
+     * Verifica se o utilizador autenticado tem acesso à empresa especificada
+     * Útil para validações de segurança
+     */
+    public static boolean temAcessoEmpresa(Long empresaId) {
+        Long empresaIdAtual = getCurrentEmpresaId();
+        return empresaIdAtual != null && empresaIdAtual.equals(empresaId);
+    }
 }
+

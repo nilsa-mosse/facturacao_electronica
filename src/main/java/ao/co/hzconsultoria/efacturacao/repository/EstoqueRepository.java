@@ -12,4 +12,5 @@ import java.util.List;
 public interface EstoqueRepository extends JpaRepository<Estoque, Long> {
     List<Estoque> findByProdutoAndEstabelecimentoIn(Produto produto, List<Estabelecimento> estabelecimentos);
     List<Estoque> findByProduto(Produto produto);
+    java.util.Optional<Estoque> findByProdutoAndEstabelecimento(Produto produto, Estabelecimento estabelecimento);
 }

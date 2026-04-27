@@ -349,6 +349,12 @@
                             title="Colocar em Promoção">
                       <i class="fas fa-fire"></i>
                     </button>
+                    <button th:if="${produto.emPromocao}" 
+                            class="btn-action bg-danger-soft text-danger me-2" 
+                            th:onclick="|retirarPromocao('${produto.id}')|" 
+                            title="Retirar da Promoção">
+                      <i class="fas fa-times-circle"></i>
+                    </button>
                     <button class="btn-action btn-edit me-2" data-bs-toggle="modal" th:data-bs-target="${'#detalhesModal_' + produto.id}">
                       <i class="fas fa-edit"></i>
                     </button>
@@ -481,6 +487,19 @@
           });
       } else {
         alert("Por favor, insira um preço válido maior que zero.");
+      }
+    }
+
+    function retirarPromocao(id) {
+      if (confirm("Tem certeza que deseja retirar este produto da promoção e restaurar o preço original?")) {
+        fetch('/api/produtos/retirar-promocao/' + id)
+          .then(response => {
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              alert("Erro ao retirar produto da promoção.");
+            }
+          });
       }
     }
 

@@ -63,10 +63,13 @@
                                          <label th:text="#{config.empresa.logotipo}">Carregar Logotipo</label>
                                          <div class="d-flex align-items-center gap-3">
                                             <input type="file" name="logoFile" class="form-control" accept="image/*">
-                                            <div th:if="*{logotipo != null}" class="border rounded bg-light p-1">
-                                                <img th:src="@{'/' + *{logotipo.replace('src/main/resources/static/', '')}}" alt="Logo" style="height: 38px; max-width: 60px; object-fit: contain;">
+                                            <div th:if="*{logotipo != null and !logotipo.isEmpty()}" class="border rounded bg-light p-1" title="Logotipo actual">
+                                                <img th:src="*{logotipo}" alt="Logo" style="height: 38px; max-width: 60px; object-fit: contain;"
+                                                     onerror="this.parentElement.style.display='none'">
                                             </div>
                                          </div>
+                                         <small class="text-muted" th:if="*{logotipo != null and !logotipo.isEmpty()}"
+                                                th:text="*{logotipo}"></small>
                                      </div>
                                 </div>
                                  <div class="row mt-3">

@@ -435,7 +435,7 @@
           </th:block>
 
           <!-- SUPER ADMIN SECTION -->
-          <th:block th:if="${isSuperAdmin}">
+          <th:block th:if="${modulo_PAINEL_GLOBAL}">
             <li class="nav-header text-warning">PAINEL GLOBAL (SaaS)</li>
             <li class="nav-item">
               <a th:href="@{/superadmin/dashboard}" class="nav-link bg-warning text-dark">
@@ -447,6 +447,12 @@
               <a th:href="@{/superadmin/usuarios}" class="nav-link bg-warning text-dark mt-1">
                 <i class="nav-icon fas fa-user-shield"></i>
                 <p>Admins Globais</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/superadmin/configuracoes}" class="nav-link bg-warning text-dark mt-1">
+                <i class="nav-icon fas fa-cogs"></i>
+                <p>Configurações SaaS</p>
               </a>
             </li>
           </th:block>

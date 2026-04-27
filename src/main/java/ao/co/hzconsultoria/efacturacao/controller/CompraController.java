@@ -9,12 +9,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Fatura;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
+import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ClienteRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
@@ -72,6 +75,7 @@ public class CompraController {
         return "redirect:/pos";
     }
     
+    @ResponseBody
     @PostMapping("/api/compras/single")
     public ResponseEntity<?> finalizarCompraSingle(@RequestBody Compra compra) {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
@@ -82,9 +86,12 @@ public class CompraController {
         Compra compraSalva = vendaService.finalizarVenda(compra);
         Fatura fatura = faturaService.emitirFatura(compraSalva);
         String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
-        return ResponseEntity.ok().body(pdfFile);
+        java.util.Map<String, String> response = new java.util.HashMap<>();
+        response.put("pdfPath", pdfFile);
+        return ResponseEntity.ok(response);
     }
 
+    @ResponseBody
     @PostMapping("/api/compras/proforma")
     public ResponseEntity<?> emitirProforma(@RequestBody Compra compra) {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
@@ -95,9 +102,12 @@ public class CompraController {
         Compra compraSalva = vendaService.finalizarVenda(compra, "FP");
         Fatura fatura = faturaService.emitirProforma(compraSalva);
         String pdfFile = "/faturas/" + fatura.getNumeroFatura() + ".pdf";
-        return ResponseEntity.ok().body(pdfFile);
+        java.util.Map<String, String> response = new java.util.HashMap<>();
+        response.put("pdfPath", pdfFile);
+        return ResponseEntity.ok(response);
     }
 
+    @ResponseBody
     @PostMapping("/api/compras/guia")
     public ResponseEntity<?> emitirGuia(@RequestBody Compra compra) {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
@@ -148,7 +158,7 @@ public class CompraController {
                 compra.setCliente(null);
             } else {
                 // É um novo cliente registado no POS
-                Cliente novoCliente = new Cliente();
+                ao.co.hzconsultoria.efacturacao.model.Cliente novoCliente = new ao.co.hzconsultoria.efacturacao.model.Cliente();
                 novoCliente.setNome(compra.getNomeCliente());
                 novoCliente.setNif(compra.getNifCliente() != null ? compra.getNifCliente() : "999999999");
                 novoCliente.setEndereco(compra.getMoradaCliente());
@@ -164,13 +174,45 @@ public class CompraController {
                 }
                 
                 try {
-                    Cliente salvo = clienteRepository.save(novoCliente);
+                    ao.co.hzconsultoria.efacturacao.model.Cliente salvo = clienteRepository.save(novoCliente);
                     compra.setCliente(salvo);
                 } catch (Exception e) {
                     // Se falhar ao salvar (ex: NIF duplicado), apenas mantemos os dados na compra
                     compra.setCliente(null);
                 }
             }
+        }
+    }
+
+    @ResponseBody
+    @GetMapping("/faturas/{filename}")
+    public ResponseEntity<org.springframework.core.io.Resource> baixarFatura(@PathVariable String filename) {
+        return baixarDocumentoDireto("faturas", filename);
+    }
+
+    @ResponseBody
+    @GetMapping("/guias/{filename}")
+    public ResponseEntity<org.springframework.core.io.Resource> baixarGuia(@PathVariable String filename) {
+        return baixarDocumentoDireto("guias", filename);
+    }
+
+    private ResponseEntity<org.springframework.core.io.Resource> baixarDocumentoDireto(String folder, String filename) {
+        try {
+            java.io.File file = new java.io.File("src/main/resources/static/" + folder + "/" + filename);
+            if (!file.exists()) {
+                file = new java.io.File("target/classes/static/" + folder + "/" + filename);
+            }
+            if (!file.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(file.toURI());
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "application/pdf")
+                    .body(resource);
+        } catch (java.net.MalformedURLException e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

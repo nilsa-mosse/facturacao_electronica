@@ -113,7 +113,12 @@ public class CarrinhoController {
 
     @GetMapping("/buscarProduto")
     public String buscarProduto(@RequestParam String codigoBarra, Model model) {
-        Produto encontrado = produtoRepository.findByCodigoBarra(codigoBarra);
+        // Recuperar o id da empresa do contexto de segurança
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        Produto encontrado = null;
+        if (empresaId != null) {
+            encontrado = produtoRepository.findByCodigoBarraAndEmpresa_Id(codigoBarra, empresaId);
+        }
         model.addAttribute("produtos", encontrado != null ? java.util.Arrays.asList(encontrado) : java.util.Collections.emptyList());
         model.addAttribute("carrinho", carrinho);
         return "index";

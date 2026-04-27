@@ -21,8 +21,6 @@ public class Estabelecimento {
     private Empresa empresa;
 
     // Getters e Setters
-    public Boolean getVisivel() { return visivel; }
-    public void setVisivel(Boolean visivel) { this.visivel = visivel; }
 
     public Empresa getEmpresa() { return empresa; }
     public void setEmpresa(Empresa empresa) { this.empresa = empresa; }

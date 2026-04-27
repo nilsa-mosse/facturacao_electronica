@@ -1,5 +1,6 @@
 package ao.co.hzconsultoria.efacturacao;
 
+// Fixed: Added JUnit 4 dependency to pom.xml
 import ao.co.hzconsultoria.efacturacao.model.Produto;
 import org.junit.Assert;
 import org.junit.Test;

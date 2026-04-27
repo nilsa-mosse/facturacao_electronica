@@ -23,6 +23,9 @@ public class Empresa {
     private String logotipo;
     private String regimeFiscal;
 
+    @OneToOne(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ConfiguracaoEmpresa configuracao;
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -48,6 +51,11 @@ public class Empresa {
     public String getLogotipo() { return logotipo; }
     public void setLogotipo(String logotipo) { this.logotipo = logotipo; }
 
+    // ...existing code...
+
     public String getRegimeFiscal() { return regimeFiscal; }
     public void setRegimeFiscal(String regimeFiscal) { this.regimeFiscal = regimeFiscal; }
+
+    public ConfiguracaoEmpresa getConfiguracao() { return configuracao; }
+    public void setConfiguracao(ConfiguracaoEmpresa configuracao) { this.configuracao = configuracao; }
 }

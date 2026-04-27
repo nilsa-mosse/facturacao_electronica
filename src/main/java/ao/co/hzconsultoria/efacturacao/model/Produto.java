@@ -108,9 +108,7 @@ public class Produto {
         this.quantidadeEstoque = quantidadeEstoque;
         // Auto-resolve o estado baseando-se no valor matemático sempre que o stock for mutado.
         if (this.quantidadeEstoque != null && this.quantidadeEstoque <= 0) {
-            this.estado = new Estado(2L, "INDISPONÍVEL");
-        } else if (this.quantidadeEstoque != null && this.quantidadeEstoque > 0) {
-            this.estado = new Estado(1L, "DISPONÍVEL");
+            // getEstado() já resolve dinamicamente
         }
     }
 

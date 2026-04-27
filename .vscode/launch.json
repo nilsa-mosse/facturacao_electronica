@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "BcryptUtilTest",
+            "request": "launch",
+            "mainClass": "ao.co.hzconsultoria.efacturacao.BcryptUtilTest",
+            "projectName": "efacturacao"
+        },
+        {
+            "type": "java",
+            "name": "EfaturacaoApplication",
+            "request": "launch",
+            "mainClass": "ao.co.hzconsultoria.efacturacao.EfaturacaoApplication",
+            "projectName": "efacturacao"
+        },
+        {
+            "type": "java",
+            "name": "EncryptPasswordTest",
+            "request": "launch",
+            "mainClass": "ao.co.hzconsultoria.efacturacao.EncryptPasswordTest",
+            "projectName": "efacturacao"
+        },
+        {
+            "type": "java",
+            "name": "TestReport",
+            "request": "launch",
+            "mainClass": "ao.co.hzconsultoria.efacturacao.TestReport",
+            "projectName": "efacturacao"
+        }
+    ]
+}

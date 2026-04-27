@@ -3,6 +3,7 @@ package ao.co.hzconsultoria.efacturacao.controller;
 import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.*;
 import ao.co.hzconsultoria.efacturacao.service.ConfiguracaoSistemaService;
+import ao.co.hzconsultoria.efacturacao.service.ConfiguracaoEmpresaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,6 +56,11 @@ public class ConfiguracaoController {
     private ao.co.hzconsultoria.efacturacao.service.AgtService agtService;
     @Autowired
     private ConfiguracaoSistemaService cfgService;
+    @Autowired
+    private ConfiguracaoEmpresaService configuracaoEmpresaService;
+
+    @Value("${app.upload.logo.dir:./uploads/logo/}")
+    private String logoUploadDir;
 
     // ─── Dados da Empresa ────────────────────────────────────────────────────
     @GetMapping("/empresa")
@@ -79,20 +86,24 @@ public class ConfiguracaoController {
 
         if (logoFile != null && !logoFile.isEmpty()) {
             try {
-                String uploadDir = "src/main/resources/static/uploads/logo/";
-                Path uploadPath = Paths.get(uploadDir);
+                Path uploadPath = Paths.get(logoUploadDir).toAbsolutePath().normalize();
                 
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
                 
-                String fileName = "logo_empresa_" + currentEmpresaId + "_" + logoFile.getOriginalFilename();
+                // Sanitizar nome do ficheiro para evitar path traversal
+                String originalName = logoFile.getOriginalFilename();
+                String safeName = (originalName != null) ? originalName.replaceAll("[^a-zA-Z0-9._-]", "_") : "logo";
+                String fileName = "logo_empresa_" + currentEmpresaId + "_" + safeName;
                 Path filePath = uploadPath.resolve(fileName);
                 Files.copy(logoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
                 
+                // URL relativa servida pelo WebConfig via /uploads/**
                 empresa.setLogotipo("/uploads/logo/" + fileName);
             } catch (IOException e) {
                 e.printStackTrace();
+                redirectAttributes.addFlashAttribute("erro", "Erro ao carregar o logotipo: " + e.getMessage());
             }
         }
         
@@ -347,7 +358,7 @@ public class ConfiguracaoController {
     public ResponseEntity<Map<String, Object>> testarEmail(@RequestBody Map<String, String> payload) {
         Map<String, Object> result = new HashMap<>();
         String dest = payload.get("emailDestino");
-        if (dest == null || dest.isBlank()) {
+        if (dest == null || dest.isEmpty()) {
             result.put("sucesso", false);
             result.put("mensagem", "Endereço de email de destino não informado.");
             return ResponseEntity.badRequest().body(result);
@@ -606,26 +617,35 @@ public class ConfiguracaoController {
         }
         model.addAttribute("usuarios", usuarios);
 
-        List<String> modulos = java.util.Arrays.asList("DASHBOARD", "VENDAS", "STOCK", "ENTIDADES", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO");
+        // Utilizar as chaves dos módulos definidas centralmente
+        List<String> modulos = new java.util.ArrayList<>(ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.keySet());
         model.addAttribute("modulosList", modulos);
+        model.addAttribute("modulosLabels", ao.co.hzconsultoria.efacturacao.config.ModuloItens.MODULO_LABELS);
 
         if (usuarioId != null) {
             User user = userRepository.findById(usuarioId).orElse(null);
             if (user != null) {
-                // Garantir que todas as permissões base existam e estejam corretas para este usuário
+                // Garantir que todas as permissões base existam para este usuário
                 for (String modulo : modulos) {
                     Optional<PermissaoModulo> opt = permissaoModuloRepository.findByModuloAndUsuario_Id(modulo, usuarioId);
+                    
+                    // Lógica de ativação por default baseada no Role (conforme solicitado)
                     boolean isAdmin = "ADMIN".equals(user.getRole());
-                    boolean deveEstarAtivo = (isAdmin && !"ADMINISTRACAO".equals(modulo)) || "VENDAS".equals(modulo);
+                    boolean isSuperAdminUser = "SUPERADMIN".equals(user.getRole());
+                    
+                    boolean deveEstarAtivo = false;
+                    if (isSuperAdminUser) {
+                        deveEstarAtivo = true;
+                    } else if (isAdmin) {
+                        // Admin tem acesso a tudo EXCEPTO Painel Global
+                        deveEstarAtivo = !modulo.equals("PAINEL_GLOBAL");
+                    } else {
+                        // Operador/User tem acesso APENAS a Vendas
+                        deveEstarAtivo = modulo.equals("VENDAS");
+                    }
                     
                     if (!opt.isPresent()) {
-                        // Se não existe, cria com o default
                         permissaoModuloRepository.save(new PermissaoModulo(modulo, user, deveEstarAtivo));
-                    } else if (isAdmin && deveEstarAtivo && !opt.get().isAtivo()) {
-                        // Se é ADMIN e o módulo básico está desativado, força a ativação "por default"
-                        PermissaoModulo p = opt.get();
-                        p.setAtivo(true);
-                        permissaoModuloRepository.save(p);
                     }
                 }
                 
@@ -662,5 +682,141 @@ public class ConfiguracaoController {
         Map<String, Object> res = new HashMap<>();
         res.put("sucesso", true);
         return ResponseEntity.ok(res);
+    }
+
+    // ─── Configurações Específicas da Empresa ──────────────────────────────
+    /**
+     * Obtém as configurações da empresa do utilizador autenticado
+     */
+    @GetMapping("/empresa/configuracoes")
+    public String configuracoeEmpresa(Model model) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        
+        if (empresaId == null) {
+            return "redirect:/dashboard";
+        }
+
+        ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+        model.addAttribute("configuracao", config);
+        
+        return "configuracoes/empresa-config";
+    }
+
+    /**
+     * Salva as configurações de email da empresa
+     */
+    @PostMapping("/empresa/salvar-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> salvarConfiguracaoEmail(
+            @RequestParam String smtpHost,
+            @RequestParam int smtpPorta,
+            @RequestParam String smtpUsername,
+            @RequestParam String smtpPassword,
+            @RequestParam String segurancaTipo,
+            @RequestParam String remetente,
+            @RequestParam String nomeRemetente) {
+
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        
+        if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
+            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+        }
+
+        try {
+            configuracaoEmpresaService.atualizarConfiguracaoEmail(empresaId, smtpHost, smtpPorta,
+                    smtpUsername, smtpPassword, segurancaTipo, remetente, nomeRemetente);
+            
+            return ResponseEntity.ok(Map.of("sucesso", true, 
+                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Salva as configurações de storage da empresa
+     */
+    @PostMapping("/empresa/salvar-storage")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> salvarConfiguracaoStorage(
+            @RequestParam String storageTipo,
+            @RequestParam String caminhoBase,
+            @RequestParam int tamanhoMaxFicheiro,
+            @RequestParam int tamanhoMaxRequest) {
+
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        
+        if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
+            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+        }
+
+        try {
+            configuracaoEmpresaService.atualizarConfiguracaoStorage(empresaId, storageTipo, caminhoBase,
+                    tamanhoMaxFicheiro, tamanhoMaxRequest);
+            
+            return ResponseEntity.ok(Map.of("sucesso", true,
+                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Salva a política de segurança da empresa
+     */
+    @PostMapping("/empresa/salvar-seguranca")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> salvarPoliticaSeguranca(
+            @RequestParam int tempoExpiracaoSessao,
+            @RequestParam(defaultValue = "false") boolean twoFactorAtivo,
+            @RequestParam(defaultValue = "true") boolean requireUppercase,
+            @RequestParam(defaultValue = "true") boolean requireNumbers,
+            @RequestParam(defaultValue = "false") boolean requireSpecialChars,
+            @RequestParam int comprimentoMinPassword) {
+
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        
+        if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
+            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+        }
+
+        try {
+            configuracaoEmpresaService.atualizarPoliticaSeguranca(empresaId, tempoExpiracaoSessao,
+                    twoFactorAtivo, requireUppercase, requireNumbers, requireSpecialChars, comprimentoMinPassword);
+            
+            return ResponseEntity.ok(Map.of("sucesso", true,
+                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Salva a configuração de integração com AGT
+     */
+    @PostMapping("/empresa/salvar-agt")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> salvarConfiguracaoAGT(
+            @RequestParam(defaultValue = "false") boolean habilitada,
+            @RequestParam String urlServico,
+            @RequestParam String usuario,
+            @RequestParam String senha,
+            @RequestParam(required = false) String certificado) {
+
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        
+        if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
+            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+        }
+
+        try {
+            configuracaoEmpresaService.atualizarConfiguracaoAGT(empresaId, habilitada, urlServico,
+                    usuario, senha, certificado != null ? certificado : "");
+            
+            return ResponseEntity.ok(Map.of("sucesso", true,
+                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+        }
     }
 }

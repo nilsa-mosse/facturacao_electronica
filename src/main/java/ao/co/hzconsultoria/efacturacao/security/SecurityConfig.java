@@ -41,7 +41,8 @@ public class SecurityConfig {
         http
             .authenticationProvider(authenticationProvider())
             .authorizeRequests()
-                .antMatchers("/login", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia", "/finalizarVenda").permitAll()
+                .antMatchers("/login", "/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia", "/finalizarVenda").permitAll()
+                .antMatchers("/faturas/**", "/guias/**").authenticated()
                 .antMatchers("/superadmin/**").hasRole("SUPERADMIN")
                 .anyRequest().authenticated()
             .and()
