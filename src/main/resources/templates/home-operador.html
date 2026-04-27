@@ -21,131 +21,48 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <!-- Cards de Boas-vindas -->
-                    <div class="row mt-4">
-                        <div class="col-lg-12">
-                            <div class="card bg-gradient-primary shadow-lg border-0 mb-4">
-                                <div class="card-body py-5 text-center">
-                                    <h2 class="display-4 fw-bold mb-3">Portal do Operador</h2>
-                                    <p class="lead">Inicie as suas operações de venda ou consulte o histórico do dia abaixo.</p>
-                                </div>
+                    <div class="row mt-4 mb-5 justify-content-center">
+                        <div class="col-lg-10">
+                            <div class="text-center mb-5">
+                                <h2 class="display-5 fw-bold text-dark">Portal do Operador</h2>
+                                <p class="lead text-muted">Selecione uma das opções abaixo para continuar</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Acções Rápidas -->
-                    <div class="row">
-                        <!-- Nova Venda -->
-                        <div class="col-md-4" th:if="${modulo_VENDAS}">
-                            <div class="card card-outline card-success shadow-sm h-100 btn-hover" th:onclick="|location.href='@{/pos}'|" style="cursor: pointer;">
-                                <div class="card-body text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="fas fa-cart-plus fa-4x text-success"></i>
+                    <div class="row justify-content-center">
+                        <!-- Nova Venda (POS) -->
+                        <div class="col-md-5 mb-4 d-flex">
+                            <a th:href="@{/pos}" class="text-decoration-none w-100">
+                                <div class="card bg-success text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
+                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
+                                    <i class="fas fa-cash-register"
+                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 14rem; opacity: 0.15; transform: rotate(-10deg);"></i>
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
+                                        style="z-index: 1;">
+                                        <i class="fas fa-shopping-cart fa-4x mb-3"></i>
+                                        <h2 class="fw-bold fs-1 m-0">Aceder ao POS</h2>
+                                        <p class="fs-5 mt-2 mb-0">Ponto de Venda e Emissão de Faturas</p>
                                     </div>
-                                    <h3 class="fw-bold">Nova Venda (POS)</h3>
-                                    <p class="text-muted">Inicie uma nova venda rápida no ponto de venda.</p>
-                                    <button class="btn btn-success btn-lg rounded-pill px-5">Abrir POS</button>
                                 </div>
-                            </div>
+                            </a>
                         </div>
 
                         <!-- Histórico de Vendas -->
-                        <div class="col-md-4" th:if="${modulo_VENDAS}">
-                            <div class="card card-outline card-info shadow-sm h-100 btn-hover" th:onclick="|location.href='@{/historico-vendas}'|" style="cursor: pointer;">
-                                <div class="card-body text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="fas fa-history fa-4x text-info"></i>
-                                    </div>
-                                    <h3 class="fw-bold">Minhas Vendas</h3>
-                                    <p class="text-muted">Consulte as vendas realizadas e emita segundas vias.</p>
-                                    <button class="btn btn-info btn-lg rounded-pill px-5">Ver Histórico</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Produtos -->
-                        <div class="col-md-4" th:if="${modulo_STOCK}">
-                            <div class="card card-outline card-warning shadow-sm h-100 btn-hover" th:onclick="|location.href='@{/produtos/listar}'|" style="cursor: pointer;">
-                                <div class="card-body text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="fas fa-boxes fa-4x text-warning"></i>
-                                    </div>
-                                    <h3 class="fw-bold">Catálogo</h3>
-                                    <p class="text-muted">Consulte preços e disponibilidade de stock.</p>
-                                    <button class="btn btn-warning btn-lg rounded-pill px-5">Ver Stock</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tabela de Vendas Recentes -->
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card shadow-sm border-0" style="border-radius: 15px;">
-                                <div class="card-header bg-white py-3" style="border-radius: 15px 15px 0 0;">
-                                    <h5 class="card-title fw-bold mb-0 text-primary">
-                                        <i class="fas fa-list-ul me-2"></i> Minhas Transações Recentes
-                                    </h5>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle mb-0">
-                                            <thead class="bg-light">
-                                                <tr>
-                                                    <th class="ps-4 py-3">Data/Hora</th>
-                                                    <th>Documento</th>
-                                                    <th>Cliente</th>
-                                                    <th class="text-end">Total</th>
-                                                    <th class="text-center">Estado</th>
-                                                    <th class="pe-4 text-center">Ações</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr th:each="v : ${vendas}">
-                                                    <td class="ps-4">
-                                                        <div class="fw-bold" th:text="${#temporals.format(v.dataCompra, 'dd/MM/yyyy')}"></div>
-                                                        <small class="text-muted" th:text="${#temporals.format(v.dataCompra, 'HH:mm')}"></small>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-light text-dark border" th:text="${v.tipoDocumento}">FR</span>
-                                                        <span class="fw-bold ms-1" th:text="${'#' + v.id}">#1</span>
-                                                    </td>
-                                                    <td th:text="${v.nomeCliente}">Consumidor Final</td>
-                                                    <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(v.total, 1, 'POINT', 2, 'COMMA') + ' Kz'}">0,00 Kz</td>
-                                                    <td class="text-center">
-                                                        <span class="badge rounded-pill px-3" 
-                                                              th:classappend="${v.status == 'EMITIDA' ? 'bg-success' : (v.status == 'CANCELADA' ? 'bg-danger' : 'bg-warning')}"
-                                                              th:text="${v.status}">EMITIDA</span>
-                                                    </td>
-                                                    <td class="pe-4 text-center">
-                                                        <a th:href="@{/api/compras/download/{id}(id=${v.id})}" target="_blank" class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" title="Descarregar PDF">
-                                                            <i class="fas fa-file-pdf"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                                <tr th:if="${#lists.isEmpty(vendas)}">
-                                                    <td colspan="6" class="text-center py-5">
-                                                        <div class="text-muted">
-                                                            <i class="fas fa-inbox fa-3x mb-3 d-block opacity-25"></i>
-                                                            Nenhuma venda realizada ainda.
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                        <div class="col-md-5 mb-4 d-flex">
+                            <a th:href="@{/historico-vendas}" class="text-decoration-none w-100">
+                                <div class="card bg-info text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
+                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
+                                    <i class="fas fa-history"
+                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 14rem; opacity: 0.15; transform: rotate(-10deg);"></i>
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
+                                        style="z-index: 1;">
+                                        <i class="fas fa-list-alt fa-4x mb-3"></i>
+                                        <h2 class="fw-bold fs-1 m-0">Histórico de Vendas</h2>
+                                        <p class="fs-5 mt-2 mb-0">Consultar vendas e reimprimir faturas</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mensagem Informativa -->
-                    <div class="row mt-5">
-                        <div class="col-md-12">
-                            <div class="alert alert-info bg-white border-info shadow-sm" style="border-radius: 12px;">
-                                <h5><i class="icon fas fa-info"></i> Dica do Dia</h5>
-                                Utilize o atalho <b>F2</b> dentro do POS para pesquisar produtos rapidamente por código ou nome.
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -157,8 +74,9 @@
         .btn-hover:hover {
             transform: translateY(-10px);
             transition: all 0.3s ease;
-            box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, .175) !important;
         }
+
         .btn-hover {
             transition: all 0.3s ease;
         }
