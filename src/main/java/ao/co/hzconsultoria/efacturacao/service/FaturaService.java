@@ -301,7 +301,7 @@ public class FaturaService {
                 String caminhoAbsoluto = resolverCaminhoImagem(logoPath);
                 if (caminhoAbsoluto != null && !caminhoAbsoluto.isEmpty()) {
                     Image logo = Image.getInstance(caminhoAbsoluto);
-                    logo.scaleToFit(200, 200);
+                    logo.scaleToFit(100, 100);
                     logoCell = new PdfPCell(logo);
                 } else {
                     logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
