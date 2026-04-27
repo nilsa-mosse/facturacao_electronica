@@ -95,24 +95,23 @@ public class GlobalControllerAdvice {
                     }
                 });
             } else if (auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
-                // Operadores e Users normais têm acesso apenas ao módulo VENDAS por padrão
                 ao.co.hzconsultoria.efacturacao.security.CustomUserDetails userDetails = (ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal();
-                java.util.Set<String> perms = userDetails.getPermissions();
+                
+                // Buscar permissões ao nível de Módulo configuradas na BD
+                java.util.List<ao.co.hzconsultoria.efacturacao.model.PermissaoModulo> permissoesDb = permissaoRepo.findByUsuario_Id(userDetails.getId());
+                java.util.Set<String> modulosAtivos = new java.util.HashSet<>();
+                for (ao.co.hzconsultoria.efacturacao.model.PermissaoModulo p : permissoesDb) {
+                    if (p.isAtivo()) {
+                        modulosAtivos.add(p.getModulo());
+                    }
+                }
                 
                 ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
-                    // Restrição estrita: Apenas VENDAS para Operadores, ignorando outras permissões no BD para segurança
-                    if (modulo.equals("VENDAS")) {
-                        boolean hasModulo = false;
-                        for (ao.co.hzconsultoria.efacturacao.config.ModuloItens.ItemDef item : itens) {
-                            String key = modulo + "_" + item.getChave();
-                            if (perms != null && perms.contains(key)) {
-                                model.addAttribute("modulo_" + key, true);
-                                hasModulo = true;
-                            }
-                        }
-                        if (hasModulo) {
-                            model.addAttribute("modulo_" + modulo, true);
-                        }
+                    // O acesso é garantido se o módulo estiver explicitamente ativo na base de dados
+                    if (modulosAtivos.contains(modulo)) {
+                        model.addAttribute("modulo_" + modulo, true);
+                        // Ativa todos os sub-itens por defeito quando o módulo está ativo
+                        itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), true));
                     }
                 });
             }

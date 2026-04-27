@@ -60,7 +60,10 @@ public class SuperAdminController {
 
     @GetMapping("/usuarios")
     public String usuarios(Model model) {
-        model.addAttribute("usuarios", userRepository.findAll());
+        java.util.List<User> admins = userRepository.findAll().stream()
+            .filter(u -> "ADMIN".equals(u.getRole()) || "SUPERADMIN".equals(u.getRole()) || "ROLE_SUPERADMIN".equals(u.getRole()))
+            .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("usuarios", admins);
         model.addAttribute("empresas", empresaRepository.findAll());
         model.addAttribute("novoUsuario", new User());
         return "superadmin/usuarios";

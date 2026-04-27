@@ -102,8 +102,8 @@
     <div class="sidebar">
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- HOME MODULE (OPERATORS) -->
-          <th:block th:if="${!modulo_DASHBOARD}">
+          <!-- HOME MODULE (OPERATORS AND USERS) -->
+          <th:block th:if="${!isAdmin and !isSuperAdmin}">
             <li class="nav-header">GERAL</li>
             <li class="nav-item">
               <a th:href="@{/home}" class="nav-link">

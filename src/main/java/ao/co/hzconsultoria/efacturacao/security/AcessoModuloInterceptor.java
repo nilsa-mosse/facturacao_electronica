@@ -54,11 +54,7 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        // Bloqueio estrito para Operadores/Users: Apenas VENDAS
-        if (!isAdmin && !"VENDAS".equals(modulo)) {
-            response.sendRedirect("/home?error=access_denied&module=" + modulo);
-            return false;
-        }
+        // O acesso aos módulos será validado mais abaixo através da Tabela de Permissões (RBAC)
 
         Long userId = null;
         if (auth.getPrincipal() instanceof CustomUserDetails) {
