@@ -99,21 +99,45 @@ public class GlobalControllerAdvice {
                 
                 // Buscar permissões ao nível de Módulo configuradas na BD
                 java.util.List<ao.co.hzconsultoria.efacturacao.model.PermissaoModulo> permissoesDb = permissaoRepo.findByUsuario_Id(userDetails.getId());
-                java.util.Set<String> modulosAtivos = new java.util.HashSet<>();
-                for (ao.co.hzconsultoria.efacturacao.model.PermissaoModulo p : permissoesDb) {
-                    if (p.isAtivo()) {
-                        modulosAtivos.add(p.getModulo());
-                    }
-                }
                 
-                ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
-                    // O acesso é garantido se o módulo estiver explicitamente ativo na base de dados
-                    if (modulosAtivos.contains(modulo)) {
-                        model.addAttribute("modulo_" + modulo, true);
-                        // Ativa todos os sub-itens por defeito quando o módulo está ativo
-                        itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), true));
+                if (permissoesDb.isEmpty()) {
+                    // Sem registos na BD (Utilizador acabado de criar) -> Usar regras padrão
+                    String userRole = userDetails.getRole();
+                    ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
+                        boolean ativo = false;
+                        if ("SUPERADMIN".equals(userRole)) {
+                            ativo = true;
+                        } else if ("ADMIN".equals(userRole)) {
+                            ativo = !modulo.equals("PAINEL_GLOBAL");
+                        } else if ("GESTOR".equals(userRole)) {
+                            ativo = modulo.equals("DASHBOARD") || modulo.equals("VENDAS") || 
+                                    modulo.equals("STOCK") || modulo.equals("ENTIDADES") || 
+                                    modulo.equals("FACTURACAO") || modulo.equals("FINANCEIRO");
+                        } else {
+                            ativo = modulo.equals("VENDAS");
+                        }
+                        
+                        if (ativo) {
+                            model.addAttribute("modulo_" + modulo, true);
+                            itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), true));
+                        }
+                    });
+                } else {
+                    // Utilizador já tem configuração feita no Controlo de Acesso
+                    java.util.Set<String> modulosAtivos = new java.util.HashSet<>();
+                    for (ao.co.hzconsultoria.efacturacao.model.PermissaoModulo p : permissoesDb) {
+                        if (p.isAtivo()) {
+                            modulosAtivos.add(p.getModulo());
+                        }
                     }
-                });
+                    
+                    ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.forEach((modulo, itens) -> {
+                        if (modulosAtivos.contains(modulo)) {
+                            model.addAttribute("modulo_" + modulo, true);
+                            itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), true));
+                        }
+                    });
+                }
             }
         }
     }

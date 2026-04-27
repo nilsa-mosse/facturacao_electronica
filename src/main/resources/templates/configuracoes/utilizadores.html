@@ -119,6 +119,7 @@
                                                 <label class="form-label" th:text="#{config.utilizadores.perfil}">Perfil (Role)</label>
                                                 <select class="form-select" id="uRole" name="role" required>
                                                     <option value="OPERADOR">OPERADOR (Ponto de Venda)</option>
+                                                    <option value="GESTOR">GESTOR (Gestão Operacional)</option>
                                                     <option value="CONSULTOR">CONSULTOR (Apenas Leitura)</option>
                                                     <option th:if="${isSuperAdmin}" value="ADMIN">ADMINISTRADOR (Gestão)</option>
                                                 </select>

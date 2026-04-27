@@ -639,6 +639,10 @@ public class ConfiguracaoController {
                     } else if (isAdmin) {
                         // Admin tem acesso a tudo EXCEPTO Painel Global
                         deveEstarAtivo = !modulo.equals("PAINEL_GLOBAL");
+                    } else if ("GESTOR".equals(user.getRole())) {
+                        deveEstarAtivo = modulo.equals("DASHBOARD") || modulo.equals("VENDAS") || 
+                                         modulo.equals("STOCK") || modulo.equals("ENTIDADES") || 
+                                         modulo.equals("FACTURACAO") || modulo.equals("FINANCEIRO");
                     } else {
                         // Operador/User tem acesso APENAS a Vendas
                         deveEstarAtivo = modulo.equals("VENDAS");
