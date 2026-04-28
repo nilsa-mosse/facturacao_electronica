@@ -2265,13 +2265,22 @@
         let vendasSuspensasCache = [];
 
         function atualizarContadorSuspensas() {
-          $.get('/api/vendas-suspensas', function (vendas) {
-            const count = vendas.length;
-            const badge = $('#suspendedCountBadge');
-            if (count > 0) {
-              badge.text(count).show();
-            } else {
-              badge.hide();
+          $.ajax({
+            url: '/api/vendas-suspensas',
+            method: 'GET',
+            cache: false,
+            success: function (vendas) {
+              const count = vendas.length;
+              const badge = $('#suspendedCountBadge');
+              const modalCount = $('#modalSuspendedCount');
+              
+              if (count > 0) {
+                badge.text(count).show();
+                modalCount.text(count);
+              } else {
+                badge.hide();
+                modalCount.text('');
+              }
             }
           });
         }
@@ -2306,36 +2315,43 @@
         }
 
         function abrirModalVendasSuspensas() {
-          $.get('/api/vendas-suspensas', function (vendas) {
-            vendasSuspensasCache = vendas;
-            const list = $('#listaVendasSuspensas');
-            list.empty();
-            if (vendas.length === 0) {
-              list.append('<div class="text-center p-4 text-muted">Nenhuma venda suspensa.</div>');
-            } else {
-              vendas.forEach(v => {
-                const data = new Date(v.dataHora).toLocaleString();
-                const row = `
-                <div class="card mb-2 border-0 shadow-sm rounded-3">
-                  <div class="card-body d-flex justify-content-between align-items-center p-3">
-                    <div>
-                      <div class="fw-bold text-dark">${v.clienteNome}</div>
-                      <small class="text-muted"><i class="far fa-clock me-1"></i> ${data}</small>
+          $.ajax({
+            url: '/api/vendas-suspensas',
+            method: 'GET',
+            cache: false,
+            success: function (vendas) {
+              vendasSuspensasCache = vendas;
+              const list = $('#listaVendasSuspensas');
+              list.empty();
+              if (vendas.length === 0) {
+                list.append('<div class="text-center p-4 text-muted">Nenhuma venda suspensa.</div>');
+              } else {
+                vendas.forEach(v => {
+                  const data = new Date(v.dataHora).toLocaleString();
+                  const row = `
+                  <div class="card mb-2 border-0 shadow-sm rounded-3">
+                    <div class="card-body d-flex justify-content-between align-items-center p-3">
+                      <div>
+                        <div class="fw-bold text-dark">${v.clienteNome}</div>
+                        <small class="text-muted"><i class="far fa-clock me-1"></i> ${data}</small>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary rounded-pill" onclick="restaurarVendaSuspensa(${v.id})">
+                          <i class="fas fa-undo me-1"></i> Restaurar
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="eliminarVendaSuspensa(${v.id})">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
                     </div>
-                    <div class="d-flex gap-2">
-                      <button class="btn btn-sm btn-primary rounded-pill" onclick="restaurarVendaSuspensa(${v.id})">
-                        <i class="fas fa-undo me-1"></i> Restaurar
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="eliminarVendaSuspensa(${v.id})">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>`;
-                list.append(row);
-              });
+                  </div>`;
+                  list.append(row);
+                });
+              }
+              var modalEl = document.getElementById('modalVendasSuspensas');
+              var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+              modal.show();
             }
-            new bootstrap.Modal(document.getElementById('modalVendasSuspensas')).show();
           });
         }
 
@@ -2385,14 +2401,17 @@
         $('#emitirProforma').click(function () {
           processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#emitirProforma');
         });
+
+        // Inicializar contador de vendas suspensas ao carregar a página
+        atualizarContadorSuspensas();
       });
     </script>
     <!-- MODAL VENDAS SUSPENSAS -->
-    <div class="modal fade" id="modalVendasSuspensas" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="modalVendasSuspensas" tabindex="-1" aria-hidden="false">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
           <div class="modal-header bg-warning text-dark border-0">
-            <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i> Vendas Suspensas</h5>
+            <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i> Vendas Suspensas <span id="modalSuspendedCount" class="badge bg-dark text-white rounded-pill ms-2" style="font-size: 0.8rem;"></span></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body p-4" style="background: #f8fafc; max-height: 60vh; overflow-y: auto;">

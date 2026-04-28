@@ -218,7 +218,7 @@
 
         <!-- Stats Grid -->
         <div class="row g-4 mb-5">
-          <div class="col-md-4">
+          <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon bg-primary-soft text-primary">
                 <i class="fas fa-box"></i>
@@ -227,7 +227,7 @@
               <h3 class="fw-900 mb-0" th:text="${produtos.size()}">0</h3>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon bg-danger-soft text-danger">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -236,13 +236,23 @@
               <h3 class="fw-900 mb-0">Verificar</h3>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon bg-warning-soft text-warning">
                 <i class="fas fa-fire"></i>
               </div>
               <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Em Promoção</h6>
               <h3 class="fw-900 mb-0">Automático</h3>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-card" style="border-left: 4px solid #4cc9f0;">
+              <div class="stat-icon bg-success-soft" style="color: #4cc9f0;">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Lucro Total (Stock)</h6>
+              <h3 class="fw-900 mb-0" style="color: #4cc9f0; font-size: 1.3rem;"
+                  th:text="${#numbers.formatDecimal(lucroTotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h3>
             </div>
           </div>
         </div>
@@ -292,8 +302,9 @@
                 <tr>
                   <th style="width: auto;">Nome do Artigo</th>
                   <th class="text-center" style="width: 15%;">Expiração</th>
-                  <th class="text-center" style="width: 15%;">Preço Unitário</th>
-                  <th class="text-center" style="width: 10%;">Stock</th>
+                  <th class="text-center" style="width: 12%;">Preço Unitário</th>
+                  <th class="text-center" style="width: 10%;">Lucro</th>
+                  <th class="text-center" style="width: 8%;">Stock</th>
                   <th class="text-center" style="width: 10%;">Estado</th>
                   <th class="text-end" style="width: 1%; white-space: nowrap;">Ações</th>
                 </tr>
@@ -325,6 +336,9 @@
                   </td>
                   <td class="text-center">
                     <div class="fw-800 text-primary" th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00</div>
+                  </td>
+                  <td class="text-center">
+                    <div class="fw-800 text-success" th:text="${#numbers.formatDecimal(produto.preco - (produto.precoCompra != null ? produto.precoCompra : 0), 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00</div>
                   </td>
                   <td class="text-center">
                     <div class="d-flex align-items-center justify-content-center gap-2">
@@ -391,6 +405,10 @@
                   <div class="col-md-6">
                     <label class="form-label fw-700">Preço de Venda (Kz)</label>
                     <input type="number" step="0.01" name="preco" class="form-control search-input" th:value="${produto.preco}" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-700">Preço de Compra (Kz)</label>
+                    <input type="number" step="0.01" name="precoCompra" class="form-control search-input" th:value="${produto.precoCompra}">
                   </div>
                   <div class="col-md-12">
                     <label class="form-label fw-700">Descrição Detalhada</label>

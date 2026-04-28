@@ -23,8 +23,11 @@
                                 th:onclick="|location.href='@{/dashboard/vendas-dia}'|">
                                 <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_hoje}">Vendas Hoje</span>
-                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_hoje}">Vendas
+                                        Hoje</span>
+                                    <span class="info-box-number"
+                                        th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
+                                        0,00</span>
                                 </div>
                             </div>
                         </div>
@@ -33,21 +36,15 @@
                                 th:onclick="|location.href='@{/dashboard/receita-mensal}'|">
                                 <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_mes}">Vendas Mês</span>
-                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(vendasMes, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_mes}">Vendas
+                                        Mês</span>
+                                    <span class="info-box-number"
+                                        th:text="${'Kz ' + #numbers.formatDecimal(vendasMes, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
+                                        0,00</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-warning shadow-sm"
-                                th:onclick="|location.href='@{/historico-vendas}'|">
-                                <span class="info-box-icon"><i class="fas fa-percent"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.iva}">IVA</span>
-                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(totalIva, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="col-md-3 col-sm-6 col-12 mb-3">
                             <div class="premium-card grad-danger shadow-sm"
                                 th:onclick="|location.href='@{/historico-vendas}'|">
@@ -55,6 +52,18 @@
                                 <div class="info-box-content">
                                     <span class="info-box-text fw-bold" th:text="#{dashboard.facturas}">Facturas</span>
                                     <span class="info-box-number" th:text="${totalFacturas}">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-warning shadow-sm"
+                                th:onclick="|location.href='@{/dashboard/receita-mensal}'|">
+                                <span class="info-box-icon"><i class="fas fa-hand-holding-usd"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold">Lucro Bruto Mensal</span>
+                                    <span class="info-box-number"
+                                        th:text="${'Kz ' + #numbers.formatDecimal(lucroBrutoMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
+                                        0,00</span>
                                 </div>
                             </div>
                         </div>
@@ -67,7 +76,8 @@
                                 th:onclick="|location.href='@{/financeiro/fluxo-caixa}'|">
                                 <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.pagamentos}">Pagamentos</span>
+                                    <span class="info-box-text fw-bold"
+                                        th:text="#{dashboard.pagamentos}">Pagamentos</span>
                                     <span class="info-box-number" th:text="${totalPagamentos}">0</span>
                                 </div>
                             </div>
@@ -87,7 +97,8 @@
                                 th:onclick="|location.href='@{/historico-vendas}'|">
                                 <span class="info-box-icon"><i class="fas fa-clock"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.pendentes}">Pendentes</span>
+                                    <span class="info-box-text fw-bold"
+                                        th:text="#{dashboard.pendentes}">Pendentes</span>
                                     <span class="info-box-number" th:text="${totalPendentes}">0</span>
                                 </div>
                             </div>
@@ -97,8 +108,11 @@
                                 th:onclick="|location.href='@{/financeiro/fluxo-caixa}'|">
                                 <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.lucros}">Lucros</span>
-                                    <span class="info-box-number" th:text="${'Kz ' + #numbers.formatDecimal(lucroMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</span>
+                                    <span class="info-box-text fw-bold" th:text="#{dashboard.lucros}">Lucro Bruto
+                                        Mensal</span>
+                                    <span class="info-box-number"
+                                        th:text="${'Kz ' + #numbers.formatDecimal(totalLucro, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
+                                        0,00</span>
                                 </div>
                             </div>
                         </div>
@@ -166,7 +180,8 @@
                         </div>
                         <div class="col-md-4">
                             <div class="card mb-3 shadow-sm">
-                                <div class="card-header bg-white fw-bold text-success">Top 10 de Produtos Mais Vendidos</div>
+                                <div class="card-header bg-white fw-bold text-success">Top 10 de Produtos Mais Vendidos
+                                </div>
                                 <div class="card-body p-0">
                                     <ul class="list-group list-group-flush">
                                         <li class="list-group-item d-flex justify-content-between align-items-center"
@@ -198,10 +213,10 @@
     <script th:src="@{/plugins/chartjs/chart.min.js}"></script>
     <script th:src="@{/plugins/chartjs/chartjs-plugin-datalabels.min.js}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <script th:inline="javascript">
         // Alerta de Acesso Negado
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('error') === 'access_denied') {
                 const modulo = urlParams.get('module') || '';
@@ -223,7 +238,7 @@
             return (d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0'));
         });
         var data30 = Object.values(vendasUltimos30Dias);
-        
+
         new Chart(document.getElementById('graficoVendas'), {
             type: 'bar',
             data: {
@@ -238,7 +253,7 @@
         });
 
         // 2. Gráfico Receita vs Despesas
-        var rdData = /*[[${receitaVsDespesa}]]*/ {labels:[], receitas:[], despesas:[]};
+        var rdData = /*[[${receitaVsDespesa}]]*/ { labels: [], receitas: [], despesas: [] };
         new Chart(document.getElementById('graficoReceitaDespesa'), {
             type: 'line',
             data: {
@@ -266,7 +281,7 @@
         });
 
         // 3. Gráfico Comparação de Períodos
-        var compData = /*[[${comparacaoPeriodos}]]*/ {labels:[], atual:[], passado:[]};
+        var compData = /*[[${comparacaoPeriodos}]]*/ { labels: [], atual: [], passado: [] };
         new Chart(document.getElementById('graficoComparacao'), {
             type: 'bar',
             data: {
@@ -284,7 +299,7 @@
                     }
                 ]
             },
-            options: { 
+            options: {
                 responsive: true,
                 scales: { x: { title: { display: true, text: 'Dia do Mês' } } }
             }
@@ -321,7 +336,7 @@
                     pointHoverRadius: 8
                 }]
             },
-            options: { 
+            options: {
                 responsive: true,
                 scales: { x: { title: { display: true, text: 'Hora do Dia' } } }
             }

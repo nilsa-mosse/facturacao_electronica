@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -85,10 +86,20 @@ public class FaturaService {
         double totalSemImposto = 0;
         double valorIva = 0;
         for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : compra.getItens()) {
-            double subtotal = item.getSubtotal();
+            double subtotal = item.getSubtotal() != null ? item.getSubtotal() : 0.0;
             totalSemImposto += subtotal;
+            if (item.getIva() != null) {
+                valorIva += item.getIva();
+            } else if (item.getIvaPercentual() != null) {
+                valorIva += subtotal * (item.getIvaPercentual() / 100);
+            } else {
+                valorIva += subtotal * 0.14; // Fallback
+            }
         }
-        double totalFinal = totalSemImposto + valorIva;
+
+        double comissao = compra.getComissaoMulticaixa() != null ? compra.getComissaoMulticaixa() : 0.0;
+        double totalFinal = (totalSemImposto + valorIva) - comissao;
+
         fatura.setTotal(totalFinal);
         fatura.setIva(valorIva);
 
@@ -183,10 +194,11 @@ public class FaturaService {
             File dir = new File("./uploads/faturas");
             if (!dir.exists())
                 dir.mkdirs();
-            
+
             String filePath = "./uploads/faturas/" + fatura.getNumeroFatura() + ".pdf";
 
-            // Gera o PDF no local externo
+            log.info("Iniciando geração de PDF para fatura {} -> {}", fatura.getNumeroFatura(), filePath);
+            // Gera o PDF no local externo (usando escrita atômica)
             gerarPdf(filePath, fatura);
             log.info("PDF da fatura gerado em: {}", filePath);
         } catch (Exception e) {
@@ -195,9 +207,323 @@ public class FaturaService {
         }
     }
 
+    private void gerarPdf(String filePath, Fatura fatura) throws Exception {
+        // Use a temp file and then move it into place to avoid partially-written files being served
+        Path finalPath = Paths.get(filePath).toAbsolutePath().normalize();
+        Path tempPath = Paths.get(filePath + ".tmp").toAbsolutePath().normalize();
+
+        // Ensure parent exists
+        if (finalPath.getParent() != null) Files.createDirectories(finalPath.getParent());
+
+        Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
+        // Use try-with-resources for FileOutputStream to ensure it's closed
+        try (FileOutputStream fos = new FileOutputStream(tempPath.toFile())) {
+            com.lowagie.text.pdf.PdfWriter writer = com.lowagie.text.pdf.PdfWriter.getInstance(doc, fos);
+            try {
+                doc.open();
+
+                // Dados da Empresa (Dinâmico)
+                Empresa configEmpresa = fatura.getEmpresa();
+                if (configEmpresa == null && fatura.getCompra() != null) {
+                    configEmpresa = fatura.getCompra().getEmpresa();
+                }
+
+                if (configEmpresa == null) {
+                    java.util.List<Empresa> empresas = empresaRepository.findAll();
+                    configEmpresa = empresas.isEmpty() ? new Empresa() : empresas.get(0);
+                }
+
+                // Obter configurações específicas da empresa
+                ConfiguracaoEmpresa configuracao = null;
+                if (configEmpresa.getId() != null) {
+                    configuracao = configuracaoEmpresaService.obterConfiguracao(configEmpresa.getId());
+                }
+
+                if (configEmpresa.getId() == null || configEmpresa.getNome() == null || configEmpresa.getNome().isEmpty()) {
+                    configEmpresa.setNome("MINHA EMPRESA (Configurar nas definições)");
+                    configEmpresa.setNif("999999999");
+                    configEmpresa.setEndereco("Endereço não configurado");
+                    configEmpresa.setEmail("configurar@empresa.com");
+                }
+
+                // Color Palette (Canva Minimalist Black & Gray)
+                java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
+                java.awt.Color grayHeader = new java.awt.Color(248, 249, 250);
+                java.awt.Color grayLine = new java.awt.Color(222, 226, 230);
+                java.awt.Color darkGray = new java.awt.Color(73, 80, 87);
+
+                // Fonts
+                Font fontFactura = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
+                Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+                Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, darkGray);
+                Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+                Font tableHeaderFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, java.awt.Color.WHITE);
+                Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 7, darkGray);
+
+                DecimalFormat df = new DecimalFormat("#,##0.00");
+
+                // Header Section
+                PdfPTable mainHeader = new PdfPTable(2);
+                mainHeader.setWidthPercentage(100);
+                mainHeader.setWidths(new float[] { 6, 4 });
+
+                String tituloDocumento = "FACTURA";
+                if ("FP".equals(fatura.getTipoDocumento())) {
+                    tituloDocumento = "FACTURA PRÓ-FORMA";
+                } else if ("FR".equals(fatura.getTipoDocumento())) {
+                    tituloDocumento = "FACTURA RECIBO";
+                }
+
+                PdfPCell titleCell = new PdfPCell(new Phrase(tituloDocumento, fontFactura));
+                titleCell.setBorder(0);
+                titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                titleCell.setPaddingBottom(10);
+                mainHeader.addCell(titleCell);
+
+                PdfPCell logoCell = new PdfPCell();
+                try {
+                    String logoPath = configEmpresa.getLogotipo();
+                    if (logoPath != null && !logoPath.isEmpty()) {
+                        // Converte a URL relativa (/uploads/logo/...) para caminho absoluto
+                        String caminhoAbsoluto = resolverCaminhoImagem(logoPath);
+                        if (caminhoAbsoluto != null && !caminhoAbsoluto.isEmpty()) {
+                            Image logo = Image.getInstance(caminhoAbsoluto);
+                            logo.scaleToFit(100, 100);
+                            logoCell = new PdfPCell(logo);
+                        } else {
+                            logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                            log.warn("Não foi possível carregar o logotipo: {}", logoPath);
+                        }
+                    } else {
+                        logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                    }
+                } catch (Exception e) {
+                    log.error("Erro ao processar logotipo: {}", e.getMessage());
+                    logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                }
+                logoCell.setBorder(0);
+                logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                logoCell.setPaddingBottom(10);
+                mainHeader.addCell(logoCell);
+
+                doc.add(mainHeader);
+                doc.add(new Paragraph(" "));
+                doc.add(new Paragraph(" "));
+
+                // Client & Meta Section
+                PdfPTable infoTable = new PdfPTable(2);
+                infoTable.setWidthPercentage(100);
+                infoTable.setWidths(new float[] { 6, 4 });
+
+                // Left: My Company Info (Dynamic from DB)
+                PdfPCell myInfoCell = new PdfPCell();
+                myInfoCell.setBorder(0);
+                myInfoCell.addElement(new Paragraph(configEmpresa.getNome(), bold));
+                myInfoCell.addElement(
+                        new Paragraph(configEmpresa.getEndereco() != null ? configEmpresa.getEndereco() : "Angola", normal));
+                myInfoCell.addElement(new Paragraph(
+                        "NIF: " + (configEmpresa.getNif() != null ? configEmpresa.getNif() : "999999999"), normal));
+                if (configEmpresa.getTelefone() != null && !configEmpresa.getTelefone().isEmpty()) {
+                    myInfoCell.addElement(new Paragraph("Tel: " + configEmpresa.getTelefone(), normal));
+                }
+                if (configEmpresa.getEmail() != null) {
+                    myInfoCell.addElement(new Paragraph("E-mail: " + configEmpresa.getEmail(), normal));
+                }
+                infoTable.addCell(myInfoCell);
+
+                // Right: Invoice Metadata
+                PdfPCell metaDataCell = new PdfPCell();
+                metaDataCell.setBorder(0);
+                metaDataCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+                PdfPTable metaInner = new PdfPTable(2);
+                metaInner.setWidthPercentage(100);
+
+                addMetaRow(metaInner, "Nº DOCUMENTO:", fatura.getNumeroFatura(), bold, normal);
+                String dataStr = fatura.getDataEmissao() != null
+                        ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao())
+                        : "-";
+                addMetaRow(metaInner, "DATA DE EMISSÃO:", dataStr, bold, normal);
+
+                // Referência a documento anterior (Rectificação/Substituição)
+                if (fatura.getCompra() != null && fatura.getCompra().getFaturaReferencia() != null) {
+                    String refNumero = "---";
+                    java.util.List<Fatura> faturasOrig = faturaRepository
+                            .findByCompra(fatura.getCompra().getFaturaReferencia());
+                    if (!faturasOrig.isEmpty()) {
+                        refNumero = faturasOrig.get(0).getNumeroFatura();
+                    } else {
+                        refNumero = "#" + fatura.getCompra().getFaturaReferencia().getId();
+                    }
+                    addMetaRow(metaInner, "DOC. REFERÊNCIA:", refNumero, bold, normal);
+                }
+
+                addMetaRow(metaInner, "MOEDA:", "AOA (Kwanza)", bold, normal);
+
+                metaDataCell.addElement(metaInner);
+                infoTable.addCell(metaDataCell);
+                doc.add(infoTable);
+
+                doc.add(new Paragraph(" "));
+
+                // BILL TO Section
+                PdfPTable billingTable = new PdfPTable(1);
+                billingTable.setWidthPercentage(100);
+                PdfPCell billToHeader = new PdfPCell(new Phrase("FACTURADO A:", fontSubtitle));
+                billToHeader.setBorder(0);
+                billToHeader.setPaddingBottom(5);
+                billingTable.addCell(billToHeader);
+
+                Compra c = fatura.getCompra();
+                String nomeCli = c != null && c.getNomeCliente() != null ? c.getNomeCliente() : "Consumidor Final";
+                String nifCli = c != null && c.getNifCliente() != null ? c.getNifCliente() : "999999999";
+                String endCli = c != null && c.getMoradaCliente() != null ? c.getMoradaCliente() : "";
+                String telCli = c != null && c.getTelefoneCliente() != null ? c.getTelefoneCliente() : "";
+                String emailCli = c != null && c.getEmailCliente() != null ? c.getEmailCliente() : "";
+
+                PdfPCell billToContent = new PdfPCell();
+                billToContent.setBorder(0);
+                billToContent.addElement(new Paragraph(nomeCli, bold));
+                billToContent.addElement(new Paragraph("NIF: " + nifCli, normal));
+                if (!endCli.isEmpty())
+                    billToContent.addElement(new Paragraph("Morada: " + endCli, normal));
+                if (!telCli.isEmpty())
+                    billToContent.addElement(new Paragraph("Tel: " + telCli, normal));
+                if (!emailCli.isEmpty())
+                    billToContent.addElement(new Paragraph("Email: " + emailCli, normal));
+                billingTable.addCell(billToContent);
+                doc.add(billingTable);
+
+                doc.add(new Paragraph(" "));
+
+                // Items Table
+                PdfPTable table = new PdfPTable(6);
+                table.setWidthPercentage(100);
+                table.setWidths(new float[] { 4f, 1f, 1.5f, 1f, 1.2f, 1.8f });
+
+                addCanvaHeader(table, "DESCRIÇÃO", tableHeaderFont, blackColor);
+                addCanvaHeader(table, "QTD", tableHeaderFont, blackColor);
+                addCanvaHeader(table, "UNITÁRIO", tableHeaderFont, blackColor);
+                addCanvaHeader(table, "IVA", tableHeaderFont, blackColor);
+                addCanvaHeader(table, "VAL. IVA", tableHeaderFont, blackColor);
+                addCanvaHeader(table, "TOTAL", tableHeaderFont, blackColor);
+
+                double totalIva = 0;
+                double subtotalGeral = 0;
+
+                if (fatura.getCompra() != null && fatura.getCompra().getItens() != null) {
+                    for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : fatura.getCompra().getItens()) {
+                        double subtotal = item.getSubtotal() != null ? item.getSubtotal() : 0.0;
+                        double valorIvaItem = item.getIva() != null ? item.getIva() : 0.0;
+                        double percIva = item.getIvaPercentual() != null ? item.getIvaPercentual() : 14.0;
+
+                        subtotalGeral += subtotal;
+                        totalIva += valorIvaItem;
+
+                        table.addCell(minimalCell(item.getNomeProduto(), normal, Element.ALIGN_LEFT, grayLine));
+                        table.addCell(
+                                minimalCell(String.valueOf(item.getQuantidade()), normal, Element.ALIGN_CENTER, grayLine));
+                        table.addCell(minimalCell(df.format(item.getPreco()), normal, Element.ALIGN_RIGHT, grayLine));
+                        table.addCell(minimalCell(df.format(percIva) + "%", normal, Element.ALIGN_CENTER, grayLine));
+                        table.addCell(minimalCell(df.format(valorIvaItem), normal, Element.ALIGN_RIGHT, grayLine));
+                        table.addCell(minimalCell(df.format(subtotal), bold, Element.ALIGN_RIGHT, grayLine));
+                    }
+                }
+                doc.add(table);
+
+                // Totals Block
+                PdfPTable totalTable = new PdfPTable(2);
+                totalTable.setWidthPercentage(35);
+                totalTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                totalTable.setSpacingBefore(20);
+
+                double comissao = 0.0;
+                if (fatura.getCompra() != null && fatura.getCompra().getComissaoMulticaixa() != null) {
+                    comissao = fatura.getCompra().getComissaoMulticaixa();
+                }
+                double totalFinalComLiquido = (subtotalGeral + totalIva) - comissao;
+
+                addTotalRow(totalTable, "SUBTOTAL:", df.format(subtotalGeral), normal, normal, null);
+                addTotalRow(totalTable, "TOTAL IVA:", df.format(totalIva), normal, normal, null);
+
+                if (comissao > 0) {
+                    addTotalRow(totalTable, "DESC. COMISSÃO TPA:", "-" + df.format(comissao), normal, normal, null);
+                }
+
+                addTotalRow(totalTable, "TOTAL FINAL:", df.format(totalFinalComLiquido) + " Kz", bold, bold, grayHeader);
+
+                doc.add(totalTable);
+
+                // Footer Section
+                doc.add(new Paragraph(" "));
+                doc.add(new Paragraph(" "));
+
+                PdfPTable footerTable = new PdfPTable(2);
+                footerTable.setWidthPercentage(100);
+
+                PdfPCell qrCell = new PdfPCell();
+                qrCell.setBorder(0);
+                try {
+                    Image qr = gerarQrCode(fatura.getNumeroFatura() + "|" + fatura.getHash());
+                    if (qr != null) {
+                        qr.scaleToFit(50, 50);
+                        qrCell.addElement(qr);
+                    }
+                } catch (Exception ignored) {
+                }
+                qrCell.addElement(new Paragraph("Hash: " + fatura.getHash(), smallFont));
+                if (fatura.getCodigoAgt() != null) {
+                    qrCell.addElement(new Paragraph("Certificado AGT: " + fatura.getCodigoAgt(), smallFont));
+                }
+                footerTable.addCell(qrCell);
+
+                PdfPCell thanksCell = new PdfPCell();
+                thanksCell.setBorder(0);
+                thanksCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                Paragraph p = new Paragraph("OBRIGADO PELA PREFERÊNCIA", bold);
+                p.setAlignment(Element.ALIGN_RIGHT);
+                thanksCell.addElement(p);
+
+                // Adicionar rodapé personalizado se configurado
+                if (configuracao != null && configuracao.isUsarRodapéPersonalizadoEmDocumentos() &&
+                        configuracao.getRodapePersonalizado() != null && !configuracao.getRodapePersonalizado().isEmpty()) {
+                    Paragraph pRodape = new Paragraph(configuracao.getRodapePersonalizado(), smallFont);
+                    pRodape.setAlignment(Element.ALIGN_RIGHT);
+                    thanksCell.addElement(pRodape);
+                } else {
+                    Paragraph p2 = new Paragraph("Os bens/serviços foram colocados à disposição na data do documento.",
+                            smallFont);
+                    p2.setAlignment(Element.ALIGN_RIGHT);
+                    thanksCell.addElement(p2);
+                }
+                footerTable.addCell(thanksCell);
+
+                doc.add(footerTable);
+
+            } finally {
+                // Ensure document is closed even if an exception occurs
+                if (doc.isOpen()) {
+                    try { doc.close(); } catch (Exception ex) { /* ignore */ }
+                }
+            }
+
+            // After document and stream are closed, move temp to final atomically
+            try {
+                Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                log.info("Movido PDF temporário {} para {}", tempPath, finalPath);
+            } catch (java.nio.file.AtomicMoveNotSupportedException amnse) {
+                // Fallback if atomic move is not supported on the filesystem
+                Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
+                log.info("Movido (fallback) PDF temporário {} para {}", tempPath, finalPath);
+            }
+        }
+    }
+
     /**
      * Resolve o caminho absoluto de uma imagem armazenada em /uploads/
-     * Converte uma URL relativa como "/uploads/logo/..." em um caminho absoluto acessível
+     * Converte uma URL relativa como "/uploads/logo/..." em um caminho absoluto
+     * acessível
      */
     private String resolverCaminhoImagem(String caminhoRelativo) {
         if (caminhoRelativo == null || caminhoRelativo.isEmpty()) {
@@ -225,279 +551,6 @@ public class FaturaService {
 
         log.warn("Arquivo de imagem não encontrado: {}", imagemPath);
         return null;
-    }
-
-    private void gerarPdf(String filePath, Fatura fatura) throws Exception {
-        Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
-        PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(filePath));
-        doc.open();
-
-        // Dados da Empresa (Dinâmico)
-        Empresa configEmpresa = fatura.getEmpresa();
-        if (configEmpresa == null && fatura.getCompra() != null) {
-            configEmpresa = fatura.getCompra().getEmpresa();
-        }
-        
-        if (configEmpresa == null) {
-            java.util.List<Empresa> empresas = empresaRepository.findAll();
-            configEmpresa = empresas.isEmpty() ? new Empresa() : empresas.get(0);
-        }
-        
-        // Obter configurações específicas da empresa
-        ConfiguracaoEmpresa configuracao = null;
-        if (configEmpresa.getId() != null) {
-            configuracao = configuracaoEmpresaService.obterConfiguracao(configEmpresa.getId());
-        }
-        
-        if (configEmpresa.getId() == null || configEmpresa.getNome() == null || configEmpresa.getNome().isEmpty()) {
-            configEmpresa.setNome("MINHA EMPRESA (Configurar nas definições)");
-            configEmpresa.setNif("999999999");
-            configEmpresa.setEndereco("Endereço não configurado");
-            configEmpresa.setEmail("configurar@empresa.com");
-        }
-
-        // Color Palette (Canva Minimalist Black & Gray)
-        java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
-        java.awt.Color grayHeader = new java.awt.Color(248, 249, 250);
-        java.awt.Color grayLine = new java.awt.Color(222, 226, 230);
-        java.awt.Color darkGray = new java.awt.Color(73, 80, 87);
-
-        // Fonts
-        Font fontFactura = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
-        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
-        Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, darkGray);
-        Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
-        Font tableHeaderFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, java.awt.Color.WHITE);
-        Font smallFont = FontFactory.getFont(FontFactory.HELVETICA, 7, darkGray);
-
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-
-        // Header Section
-        PdfPTable mainHeader = new PdfPTable(2);
-        mainHeader.setWidthPercentage(100);
-        mainHeader.setWidths(new float[] { 6, 4 });
-
-        String tituloDocumento = "FACTURA";
-        if ("FP".equals(fatura.getTipoDocumento())) {
-            tituloDocumento = "FACTURA PRÓ-FORMA";
-        } else if ("FR".equals(fatura.getTipoDocumento())) {
-            tituloDocumento = "FACTURA RECIBO";
-        }
-
-        PdfPCell titleCell = new PdfPCell(new Phrase(tituloDocumento, fontFactura));
-        titleCell.setBorder(0);
-        titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        titleCell.setPaddingBottom(10);
-        mainHeader.addCell(titleCell);
-
-        PdfPCell logoCell = new PdfPCell();
-        try {
-            String logoPath = configEmpresa.getLogotipo();
-            if (logoPath != null && !logoPath.isEmpty()) {
-                // Converte a URL relativa (/uploads/logo/...) para caminho absoluto
-                String caminhoAbsoluto = resolverCaminhoImagem(logoPath);
-                if (caminhoAbsoluto != null && !caminhoAbsoluto.isEmpty()) {
-                    Image logo = Image.getInstance(caminhoAbsoluto);
-                    logo.scaleToFit(100, 100);
-                    logoCell = new PdfPCell(logo);
-                } else {
-                    logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
-                    log.warn("Não foi possível carregar o logotipo: {}", logoPath);
-                }
-            } else {
-                logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
-            }
-        } catch (Exception e) {
-            log.error("Erro ao processar logotipo: {}", e.getMessage());
-            logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
-        }
-        logoCell.setBorder(0);
-        logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        logoCell.setPaddingBottom(10);
-        mainHeader.addCell(logoCell);
-
-        doc.add(mainHeader);
-        doc.add(new Paragraph(" "));
-        doc.add(new Paragraph(" "));
-
-        // Client & Meta Section
-        PdfPTable infoTable = new PdfPTable(2);
-        infoTable.setWidthPercentage(100);
-        infoTable.setWidths(new float[] { 6, 4 });
-
-        // Left: My Company Info (Dynamic from DB)
-        PdfPCell myInfoCell = new PdfPCell();
-        myInfoCell.setBorder(0);
-        myInfoCell.addElement(new Paragraph(configEmpresa.getNome(), bold));
-        myInfoCell.addElement(
-                new Paragraph(configEmpresa.getEndereco() != null ? configEmpresa.getEndereco() : "Angola", normal));
-        myInfoCell.addElement(new Paragraph(
-                "NIF: " + (configEmpresa.getNif() != null ? configEmpresa.getNif() : "999999999"), normal));
-        if (configEmpresa.getTelefone() != null && !configEmpresa.getTelefone().isEmpty()) {
-            myInfoCell.addElement(new Paragraph("Tel: " + configEmpresa.getTelefone(), normal));
-        }
-        if (configEmpresa.getEmail() != null) {
-            myInfoCell.addElement(new Paragraph("E-mail: " + configEmpresa.getEmail(), normal));
-        }
-        infoTable.addCell(myInfoCell);
-
-        // Right: Invoice Metadata
-        PdfPCell metaDataCell = new PdfPCell();
-        metaDataCell.setBorder(0);
-        metaDataCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-
-        PdfPTable metaInner = new PdfPTable(2);
-        metaInner.setWidthPercentage(100);
-
-        addMetaRow(metaInner, "Nº DOCUMENTO:", fatura.getNumeroFatura(), bold, normal);
-        String dataStr = fatura.getDataEmissao() != null
-                ? new java.text.SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao())
-                : "-";
-        addMetaRow(metaInner, "DATA DE EMISSÃO:", dataStr, bold, normal);
-
-        // Referência a documento anterior (Rectificação/Substituição)
-        if (fatura.getCompra() != null && fatura.getCompra().getFaturaReferencia() != null) {
-            String refNumero = "---";
-            java.util.List<Fatura> faturasOrig = faturaRepository
-                    .findByCompra(fatura.getCompra().getFaturaReferencia());
-            if (!faturasOrig.isEmpty()) {
-                refNumero = faturasOrig.get(0).getNumeroFatura();
-            } else {
-                refNumero = "#" + fatura.getCompra().getFaturaReferencia().getId();
-            }
-            addMetaRow(metaInner, "DOC. REFERÊNCIA:", refNumero, bold, normal);
-        }
-
-        addMetaRow(metaInner, "MOEDA:", "AOA (Kwanza)", bold, normal);
-
-        metaDataCell.addElement(metaInner);
-        infoTable.addCell(metaDataCell);
-        doc.add(infoTable);
-
-        doc.add(new Paragraph(" "));
-
-        // BILL TO Section
-        PdfPTable billingTable = new PdfPTable(1);
-        billingTable.setWidthPercentage(100);
-        PdfPCell billToHeader = new PdfPCell(new Phrase("FACTURADO A:", fontSubtitle));
-        billToHeader.setBorder(0);
-        billToHeader.setPaddingBottom(5);
-        billingTable.addCell(billToHeader);
-
-        Compra c = fatura.getCompra();
-        String nomeCli = c != null && c.getNomeCliente() != null ? c.getNomeCliente() : "Consumidor Final";
-        String nifCli = c != null && c.getNifCliente() != null ? c.getNifCliente() : "999999999";
-        String endCli = c != null && c.getMoradaCliente() != null ? c.getMoradaCliente() : "";
-        String telCli = c != null && c.getTelefoneCliente() != null ? c.getTelefoneCliente() : "";
-        String emailCli = c != null && c.getEmailCliente() != null ? c.getEmailCliente() : "";
-
-        PdfPCell billToContent = new PdfPCell();
-        billToContent.setBorder(0);
-        billToContent.addElement(new Paragraph(nomeCli, bold));
-        billToContent.addElement(new Paragraph("NIF: " + nifCli, normal));
-        if (!endCli.isEmpty())
-            billToContent.addElement(new Paragraph("Morada: " + endCli, normal));
-        if (!telCli.isEmpty())
-            billToContent.addElement(new Paragraph("Tel: " + telCli, normal));
-        if (!emailCli.isEmpty())
-            billToContent.addElement(new Paragraph("Email: " + emailCli, normal));
-        billingTable.addCell(billToContent);
-        doc.add(billingTable);
-
-        doc.add(new Paragraph(" "));
-
-        // Items Table
-        PdfPTable table = new PdfPTable(6);
-        table.setWidthPercentage(100);
-        table.setWidths(new float[] { 4f, 1f, 1.5f, 1f, 1.2f, 1.8f });
-
-        addCanvaHeader(table, "DESCRIÇÃO", tableHeaderFont, blackColor);
-        addCanvaHeader(table, "QTD", tableHeaderFont, blackColor);
-        addCanvaHeader(table, "UNITÁRIO", tableHeaderFont, blackColor);
-        addCanvaHeader(table, "IVA", tableHeaderFont, blackColor);
-        addCanvaHeader(table, "VAL. IVA", tableHeaderFont, blackColor);
-        addCanvaHeader(table, "TOTAL", tableHeaderFont, blackColor);
-
-        double totalIva = 0;
-        double subtotalGeral = 0;
-
-        if (fatura.getCompra() != null && fatura.getCompra().getItens() != null) {
-            for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : fatura.getCompra().getItens()) {
-                double percIva = 14;
-                double valorIva = item.getSubtotal() * (percIva / 100);
-                subtotalGeral += item.getSubtotal();
-                totalIva += valorIva;
-
-                table.addCell(minimalCell(item.getNomeProduto(), normal, Element.ALIGN_LEFT, grayLine));
-                table.addCell(
-                        minimalCell(String.valueOf(item.getQuantidade()), normal, Element.ALIGN_CENTER, grayLine));
-                table.addCell(minimalCell(df.format(item.getPreco()), normal, Element.ALIGN_RIGHT, grayLine));
-                table.addCell(minimalCell(df.format(percIva) + "%", normal, Element.ALIGN_CENTER, grayLine));
-                table.addCell(minimalCell(df.format(valorIva), normal, Element.ALIGN_RIGHT, grayLine));
-                table.addCell(minimalCell(df.format(item.getSubtotal()), bold, Element.ALIGN_RIGHT, grayLine));
-            }
-        }
-        doc.add(table);
-
-        // Totals Block
-        PdfPTable totalTable = new PdfPTable(2);
-        totalTable.setWidthPercentage(35);
-        totalTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        totalTable.setSpacingBefore(20);
-
-        addTotalRow(totalTable, "SUBTOTAL:", df.format(subtotalGeral), normal, normal, null);
-        addTotalRow(totalTable, "TOTAL IVA:", df.format(totalIva), normal, normal, null);
-        addTotalRow(totalTable, "TOTAL FINAL:", df.format(subtotalGeral + totalIva) + " Kz", bold, bold, grayHeader);
-
-        doc.add(totalTable);
-
-        // Footer Section
-        doc.add(new Paragraph(" "));
-        doc.add(new Paragraph(" "));
-
-        PdfPTable footerTable = new PdfPTable(2);
-        footerTable.setWidthPercentage(100);
-
-        PdfPCell qrCell = new PdfPCell();
-        qrCell.setBorder(0);
-        try {
-            Image qr = gerarQrCode(fatura.getNumeroFatura() + "|" + fatura.getHash());
-            if (qr != null) {
-                qr.scaleToFit(50, 50);
-                qrCell.addElement(qr);
-            }
-        } catch (Exception ignored) {
-        }
-        qrCell.addElement(new Paragraph("Hash: " + fatura.getHash(), smallFont));
-        if (fatura.getCodigoAgt() != null) {
-            qrCell.addElement(new Paragraph("Certificado AGT: " + fatura.getCodigoAgt(), smallFont));
-        }
-        footerTable.addCell(qrCell);
-
-        PdfPCell thanksCell = new PdfPCell();
-        thanksCell.setBorder(0);
-        thanksCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        Paragraph p = new Paragraph("OBRIGADO PELA PREFERÊNCIA", bold);
-        p.setAlignment(Element.ALIGN_RIGHT);
-        thanksCell.addElement(p);
-        
-        // Adicionar rodapé personalizado se configurado
-        if (configuracao != null && configuracao.isUsarRodapéPersonalizadoEmDocumentos() && 
-            configuracao.getRodapePersonalizado() != null && !configuracao.getRodapePersonalizado().isEmpty()) {
-            Paragraph pRodape = new Paragraph(configuracao.getRodapePersonalizado(), smallFont);
-            pRodape.setAlignment(Element.ALIGN_RIGHT);
-            thanksCell.addElement(pRodape);
-        } else {
-            Paragraph p2 = new Paragraph("Os bens/serviços foram colocados à disposição na data do documento.", smallFont);
-            p2.setAlignment(Element.ALIGN_RIGHT);
-            thanksCell.addElement(p2);
-        }
-        footerTable.addCell(thanksCell);
-
-        doc.add(footerTable);
-
-        doc.close();
     }
 
     private void addMetaRow(PdfPTable table, String label, String value, Font labelFont, Font valueFont) {

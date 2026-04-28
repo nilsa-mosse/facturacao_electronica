@@ -193,6 +193,10 @@
                     </div>
                     <div class="row g-4 mb-5">
                         <div class="col-md-4">
+                            <label class="form-label">Preço de Compra (Kz)</label>
+                            <input type="number" name="precoCompra" class="form-control input-premium" th:value="${produto.precoCompra}" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label">Preço de Venda (Kz)</label>
                             <input type="number" name="preco" class="form-control input-premium" th:value="${produto.preco}" step="0.01" min="0" required>
                         </div>

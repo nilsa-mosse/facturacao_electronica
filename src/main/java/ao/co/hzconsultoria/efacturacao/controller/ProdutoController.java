@@ -100,6 +100,7 @@ public class ProdutoController {
             @RequestParam(value = "dataFabrico", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFabrico,
             @RequestParam(value = "dataExpiracao", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataExpiracao,
             @RequestParam(value = "unidadeMedida", required = false) String unidadeMedida,
+            @RequestParam(value = "precoCompra", required = false) Double precoCompra,
             RedirectAttributes redirectAttributes) {
 
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
@@ -118,6 +119,7 @@ public class ProdutoController {
         produto.setDataFabrico(dataFabrico);
         produto.setDataExpiracao(dataExpiracao);
         produto.setUnidadeMedida(unidadeMedida);
+        produto.setPrecoCompra(precoCompra);
 
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
         produto.setEmpresa(empresa);
@@ -212,6 +214,7 @@ public class ProdutoController {
             @RequestParam(value = "dataFabrico", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFabrico,
             @RequestParam(value = "dataExpiracao", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataExpiracao,
             @RequestParam(value = "unidadeMedida", required = false) String unidadeMedida,
+            @RequestParam(value = "precoCompra", required = false) Double precoCompra,
             RedirectAttributes redirectAttributes) throws IOException {
 
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
@@ -232,6 +235,7 @@ public class ProdutoController {
         produto.setDataFabrico(dataFabrico);
         produto.setDataExpiracao(dataExpiracao);
         produto.setUnidadeMedida(unidadeMedida);
+        produto.setPrecoCompra(precoCompra);
 
         Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
         produto.setCategoria(categoria);

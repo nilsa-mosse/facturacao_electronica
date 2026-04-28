@@ -1,67 +1,355 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="menu :: head"></head>
+<head th:replace="menu :: head">
+    <style>
+        .vendas-header {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            color: white;
+            box-shadow: 0 10px 20px rgba(75, 108, 183, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .icon-sales {
+            background: rgba(75, 108, 183, 0.1);
+            color: #4b6cb7;
+        }
+
+        .icon-iva {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+        }
+
+        .icon-count {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .table-modern {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-modern thead th {
+            background: #f8f9fa;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #6c757d;
+            border: none;
+            padding: 1.25rem 1rem;
+        }
+
+        .table-modern tbody td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .table-modern tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .btn-action {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.05);
+        }
+
+        .badge-id {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .dark-mode .stat-card,
+        .dark-mode .table-modern {
+            background: #2b3035;
+            color: #e9ecef;
+        }
+
+        .dark-mode .table-modern thead th {
+            background: #343a40;
+            color: #adb5bd;
+        }
+
+        .dark-mode .badge-id {
+            background: #343a40;
+            color: #dee2e6;
+        }
+
+        /* Esconder botões padrão do DataTables para usar apenas o menu customizado */
+        .dt-buttons {
+            display: none !important;
+        }
+    </style>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" th:href="@{/plugins/datatables/css/dataTables.bootstrap5.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/datatables/css/buttons.bootstrap5.min.css}">
+</head>
 
 <body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card shadow-lg border-0 overflow-hidden">
-                    <div class="grad-primary p-4 d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center text-white">
-                            <i class="fas fa-coins fa-2x me-3"></i>
-                            <h2 class="mb-0 fw-bold" th:text="#{dashboard.receita_mes.titulo}">Receita do Mês</h2>
-                        </div>
-                        <div class="text-white text-end">
-                            <h3 class="mb-0 fw-bold"
-                                th:text="${#numbers.formatDecimal(#aggregates.sum(vendasDoMes.![total]), 1, 'COMMA', 2, 'POINT')} + ' Kz'">
-                                0,00 Kz</h3>
-                        </div>
-                    </div>
+        <!-- Header -->
+        <div class="vendas-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+            <div>
+                <h1 class="display-5 fw-bold mb-1">Receita do Mês</h1>
+                <p class="mb-0 opacity-75">
+                    <i class="far fa-calendar-alt me-2"></i>
+                    <span th:text="${#temporals.format(#temporals.createNow(), 'MMMM ''de'' yyyy')}">Abril de 2026</span>
+                </p>
+            </div>
+            <div>
+                <a th:href="@{/dashboard}" class="btn btn-light btn-lg rounded-pill px-4 shadow-sm">
+                    <i class="fas fa-th-large me-2 text-primary"></i> Dashboard
+                </a>
+            </div>
+        </div>
 
-                    <div class="card-body p-4">
-                        <div class="mb-4">
-                            <a th:href="@{/dashboard}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i> <span th:text="#{btn.voltar}">Voltar</span>
-                            </a>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="bg-light text-muted">
-                                    <tr>
-                                        <th class="border-0 ps-4" th:text="#{vendas.col.id}">ID</th>
-                                        <th class="border-0" th:text="#{vendas.col.data}">Data</th>
-                                        <th class="border-0 text-end pe-4" th:text="#{vendas.col.total}">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="venda : ${vendasDoMes}">
-                                        <td class="ps-4 fw-bold text-primary" th:text="'#' + ${venda.id}">#1</td>
-                                        <td>
-                                            <i class="far fa-calendar-alt text-muted me-2"></i>
-                                            <span
-                                                th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy HH:mm')}">20/03/2026</span>
-                                        </td>
-                                        <td class="text-end pe-4 fw-bold"
-                                            th:text="${#numbers.formatDecimal(venda.total, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')} + ' Kz'">
-                                            0,00 Kz</td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(vendasDoMes)}">
-                                        <td colspan="3" class="text-center py-5 text-muted">
-                                            <i class="fas fa-search mb-3 fa-3x d-block opacity-25"></i>
-                                            <span th:text="#{clientes.historico.vazio}">Nenhuma venda realizada neste
-                                                mês.</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+        <!-- Quick Stats -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon icon-sales">
+                        <i class="fas fa-chart-line"></i>
                     </div>
+                    <span class="text-muted small fw-bold">RECEITA MENSAL</span>
+                    <h2 class="mb-0 fw-bold mt-1"
+                        th:text="${#numbers.formatDecimal(totalVendasMes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon icon-iva">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <span class="text-muted small fw-bold">IVA ACUMULADO</span>
+                    <h2 class="mb-0 fw-bold mt-1"
+                        th:text="${#numbers.formatDecimal(totalIvaMes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon icon-count">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <span class="text-muted small fw-bold">TOTAL DE VENDAS</span>
+                    <h2 class="mb-0 fw-bold mt-1" th:text="${vendasDoMes.size()}">0</h2>
                 </div>
             </div>
         </div>
+
+        <!-- Main Content -->
+        <div class="table-modern">
+            <div class="p-4 border-bottom d-flex align-items-center justify-content-between bg-white">
+                <h4 class="mb-0 fw-bold">Transações do Mês</h4>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill me-2" type="button"
+                        id="btnExportar" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-download me-1"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="btnExportar">
+                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expCopy"><i
+                                    class="fas fa-copy me-2 text-primary"></i> Copiar Dados</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expExcel"><i
+                                    class="fas fa-file-excel me-2 text-success"></i> Excel (.xlsx)</a></li>
+                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expCSV"><i
+                                    class="fas fa-file-csv me-2 text-info"></i> CSV (.csv)</a></li>
+                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expPDF"><i
+                                    class="fas fa-file-pdf me-2 text-danger"></i> PDF Documento</a></li>
+                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expJSON"><i
+                                    class="fas fa-code me-2 text-dark"></i> JSON Data</a></li>
+                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expXML"><i
+                                    class="fas fa-file-code me-2 text-warning"></i> XML Format</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expPrint"><i
+                                    class="fas fa-print me-2 text-secondary"></i> Imprimir Tabela</a></li>
+                    </ul>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive p-3">
+                <table id="tabelaVendas" class="table align-middle mb-0" 
+                       th:data-lang-url="@{/plugins/datatables/i18n/pt-PT.json}">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Referência</th>
+                            <th>Data e Hora</th>
+                            <th class="text-end">Imposto (IVA)</th>
+                            <th class="text-end">Valor Total</th>
+                            <th class="text-end pe-4" data-orderable="false">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="venda : ${vendasDoMes}">
+                            <td class="ps-4">
+                                <span class="badge-id" th:text="'#' + ${venda.id}">#1</span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold"
+                                        th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy HH:mm')}">28/04/2026 14:30</span>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <span class="text-info fw-bold"
+                                    th:with="ivaTotal=${venda.itens != null ? #aggregates.sum(venda.itens.![iva != null ? iva : 0.0]) : 0.0}"
+                                    th:text="${#numbers.formatDecimal(ivaTotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
+                                    0,00 Kz
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold fs-5 text-dark"
+                                    th:text="${#numbers.formatDecimal(venda.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
+                                    0,00 Kz
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div th:if="${faturasMap.containsKey(venda.id)}"
+                                    class="d-flex justify-content-end gap-2">
+                                    <a th:href="@{'/uploads/faturas/' + ${faturasMap.get(venda.id)} + '.pdf'}"
+                                        target="_blank" class="btn btn-action btn-primary shadow-sm">
+                                        <i class="fas fa-file-pdf me-1"></i> Factura
+                                    </a>
+                                </div>
+                                <div th:unless="${faturasMap.containsKey(venda.id)}">
+                                    <span class="badge rounded-pill bg-light text-muted border">Sem Documento</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
+    <!-- DataTables & Extensions JS -->
+    <script th:src="@{/plugins/datatables/js/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/dataTables.bootstrap5.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/dataTables.buttons.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/buttons.bootstrap5.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/jszip.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/pdfmake.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/vfs_fonts.js}"></script>
+    <script th:src="@{/plugins/datatables/js/buttons.html5.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/buttons.print.min.js}"></script>
+
+    <script th:inline="none">
+        $(document).ready(function () {
+            var table = $('#tabelaVendas').DataTable({
+                "language": {
+                    "url": $('#tabelaVendas').data('lang-url')
+                },
+                "order": [[1, "desc"]],
+                "searching": false,
+                "dom": '<"d-none"B>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
+                "buttons": [
+                    {
+                        extend: 'copyHtml5',
+                        exportOptions: { columns: [0, 1, 2, 3] }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: { columns: [0, 1, 2, 3] }
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        exportOptions: { columns: [0, 1, 2, 3] }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: { columns: [0, 1, 2, 3] }
+                    },
+                    {
+                        extend: 'print',
+                        exportOptions: { columns: [0, 1, 2, 3] }
+                    }
+                ]
+            });
+
+            // Vincular ações
+            $('#expCopy').on('click', function () { table.button('.buttons-copy').trigger(); });
+            $('#expExcel').on('click', function () { table.button('.buttons-excel').trigger(); });
+            $('#expCSV').on('click', function () { table.button('.buttons-csv').trigger(); });
+            $('#expPDF').on('click', function () { table.button('.buttons-pdf').trigger(); });
+            $('#expPrint').on('click', function () { table.button('.buttons-print').trigger(); });
+
+            $('#expJSON').on('click', function () {
+                var data = table.buttons.exportData({ columns: [0, 1, 2, 3] });
+                var json = JSON.stringify(data.body);
+                var blob = new Blob([json], { type: "application/json" });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = "vendas_mes.json";
+                a.click();
+            });
+
+            $('#expXML').on('click', function () {
+                var data = table.buttons.exportData({ columns: [0, 1, 2, 3] });
+                var xml = '<?xml version="1.0" encoding="UTF-8"?><vendas>';
+                data.body.forEach(function (row) {
+                    xml += '<venda>';
+                    xml += '<referencia>' + row[0] + '</referencia>';
+                    xml += '<data_hora>' + row[1] + '</data_hora>';
+                    xml += '<iva>' + row[2] + '</iva>';
+                    xml += '<total>' + row[3] + '</total>';
+                    xml += '</venda>';
+                });
+                xml += '</vendas>';
+                var blob = new Blob([xml], { type: "application/xml" });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = "vendas_mes.xml";
+                a.click();
+            });
+        });
+    </script>
 </body>
 
 </html>

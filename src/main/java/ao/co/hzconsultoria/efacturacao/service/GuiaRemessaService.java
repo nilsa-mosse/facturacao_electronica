@@ -27,6 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -172,9 +176,10 @@ public class GuiaRemessaService {
             // Salva em ./uploads/guias (pasta externa)
             File dir = new File("./uploads/guias");
             if (!dir.exists()) dir.mkdirs();
-            
+
             String filePath = "./uploads/guias/" + guia.getNumeroGuia() + ".pdf";
 
+            log.info("Iniciando geração de PDF para guia {} -> {}", guia.getNumeroGuia(), filePath);
             gerarPdf(filePath, guia);
             log.info("PDF da Guia gerado em: {}", filePath);
         } catch (Exception e) {
@@ -183,126 +188,147 @@ public class GuiaRemessaService {
     }
 
     private void gerarPdf(String filePath, GuiaRemessa guia) throws Exception {
+        Path finalPath = Paths.get(filePath).toAbsolutePath().normalize();
+        Path tempPath = Paths.get(filePath + ".tmp").toAbsolutePath().normalize();
+
+        if (finalPath.getParent() != null) Files.createDirectories(finalPath.getParent());
+
         Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
-        PdfWriter.getInstance(doc, new FileOutputStream(filePath));
-        doc.open();
+        try (FileOutputStream fos = new FileOutputStream(tempPath.toFile())) {
+            com.lowagie.text.pdf.PdfWriter.getInstance(doc, fos);
+            try {
+                doc.open();
 
-        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        Empresa configEmpresa = empresaRepository.findById(empresaId).orElse(new Empresa());
+                Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+                Empresa configEmpresa = empresaRepository.findById(empresaId).orElse(new Empresa());
 
-        java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
-        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
-        Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, new java.awt.Color(73, 80, 87));
-        Font small = FontFactory.getFont(FontFactory.HELVETICA, 7);
-        Font smallBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8);
-        Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+                java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
+                Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
+                Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+                Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, new java.awt.Color(73, 80, 87));
+                Font small = FontFactory.getFont(FontFactory.HELVETICA, 7);
+                Font smallBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8);
+                Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
 
-        // Header
-        PdfPTable mainHeader = new PdfPTable(2);
-        mainHeader.setWidthPercentage(100);
-        mainHeader.setWidths(new float[] { 6, 4 });
+                // Header
+                PdfPTable mainHeader = new PdfPTable(2);
+                mainHeader.setWidthPercentage(100);
+                mainHeader.setWidths(new float[] { 6, 4 });
 
-        PdfPCell titleCell = new PdfPCell(new Phrase("GUIA DE REMESSA", fontTitle));
-        titleCell.setBorder(0);
-        titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        mainHeader.addCell(titleCell);
+                PdfPCell titleCell = new PdfPCell(new Phrase("GUIA DE REMESSA", fontTitle));
+                titleCell.setBorder(0);
+                titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                mainHeader.addCell(titleCell);
 
-        PdfPCell logoCell = new PdfPCell();
-        try {
-            if (configEmpresa.getLogotipo() != null) {
-                Image logo = Image.getInstance(configEmpresa.getLogotipo());
-                logo.scaleToFit(150, 150);
-                logoCell = new PdfPCell(logo);
-            } else {
-                logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                PdfPCell logoCell = new PdfPCell();
+                try {
+                    if (configEmpresa.getLogotipo() != null) {
+                        Image logo = Image.getInstance(configEmpresa.getLogotipo());
+                        logo.scaleToFit(150, 150);
+                        logoCell = new PdfPCell(logo);
+                    } else {
+                        logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                    }
+                } catch (Exception e) {
+                    logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                }
+                logoCell.setBorder(0);
+                logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                mainHeader.addCell(logoCell);
+                doc.add(mainHeader);
+                doc.add(new Paragraph(" "));
+
+                // Info Sections
+                PdfPTable infoTable = new PdfPTable(2);
+                infoTable.setWidthPercentage(100);
+
+                // From (Company)
+                PdfPCell cellDe = new PdfPCell();
+                cellDe.setBorder(0);
+                cellDe.addElement(new Paragraph(configEmpresa.getNome(), bold));
+                cellDe.addElement(new Paragraph(configEmpresa.getEndereco(), normal));
+                cellDe.addElement(new Paragraph("NIF: " + configEmpresa.getNif(), normal));
+                infoTable.addCell(cellDe);
+
+                // Meta (Doc info)
+                PdfPCell cellMeta = new PdfPCell();
+                cellMeta.setBorder(0);
+                cellMeta.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                String numeroDoc = guia.getNumeroGuia() != null ? guia.getNumeroGuia() : "-";
+                String dataDoc = guia.getDataEmissao() != null ? guia.getDataEmissao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-";
+                cellMeta.addElement(new Paragraph("Nº DOCUMENTO: " + numeroDoc, bold));
+                cellMeta.addElement(new Paragraph("DATA: " + dataDoc, normal));
+                
+                if (guia.getCodigoValidacao() != null) {
+                    Paragraph agtCode = new Paragraph("CÓD. AGT: " + guia.getCodigoValidacao(), smallBold);
+                    agtCode.setSpacingBefore(5);
+                    cellMeta.addElement(agtCode);
+                    
+                    String miniHash = guia.getHashAgt() != null && guia.getHashAgt().length() > 10 ? 
+                                      guia.getHashAgt().substring(0, 4) + "..." + guia.getHashAgt().substring(guia.getHashAgt().length() - 4) : "-";
+                    cellMeta.addElement(new Paragraph("HASH: " + miniHash, small));
+                }
+                
+                infoTable.addCell(cellMeta);
+                doc.add(infoTable);
+                doc.add(new Paragraph(" "));
+
+                // Transportation Details
+                PdfPTable transportTable = new PdfPTable(1);
+                transportTable.setWidthPercentage(100);
+                PdfPCell transHeader = new PdfPCell(new Phrase("DETALHES DE TRANSPORTE", fontSubtitle));
+                transHeader.setBackgroundColor(new java.awt.Color(248, 249, 250));
+                transHeader.setPadding(8);
+                transportTable.addCell(transHeader);
+                
+                PdfPCell transBody = new PdfPCell();
+                transBody.setPadding(10);
+                String origem = guia.getLocalCarga() != null ? guia.getLocalCarga() : "-";
+                String destino = guia.getLocalDescarga() != null ? guia.getLocalDescarga() : "-";
+                String viatura = guia.getMatriculaViatura() != null ? guia.getMatriculaViatura() : "-";
+                String motorista = guia.getMotorista() != null ? guia.getMotorista() : "-";
+                
+                transBody.addElement(new Paragraph("ORIGEM: " + origem, normal));
+                transBody.addElement(new Paragraph("DESTINO: " + destino, normal));
+                transBody.addElement(new Paragraph("VIATURA: " + viatura + " | MOTORISTA: " + motorista, normal));
+                transportTable.addCell(transBody);
+                doc.add(transportTable);
+                doc.add(new Paragraph(" "));
+
+                // Items Table
+                PdfPTable itemsTable = new PdfPTable(new float[] { 6, 2, 2 });
+                itemsTable.setWidthPercentage(100);
+                
+                String[] headers = { "ARTIGO / DESIGNAÇÃO", "QTD", "UNIDADE" };
+                for (String h : headers) {
+                    PdfPCell c = new PdfPCell(new Phrase(h, bold));
+                    c.setBackgroundColor(new java.awt.Color(241, 243, 245));
+                    c.setPadding(8);
+                    itemsTable.addCell(c);
+                }
+
+                for (ItemGuiaRemessa item : guia.getItens()) {
+                    itemsTable.addCell(new PdfPCell(new Phrase(item.getNomeProduto(), normal)));
+                    itemsTable.addCell(new PdfPCell(new Phrase(String.valueOf(item.getQuantidade()), normal)));
+                    itemsTable.addCell(new PdfPCell(new Phrase(item.getUnidadeMedida(), normal)));
+                }
+                doc.add(itemsTable);
+
+                doc.close();
+            } finally {
+                if (doc.isOpen()) {
+                    try { doc.close(); } catch (Exception ex) { /* ignore */ }
+                }
             }
-        } catch (Exception e) {
-            logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+
+            try {
+                Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                log.info("Movido PDF temporário {} para {}", tempPath, finalPath);
+            } catch (java.nio.file.AtomicMoveNotSupportedException amnse) {
+                Files.move(tempPath, finalPath, StandardCopyOption.REPLACE_EXISTING);
+                log.info("Movido (fallback) PDF temporário {} para {}", tempPath, finalPath);
+            }
         }
-        logoCell.setBorder(0);
-        logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        mainHeader.addCell(logoCell);
-        doc.add(mainHeader);
-        doc.add(new Paragraph(" "));
-
-        // Info Sections
-        PdfPTable infoTable = new PdfPTable(2);
-        infoTable.setWidthPercentage(100);
-
-        // From (Company)
-        PdfPCell cellDe = new PdfPCell();
-        cellDe.setBorder(0);
-        cellDe.addElement(new Paragraph(configEmpresa.getNome(), bold));
-        cellDe.addElement(new Paragraph(configEmpresa.getEndereco(), normal));
-        cellDe.addElement(new Paragraph("NIF: " + configEmpresa.getNif(), normal));
-        infoTable.addCell(cellDe);
-
-        // Meta (Doc info)
-        PdfPCell cellMeta = new PdfPCell();
-        cellMeta.setBorder(0);
-        cellMeta.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        String numeroDoc = guia.getNumeroGuia() != null ? guia.getNumeroGuia() : "-";
-        String dataDoc = guia.getDataEmissao() != null ? guia.getDataEmissao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-";
-        cellMeta.addElement(new Paragraph("Nº DOCUMENTO: " + numeroDoc, bold));
-        cellMeta.addElement(new Paragraph("DATA: " + dataDoc, normal));
-        
-        if (guia.getCodigoValidacao() != null) {
-            Paragraph agtCode = new Paragraph("CÓD. AGT: " + guia.getCodigoValidacao(), smallBold);
-            agtCode.setSpacingBefore(5);
-            cellMeta.addElement(agtCode);
-            
-            String miniHash = guia.getHashAgt() != null && guia.getHashAgt().length() > 10 ? 
-                              guia.getHashAgt().substring(0, 4) + "..." + guia.getHashAgt().substring(guia.getHashAgt().length() - 4) : "-";
-            cellMeta.addElement(new Paragraph("HASH: " + miniHash, small));
-        }
-        
-        infoTable.addCell(cellMeta);
-        doc.add(infoTable);
-        doc.add(new Paragraph(" "));
-
-        // Transportation Details
-        PdfPTable transportTable = new PdfPTable(1);
-        transportTable.setWidthPercentage(100);
-        PdfPCell transHeader = new PdfPCell(new Phrase("DETALHES DE TRANSPORTE", fontSubtitle));
-        transHeader.setBackgroundColor(new java.awt.Color(248, 249, 250));
-        transHeader.setPadding(8);
-        transportTable.addCell(transHeader);
-        
-        PdfPCell transBody = new PdfPCell();
-        transBody.setPadding(10);
-        String origem = guia.getLocalCarga() != null ? guia.getLocalCarga() : "-";
-        String destino = guia.getLocalDescarga() != null ? guia.getLocalDescarga() : "-";
-        String viatura = guia.getMatriculaViatura() != null ? guia.getMatriculaViatura() : "-";
-        String motorista = guia.getMotorista() != null ? guia.getMotorista() : "-";
-        
-        transBody.addElement(new Paragraph("ORIGEM: " + origem, normal));
-        transBody.addElement(new Paragraph("DESTINO: " + destino, normal));
-        transBody.addElement(new Paragraph("VIATURA: " + viatura + " | MOTORISTA: " + motorista, normal));
-        transportTable.addCell(transBody);
-        doc.add(transportTable);
-        doc.add(new Paragraph(" "));
-
-        // Items Table
-        PdfPTable itemsTable = new PdfPTable(new float[] { 6, 2, 2 });
-        itemsTable.setWidthPercentage(100);
-        
-        String[] headers = { "ARTIGO / DESIGNAÇÃO", "QTD", "UNIDADE" };
-        for (String h : headers) {
-            PdfPCell c = new PdfPCell(new Phrase(h, bold));
-            c.setBackgroundColor(new java.awt.Color(241, 243, 245));
-            c.setPadding(8);
-            itemsTable.addCell(c);
-        }
-
-        for (ItemGuiaRemessa item : guia.getItens()) {
-            itemsTable.addCell(new PdfPCell(new Phrase(item.getNomeProduto(), normal)));
-            itemsTable.addCell(new PdfPCell(new Phrase(String.valueOf(item.getQuantidade()), normal)));
-            itemsTable.addCell(new PdfPCell(new Phrase(item.getUnidadeMedida(), normal)));
-        }
-        doc.add(itemsTable);
-
-        doc.close();
     }
 
     @Transactional

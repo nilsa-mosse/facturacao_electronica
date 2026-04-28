@@ -31,6 +31,8 @@ public class VendaSuspensaController {
     public ResponseEntity<?> suspender(@RequestBody Map<String, Object> payload) {
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
         Long userId = SecurityUtils.getCurrentUserId();
+        
+        System.out.println("Suspender venda - Empresa: " + empresaId + ", Usuário: " + userId);
 
         VendaSuspensa venda = new VendaSuspensa();
         venda.setClienteNome((String) payload.get("clienteNome"));
@@ -39,14 +41,18 @@ public class VendaSuspensaController {
         venda.setEmpresa(empresaRepository.findById(empresaId).orElse(null));
         venda.setOperador(userRepository.findById(userId).orElse(null));
 
-        repository.save(venda);
+        VendaSuspensa salva = repository.save(venda);
+        System.out.println("Venda suspensa salva com ID: " + salva.getId());
+        
         return ResponseEntity.ok().body("Venda suspensa com sucesso!");
     }
 
     @GetMapping
     public List<VendaSuspensa> listar() {
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
-        return repository.findByEmpresa_IdOrderByDataHoraDesc(empresaId);
+        List<VendaSuspensa> lista = repository.findByEmpresa_IdOrderByDataHoraDesc(empresaId);
+        System.out.println("Listar vendas suspensas - Empresa: " + empresaId + ", Total: " + lista.size());
+        return lista;
     }
 
     @DeleteMapping("/{id}")

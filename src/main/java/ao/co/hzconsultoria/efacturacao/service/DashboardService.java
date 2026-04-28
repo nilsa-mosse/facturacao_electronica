@@ -147,6 +147,36 @@ public class DashboardService {
         return receita - despesas;
     }
 
+    public double getLucroBrutoMensal(Long empresaId) {
+        List<Compra> vendasDoMes = getComprasDoMes(empresaId);
+        double receitaMensal = 0.0;
+        double cogs = 0.0;
+        
+        for (Compra compra : vendasDoMes) {
+            receitaMensal += (compra.getTotal() != null ? compra.getTotal() : 0.0);
+            if (compra.getItens() != null) {
+                for (ItemCompra item : compra.getItens()) {
+                    double precoCompra = 0.0;
+                    if (item.getProduto() != null && item.getProduto().getPrecoCompra() != null) {
+                        precoCompra = item.getProduto().getPrecoCompra();
+                    }
+                    cogs += (precoCompra * (item.getQuantidade() != null ? item.getQuantidade() : 0));
+                }
+            }
+        }
+        return receitaMensal - cogs;
+    }
+
+    public double getLucroTotal(Long empresaId) {
+        double receitaTotal = compraRepository.findByEmpresa_Id(empresaId).stream()
+                .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
+                .sum();
+        double despesasTotais = despesaRepository.findByEmpresa_Id(empresaId).stream()
+                .mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0)
+                .sum();
+        return receitaTotal - despesasTotais;
+    }
+
     public double getDespesasMensais(Long empresaId) {
         java.time.LocalDate hoje = java.time.LocalDate.now();
         java.time.LocalDate inicio = hoje.withDayOfMonth(1);

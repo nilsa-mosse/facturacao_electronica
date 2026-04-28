@@ -90,15 +90,26 @@ public class VendaService {
         double totalSemImposto = 0;
         double valorIva = 0;
         for (ItemCompra item : compra.getItens()) {
-            Produto produto = produtoRepository.findByCodigoBarraAndEmpresa_Id(item.getNomeProduto(), empresaId);
+            Produto produto = null;
+            if (item.getProdutoId() != null) {
+                produto = produtoRepository.findById(item.getProdutoId()).orElse(null);
+            }
+            if (produto == null) {
+                produto = produtoRepository.findByCodigoBarraAndEmpresa_Id(item.getNomeProduto(), empresaId);
+            }
+
             double ivaPercentual = 0;
             if (produto != null && produto.getIvaPercentual() != null) {
                 ivaPercentual = produto.getIvaPercentual();
             }
             double subtotal = item.getSubtotal();
+            double itemIva = 0;
             if (ivaPercentual > 0) {
-                valorIva += subtotal * (ivaPercentual / 100);
+                itemIva = subtotal * (ivaPercentual / 100);
+                valorIva += itemIva;
             }
+            item.setIva(itemIva);
+            item.setIvaPercentual(ivaPercentual);
             totalSemImposto += subtotal;
         }
         double totalFinal = totalSemImposto + valorIva;

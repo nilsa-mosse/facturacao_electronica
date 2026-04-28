@@ -1,15 +1,21 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.service.DashboardService;
+import ao.co.hzconsultoria.efacturacao.model.Compra;
+import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import java.util.List;
 
 @Controller
 public class DashboardController {
     @Autowired
     private DashboardService dashboardService;
+    
+    @Autowired
+    private FaturaRepository faturaRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -29,7 +35,8 @@ public class DashboardController {
         model.addAttribute("totalPagamentos", dashboardService.getTotalPagamentosMes(empresaId));
         model.addAttribute("totalClientes", dashboardService.getTotalClientes(empresaId));
         model.addAttribute("totalPendentes", dashboardService.getTotalPendentes(empresaId));
-        model.addAttribute("lucroMensal", dashboardService.getLucroMensal(empresaId));
+        model.addAttribute("totalLucro", dashboardService.getLucroTotal(empresaId));
+        model.addAttribute("lucroBrutoMensal", dashboardService.getLucroBrutoMensal(empresaId));
 
         // Dados para os novos gráficos
         model.addAttribute("receitaVsDespesa", dashboardService.getReceitaVsDespesaData(empresaId));
@@ -91,14 +98,66 @@ public class DashboardController {
     @GetMapping("/dashboard/vendas-dia")
     public String vendasDia(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        model.addAttribute("vendasDoDia", dashboardService.getComprasDoDia(empresaId));
+        List<Compra> vendas = dashboardService.getComprasDoDia(empresaId);
+        
+        double totalVendas = vendas.stream()
+            .mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0)
+            .sum();
+            
+        double totalIva = 0.0;
+        java.util.Map<Long, String> faturasMap = new java.util.HashMap<>();
+        
+        for (Compra v : vendas) {
+            if (v.getItens() != null) {
+                totalIva += v.getItens().stream()
+                    .mapToDouble(i -> i.getIva() != null ? i.getIva() : 0.0)
+                    .sum();
+            }
+            
+            // Buscar o número da fatura associada a esta compra
+            List<ao.co.hzconsultoria.efacturacao.model.Fatura> faturas = faturaRepository.findByCompra(v);
+            if (!faturas.isEmpty()) {
+                faturasMap.put(v.getId(), faturas.get(0).getNumeroFatura());
+            }
+        }
+
+        model.addAttribute("vendasDoDia", vendas);
+        model.addAttribute("totalVendasDia", totalVendas);
+        model.addAttribute("totalIvaDia", totalIva);
+        model.addAttribute("faturasMap", faturasMap);
         return "vendasDia";
     }
 
     @GetMapping("/dashboard/receita-mensal")
     public String receitaMensal(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        model.addAttribute("vendasDoMes", dashboardService.getComprasDoMes(empresaId));
+        List<Compra> vendas = dashboardService.getComprasDoMes(empresaId);
+        
+        double totalVendas = vendas.stream()
+            .mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0)
+            .sum();
+            
+        double totalIva = 0.0;
+        java.util.Map<Long, String> faturasMap = new java.util.HashMap<>();
+        
+        for (Compra v : vendas) {
+            if (v.getItens() != null) {
+                totalIva += v.getItens().stream()
+                    .mapToDouble(i -> i.getIva() != null ? i.getIva() : 0.0)
+                    .sum();
+            }
+            
+            // Buscar o número da fatura associada a esta compra
+            List<ao.co.hzconsultoria.efacturacao.model.Fatura> faturas = faturaRepository.findByCompra(v);
+            if (!faturas.isEmpty()) {
+                faturasMap.put(v.getId(), faturas.get(0).getNumeroFatura());
+            }
+        }
+
+        model.addAttribute("vendasDoMes", vendas);
+        model.addAttribute("totalVendasMes", totalVendas);
+        model.addAttribute("totalIvaMes", totalIva);
+        model.addAttribute("faturasMap", faturasMap);
         return "receitaMensal";
     }
 }

@@ -17,14 +17,28 @@ public class ItemCompra {
 
     private Double subtotal;
     private Double iva;
+    private Double ivaPercentual;
 
     @ManyToOne
+    @JoinColumn(name = "compra_id")
     private Compra compra;
-    
+
+    @ManyToOne
+    @JoinColumn(name = "produto_id")
+    private Produto produto;
+
     @Transient
     private Long produtoId;
 
     // Getters and Setters
+    public Double getIvaPercentual() {
+        return ivaPercentual;
+    }
+
+    public void setIvaPercentual(Double ivaPercentual) {
+        this.ivaPercentual = ivaPercentual;
+    }
+
     public Long getProdutoId() {
         return produtoId;
     }
@@ -79,6 +93,14 @@ public class ItemCompra {
 
     public void setCompra(Compra compra) {
         this.compra = compra;
+    }
+
+    public Produto getProduto() {
+        return produto;
+    }
+
+    public void setProduto(Produto produto) {
+        this.produto = produto;
     }
 
 	public Double getIva() {

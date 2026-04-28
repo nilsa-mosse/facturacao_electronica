@@ -70,6 +70,14 @@ public class ListarProdutosController {
         }
         model.addAttribute("regimeFiscal", regimeFiscal);
         model.addAttribute("impostos", impostoRepository.findAll());
+
+        double lucroTotal = produtos.stream().mapToDouble(p -> {
+            double lucroUnitario = p.getPreco() - (p.getPrecoCompra() != null ? p.getPrecoCompra() : 0.0);
+            double quantidade = p.getQuantidadeEstoque() != null ? p.getQuantidadeEstoque() : 0.0;
+            return lucroUnitario * quantidade;
+        }).sum();
+        model.addAttribute("lucroTotal", lucroTotal);
+
         return "listarProdutos";
     }
 

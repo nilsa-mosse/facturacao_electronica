@@ -142,9 +142,69 @@
                     </div>
                 </form>
 
+                <!-- Manutenção -->
+                <div class="card card-outline card-danger mt-5 mb-4" th:if="${isAdmin or isSuperAdmin}">
+                    <div class="card-header">
+                        <h3 class="card-title text-danger"><i class="fas fa-trash-alt me-2"></i>Manutenção e Limpeza</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="fw-bold mb-1">Limpar Dados Transacionais</h6>
+                                <p class="text-muted mb-0">Esta acção irá eliminar todas as <strong>vendas, facturas, guias de remessa, notas de crédito, vendas suspensas e movimentos de stock</strong>. Os produtos e clientes serão mantidos.</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <button type="button" class="btn btn-outline-danger px-4" id="btnLimparDados">
+                                    <i class="fas fa-eraser me-1"></i>Limpar Base de Dados
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light py-2">
+                        <small class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-1"></i> ATENÇÃO: Esta operação é irreversível e apagará todo o histórico financeiro e de vendas.</small>
+                    </div>
+                </div>
+
             </div>
         </section>
     </div>
     </div>
+
+    <!-- Script de Limpeza -->
+    <script th:if="${isAdmin or isSuperAdmin}">
+        document.getElementById('btnLimparDados').addEventListener('click', function() {
+            if (confirm('TEM A CERTEZA? Esta operação irá apagar TODAS as vendas e facturas de forma permanente. Não é possível desfazer.')) {
+                if (confirm('CONFIRMAÇÃO FINAL: Deseja mesmo prosseguir com a limpeza total dos dados de vendas?')) {
+                    
+                    const btn = this;
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>A limpar...';
+
+                    fetch('/api/limpeza/executar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            // O CSRF token pode ser necessário se estiver habilitado
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Dados limpos com sucesso! O sistema será recarregado.');
+                            window.location.reload();
+                        } else {
+                            response.text().then(text => alert('Erro: ' + text));
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-eraser me-1"></i>Limpar Base de Dados';
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro na ligação ao servidor: ' + error);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-eraser me-1"></i>Limpar Base de Dados';
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>

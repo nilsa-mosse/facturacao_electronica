@@ -35,6 +35,8 @@ public class Produto {
     private boolean emPromocao = false;
     private String unidadeMedida;
     private Double precoOriginal;
+    @Column(name = "preco_compra")
+    private Double precoCompra;
 
 
 
@@ -198,6 +200,14 @@ public class Produto {
 
     public void setPrecoOriginal(Double precoOriginal) {
         this.precoOriginal = precoOriginal;
+    }
+
+    public Double getPrecoCompra() {
+        return precoCompra;
+    }
+
+    public void setPrecoCompra(Double precoCompra) {
+        this.precoCompra = precoCompra;
     }
 
     @Transient
