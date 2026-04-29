@@ -55,7 +55,7 @@
                                         <tr th:each="despesa : ${despesas}">
                                             <td th:text="${despesa.id}"></td>
                                             <td th:text="${despesa.descricao}"></td>
-                                            <td class="fw-bold text-danger" th:text="${#numbers.formatDecimal(despesa.valor, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">0,00</td>
+                                            <td class="fw-bold text-danger" th:text="${despesa.valor != null} ? ${#numbers.formatDecimal(despesa.valor, 1, 'POINT', 2, 'COMMA')} + ' Kz' : '0,00 Kz'">0,00 Kz</td>
                                             <td th:text="${despesa.dataDespesa}"></td>
                                             <td th:text="${despesa.categoria}"></td>
                                             <td>

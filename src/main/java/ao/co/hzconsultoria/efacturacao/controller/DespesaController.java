@@ -1,7 +1,10 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.model.Despesa;
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.service.DespesaService;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
+import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -33,12 +36,16 @@ public class DespesaController {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private EmpresaRepository empresaRepository;
+
     private final String UPLOAD_DIR = "src/main/resources/static/uploads/despesas/";
 
     // Listar despesas
     @GetMapping("/listar")
     public String listarDespesas(Model model) {
-        model.addAttribute("despesas", despesaService.listarTodas());
+        Long empresaId = SecurityUtils.getCurrentEmpresaId();
+        model.addAttribute("despesas", despesaService.listarPorEmpresa(empresaId));
         return "listarDespesas";
     }
 
@@ -52,8 +59,13 @@ public class DespesaController {
     // Processar cadastro
     @PostMapping("/adicionar")
     public String cadastrarDespesa(@ModelAttribute Despesa despesa, 
-                                   @RequestParam("fileFatura") MultipartFile file,
+                                   @RequestParam(value = "fileFatura", required = false) MultipartFile file,
                                    RedirectAttributes redirectAttributes) {
+        Long empresaId = SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+            despesa.setEmpresa(empresa);
+        }
         tratarUpload(despesa, file);
         despesaService.salvar(despesa);
         redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.despesa.salvo", null, LocaleContextHolder.getLocale()));
@@ -71,8 +83,13 @@ public class DespesaController {
     // Atualizar despesa
     @PostMapping("/atualizar")
     public String atualizarDespesa(@ModelAttribute Despesa despesa, 
-                                   @RequestParam("fileFatura") MultipartFile file,
+                                   @RequestParam(value = "fileFatura", required = false) MultipartFile file,
                                    RedirectAttributes redirectAttributes) {
+        Long empresaId = SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+            despesa.setEmpresa(empresa);
+        }
         tratarUpload(despesa, file);
         despesaService.atualizar(despesa);
         redirectAttributes.addFlashAttribute("mensagem", messageSource.getMessage("msg.despesa.atualizada", null, LocaleContextHolder.getLocale()));
@@ -80,7 +97,7 @@ public class DespesaController {
     }
 
     private void tratarUpload(Despesa despesa, MultipartFile file) {
-        if (!file.isEmpty()) {
+        if (file != null && !file.isEmpty()) {
             try {
                 Path uploadPath = Paths.get(UPLOAD_DIR);
                 if (!Files.exists(uploadPath)) {

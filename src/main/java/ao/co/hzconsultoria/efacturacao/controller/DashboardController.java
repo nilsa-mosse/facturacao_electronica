@@ -2,12 +2,16 @@ package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.service.DashboardService;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
+import ao.co.hzconsultoria.efacturacao.model.Despesa;
+import ao.co.hzconsultoria.efacturacao.model.ItemCompra;
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.DespesaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class DashboardController {
@@ -16,6 +20,9 @@ public class DashboardController {
     
     @Autowired
     private FaturaRepository faturaRepository;
+
+    @Autowired
+    private DespesaRepository despesaRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -37,6 +44,7 @@ public class DashboardController {
         model.addAttribute("totalPendentes", dashboardService.getTotalPendentes(empresaId));
         model.addAttribute("totalLucro", dashboardService.getLucroTotal(empresaId));
         model.addAttribute("lucroBrutoMensal", dashboardService.getLucroBrutoMensal(empresaId));
+        model.addAttribute("lucroLiquidoMensal", dashboardService.getLucroMensal(empresaId));
 
         // Dados para os novos gráficos
         model.addAttribute("receitaVsDespesa", dashboardService.getReceitaVsDespesaData(empresaId));
@@ -159,5 +167,73 @@ public class DashboardController {
         model.addAttribute("totalIvaMes", totalIva);
         model.addAttribute("faturasMap", faturasMap);
         return "receitaMensal";
+    }
+
+    @GetMapping("/dashboard/lucro-liquido-mensal")
+    public String lucroLiquidoMensal(Model model) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        java.time.LocalDate inicioMes = hoje.withDayOfMonth(1);
+        java.time.LocalDate fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth());
+
+        // Vendas do mês
+        List<Compra> vendasDoMes = dashboardService.getComprasDoMes(empresaId);
+
+        // Receita total mensal
+        double receitaMensal = vendasDoMes.stream()
+            .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
+            .sum();
+
+        // COGS (Custo dos Produtos Vendidos)
+        double cogs = 0.0;
+        for (Compra compra : vendasDoMes) {
+            if (compra.getItens() != null) {
+                for (ItemCompra item : compra.getItens()) {
+                    double precoCompra = 0.0;
+                    if (item.getProduto() != null && item.getProduto().getPrecoCompra() != null) {
+                        precoCompra = item.getProduto().getPrecoCompra();
+                    }
+                    cogs += (precoCompra * (item.getQuantidade() != null ? item.getQuantidade() : 0));
+                }
+            }
+        }
+
+        // Despesas do mês (inclui despesas associadas à empresa + despesas sem empresa para compatibilidade)
+        List<Despesa> todasDespesas = despesaRepository.findAll().stream()
+            .filter(d -> d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
+            .collect(Collectors.toList());
+        List<Despesa> despesasDoMes = todasDespesas.stream()
+            .filter(d -> d.getDataDespesa() != null
+                && !d.getDataDespesa().isBefore(inicioMes)
+                && !d.getDataDespesa().isAfter(fimMes))
+            .collect(Collectors.toList());
+        double totalDespesas = despesasDoMes.stream()
+            .mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0)
+            .sum();
+
+        // Lucro Bruto = Receita - COGS
+        double lucroBruto = receitaMensal - cogs;
+
+        // Lucro Líquido = Receita - COGS - Despesas
+        double lucroLiquido = lucroBruto - totalDespesas;
+
+        // Margem de Lucro (%)
+        double margemLucro = receitaMensal > 0 ? (lucroLiquido / receitaMensal) * 100 : 0;
+
+        // Número de vendas
+        long totalVendasCount = vendasDoMes.size();
+
+        model.addAttribute("receitaMensal", receitaMensal);
+        model.addAttribute("cogs", cogs);
+        model.addAttribute("totalDespesas", totalDespesas);
+        model.addAttribute("lucroBruto", lucroBruto);
+        model.addAttribute("lucroLiquido", lucroLiquido);
+        model.addAttribute("margemLucro", margemLucro);
+        model.addAttribute("totalVendasCount", totalVendasCount);
+        model.addAttribute("vendasDoMes", vendasDoMes);
+        model.addAttribute("despesasDoMes", despesasDoMes);
+
+        return "lucroMensal";
     }
 }

@@ -171,7 +171,8 @@ public class DashboardService {
         double receitaTotal = compraRepository.findByEmpresa_Id(empresaId).stream()
                 .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
                 .sum();
-        double despesasTotais = despesaRepository.findByEmpresa_Id(empresaId).stream()
+        double despesasTotais = despesaRepository.findAll().stream()
+                .filter(d -> d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
                 .mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0)
                 .sum();
         return receitaTotal - despesasTotais;
@@ -181,8 +182,13 @@ public class DashboardService {
         java.time.LocalDate hoje = java.time.LocalDate.now();
         java.time.LocalDate inicio = hoje.withDayOfMonth(1);
         java.time.LocalDate fim = hoje.withDayOfMonth(hoje.lengthOfMonth());
-        List<Despesa> despesas = despesaRepository.findByDataDespesaBetween(inicio, fim).stream()
-                .filter(d -> d.getEmpresa() != null && d.getEmpresa().getId().equals(empresaId))
+        List<Despesa> todasDespesas = despesaRepository.findAll().stream()
+                .filter(d -> d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
+                .collect(Collectors.toList());
+        List<Despesa> despesas = todasDespesas.stream()
+                .filter(d -> d.getDataDespesa() != null
+                    && !d.getDataDespesa().isBefore(inicio)
+                    && !d.getDataDespesa().isAfter(fim))
                 .collect(Collectors.toList());
         return despesas.stream().mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0).sum();
     }
@@ -209,8 +215,11 @@ public class DashboardService {
             receitas.add(comprasMes.stream().mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0).sum());
 
             // Despesas
-            List<Despesa> despesasMes = despesaRepository.findByDataDespesaBetween(inicio, fim).stream()
-                .filter(d -> d.getEmpresa() != null && d.getEmpresa().getId().equals(empresaId))
+            List<Despesa> despesasMes = despesaRepository.findAll().stream()
+                .filter(d -> (d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
+                    && d.getDataDespesa() != null
+                    && !d.getDataDespesa().isBefore(inicio)
+                    && !d.getDataDespesa().isAfter(fim))
                 .collect(Collectors.toList());
             despesasValues.add(despesasMes.stream().mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0).sum());
         }
