@@ -178,6 +178,15 @@ public class DashboardService {
         return receitaTotal - despesasTotais;
     }
 
+    public long getTotalMovimentos(Long empresaId) {
+        long vendasCount = compraRepository.findByEmpresa_Id(empresaId).size();
+        long despesasCount = despesaRepository.findAll().stream()
+                .filter(d -> d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
+                .count();
+        return vendasCount + despesasCount;
+    }
+
+
     public double getDespesasMensais(Long empresaId) {
         java.time.LocalDate hoje = java.time.LocalDate.now();
         java.time.LocalDate inicio = hoje.withDayOfMonth(1);

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid px-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                        <div>
+                            <h1 class="fw-bold text-dark">Gestão de <span class="text-primary">Inventários</span></h1>
+                            <p class="text-muted">Monitorização e controlo de contagens de stock por armazém e localização.</p>
+                        </div>
+                        <a th:href="@{/gestao-inventarios/novo}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-plus-circle me-2"></i> Novo Inventário
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid px-4">
+                    <!-- Filtros e Pesquisa -->
+                    <div class="card border-0 shadow-sm mb-4 rounded-xl">
+                        <div class="card-body p-4">
+                            <form method="GET" th:action="@{/gestao-inventarios}" id="filterForm">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="search-input-group">
+                                            <i class="fas fa-search search-icon"></i>
+                                            <input type="text" name="busca" class="form-control ps-5 rounded-pill" 
+                                                   placeholder="Pesquisar por Código, Nome ou Responsável..." 
+                                                   th:value="${busca}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="tipo" class="form-select rounded-pill shadow-none border-light-subtle">
+                                            <option value="">Tipo de Inventário</option>
+                                            <option value="GERAL">Geral (Total)</option>
+                                            <option value="PARCIAL">Parcial (Categoria)</option>
+                                            <option value="ROTATIVO">Rotativo (Cíclico)</option>
+                                            <option value="EXTRAORDINARIO">Extraordinário</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select name="estado" class="form-select rounded-pill shadow-none border-light-subtle">
+                                            <option value="">Estado</option>
+                                            <option value="RASCUNHO">Rascunho</option>
+                                            <option value="EM_CONTAGEM">Em Contagem</option>
+                                            <option value="EM_REVISAO">Em Revisão</option>
+                                            <option value="FINALIZADO">Finalizado</option>
+                                            <option value="CANCELADO">Cancelado</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="date" name="data" class="form-control rounded-pill shadow-none border-light-subtle">
+                                    </div>
+                                    <div class="col-md-2 d-grid">
+                                        <button type="submit" class="btn btn-dark rounded-pill">
+                                            <i class="fas fa-filter me-1"></i> Filtrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Inventários -->
+                    <div class="card border-0 shadow-sm rounded-xl overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 custom-premium-table">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4">Código</th>
+                                            <th>Nome do Inventário</th>
+                                            <th>Tipo</th>
+                                            <th>Armazém / Localização</th>
+                                            <th class="text-center">Total Itens</th>
+                                            <th class="text-center">Divergentes</th>
+                                            <th class="text-end">Valor Diverg.</th>
+                                            <th>Estado</th>
+                                            <th class="text-end pe-4">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="inv : ${inventarios}">
+                                            <td class="ps-4">
+                                                <span class="badge bg-secondary-subtle text-secondary fw-bold rounded-pill px-3" th:text="${inv.codigo}">INV-001</span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-dark" th:text="${inv.nome}">Inventário Trimestral</div>
+                                                <small class="text-muted d-block">
+                                                    <i class="fas fa-calendar-alt me-1"></i> 
+                                                    <span th:text="${#temporals.format(inv.dataAbertura, 'dd/MM/yyyy')}">01/01</span>
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).GERAL}" class="badge bg-info-subtle text-info rounded-pill">Geral</span>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).PARCIAL}" class="badge bg-primary-subtle text-primary rounded-pill">Parcial</span>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).ROTATIVO}" class="badge bg-success-subtle text-success rounded-pill">Rotativo</span>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).EXTRAORDINARIO}" class="badge bg-warning-subtle text-warning rounded-pill">Extraordinário</span>
+                                            </td>
+                                            <td>
+                                                <div th:text="${inv.armazem != null ? inv.armazem : 'Principal'}">Armazém Central</div>
+                                                <small class="text-muted d-block"><i class="fas fa-map-marker-alt me-1"></i> <span th:text="${inv.localizacao != null ? inv.localizacao : 'N/D'}">Corredor A</span></small>
+                                            </td>
+                                            <td class="text-center fw-bold text-dark" th:text="${inv.totalItens}">0</td>
+                                            <td class="text-center">
+                                                <span th:class="${inv.itensDivergentes > 0} ? 'text-danger fw-bold' : 'text-muted'" 
+                                                      th:text="${inv.itensDivergentes}">0</span>
+                                            </td>
+                                            <td class="text-end fw-bold" 
+                                                th:classappend="${inv.valorDivergencias < 0 ? 'text-danger' : (inv.valorDivergencias > 0 ? 'text-success' : 'text-muted')}"
+                                                th:text="${#numbers.formatDecimal(inv.valorDivergencias, 1, 'COMMA', 2, 'POINT') + ' Kz'}">
+                                                0,00 Kz
+                                            </td>
+                                            <td>
+                                                <span th:class="'badge rounded-pill px-3 ' + 
+                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).RASCUNHO} ? 'bg-secondary' : 
+                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EM_CONTAGEM)} ? 'bg-primary' : 
+                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EM_REVISAO)} ? 'bg-warning' : 
+                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.FINALIZADO)} ? 'bg-success' : 'bg-danger'))))"
+                                                      th:text="${inv.estado}">Rascunho</span>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="dropdown shadow-none">
+                                                    <button class="btn btn-light btn-sm rounded-pill px-3 border-light-subtle dropdown-toggle fw-bold text-muted" 
+                                                            type="button" data-bs-toggle="dropdown">
+                                                        Opções
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3">
+                                                        <!-- View Details (Always available) -->
+                                                        <li><a class="dropdown-item py-2" th:href="@{'/gestao-inventarios/detalhes/' + ${inv.id}}">
+                                                            <i class="fas fa-eye text-primary me-2"></i> Ver Detalhes</a>
+                                                        </li>
+
+                                                        <!-- Actions for RASCUNHO -->
+                                                        <li th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).RASCUNHO}">
+                                                            <a class="dropdown-item py-2" th:href="@{'/gestao-inventarios/editar/' + ${inv.id}}">
+                                                                <i class="fas fa-edit text-dark me-2"></i> Editar Dados
+                                                            </a>
+                                                        </li>
+                                                        <li th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).RASCUNHO}">
+                                                            <a class="dropdown-item py-2 text-primary fw-bold" th:href="@{'/gestao-inventarios/iniciar/' + ${inv.id}}">
+                                                                <i class="fas fa-play me-2"></i> Iniciar Contagem
+                                                            </a>
+                                                        </li>
+
+                                                        <!-- Actions for EM_CONTAGEM -->
+                                                        <li th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_CONTAGEM}">
+                                                            <a class="dropdown-item py-2 text-primary fw-bold" th:href="@{'/gestao-inventarios/contar/' + ${inv.id}}">
+                                                                <i class="fas fa-list-ol me-2"></i> Continuar Contagem
+                                                            </a>
+                                                        </li>
+                                                        <li th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_CONTAGEM}">
+                                                            <a class="dropdown-item py-2 text-success fw-bold" th:href="@{'/gestao-inventarios/fechar/' + ${inv.id}}">
+                                                                <i class="fas fa-check-double me-2"></i> Fechar Inventário
+                                                            </a>
+                                                        </li>
+
+                                                        <!-- Actions for EM_REVISAO -->
+                                                        <li th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_REVISAO}">
+                                                            <a class="dropdown-item py-2 text-success fw-bold" th:href="@{'/gestao-inventarios/aprovar/' + ${inv.id}}">
+                                                                <i class="fas fa-file-signature me-2"></i> Aprovar Ajustes
+                                                            </a>
+                                                        </li>
+
+                                                        <!-- Cancel Action (Available for Rascunho, Contagem, Revisao) -->
+                                                        <li th:if="${inv.estado != T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).FINALIZADO and inv.estado != T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).CANCELADO}">
+                                                            <hr class="dropdown-divider">
+                                                            <a class="dropdown-item py-2 text-danger" 
+                                                               th:href="@{'/gestao-inventarios/cancelar/' + ${inv.id}}"
+                                                               onclick="return confirm('Tem a certeza que deseja cancelar este inventário?')">
+                                                                <i class="fas fa-ban me-2"></i> Cancelar
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(inventarios)}">
+                                            <td colspan="8" class="text-center py-5">
+                                                <i class="fas fa-clipboard-list text-muted mb-3" style="font-size: 3rem; opacity: 0.2;"></i>
+                                                <p class="text-muted fw-bold">Nenhum inventário registado.</p>
+                                                <a th:href="@{/gestao-inventarios/novo}" class="btn btn-sm btn-outline-primary rounded-pill mt-2">Começar agora</a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="main-footer bg-white border-0 py-3">
+            <div class="container-fluid px-4">
+                <div class="float-right d-none d-sm-inline">eFacturacao v2.0</div>
+                <strong>Copyright &copy; 2024 <a href="#">HZ Consultoria</a>.</strong> Todos os direitos reservados.
+            </div>
+        </footer>
+    </div>
+
+    <style>
+        .rounded-xl { border-radius: 20px !important; }
+        .custom-premium-table thead th {
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: #6c757d;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        .custom-premium-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        .custom-premium-table tbody tr:hover {
+            background-color: #f8faff;
+            transform: translateY(-1px);
+        }
+        .search-input-group {
+            position: relative;
+        }
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+        }
+        .btn-light.rounded-circle {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #f1f3f5;
+        }
+        .badge-info-subtle { background-color: #e0f2fe; color: #0369a1; }
+        .badge-primary-subtle { background-color: #e0e7ff; color: #4338ca; }
+        .badge-success-subtle { background-color: #dcfce7; color: #15803d; }
+        .badge-warning-subtle { background-color: #fef9c3; color: #a16207; }
+    </style>
+</body>
+</html>

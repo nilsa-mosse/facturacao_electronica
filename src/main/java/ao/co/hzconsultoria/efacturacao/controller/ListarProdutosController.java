@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import ao.co.hzconsultoria.efacturacao.service.StockService;
 import java.util.List;
 import java.util.stream.Collectors;
 import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
@@ -32,6 +33,8 @@ public class ListarProdutosController {
     private EmpresaRepository empresaRepository;
     @Autowired
     private ImpostoRepository impostoRepository;
+    @Autowired
+    private StockService stockService;
 
     @GetMapping("/produtos/listar")
     public String listarProdutos(@RequestParam(value = "cat", required = false) Long cat,

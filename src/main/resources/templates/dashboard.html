@@ -18,7 +18,7 @@
 
                     <!-- Indicadores principais - 1ª Linha -->
                     <div class="row mb-4">
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="col-md col-sm-6 col-12 mb-3">
                             <div class="premium-card grad-success shadow-sm"
                                 th:onclick="|location.href='@{/dashboard/vendas-dia}'|">
                                 <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
@@ -31,7 +31,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="col-md col-sm-6 col-12 mb-3">
                             <div class="premium-card grad-primary shadow-sm"
                                 th:onclick="|location.href='@{/dashboard/receita-mensal}'|">
                                 <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
@@ -45,7 +45,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="col-md col-sm-6 col-12 mb-3">
                             <div class="premium-card grad-danger shadow-sm"
                                 th:onclick="|location.href='@{/historico-vendas}'|">
                                 <span class="info-box-icon"><i class="fas fa-file-invoice"></i></span>
@@ -55,7 +55,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
+                        <div class="col-md col-sm-6 col-12 mb-3">
                             <div class="premium-card grad-warning shadow-sm"
                                 th:onclick="|location.href='@{/dashboard/lucro-liquido-mensal}'|">
                                 <span class="info-box-icon"><i class="fas fa-hand-holding-usd"></i></span>
@@ -67,55 +67,20 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md col-sm-6 col-12 mb-3">
+                            <div class="premium-card grad-indigo shadow-sm"
+                                th:onclick="|location.href='@{/financeiro/fluxo-caixa}'|">
+                                <span class="info-box-icon"><i class="fas fa-exchange-alt"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text fw-bold"
+                                        th:text="#{dashboard.movimentos}">Movimentos</span>
+                                    <span class="info-box-number" th:text="${totalMovimentos}">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
 
-                    <!-- Indicadores principais - 2ª Linha -->
-                    <div class="row mb-4">
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-info shadow-sm"
-                                th:onclick="|location.href='@{/financeiro/fluxo-caixa}'|">
-                                <span class="info-box-icon"><i class="fas fa-money-bill-wave"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold"
-                                        th:text="#{dashboard.pagamentos}">Pagamentos</span>
-                                    <span class="info-box-number" th:text="${totalPagamentos}">0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-secondary shadow-sm"
-                                th:onclick="|location.href='@{/clientes/listar}'|">
-                                <span class="info-box-icon"><i class="fas fa-users"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.clientes}">Clientes</span>
-                                    <span class="info-box-number" th:text="${totalClientes}">0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-orange shadow-sm"
-                                th:onclick="|location.href='@{/historico-vendas}'|">
-                                <span class="info-box-icon"><i class="fas fa-clock"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold"
-                                        th:text="#{dashboard.pendentes}">Pendentes</span>
-                                    <span class="info-box-number" th:text="${totalPendentes}">0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-dark shadow-sm"
-                                th:onclick="|location.href='@{/financeiro/fluxo-caixa}'|">
-                                <span class="info-box-icon"><i class="fas fa-piggy-bank"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.lucros}">Lucro L&iacute;quido</span>
-                                    <span class="info-box-number"
-                                        th:text="${'Kz ' + #numbers.formatDecimal(totalLucro, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
-                                        0,00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Novos Gráficos - Linha 1 -->
                     <div class="row mb-4">

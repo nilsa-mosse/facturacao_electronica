@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content py-4">
+                <div class="container-fluid px-4">
+                    <!-- Stepper Progress -->
+                    <div class="wizard-stepper mb-5">
+                        <div class="step active" id="step1-indicator">
+                            <div class="step-icon">1</div>
+                            <div class="step-label">Dados Gerais</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" id="step2-indicator">
+                            <div class="step-icon">2</div>
+                            <div class="step-label">Seleção de Produtos</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" id="step3-indicator">
+                            <div class="step-icon">3</div>
+                            <div class="step-label">Contagem Física</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" id="step4-indicator">
+                            <div class="step-icon">4</div>
+                            <div class="step-label">Divergências</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" id="step5-indicator">
+                            <div class="step-icon">5</div>
+                            <div class="step-label">Ajustes</div>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/gestao-inventarios/salvar}" th:object="${inventario}" method="POST" id="wizardForm">
+                        <input type="hidden" th:field="*{id}" />
+
+                        <!-- STEP 1: DADOS GERAIS -->
+                        <div class="wizard-step-content active" id="step1-content">
+                            <div class="card border-0 shadow-lg rounded-xl p-4">
+                                <div class="card-header bg-transparent border-0 mb-3">
+                                    <h4 class="fw-bold text-primary mb-0">Informações do Inventário</h4>
+                                    <p class="text-muted small">Defina o escopo e os responsáveis pela auditoria.</p>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-4">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Código</label>
+                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
+                                                   th:field="*{codigo}" readonly required>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Nome do Inventário</label>
+                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
+                                                   th:field="*{nome}" placeholder="Ex: Inventário Mensal de Abril" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Tipo</label>
+                                            <select th:field="*{tipo}" class="form-select rounded-pill bg-light border-0 px-4 py-2" required>
+                                                <option value="GERAL">Geral (Total)</option>
+                                                <option value="PARCIAL">Parcial (Por Categoria)</option>
+                                                <option value="ROTATIVO">Rotativo</option>
+                                                <option value="EXTRAORDINARIO">Extraordinário</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Armazém</label>
+                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
+                                                   th:field="*{armazem}" placeholder="Armazém Principal">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Localização (Corredor/Zona)</label>
+                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
+                                                   th:field="*{localizacao}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Data Abertura</label>
+                                            <input type="date" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
+                                                   th:field="*{dataAbertura}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Responsável</label>
+                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
+                                                   th:field="*{responsavel}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2: SELEÇÃO DE PRODUTOS -->
+                        <div class="wizard-step-content" id="step2-content">
+                            <div class="card border-0 shadow-lg rounded-xl p-4">
+                                <div class="card-header bg-transparent border-0 mb-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="fw-bold text-primary mb-0">Seleção de Itens</h4>
+                                        <p class="text-muted small">Escolha quais os produtos que serão contados neste inventário.</p>
+                                    </div>
+                                    <div class="search-box">
+                                        <input type="text" class="form-control rounded-pill border-light ps-4" placeholder="Pesquisar produto...">
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="sticky-top bg-white">
+                                                <tr>
+                                                    <th width="50">
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" id="checkAll"></div>
+                                                    </th>
+                                                    <th>Código</th>
+                                                    <th>Produto</th>
+                                                    <th>Stock Atual</th>
+                                                    <th>Categoria</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="prod : ${produtosDisponiveis}">
+                                                    <td>
+                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="produtoIds" th:value="${prod.id}"></div>
+                                                    </td>
+                                                    <td th:text="${prod.codigoBarra}">001</td>
+                                                    <td th:text="${prod.nome}">Produto Exemplo</td>
+                                                    <td class="fw-bold" th:text="${prod.quantidadeEstoque}">10</td>
+                                                    <td th:text="${prod.categoria != null ? prod.categoria.nome : 'Sem Categoria'}">Geral</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3: CONTAGEM FÍSICA -->
+                        <div class="wizard-step-content" id="step3-content">
+                            <div class="card border-0 shadow-lg rounded-xl p-4">
+                                <div class="card-header bg-transparent border-0 mb-3">
+                                    <h4 class="fw-bold text-primary mb-0">Contagem de Campo</h4>
+                                    <p class="text-muted small">Insira as quantidades físicas encontradas durante a contagem.</p>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info rounded-pill border-0 px-4">
+                                        <i class="fas fa-info-circle me-2"></i> Só poderá preencher este campo quando o inventário estiver em estado "Contagem".
+                                    </div>
+                                    <div id="contagemList" class="text-center py-5 text-muted">
+                                        <i class="fas fa-barcode mb-3" style="font-size: 3rem; opacity: 0.1;"></i>
+                                        <p>A lista de contagem será gerada após a seleção dos produtos.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 4: DIVERGÊNCIAS -->
+                        <div class="wizard-step-content" id="step4-content">
+                            <div class="card border-0 shadow-lg rounded-xl p-4">
+                                <div class="card-header bg-transparent border-0 mb-3">
+                                    <h4 class="fw-bold text-primary mb-0">Relatório de Diferenças</h4>
+                                    <p class="text-muted small">Comparação automática entre stock do sistema e contagem física.</p>
+                                </div>
+                                <div class="card-body text-center py-5">
+                                    <i class="fas fa-chart-pie mb-3" style="font-size: 3rem; opacity: 0.1;"></i>
+                                    <p class="text-muted">As divergências serão calculadas após a conclusão da contagem física.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 5: AJUSTES -->
+                        <div class="wizard-step-content" id="step5-content">
+                            <div class="card border-0 shadow-lg rounded-xl p-4">
+                                <div class="card-header bg-transparent border-0 mb-3">
+                                    <h4 class="fw-bold text-primary mb-0">Ajustes de Stock</h4>
+                                    <p class="text-muted small">Movimentações que serão geradas para sincronizar o stock.</p>
+                                </div>
+                                <div class="card-body text-center py-5">
+                                    <i class="fas fa-exchange-alt mb-3" style="font-size: 3rem; opacity: 0.1;"></i>
+                                    <p class="text-muted">A pré-visualização dos ajustes estará disponível após a revisão das divergências.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NAVIGATION BUTTONS -->
+                        <div class="d-flex justify-content-between align-items-center mt-5 mb-5 px-3">
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm" id="prevBtn" onclick="changeStep(-1)" disabled>
+                                <i class="fas fa-arrow-left me-2"></i> Anterior
+                            </button>
+                            
+                            <div>
+                                <a th:href="@{/gestao-inventarios}" class="btn btn-link text-muted fw-bold text-decoration-none me-3">
+                                    Sair sem salvar
+                                </a>
+                                <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow" id="nextBtn" onclick="changeStep(1)">
+                                    Próximo <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                                <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow d-none" id="saveBtn">
+                                    <i class="fas fa-save me-2"></i> Finalizar Registro
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <style>
+        .rounded-xl { border-radius: 24px !important; }
+        
+        /* Wizard Stepper Styling */
+        .wizard-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .step-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #f1f3f5;
+            color: #adb5bd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 1px #e9ecef;
+        }
+        .step-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #adb5bd;
+            letter-spacing: 0.5px;
+        }
+        .step-line {
+            height: 3px;
+            background: #e9ecef;
+            flex-grow: 1;
+            margin: 0 10px;
+            margin-top: -32px;
+            position: relative;
+            z-index: 1;
+        }
+        .step.active .step-icon {
+            background: #4361ee;
+            color: white;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        .step.active .step-label {
+            color: #4361ee;
+        }
+        .step.completed .step-icon {
+            background: #059669;
+            color: white;
+        }
+        
+        /* Step Content Toggle */
+        .wizard-step-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .wizard-step-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #fff !important;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15) !important;
+            border-color: #4361ee !important;
+        }
+    </style>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function changeStep(n) {
+            // Validate before going forward
+            if (n === 1 && !validateStep(currentStep)) return;
+
+            // Update UI
+            document.getElementById(`step${currentStep}-content`).classList.remove('active');
+            document.getElementById(`step${currentStep}-indicator`).classList.remove('active');
+            if (n === 1) document.getElementById(`step${currentStep}-indicator`).classList.add('completed');
+            
+            currentStep += n;
+            
+            document.getElementById(`step${currentStep}-content`).classList.add('active');
+            document.getElementById(`step${currentStep}-indicator`).classList.add('active');
+
+            // Button controls
+            document.getElementById('prevBtn').disabled = (currentStep === 1);
+            
+            if (currentStep === totalSteps) {
+                document.getElementById('nextBtn').classList.add('d-none');
+                document.getElementById('saveBtn').classList.remove('d-none');
+            } else {
+                document.getElementById('nextBtn').classList.remove('d-none');
+                document.getElementById('saveBtn').classList.add('d-none');
+            }
+
+            // Scroll to top of stepper
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateStep(step) {
+            const currentContent = document.getElementById(`step${step}-content`);
+            const inputs = currentContent.querySelectorAll('input[required], select[required]');
+            let valid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value) {
+                    input.classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            if (step === 2) {
+                const checkboxes = currentContent.querySelectorAll('input[name="produtoIds"]:checked');
+                if (checkboxes.length === 0) {
+                    alert('Por favor, selecione pelo menos um produto para o inventário.');
+                    valid = false;
+                }
+            }
+
+            return valid;
+        }
+
+        document.getElementById('checkAll').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('input[name="produtoIds"]');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
+</body>
+</html>

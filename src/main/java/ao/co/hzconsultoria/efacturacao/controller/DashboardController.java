@@ -43,6 +43,7 @@ public class DashboardController {
         model.addAttribute("totalClientes", dashboardService.getTotalClientes(empresaId));
         model.addAttribute("totalPendentes", dashboardService.getTotalPendentes(empresaId));
         model.addAttribute("totalLucro", dashboardService.getLucroTotal(empresaId));
+        model.addAttribute("totalMovimentos", dashboardService.getTotalMovimentos(empresaId));
         model.addAttribute("lucroBrutoMensal", dashboardService.getLucroBrutoMensal(empresaId));
         model.addAttribute("lucroLiquidoMensal", dashboardService.getLucroMensal(empresaId));
 

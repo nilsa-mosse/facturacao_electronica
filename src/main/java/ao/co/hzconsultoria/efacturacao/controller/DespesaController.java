@@ -74,8 +74,12 @@ public class DespesaController {
 
     // Exibir formulário de edição
     @GetMapping("/editar/{id}")
-    public String mostrarFormularioEdicao(@PathVariable Long id, Model model) {
+    public String mostrarFormularioEdicao(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         Despesa despesa = despesaService.buscarPorId(id);
+        if (despesa == null) {
+            redirectAttributes.addFlashAttribute("error", "Despesa não encontrada.");
+            return "redirect:/despesas/listar";
+        }
         model.addAttribute("despesa", despesa);
         return "cadastroDespesa";
     }
