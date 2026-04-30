@@ -238,6 +238,58 @@ public class InventarioController {
         return "detalhesInventario";
     }
 
+    @GetMapping("/dashboard/{id}")
+    public String dashboard(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        Inventario inv = inventarioRepository.findById(id).orElse(null);
+        if (inv == null) {
+            ra.addFlashAttribute("mensagemErro", "Inventário não encontrado.");
+            return "redirect:/gestao-inventarios";
+        }
+
+        // 1. Itens contados vs por contar
+        // Assumimos que "contado" é quando quantidadeContada != 0 ou foi explicitamente preenchido
+        // Como o default é 0, vamos considerar contados todos os que estão no inventário para simplificar,
+        // ou podemos usar uma lógica de "quantidadeContada != null" se mudarmos o modelo.
+        // Por agora, vamos usar a lógica: contados = total, por contar = 0 se estiver FINALIZADO.
+        // Se estiver EM_CONTAGEM, vamos considerar contados aqueles que têm valor > 0 ou foram alterados.
+        long totalItens = inv.getItens().size();
+        long itensContados = inv.getItens().stream().filter(it -> it.getQuantidadeContada() != null && it.getQuantidadeContada() > 0).count();
+        long itensPorContar = totalItens - itensContados;
+
+        // 2. Divergências
+        long divergencias = inv.getItensDivergentes();
+        
+        // 3. Precisão do Inventário
+        double precisao = totalItens > 0 ? ((double)(totalItens - divergencias) / totalItens) * 100 : 100.0;
+
+        // 4. Valores Monetários
+        double valorTotalStock = inv.getItens().stream()
+                .mapToDouble(it -> (it.getQuantidadeSistema() != null ? it.getQuantidadeSistema() : 0.0) * 
+                                  (it.getProduto() != null && it.getProduto().getPrecoCompra() != null ? it.getProduto().getPrecoCompra() : 0.0))
+                .sum();
+        
+        double valorAjustado = inv.getValorDivergencias();
+
+        // 5. Produtos Críticos (Maiores divergências em valor absoluto)
+        java.util.List<ItemInventario> criticos = inv.getItens().stream()
+                .filter(it -> Math.abs(it.getDivergencia()) > 0)
+                .sorted((a, b) -> Double.compare(Math.abs(b.getValorDivergencia()), Math.abs(a.getValorDivergencia())))
+                .limit(5)
+                .collect(java.util.stream.Collectors.toList());
+
+        model.addAttribute("inventario", inv);
+        model.addAttribute("totalItens", totalItens);
+        model.addAttribute("itensContados", itensContados);
+        model.addAttribute("itensPorContar", itensPorContar);
+        model.addAttribute("divergencias", divergencias);
+        model.addAttribute("precisao", precisao);
+        model.addAttribute("valorTotalStock", valorTotalStock);
+        model.addAttribute("valorAjustado", valorAjustado);
+        model.addAttribute("produtosCriticos", criticos);
+
+        return "dashboardInventario";
+    }
+
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model, RedirectAttributes ra) {
         Inventario inv = inventarioRepository.findById(id).orElse(null);

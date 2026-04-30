@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head">
+    <title>Dashboard de Inventário | eFacturacao</title>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper bg-light-subtle">
+            <section class="content-header">
+                <div class="container-fluid px-4">
+                    <div class="d-flex justify-content-between align-items-end mb-4 mt-3">
+                        <div>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-1">
+                                    <li class="breadcrumb-item"><a th:href="@{/gestao-inventarios}">Inventários</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                                </ol>
+                            </nav>
+                            <h1 class="fw-bold text-dark mb-0">Resumo do <span class="text-primary" th:text="${inventario.codigo}">INV-001</span></h1>
+                            <p class="text-muted" th:text="${inventario.nome}">Análise detalhada de divergências e precisão de stock.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{'/gestao-inventarios/detalhes/' + ${inventario.id}}" class="btn btn-outline-dark rounded-pill px-4">
+                                <i class="fas fa-list me-2"></i> Ver Lista Completa
+                            </a>
+                            <button onclick="window.print()" class="btn btn-dark rounded-pill px-4">
+                                <i class="fas fa-print me-2"></i> Imprimir Relatório
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid px-4">
+                    
+                    <!-- KPI Cards Row -->
+                    <div class="row g-4 mb-4">
+                        <!-- Itens Contados -->
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl h-100 kpi-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="kpi-icon bg-primary-subtle text-primary">
+                                            <i class="fas fa-check-double"></i>
+                                        </div>
+                                        <span class="badge bg-light text-dark rounded-pill" th:text="${totalItens} + ' Total'">100 Total</span>
+                                    </div>
+                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold">Itens Contados</h6>
+                                    <h2 class="fw-bold mb-0" th:text="${itensContados}">85</h2>
+                                    <div class="progress mt-3" style="height: 6px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             th:style="'width: ' + (${totalItens > 0 ? (itensContados * 100 / totalItens) : 0}) + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Itens por Contar -->
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl h-100 kpi-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="kpi-icon bg-warning-subtle text-warning">
+                                            <i class="fas fa-hourglass-half"></i>
+                                        </div>
+                                    </div>
+                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold">Itens por Contar</h6>
+                                    <h2 class="fw-bold mb-0" th:text="${itensPorContar}">15</h2>
+                                    <p class="text-muted small mt-2 mb-0">Aguardando contagem física</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Divergências -->
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl h-100 kpi-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="kpi-icon bg-danger-subtle text-danger">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <span class="text-danger small fw-bold" th:if="${totalItens > 0}" 
+                                              th:text="${#numbers.formatDecimal(divergencias * 100.0 / totalItens, 1, 1) + '% do total'}">
+                                            10% do total
+                                        </span>
+                                    </div>
+                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold">Divergências</h6>
+                                    <h2 class="fw-bold mb-0 text-danger" th:text="${divergencias}">12</h2>
+                                    <p class="text-muted small mt-2 mb-0">Produtos com diferença de stock</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Precisão -->
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl h-100 kpi-card bg-primary text-white">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="kpi-icon bg-white bg-opacity-25 text-white">
+                                            <i class="fas fa-bullseye"></i>
+                                        </div>
+                                    </div>
+                                    <h6 class="text-white-50 text-uppercase mb-1 small fw-bold">Precisão do Inventário</h6>
+                                    <h2 class="fw-bold mb-0" th:text="${#numbers.formatDecimal(precisao, 1, 2) + '%'}">98.5%</h2>
+                                    <p class="text-white-50 small mt-2 mb-0">Índice de acerto físico vs sistema</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Second Row: Financial Values -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm rounded-xl h-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex align-items-center gap-3 mb-4">
+                                        <div class="p-3 bg-light rounded-circle text-primary">
+                                            <i class="fas fa-wallet fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold mb-0">Impacto Financeiro</h5>
+                                            <p class="text-muted small mb-0">Análise de valores em stock e ajustes.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-3">
+                                        <div class="col-sm-6">
+                                            <div class="p-3 bg-light rounded-3">
+                                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 10px;">Valor Total em Stock</small>
+                                                <h4 class="fw-bold text-dark mb-0" th:text="${#numbers.formatDecimal(valorTotalStock, 1, 'COMMA', 2, 'POINT') + ' Kz'}">1.250.000,00 Kz</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="p-3 bg-light rounded-3 border-start border-4" th:classappend="${valorAjustado < 0 ? 'border-danger' : 'border-success'}">
+                                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 10px;">Valor Ajustado (Net)</small>
+                                                <h4 class="fw-bold mb-0" th:classappend="${valorAjustado < 0 ? 'text-danger' : 'text-success'}" 
+                                                    th:text="${#numbers.formatDecimal(valorAjustado, 1, 'COMMA', 2, 'POINT') + ' Kz'}">
+                                                    -15.400,00 Kz
+                                                </h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 pt-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="text-muted small">Estado do Inventário</span>
+                                            <span class="badge rounded-pill bg-primary px-3" th:text="${inventario.estado}">EM_CONTAGEM</span>
+                                        </div>
+                                        <div class="progress" style="height: 10px; border-radius: 5px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm rounded-xl h-100">
+                                <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+                                    <h5 class="fw-bold mb-0">Produtos Críticos com Diferença</h5>
+                                    <p class="text-muted small">Top 5 itens com maior impacto financeiro na divergência.</p>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="bg-light-subtle">
+                                                <tr>
+                                                    <th class="ps-4 py-3 small text-uppercase fw-bold">Produto</th>
+                                                    <th class="text-center py-3 small text-uppercase fw-bold">Diverg.</th>
+                                                    <th class="text-end pe-4 py-3 small text-uppercase fw-bold">V. Impacto</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="item : ${produtosCriticos}">
+                                                    <td class="ps-4">
+                                                        <div class="fw-bold text-dark small" th:text="${item.produto.nome}">Cerveja Cuca 330ml</div>
+                                                        <small class="text-muted" th:text="${item.produto.codigoBarra}">560123...</small>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge rounded-pill" 
+                                                              th:classappend="${item.divergencia < 0 ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'}"
+                                                              th:text="${(item.divergencia > 0 ? '+' : '') + item.divergencia}">-5</span>
+                                                    </td>
+                                                    <td class="text-end pe-4 fw-bold" th:classappend="${item.valorDivergencia < 0 ? 'text-danger' : 'text-success'}"
+                                                        th:text="${#numbers.formatDecimal(item.valorDivergencia, 1, 'COMMA', 2, 'POINT') + ' Kz'}">
+                                                        -2.500,00 Kz
+                                                    </td>
+                                                </tr>
+                                                <tr th:if="${#lists.isEmpty(produtosCriticos)}">
+                                                    <td colspan="3" class="text-center py-4 text-muted">
+                                                        <i class="fas fa-check-circle text-success me-2"></i> Sem divergências críticas.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="menu :: footer"></footer>
+    </div>
+
+    <style>
+        .rounded-xl { border-radius: 20px !important; }
+        .kpi-card { transition: transform 0.3s ease, shadow 0.3s ease; }
+        .kpi-card:hover { transform: translateY(-5px); box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important; }
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .bg-light-subtle { background-color: #f8fafc !important; }
+        
+        @media print {
+            .main-sidebar, .main-header, .btn, .breadcrumb { display: none !important; }
+            .content-wrapper { margin-left: 0 !important; padding: 0 !important; }
+            .card { border: 1px solid #ddd !important; box-shadow: none !important; }
+        }
+    </style>
+</body>
+</html>

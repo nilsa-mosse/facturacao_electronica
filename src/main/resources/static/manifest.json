@@ -1,0 +1,21 @@
+{
+  "name": "eFacturacao - Sistema de Gestão",
+  "short_name": "eFacturacao",
+  "description": "Sistema de Facturação Electrónica e Gestão de Stock",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4338ca",
+  "icons": [
+    {
+      "src": "/dist/img/logo_pwa_192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/dist/img/logo_pwa_512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

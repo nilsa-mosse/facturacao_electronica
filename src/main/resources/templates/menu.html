@@ -9,6 +9,19 @@
   <meta name="_csrf_header" th:content="${_csrf?.headerName}" />
   <title>Sistema de Facturação Eletrónica</title>
 
+  <!-- PWA Manifest & Service Worker -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#4338ca">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker registrado!', reg))
+          .catch(err => console.log('Erro ao registrar Service Worker', err));
+      });
+    }
+  </script>
+
   <!-- jQuery -->
   <script th:src="@{/plugins/jquery/jquery-3.6.0.min.js}"></script>
 

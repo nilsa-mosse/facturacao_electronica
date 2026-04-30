@@ -130,6 +130,11 @@
                                             <td class="text-end pe-4">
                                                 <!-- Inline icon action buttons (icon-only for compact rows) -->
                                                 <div class="d-inline-flex align-items-center">
+                                                    <!-- Dashboard / Resumo -->
+                                                    <a class="btn btn-light rounded-circle ms-2 shadow-none" th:href="@{'/gestao-inventarios/dashboard/' + ${inv.id}}" title="Dashboard / Resumo">
+                                                        <i class="fas fa-chart-pie text-success"></i>
+                                                    </a>
+
                                                     <!-- Ver Detalhes (Always) -->
                                                     <a class="btn btn-light rounded-circle shadow-none" th:href="@{'/gestao-inventarios/detalhes/' + ${inv.id}}" title="Ver Detalhes">
                                                         <i class="fas fa-eye text-primary"></i>
