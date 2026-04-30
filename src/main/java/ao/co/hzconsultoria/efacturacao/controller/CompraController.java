@@ -27,6 +27,8 @@ import ao.co.hzconsultoria.efacturacao.service.GuiaRemessaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
 import ao.co.hzconsultoria.efacturacao.service.ProdutoService;
 import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa; 
+import ao.co.hzconsultoria.efacturacao.service.StockService; // added import for StockService
+import ao.co.hzconsultoria.efacturacao.security.SecurityUtils; // added import for SecurityUtils
 
 
 @Controller
@@ -59,6 +61,9 @@ public class CompraController {
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.CaixaService caixaService;
 
+    @Autowired
+    private StockService stockService; // added field for stockService
+
     @GetMapping("/pos")
     public String abrirPDV(Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (!caixaService.isCaixaAberto()) {
@@ -66,16 +71,26 @@ public class CompraController {
             return "redirect:/caixa/abertura";
         }
 
-    	 Pageable pageable = PageRequest.of(0, 60);
-        List<Produto> produtos = produtoRepository.findAll(pageable).getContent();
-        
+        Long empresaId = SecurityUtils.getCurrentEmpresaId();
+        List<Produto> produtos;
+        if (empresaId != null) {
+            produtos = produtoRepository.findByEmpresa_Id(empresaId);
+        } else {
+            produtos = produtoRepository.findAll();
+        }
+
+        System.out.println("[POS] empresaId=" + empresaId + " produtos.size=" + (produtos != null ? produtos.size() : 0));
+
         model.addAttribute("produtos", produtos);
         model.addAttribute("categorias", categoriaRepository.findAll());
         // Passa lista de clientes para o modal de identificacao
         model.addAttribute("clientes", clienteRepository.findAll());
-        
+
         // Passa a instância do caixa aberto para exibir saldo ou número do caixa
         model.addAttribute("caixaAberto", caixaService.getCaixaAbertoAtual());
+        // Produtos bloqueados por inventário parcial (ids)
+        java.util.Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();
+        model.addAttribute("produtosBloqueados", bloqueados);
         return "pos";
     }
 
@@ -95,6 +110,13 @@ public class CompraController {
     public ResponseEntity<?> finalizarCompraSingle(@RequestBody Compra compra) {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
             return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
+        }
+        // Validate that no produto is locked by an active parcial inventory
+        java.util.Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();
+        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra it : compra.getItens()) {
+            if (it.getProdutoId() != null && bloqueados.contains(it.getProdutoId())) {
+                return ResponseEntity.badRequest().body("Produto em inventário parcial: venda bloqueada. ProdutoId=" + it.getProdutoId());
+            }
         }
         compra.getItens().forEach(item -> item.setCompra(compra));
         resolverCliente(compra);
@@ -119,6 +141,13 @@ public class CompraController {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
             return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
         }
+        // Proformas podem seguir mesmo com inventário bloqueado, but we keep same restriction for consistency
+        java.util.Set<Long> bloqueados2 = stockService.listarProdutosEmInventarioParcial();
+        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra it : compra.getItens()) {
+            if (it.getProdutoId() != null && bloqueados2.contains(it.getProdutoId())) {
+                return ResponseEntity.badRequest().body("Produto em inventário parcial: proforma bloqueada. ProdutoId=" + it.getProdutoId());
+            }
+        }
         compra.getItens().forEach(item -> item.setCompra(compra));
         resolverCliente(compra);
         Compra compraSalva = vendaService.finalizarVenda(compra, "FP");
@@ -139,6 +168,12 @@ public class CompraController {
     public ResponseEntity<?> emitirGuia(@RequestBody Compra compra) {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
             return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
+        }
+        java.util.Set<Long> bloqueados3 = stockService.listarProdutosEmInventarioParcial();
+        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra it : compra.getItens()) {
+            if (it.getProdutoId() != null && bloqueados3.contains(it.getProdutoId())) {
+                return ResponseEntity.badRequest().body("Produto em inventário parcial: guia bloqueada. ProdutoId=" + it.getProdutoId());
+            }
         }
         compra.getItens().forEach(item -> item.setCompra(compra));
         resolverCliente(compra);

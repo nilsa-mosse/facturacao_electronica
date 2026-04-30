@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid px-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                    <div>
+                        <h1 class="fw-bold text-dark">Detalhes do Inventário <span th:text="${inventario.codigo}"></span></h1>
+                        <p class="text-muted" th:text="${inventario.nome}">Nome do inventário</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/gestao-inventarios}" class="btn btn-outline-secondary">Voltar</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid px-4">
+                <div class="card border-0 shadow-sm rounded-xl">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4"><strong>Tipo:</strong> <span th:text="${inventario.tipo}"></span></div>
+                            <div class="col-md-4"><strong>Armazém:</strong> <span th:text="${inventario.armazem}"></span></div>
+                            <div class="col-md-4"><strong>Estado:</strong> <span th:text="${inventario.estado}"></span></div>
+                        </div>
+
+                        <h5>Itens</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Qtd Sistema</th>
+                                    <th>Qtd Contada</th>
+                                    <th>Divergência</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item : ${itens}">
+                                    <td th:text="${item.produto.nome}">Produto X</td>
+                                    <td th:text="${item.quantidadeSistema}">0</td>
+                                    <td th:text="${item.quantidadeContada}">0</td>
+                                    <td th:text="${item.valorDivergencia}">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="menu :: footer"></footer>
+</div>
+</body>
+</html>

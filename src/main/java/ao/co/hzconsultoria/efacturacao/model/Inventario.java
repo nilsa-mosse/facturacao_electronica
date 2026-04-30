@@ -3,6 +3,7 @@ package ao.co.hzconsultoria.efacturacao.model;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "inventarios")
@@ -24,7 +25,10 @@ public class Inventario {
     private String armazem;
     private String localizacao; // prateleira, corredor, zona
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dataAbertura;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dataPrevisaoFecho;
 
     private String responsavel;
@@ -97,6 +101,9 @@ public class Inventario {
 
     public Empresa getEmpresa() { return empresa; }
     public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+
+    public java.util.List<ItemInventario> getItens() { return itens; }
+    public void setItens(java.util.List<ItemInventario> itens) { this.itens = itens; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

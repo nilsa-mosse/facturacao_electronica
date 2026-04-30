@@ -9,4 +9,6 @@ import java.util.List;
 public interface InventarioRepository extends JpaRepository<Inventario, Long> {
     List<Inventario> findByEmpresa_Id(Long empresaId);
     List<Inventario> findByEmpresa_IdOrderByCreatedAtDesc(Long empresaId);
+    // Find inventories by company, specific type and any of the provided states
+    List<Inventario> findByEmpresa_IdAndTipoAndEstadoIn(Long empresaId, Inventario.TipoInventario tipo, java.util.List<Inventario.EstadoInventario> estados);
 }

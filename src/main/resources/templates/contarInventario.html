@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid px-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                    <div>
+                        <h1 class="fw-bold text-dark">Contagem do Inventário <span th:text="${inventario.codigo}"></span></h1>
+                        <p class="text-muted" th:text="${inventario.nome}">Descrição do inventário</p>
+                    </div>
+                    <a th:href="@{/gestao-inventarios}" class="btn btn-outline-secondary">Voltar</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid px-4">
+                <div th:if="${itens == null or #lists.isEmpty(itens)}" class="alert alert-info">Nenhum item associado a este inventário.</div>
+
+                <form th:action="@{/gestao-inventarios/salvar}" method="post">
+                    <input type="hidden" name="id" th:value="${inventario.id}" />
+                    <div class="card border-0 shadow-sm rounded-xl">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th>Estoque Sistema</th>
+                                        <th>Quantidade Contada</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item, idx : ${itens}">
+                                        <td th:text="${item.produto.nome}">Produto X</td>
+                                        <td th:text="${item.quantidadeSistema}">0</td>
+                                        <td>
+                                            <input type="hidden" name="itemProdutoIds" th:value="${item.produto.id}" />
+                                            <input type="number" step="0.01" min="0" name="itemQuantidadesContadas" th:value="${item.quantidadeContada != null ? item.quantidadeContada : 0}" class="form-control" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">Salvar Contagens</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="menu :: footer"></footer>
+</div>
+</body>
+</html>

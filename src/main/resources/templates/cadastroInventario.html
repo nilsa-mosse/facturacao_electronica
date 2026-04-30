@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="menu :: head"></head>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
@@ -38,7 +39,8 @@
                         </div>
                     </div>
 
-                    <form th:action="@{/gestao-inventarios/salvar}" th:object="${inventario}" method="POST" id="wizardForm">
+                    <form th:action="@{/gestao-inventarios/salvar}" th:object="${inventario}" method="POST"
+                        id="wizardForm">
                         <input type="hidden" th:field="*{id}" />
 
                         <!-- STEP 1: DADOS GERAIS -->
@@ -51,18 +53,25 @@
                                 <div class="card-body">
                                     <div class="row g-4">
                                         <div class="col-md-4">
-                                            <label class="form-label fw-bold text-muted small text-uppercase">Código</label>
-                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
-                                                   th:field="*{codigo}" readonly required>
+                                            <label
+                                                class="form-label fw-bold text-muted small text-uppercase">Código</label>
+                                            <input type="text"
+                                                class="form-control rounded-pill bg-light border-0 px-4 py-2"
+                                                th:field="*{codigo}" readonly required>
                                         </div>
                                         <div class="col-md-8">
-                                            <label class="form-label fw-bold text-muted small text-uppercase">Nome do Inventário</label>
-                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
-                                                   th:field="*{nome}" placeholder="Ex: Inventário Mensal de Abril" required>
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Nome do
+                                                Inventário</label>
+                                            <input type="text"
+                                                class="form-control rounded-pill bg-light border-0 px-4 py-2"
+                                                th:field="*{nome}" placeholder="Ex: Inventário Mensal de Abril"
+                                                required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label fw-bold text-muted small text-uppercase">Tipo</label>
-                                            <select th:field="*{tipo}" class="form-select rounded-pill bg-light border-0 px-4 py-2" required>
+                                            <label
+                                                class="form-label fw-bold text-muted small text-uppercase">Tipo</label>
+                                            <select th:field="*{tipo}"
+                                                class="form-select rounded-pill bg-light border-0 px-4 py-2" required>
                                                 <option value="GERAL">Geral (Total)</option>
                                                 <option value="PARCIAL">Parcial (Por Categoria)</option>
                                                 <option value="ROTATIVO">Rotativo</option>
@@ -70,24 +79,52 @@
                                             </select>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label fw-bold text-muted small text-uppercase">Armazém</label>
-                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
-                                                   th:field="*{armazem}" placeholder="Armazém Principal">
+                                            <label
+                                                class="form-label fw-bold text-muted small text-uppercase">Armazém</label>
+                                            <select th:field="*{armazem}"
+                                                    class="form-select rounded-pill bg-light border-0 px-4 py-2">
+                                                <!-- default empty option -->
+                                                <option th:each="est : ${armazens}"
+                                                        th:value="${est.nome}"
+                                                        th:text="${est.nome}"></option>
+                                            </select>
                                         </div>
                                         <div class="col-md-12">
-                                            <label class="form-label fw-bold text-muted small text-uppercase">Localização (Corredor/Zona)</label>
-                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
-                                                   th:field="*{localizacao}">
+                                            <label
+                                                class="form-label fw-bold text-muted small text-uppercase">Localização
+                                                (Corredor/Zona)</label>
+                                            <input type="text"
+                                                class="form-control rounded-pill bg-light border-0 px-4 py-2"
+                                                th:field="*{localizacao}">
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label fw-bold text-muted small text-uppercase">Data Abertura</label>
-                                            <input type="date" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
-                                                   th:field="*{dataAbertura}" required>
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Data
+                                                Abertura</label>
+                                            <input type="date"
+                                                class="form-control rounded-pill bg-light border-0 px-4 py-2"
+                                                th:field="*{dataAbertura}" required>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label fw-bold text-muted small text-uppercase">Responsável</label>
-                                            <input type="text" class="form-control rounded-pill bg-light border-0 px-4 py-2" 
-                                                   th:field="*{responsavel}" required>
+                                            <label
+                                                class="form-label fw-bold text-muted small text-uppercase">Responsável</label>
+                                            <input type="text"
+                                                class="form-control rounded-pill bg-light border-0 px-4 py-2"
+                                                th:field="*{responsavel}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-muted small text-uppercase">Estado
+                                                do Inventário</label>
+                                            <select th:field="*{estado}"
+                                                class="form-select rounded-pill bg-light border-0 px-4 py-2" required>
+                                                <option value="RASCUNHO">Rascunho (Preparação)</option>
+                                                <option value="EM_CONTAGEM">Iniciar Imediatamente (Em Contagem)</option>
+                                                <option value="EM_REVISAO" th:if="${inventario.id != null}">Em Revisão
+                                                </option>
+                                                <option value="FINALIZADO" th:if="${inventario.id != null}">Finalizado
+                                                </option>
+                                                <option value="CANCELADO" th:if="${inventario.id != null}">Cancelado
+                                                </option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -97,38 +134,138 @@
                         <!-- STEP 2: SELEÇÃO DE PRODUTOS -->
                         <div class="wizard-step-content" id="step2-content">
                             <div class="card border-0 shadow-lg rounded-xl p-4">
-                                <div class="card-header bg-transparent border-0 mb-3 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h4 class="fw-bold text-primary mb-0">Seleção de Itens</h4>
-                                        <p class="text-muted small">Escolha quais os produtos que serão contados neste inventário.</p>
-                                    </div>
-                                    <div class="search-box">
-                                        <input type="text" class="form-control rounded-pill border-light ps-4" placeholder="Pesquisar produto...">
-                                    </div>
+                                <div class="card-header bg-transparent border-0 mb-3">
+                                    <h4 class="fw-bold text-primary mb-0">Seleção de Itens para Inventário</h4>
+                                    <p class="text-muted small">Filtre e selecione os produtos que deseja auditar.</p>
                                 </div>
                                 <div class="card-body">
-                                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                                        <table class="table table-hover align-middle">
-                                            <thead class="sticky-top bg-white">
-                                                <tr>
-                                                    <th width="50">
-                                                        <div class="form-check"><input class="form-check-input" type="checkbox" id="checkAll"></div>
+                                    <!-- Filtros de Seleção -->
+                                    <div class="row g-3 mb-4 p-3 bg-light rounded-4">
+                                        <div class="col-md-2">
+                                            <select class="form-select border-0 shadow-none" id="filterCat">
+                                                <option value="">Categoria</option>
+                                                <option th:each="cat : ${categorias}" th:value="${cat.id}"
+                                                    th:text="${cat.nome}"></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <select class="form-select border-0 shadow-none" id="filterMarca">
+                                                <option value="">Marca</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <select class="form-select border-0 shadow-none" id="filterFornecedor">
+                                                <option value="">Fornecedor</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <select class="form-select border-0 shadow-none" id="filterFamilia">
+                                                <option value="">Família</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-check pt-2">
+                                                <input class="form-check-input" type="checkbox" id="onlyWithStock">
+                                                <label class="form-check-label small fw-bold" for="onlyWithStock">Apenas
+                                                    com stock</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <button type="button"
+                                                class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                                                <i class="fas fa-search me-1"></i> Pesquisar
+                                            </button>
+                                        </div>
+                                        <div class="col-md-4 mt-2">
+                                            <input type="text"
+                                                class="form-control border-0 shadow-none rounded-pill ps-4"
+                                                placeholder="Selecionar por localização (Corredor, Prateleira...)">
+                                        </div>
+                                        <div class="col-md-8 mt-2 d-flex gap-2 justify-content-end align-items-center">
+                                            <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill"><i
+                                                    class="fas fa-exclamation-triangle me-1"></i> Produtos
+                                                críticos</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botões de Ação -->
+                                    <div class="d-flex gap-2 mb-3 flex-wrap">
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                            id="btnImportarProd">
+                                            <i class="fas fa-file-import me-1"></i> Importar produtos
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                            id="btnGerarStock">
+                                            <i class="fas fa-sync me-1"></i> Gerar por stock atual
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                            id="btnAdicionarManual">
+                                            <i class="fas fa-plus me-1"></i> Adicionar manual
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success btn-sm rounded-pill px-3"
+                                            id="btnImportarExcel">
+                                            <i class="fas fa-file-excel me-1"></i> Importar por Excel
+                                        </button>
+                                        <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-3"
+                                            id="btnLerBarcode">
+                                            <i class="fas fa-barcode me-1"></i> Ler código de barras
+                                        </button>
+                                    </div>
+
+                                    <!-- Grid de Produtos -->
+                                    <div class="table-responsive"
+                                        style="max-height: 400px; overflow-y: auto; border: 1px solid #f1f3f5; border-radius: 15px;">
+                                        <table class="table table-hover align-middle mb-0" id="productSelectTable">
+                                            <thead class="sticky-top bg-white border-bottom">
+                                                <tr class="small text-uppercase fw-bold text-muted">
+                                                    <th width="40" class="ps-3">
+                                                        <div class="form-check"><input class="form-check-input"
+                                                                type="checkbox" id="checkAll"></div>
                                                     </th>
-                                                    <th>Código</th>
                                                     <th>Produto</th>
-                                                    <th>Stock Atual</th>
-                                                    <th>Categoria</th>
+                                                    <th>Código barras</th>
+                                                    <th>Unidade</th>
+                                                    <th class="text-center">Stock sistema</th>
+                                                    <th class="text-end">Custo médio</th>
+                                                    <th class="text-end">Valor em stock</th>
+                                                    <th>Localização</th>
+                                                    <th>Lote</th>
+                                                    <th>Validade</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr th:each="prod : ${produtosDisponiveis}">
+                                                <tr th:each="prod : ${produtosDisponiveis}"
+                                                    th:data-cost="${prod.precoCompra != null ? prod.precoCompra : 0.0}"
+                                                    th:data-unit="${prod.unidadeMedida != null ? prod.unidadeMedida : 'UN'}"
+                                                    th:data-stock="${prod.quantidadeEstoque != null ? prod.quantidadeEstoque : 0.0}">
+                                                    <td class="ps-3">
+                                                        <div class="form-check"><input class="form-check-input"
+                                                                type="checkbox" name="produtoIds" th:value="${prod.id}">
+                                                        </div>
+                                                    </td>
                                                     <td>
-                                                        <div class="form-check"><input class="form-check-input" type="checkbox" name="produtoIds" th:value="${prod.id}"></div>
+                                                        <div class="fw-bold text-dark" th:text="${prod.nome}">Produto
+                                                        </div>
+                                                        <small class="text-muted"
+                                                            th:text="${prod.categoria != null ? prod.categoria.nome : 'Sem Categoria'}">Geral</small>
                                                     </td>
                                                     <td th:text="${prod.codigoBarra}">001</td>
-                                                    <td th:text="${prod.nome}">Produto Exemplo</td>
-                                                    <td class="fw-bold" th:text="${prod.quantidadeEstoque}">10</td>
-                                                    <td th:text="${prod.categoria != null ? prod.categoria.nome : 'Sem Categoria'}">Geral</td>
+                                                    <td class="text-center"><span class="badge bg-light text-dark"
+                                                            th:text="${prod.unidadeMedida != null ? prod.unidadeMedida : 'UN'}">UN</span>
+                                                    </td>
+                                                    <td class="text-center fw-bold" th:text="${prod.quantidadeEstoque}">
+                                                        0</td>
+                                                    <td class="text-end text-muted"
+                                                        th:text="${#numbers.formatDecimal(prod.precoCompra != null ? prod.precoCompra : 0.0, 1, 'COMMA', 2, 'POINT')} + ' Kz'">
+                                                        0,00</td>
+                                                    <td class="text-end fw-bold"
+                                                        th:text="${#numbers.formatDecimal((prod.quantidadeEstoque != null ? prod.quantidadeEstoque : 0.0) * (prod.precoCompra != null ? prod.precoCompra : 0.0), 1, 'COMMA', 2, 'POINT')} + ' Kz'">
+                                                        0,00</td>
+                                                    <td><small class="text-muted">N/D</small></td>
+                                                    <td><small class="text-muted">N/D</small></td>
+                                                    <td
+                                                        th:text="${prod.dataExpiracao != null ? #temporals.format(prod.dataExpiracao, 'dd/MM/yyyy') : 'N/D'}">
+                                                        N/D</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -141,16 +278,35 @@
                         <div class="wizard-step-content" id="step3-content">
                             <div class="card border-0 shadow-lg rounded-xl p-4">
                                 <div class="card-header bg-transparent border-0 mb-3">
-                                    <h4 class="fw-bold text-primary mb-0">Contagem de Campo</h4>
-                                    <p class="text-muted small">Insira as quantidades físicas encontradas durante a contagem.</p>
+                                    <h4 class="fw-bold text-primary mb-0">Folha de Contagem Física</h4>
+                                    <p class="text-muted small">Insira as quantidades reais encontradas no local.</p>
                                 </div>
                                 <div class="card-body">
-                                    <div class="alert alert-info rounded-pill border-0 px-4">
-                                        <i class="fas fa-info-circle me-2"></i> Só poderá preencher este campo quando o inventário estiver em estado "Contagem".
+                                    <div class="table-responsive"
+                                        style="max-height: 450px; overflow-y: auto; border: 1px solid #f1f3f5; border-radius: 15px;">
+                                        <table class="table table-hover align-middle mb-0" id="countingTable">
+                                            <thead class="sticky-top bg-white border-bottom">
+                                                <tr class="small text-uppercase fw-bold text-muted">
+                                                    <th>Produto</th>
+                                                    <th>Cód. Barras</th>
+                                                    <th class="text-center">Sistema</th>
+                                                    <th class="text-center" width="150">Contada</th>
+                                                    <th class="text-center">Diferença</th>
+                                                    <th class="text-end">Custo</th>
+                                                    <th class="text-end">Ajuste Valor</th>
+                                                    <th class="text-center">Unidade</th>
+                                                    <th>Observações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="countingBody">
+                                                <!-- Dynamic rows will be inserted here by JS -->
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div id="contagemList" class="text-center py-5 text-muted">
-                                        <i class="fas fa-barcode mb-3" style="font-size: 3rem; opacity: 0.1;"></i>
-                                        <p>A lista de contagem será gerada após a seleção dos produtos.</p>
+                                    <div id="noProductsWarning" class="text-center py-5 text-muted">
+                                        <i class="fas fa-exclamation-circle mb-3"
+                                            style="font-size: 3rem; opacity: 0.1;"></i>
+                                        <p>Nenhum produto selecionado na etapa anterior.</p>
                                     </div>
                                 </div>
                             </div>
@@ -159,13 +315,64 @@
                         <!-- STEP 4: DIVERGÊNCIAS -->
                         <div class="wizard-step-content" id="step4-content">
                             <div class="card border-0 shadow-lg rounded-xl p-4">
-                                <div class="card-header bg-transparent border-0 mb-3">
-                                    <h4 class="fw-bold text-primary mb-0">Relatório de Diferenças</h4>
-                                    <p class="text-muted small">Comparação automática entre stock do sistema e contagem física.</p>
+                                <div class="card-header bg-transparent border-0 mb-4">
+                                    <h4 class="fw-bold text-primary mb-0">Resumo de Divergências</h4>
+                                    <p class="text-muted small">Itens com diferenças detetadas durante a contagem.</p>
                                 </div>
-                                <div class="card-body text-center py-5">
-                                    <i class="fas fa-chart-pie mb-3" style="font-size: 3rem; opacity: 0.1;"></i>
-                                    <p class="text-muted">As divergências serão calculadas após a conclusão da contagem física.</p>
+                                <div class="card-body p-0">
+                                    <!-- Divergence KPIs -->
+                                    <div class="row g-4 mb-5 px-3">
+                                        <div class="col-md-3">
+                                            <div class="p-3 bg-danger-subtle rounded-4 text-center border-0">
+                                                <small class="text-danger fw-bold text-uppercase">Total Faltas</small>
+                                                <h3 class="fw-bold text-danger mb-0" id="kpiTotalFaltas">0</h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-3 bg-success-subtle rounded-4 text-center border-0">
+                                                <small class="text-success fw-bold text-uppercase">Total Sobras</small>
+                                                <h3 class="fw-bold text-success mb-0" id="kpiTotalSobras">0</h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-3 bg-dark-subtle rounded-4 text-center border-0">
+                                                <small class="text-dark fw-bold text-uppercase">Valor Perdas</small>
+                                                <h3 class="fw-bold text-dark mb-0" id="kpiValorPerdas">0,00 Kz</h3>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="p-3 bg-warning-subtle rounded-4 text-center border-0">
+                                                <small class="text-warning-emphasis fw-bold text-uppercase">%
+                                                    Divergência</small>
+                                                <h3 class="fw-bold text-warning-emphasis mb-0" id="kpiPercentual">0%
+                                                </h3>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive"
+                                        style="max-height: 400px; overflow-y: auto; border: 1px solid #f1f3f5; border-radius: 15px;">
+                                        <table class="table table-hover align-middle mb-0" id="divergenceTable">
+                                            <thead class="sticky-top bg-white border-bottom">
+                                                <tr class="small text-uppercase fw-bold text-muted">
+                                                    <th class="ps-3">Produto</th>
+                                                    <th class="text-center">Tipo</th>
+                                                    <th class="text-center">Qtd. Dif</th>
+                                                    <th class="text-end">Valor Financeiro</th>
+                                                    <th width="250">Motivo da Divergência</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="divergenceBody">
+                                                <!-- Dynamic rows will be inserted here by JS -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div id="noDivergenceSuccess" class="text-center py-5 d-none">
+                                        <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
+                                        <h5 class="fw-bold text-success">Inventário 100% Preciso!</h5>
+                                        <p class="text-muted">Nenhuma divergência detetada entre o sistema e o físico.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -173,31 +380,94 @@
                         <!-- STEP 5: AJUSTES -->
                         <div class="wizard-step-content" id="step5-content">
                             <div class="card border-0 shadow-lg rounded-xl p-4">
-                                <div class="card-header bg-transparent border-0 mb-3">
-                                    <h4 class="fw-bold text-primary mb-0">Ajustes de Stock</h4>
-                                    <p class="text-muted small">Movimentações que serão geradas para sincronizar o stock.</p>
+                                <div class="card-header bg-transparent border-0 mb-4">
+                                    <h4 class="fw-bold text-primary mb-0">Ajustes de Stock Gerados</h4>
+                                    <p class="text-muted small">Resumo dos movimentos que serão registados no sistema.</p>
                                 </div>
-                                <div class="card-body text-center py-5">
-                                    <i class="fas fa-exchange-alt mb-3" style="font-size: 3rem; opacity: 0.1;"></i>
-                                    <p class="text-muted">A pré-visualização dos ajustes estará disponível após a revisão das divergências.</p>
+                                <div class="card-body">
+                                    <div class="row g-4 mb-4">
+                                        <!-- Resumo de Movimentos -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-light rounded-4 h-100">
+                                                <h6 class="fw-bold text-muted text-uppercase mb-3">Movimentos a Criar</h6>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Entradas por ajuste:</span>
+                                                    <span class="fw-bold text-success" id="summaryEntradas">0.00</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-3">
+                                                    <span>Saídas por ajuste:</span>
+                                                    <span class="fw-bold text-danger" id="summarySaidas">0.00</span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="fw-bold">Total Itens Ajustados:</span>
+                                                    <span class="fw-bold" id="summaryTotalItens">0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Metadados do Ajuste -->
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-light rounded-4 h-100">
+                                                <h6 class="fw-bold text-muted text-uppercase mb-3">Informação do Documento</h6>
+                                                <div class="mb-2">
+                                                    <span class="text-muted">Documento ajuste nº:</span>
+                                                    <span class="fw-bold ms-2">AJU-2024-001 <small class="text-muted">(Rascunho)</small></span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <span class="text-muted">Data:</span>
+                                                    <span class="fw-bold ms-2" th:text="${dataAtual}">29/04/2024</span>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <span class="text-muted">Utilizador:</span>
+                                                    <span class="fw-bold ms-2" th:text="${usuarioAtual}">Admin</span>
+                                                </div>
+                                                <div class="mb-0">
+                                                    <span class="text-muted">Aprovado por:</span>
+                                                    <span class="fw-bold ms-2">Aguardando Aprovação</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botões de Ação de Ajuste -->
+                                    <div class="d-flex gap-3 justify-content-center mt-5">
+                                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="btnGerarAjustes">
+                                            <i class="fas fa-magic me-2"></i> Gerar ajustes
+                                        </button>
+                                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow" id="btnAprovarAjustes">
+                                            <i class="fas fa-check-double me-2"></i> Aprovar ajustes
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger rounded-pill px-4" id="btnReverterAjuste">
+                                            <i class="fas fa-undo me-2"></i> Reverter ajuste
+                                        </button>
+                                    </div>
+
+                                    <div class="alert alert-warning mt-4 rounded-4 border-0 small">
+                                        <i class="fas fa-exclamation-triangle me-2"></i> 
+                                        <strong>Atenção:</strong> Ao aprovar os ajustes, o stock real dos produtos será alterado permanentemente para coincidir com a contagem física.
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- NAVIGATION BUTTONS -->
                         <div class="d-flex justify-content-between align-items-center mt-5 mb-5 px-3">
-                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm" id="prevBtn" onclick="changeStep(-1)" disabled>
+                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm"
+                                id="prevBtn" onclick="changeStep(-1)" disabled>
                                 <i class="fas fa-arrow-left me-2"></i> Anterior
                             </button>
-                            
+
                             <div>
-                                <a th:href="@{/gestao-inventarios}" class="btn btn-link text-muted fw-bold text-decoration-none me-3">
+                                <a th:href="@{/gestao-inventarios}"
+                                    class="btn btn-link text-muted fw-bold text-decoration-none me-3">
                                     Sair sem salvar
                                 </a>
-                                <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow" id="nextBtn" onclick="changeStep(1)">
+                                <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow"
+                                    id="nextBtn" onclick="changeStep(1)">
                                     Próximo <i class="fas fa-arrow-right ms-2"></i>
                                 </button>
-                                <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow d-none" id="saveBtn">
+                                <button type="submit"
+                                    class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow d-none" id="saveBtn">
                                     <i class="fas fa-save me-2"></i> Finalizar Registro
                                 </button>
                             </div>
@@ -209,8 +479,10 @@
     </div>
 
     <style>
-        .rounded-xl { border-radius: 24px !important; }
-        
+        .rounded-xl {
+            border-radius: 24px !important;
+        }
+
         /* Wizard Stepper Styling */
         .wizard-stepper {
             display: flex;
@@ -219,6 +491,7 @@
             max-width: 1000px;
             margin: 0 auto;
         }
+
         .step {
             display: flex;
             flex-direction: column;
@@ -226,6 +499,7 @@
             position: relative;
             z-index: 2;
         }
+
         .step-icon {
             width: 45px;
             height: 45px;
@@ -241,6 +515,7 @@
             border: 3px solid #fff;
             box-shadow: 0 0 0 1px #e9ecef;
         }
+
         .step-label {
             font-size: 11px;
             font-weight: 700;
@@ -248,6 +523,7 @@
             color: #adb5bd;
             letter-spacing: 0.5px;
         }
+
         .step-line {
             height: 3px;
             background: #e9ecef;
@@ -257,34 +533,46 @@
             position: relative;
             z-index: 1;
         }
+
         .step.active .step-icon {
             background: #4361ee;
             color: white;
             box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
         }
+
         .step.active .step-label {
             color: #4361ee;
         }
+
         .step.completed .step-icon {
             background: #059669;
             color: white;
         }
-        
+
         /* Step Content Toggle */
         .wizard-step-content {
             display: none;
             animation: fadeIn 0.4s ease;
         }
+
         .wizard-step-content.active {
             display: block;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
-        .form-control:focus, .form-select:focus {
+
+        .form-control:focus,
+        .form-select:focus {
             background-color: #fff !important;
             box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15) !important;
             border-color: #4361ee !important;
@@ -303,15 +591,30 @@
             document.getElementById(`step${currentStep}-content`).classList.remove('active');
             document.getElementById(`step${currentStep}-indicator`).classList.remove('active');
             if (n === 1) document.getElementById(`step${currentStep}-indicator`).classList.add('completed');
-            
+
             currentStep += n;
+
+            // Logic for Step 3: Populate Counting Sheet
+            if (currentStep === 3) {
+                populateCountingSheet();
+            }
+
+            // Logic for Step 4: Populate Divergences
+            if (currentStep === 4) {
+                populateDivergenceSheet();
+            }
             
+            // Logic for Step 5: Populate Adjustment Summary
+            if (currentStep === 5) {
+                populateAdjustmentSummary();
+            }
+
             document.getElementById(`step${currentStep}-content`).classList.add('active');
             document.getElementById(`step${currentStep}-indicator`).classList.add('active');
 
             // Button controls
             document.getElementById('prevBtn').disabled = (currentStep === 1);
-            
+
             if (currentStep === totalSteps) {
                 document.getElementById('nextBtn').classList.add('d-none');
                 document.getElementById('saveBtn').classList.remove('d-none');
@@ -328,7 +631,7 @@
             const currentContent = document.getElementById(`step${step}-content`);
             const inputs = currentContent.querySelectorAll('input[required], select[required]');
             let valid = true;
-            
+
             inputs.forEach(input => {
                 if (!input.value) {
                     input.classList.add('is-invalid');
@@ -349,10 +652,272 @@
             return valid;
         }
 
-        document.getElementById('checkAll').addEventListener('change', function() {
+        document.getElementById('checkAll').addEventListener('change', function () {
             const checkboxes = document.querySelectorAll('input[name="produtoIds"]');
             checkboxes.forEach(cb => cb.checked = this.checked);
         });
+
+        // ACTION BUTTONS LOGIC
+
+        function populateCountingSheet() {
+            const selectedProducts = document.querySelectorAll('input[name="produtoIds"]:checked');
+            const countingBody = document.getElementById('countingBody');
+            const warning = document.getElementById('noProductsWarning');
+            const table = document.getElementById('countingTable');
+
+            countingBody.innerHTML = '';
+
+            if (selectedProducts.length === 0) {
+                warning.classList.remove('d-none');
+                table.classList.add('d-none');
+                return;
+            }
+
+            warning.classList.add('d-none');
+            table.classList.remove('d-none');
+
+            selectedProducts.forEach(cb => {
+                const row = cb.closest('tr');
+                const name = row.cells[1].querySelector('.fw-bold').innerText;
+                const barcode = row.cells[2].innerText;
+                const systemStock = parseFloat(row.dataset.stock);
+                const unit = row.dataset.unit;
+                const cost = parseFloat(row.dataset.cost);
+                const id = cb.value;
+
+                const newRow = `
+                    <tr data-cost="${cost}" data-system="${systemStock}">
+                        <td><input type="hidden" name="itemProdutoIds" value="${id}">${name}</td>
+                        <td>${barcode}</td>
+                        <td class="text-center fw-bold text-muted">${systemStock.toFixed(2)}</td>
+                        <td>
+                            <input type="number" step="0.01" name="itemQuantidadesContadas" 
+                                   class="form-control rounded-pill text-center border-primary fw-bold" 
+                                   value="${systemStock}" oninput="calculateDivergence(this)">
+                        </td>
+                        <td class="text-center fw-bold diff-cell text-muted">0.00</td>
+                        <td class="text-end text-muted">${cost.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz</td>
+                        <td class="text-end fw-bold adjust-cell text-muted">0.00 Kz</td>
+                        <td class="text-center">${unit}</td>
+                        <td><input type="text" name="itemObservacoes" class="form-control form-control-sm rounded-pill border-light" placeholder="..."></td>
+                    </tr>
+                `;
+                countingBody.insertAdjacentHTML('beforeend', newRow);
+            });
+        }
+
+        function calculateDivergence(input) {
+            const row = input.closest('tr');
+            const system = parseFloat(row.dataset.system);
+            const counted = parseFloat(input.value) || 0;
+            const cost = parseFloat(row.dataset.cost);
+
+            const diff = counted - system;
+            const adjustValue = diff * cost;
+
+            const diffCell = row.querySelector('.diff-cell');
+            const adjustCell = row.querySelector('.adjust-cell');
+
+            diffCell.innerText = diff.toFixed(2);
+            diffCell.className = 'text-center fw-bold diff-cell ' + (diff < 0 ? 'text-danger' : (diff > 0 ? 'text-success' : 'text-muted'));
+
+            adjustCell.innerText = adjustValue.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) + ' Kz';
+            adjustCell.className = 'text-end fw-bold adjust-cell ' + (adjustValue < 0 ? 'text-danger' : (adjustValue > 0 ? 'text-success' : 'text-muted'));
+        }
+
+        function populateDivergenceSheet() {
+            const countingRows = document.querySelectorAll('#countingBody tr');
+            const divergenceBody = document.getElementById('divergenceBody');
+            const table = document.getElementById('divergenceTable');
+            const successMsg = document.getElementById('noDivergenceSuccess');
+
+            divergenceBody.innerHTML = '';
+            let qtdFaltas = 0;
+            let qtdSobras = 0;
+            let valorPerdas = 0;
+            let totalItens = 0;
+            let totalDivergentes = 0;
+
+            countingRows.forEach(row => {
+                const name = row.cells[0].innerText;
+                const system = parseFloat(row.dataset.system) || 0;
+                const counted = parseFloat(row.querySelector('input[name="itemQuantidadesContadas"]').value);
+
+                // Use rounding to avoid floating point precision issues
+                const diff = Math.round((counted - system) * 100) / 100;
+                const cost = parseFloat(row.dataset.cost) || 0;
+                const adjustValue = diff * cost;
+
+                totalItens++;
+
+                if (diff !== 0) {
+                    totalDivergentes++;
+                    if (diff < 0) {
+                        qtdFaltas += Math.abs(diff);
+                        valorPerdas += Math.abs(adjustValue);
+                    } else {
+                        qtdSobras += diff;
+                    }
+
+                    const typeBadge = diff < 0 ? '<span class="badge bg-danger-subtle text-danger rounded-pill">Falta</span>' :
+                        '<span class="badge bg-success-subtle text-success rounded-pill">Sobra</span>';
+
+                    const newRow = `
+                        <tr>
+                            <td class="ps-3 fw-bold">${name}</td>
+                            <td class="text-center">${typeBadge}</td>
+                            <td class="text-center fw-bold ${diff < 0 ? 'text-danger' : 'text-success'}">${Math.abs(diff).toFixed(2)}</td>
+                            <td class="text-end fw-bold">${adjustValue.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz</td>
+                            <td>
+                                <select class="form-select form-select-sm rounded-pill border-light">
+                                    <option value="ERRO">Erro operacional</option>
+                                    <option value="QUEBRA">Quebra</option>
+                                    <option value="FURTO">Furto</option>
+                                    <option value="VENCIDO">Vencido</option>
+                                    <option value="PERDA">Perda</option>
+                                    <option value="AJUSTE">Ajuste administrativo</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                    divergenceBody.insertAdjacentHTML('beforeend', newRow);
+                }
+            });
+
+            // Update KPIs
+            document.getElementById('kpiTotalFaltas').innerText = qtdFaltas.toFixed(2);
+            document.getElementById('kpiTotalSobras').innerText = qtdSobras.toFixed(2);
+            document.getElementById('kpiValorPerdas').innerText = valorPerdas.toLocaleString('pt-PT', { minimumFractionDigits: 2 }) + ' Kz';
+
+            // Percentage of divergent items relative to total items in count
+            const percent = totalItens > 0 ? ((totalDivergentes / totalItens) * 100).toFixed(1) : 0;
+            document.getElementById('kpiPercentual').innerText = percent + '%';
+
+            if (totalDivergentes === 0) {
+                table.classList.add('d-none');
+                successMsg.classList.remove('d-none');
+            } else {
+                table.classList.remove('d-none');
+                successMsg.classList.add('d-none');
+            }
+        }
+
+        function populateAdjustmentSummary() {
+            const countingRows = document.querySelectorAll('#countingBody tr');
+            let entradas = 0;
+            let saidas = 0;
+            let totalItens = 0;
+
+            countingRows.forEach(row => {
+                const system = parseFloat(row.dataset.system) || 0;
+                const counted = parseFloat(row.querySelector('input[name="itemQuantidadesContadas"]').value);
+                const diff = Math.round((counted - system) * 100) / 100;
+
+                if (diff !== 0) {
+                    totalItens++;
+                    if (diff > 0) {
+                        entradas += diff;
+                    } else {
+                        saidas += Math.abs(diff);
+                    }
+                }
+            });
+
+            document.getElementById('summaryEntradas').innerText = entradas.toFixed(2);
+            document.getElementById('summarySaidas').innerText = saidas.toFixed(2);
+            document.getElementById('summaryTotalItens').innerText = totalItens;
+        }
+
+        // STEP 5 ADJUSTMENT BUTTONS
+        document.getElementById('btnGerarAjustes').addEventListener('click', function() {
+            populateAdjustmentSummary();
+            alert('Ajustes recalculados com sucesso baseando-se nas últimas alterações da contagem.');
+        });
+
+        document.getElementById('btnAprovarAjustes').addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja APROVAR os ajustes? Esta ação alterará o stock do sistema permanentemente.')) {
+                // Trigger form submit
+                document.getElementById('wizardForm').submit();
+            }
+        });
+
+        document.getElementById('btnReverterAjuste').addEventListener('click', function() {
+            if (confirm('Deseja reverter as alterações e voltar para a revisão de divergências?')) {
+                changeStep(-1);
+            }
+        });
+
+        // 1. Gerar por stock atual
+        document.getElementById('btnGerarStock').addEventListener('click', function () {
+            const rows = document.querySelectorAll('#productSelectTable tbody tr');
+            let count = 0;
+            rows.forEach(row => {
+                const stockVal = parseFloat(row.cells[4].innerText);
+                if (stockVal > 0) {
+                    row.querySelector('input[type="checkbox"]').checked = true;
+                    count++;
+                }
+            });
+            alert(count + ' produtos com stock positivo foram selecionados.');
+        });
+
+        // 2. Ler código de barras
+        document.getElementById('btnLerBarcode').addEventListener('click', function () {
+            const code = prompt("Por favor, leia ou digite o código de barras:");
+            if (code) {
+                const rows = document.querySelectorAll('#productSelectTable tbody tr');
+                let found = false;
+                rows.forEach(row => {
+                    const barcode = row.cells[2].innerText.trim();
+                    if (barcode === code) {
+                        row.querySelector('input[type="checkbox"]').checked = true;
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        row.classList.add('table-primary');
+                        setTimeout(() => row.classList.remove('table-primary'), 2000);
+                        found = true;
+                    }
+                });
+                if (!found) alert('Produto com código ' + code + ' não encontrado na lista.');
+            }
+        });
+
+        // 3. Adicionar manual (Abre pesquisa)
+        document.getElementById('btnAdicionarManual').addEventListener('click', function () {
+            // Focar no campo de pesquisa ou abrir modal
+            const searchInput = prompt("Digite o nome do produto para pesquisar na grid:");
+            if (searchInput) {
+                const term = searchInput.toLowerCase();
+                const rows = document.querySelectorAll('#productSelectTable tbody tr');
+                rows.forEach(row => {
+                    const name = row.cells[1].innerText.toLowerCase();
+                    if (name.includes(term)) {
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        row.classList.add('table-info');
+                        setTimeout(() => row.classList.remove('table-info'), 3000);
+                    }
+                });
+            }
+        });
+
+        // 4. Importar por Excel (Simulação de clique em file input)
+        document.getElementById('btnImportarExcel').addEventListener('click', function () {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx, .xls';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                alert('Ficheiro "' + file.name + '" selecionado. A processar importação...');
+                // Aqui seria feito o upload/parsing
+            };
+            input.click();
+        });
+
+        // 5. Importar produtos (Recarregar/Filtrar)
+        document.getElementById('btnImportarProd').addEventListener('click', function () {
+            alert('A carregar lista completa de produtos do catálogo...');
+            // Lógica para carregar via AJAX se necessário
+        });
     </script>
 </body>
+
 </html>

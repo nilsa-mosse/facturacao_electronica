@@ -30,6 +30,9 @@ public class StockService {
     @Autowired
     private EstabelecimentoRepository estabelecimentoRepository;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.InventarioRepository inventarioRepository;
+
     @Transactional
     public MovimentoStock registrarMovimento(Long produtoId, Double quantidade, String tipo, String motivo, 
                                             String referencia, String origem, String nomeDoc, byte[] blobDoc,
@@ -108,5 +111,59 @@ public class StockService {
 
     public MovimentoStock buscarPorId(Long id) {
         return movimentoStockRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Check if a product is marked in any active PARCIAL inventory for the current company.
+     * Active states that block sales: RASCUNHO, EM_CONTAGEM, EM_REVISAO
+     */
+    public boolean isProdutoEmInventarioParcial(Long produtoId) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId == null) return false;
+
+        java.util.List<ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario> estados = new java.util.ArrayList<>();
+        estados.add(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario.RASCUNHO);
+        estados.add(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario.EM_CONTAGEM);
+        estados.add(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario.EM_REVISAO);
+
+        java.util.List<ao.co.hzconsultoria.efacturacao.model.Inventario> inventarios = inventarioRepository.findByEmpresa_IdAndTipoAndEstadoIn(empresaId, ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario.PARCIAL, estados);
+        if (inventarios == null || inventarios.isEmpty()) return false;
+
+        for (ao.co.hzconsultoria.efacturacao.model.Inventario inv : inventarios) {
+            if (inv.getItens() == null) continue;
+            for (ao.co.hzconsultoria.efacturacao.model.ItemInventario it : inv.getItens()) {
+                if (it != null && it.getProduto() != null && it.getProduto().getId() != null && it.getProduto().getId().equals(produtoId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return a set of product IDs that are part of any active PARCIAL inventory for the current company.
+     */
+    public java.util.Set<Long> listarProdutosEmInventarioParcial() {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        java.util.Set<Long> result = new java.util.HashSet<>();
+        if (empresaId == null) return result;
+
+        java.util.List<ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario> estados = new java.util.ArrayList<>();
+        estados.add(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario.RASCUNHO);
+        estados.add(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario.EM_CONTAGEM);
+        estados.add(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario.EM_REVISAO);
+
+        java.util.List<ao.co.hzconsultoria.efacturacao.model.Inventario> inventarios = inventarioRepository.findByEmpresa_IdAndTipoAndEstadoIn(empresaId, ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario.PARCIAL, estados);
+        if (inventarios == null || inventarios.isEmpty()) return result;
+
+        for (ao.co.hzconsultoria.efacturacao.model.Inventario inv : inventarios) {
+            if (inv.getItens() == null) continue;
+            for (ao.co.hzconsultoria.efacturacao.model.ItemInventario it : inv.getItens()) {
+                if (it != null && it.getProduto() != null && it.getProduto().getId() != null) {
+                    result.add(it.getProduto().getId());
+                }
+            }
+        }
+        return result;
     }
 }
