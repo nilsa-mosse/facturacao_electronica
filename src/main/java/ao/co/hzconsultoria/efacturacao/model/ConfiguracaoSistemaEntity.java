@@ -233,5 +233,9 @@ public class ConfiguracaoSistemaEntity {
     // Licença
     public java.time.LocalDateTime getLicencaDataAtivacao() { return licencaDataAtivacao; }
     public void setLicencaDataAtivacao(java.time.LocalDateTime v) { this.licencaDataAtivacao = v; }
+
+    private String licencaChaveAtivacao;
+    public String getLicencaChaveAtivacao() { return licencaChaveAtivacao; }
+    public void setLicencaChaveAtivacao(String v) { this.licencaChaveAtivacao = v; }
 }
 

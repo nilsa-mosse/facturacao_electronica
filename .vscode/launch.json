@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ResetSuperAdmin",
+            "request": "launch",
+            "mainClass": "ResetSuperAdmin",
+            "projectName": "efacturacao"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"

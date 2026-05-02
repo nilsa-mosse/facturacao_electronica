@@ -22,9 +22,17 @@ public class LicencaInterceptor implements HandlerInterceptor {
         // Ignorar recursos estáticos, erros, login e ficheiros PWA
         if (uri.startsWith("/assets/") || uri.startsWith("/plugins/") || uri.startsWith("/css/") || 
             uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/error") || 
-            uri.equals("/login") || uri.equals("/licenca-expirada") ||
+            uri.equals("/login") || uri.equals("/licenca-expirada") || uri.equals("/ativar-licenca") ||
             uri.equals("/manifest.json") || uri.equals("/sw.js")) {
             return true;
+        }
+
+        // Permitir que o SuperAdmin aceda ao Gerador de Licenças mesmo se a licença estiver expirada
+        if (uri.startsWith("/superadmin/licenca")) {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"))) {
+                return true;
+            }
         }
 
         if (!licencaService.isLicencaValida()) {

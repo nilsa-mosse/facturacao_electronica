@@ -36,12 +36,14 @@ public class EfaturacaoApplication {
             ImpostoRepository impostoRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
-            // RESET TRIAL (Remover após execução se desejar)
+            // RESET TRIAL (Comentado para não reiniciar o tempo sempre que o servidor arranca)
+            /*
             configRepo.findById(1L).ifPresent(c -> {
                 c.setLicencaDataAtivacao(null);
                 configRepo.save(c);
                 System.out.println(">>> TRIAL RESETADO COM SUCESSO!");
             });
+            */
 
             // 1. Ativar utilizadores existentes (migração)
             userRepository.findAll().forEach(user -> {
@@ -130,10 +132,35 @@ public class EfaturacaoApplication {
                 System.out.println(">>> Utilizador 'admin' criado com sucesso (Senha: admin123)");
             }
 
+            // 3.1 Criar ou Resetar SuperAdmin de Sistema
+            Optional<User> superOpt = userRepository.findByLogin("superadmin");
+            if (!superOpt.isPresent()) {
+                System.out.println("Criando SuperAdmin de emergência...");
+                User superAdmin = new User();
+                superAdmin.setLogin("superadmin");
+                superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
+                superAdmin.setNome("Super Administrador");
+                superAdmin.setRole("SUPERADMIN");
+                superAdmin.setAtivo(true);
+                superAdmin.setPermissoes(new HashSet<>(Arrays.asList(
+                        "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "PAINEL_GLOBAL")));
+                userRepository.save(superAdmin);
+                System.out.println(">>> Utilizador 'superadmin' criado (Nova Senha: superadmin@2026)");
+            } else {
+                // Forçar reset de senha
+                User superAdmin = superOpt.get();
+                superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
+                superAdmin.setAtivo(true);
+                superAdmin.setTentativasLogin(0);
+                superAdmin.setBloqueadoAte(null);
+                userRepository.save(superAdmin);
+                System.out.println(">>> SENHA DO SUPERADMIN ALTERADA PARA: superadmin@2026");
+            }
+
             // 4. Inicializar Impostos Padrão (se necessário)
             if (impostoRepository.count() == 0) {
                 System.out.println("Iniciando criação de impostos padrão...");
-                
+
                 Imposto iva14 = new Imposto();
                 iva14.setNome("IVA - Taxa Normal");
                 iva14.setPercentagem(new BigDecimal("14.0"));

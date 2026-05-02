@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="menu :: head"></th:block>
+    <style>
+        .generator-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 30px;
+        }
+        .key-box {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: monospace;
+            word-break: break-all;
+            font-size: 1.1rem;
+            color: #1e293b;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1><i class="fas fa-key text-warning"></i> Gerador de Licenças Profissionais</h1>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="generator-card">
+                                <h5 class="mb-4">Configurar Nova Chave</h5>
+                                <form th:action="@{/superadmin/licenca/gerar}" method="post">
+                                    <div class="form-group mb-3">
+                                        <label>Machine ID do Cliente</label>
+                                        <input type="text" name="machineId" class="form-control" th:value="${machineId}" placeholder="Ex: 736E21F0" required>
+                                        <small class="text-muted">Este código é fornecido pelo cliente na tela de expiração.</small>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label>Data de Expiração</label>
+                                                <input type="date" name="dataExpiracao" class="form-control" th:value="${dataExpiracao}" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label>Hora de Expiração</label>
+                                                <input type="time" name="horaExpiracao" class="form-control" th:value="${horaExpiracao ?: '23:59'}" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-4">
+                                        <label class="text-danger"><i class="fas fa-lock"></i> PIN de Segurança Mestre</label>
+                                        <input type="password" name="pin" class="form-control border-danger" placeholder="****" required>
+                                        <small class="text-danger">Apenas o desenvolvedor possui este PIN.</small>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block py-3">
+                                        <i class="fas fa-magic"></i> GERAR CHAVE DE ATIVAÇÃO
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" th:if="${chaveGerada}">
+                            <div class="generator-card bg-light border-primary">
+                                <h5 class="text-primary mb-4"><i class="fas fa-check-circle"></i> Chave Gerada com Sucesso</h5>
+                                <p class="small text-muted mb-2">Copie o código abaixo e envie ao cliente:</p>
+                                <div class="key-box" id="chaveFinal" th:text="${chaveGerada}"></div>
+                                <button class="btn btn-outline-primary btn-sm mt-3" onclick="copyKey()">
+                                    <i class="fas fa-copy"></i> Copiar Chave
+                                </button>
+                                
+                                <div class="mt-4 p-3 bg-white rounded border">
+                                    <p class="mb-1"><strong>Resumo da Licença:</strong></p>
+                                    <ul class="mb-0 small">
+                                        <li>Máquina: <span th:text="${machineId}"></span></li>
+                                        <li>Expira em: <span th:text="${dataExpiracao + ' ' + horaExpiracao}"></span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function copyKey() {
+            const text = document.getElementById('chaveFinal').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Chave copiada para a área de transferência!');
+            });
+        }
+    </script>
+</body>
+</html>
