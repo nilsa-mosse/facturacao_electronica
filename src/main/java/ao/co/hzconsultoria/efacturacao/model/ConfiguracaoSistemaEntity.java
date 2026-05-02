@@ -115,6 +115,10 @@ public class ConfiguracaoSistemaEntity {
 
     private boolean segLogAcessosAtivo = true;
 
+    // ─── Licença ────────────────────────────────────────────────────────
+    private java.time.LocalDateTime licencaDataAtivacao;
+
+
     // ================================================================
     // Getters & Setters
     // ================================================================
@@ -225,4 +229,9 @@ public class ConfiguracaoSistemaEntity {
     public void setSegIpWhitelist(String v) { this.segIpWhitelist = v; }
     public boolean isSegLogAcessosAtivo() { return segLogAcessosAtivo; }
     public void setSegLogAcessosAtivo(boolean v) { this.segLogAcessosAtivo = v; }
+
+    // Licença
+    public java.time.LocalDateTime getLicencaDataAtivacao() { return licencaDataAtivacao; }
+    public void setLicencaDataAtivacao(java.time.LocalDateTime v) { this.licencaDataAtivacao = v; }
 }
+

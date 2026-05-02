@@ -316,11 +316,11 @@ public class ConfiguracaoController {
             err.put("sucesso", false);
             err.put("mensagem",
                     messageSource.getMessage("config.agt.teste.falha_url", null, LocaleContextHolder.getLocale()));
-            return ResponseEntity.badRequest().body(err);
+            return ResponseEntity.badRequest().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(err);
         }
 
         Map<String, Object> resultado = agtService.pingAgt(urlApi, token);
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(resultado);
     }
 
     // ─── Servidor e Rede ─────────────────────────────────────────────────
@@ -361,11 +361,11 @@ public class ConfiguracaoController {
         if (dest == null || dest.isEmpty()) {
             result.put("sucesso", false);
             result.put("mensagem", "Endereço de email de destino não informado.");
-            return ResponseEntity.badRequest().body(result);
+            return ResponseEntity.badRequest().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(result);
         }
         result.put("sucesso", true);
         result.put("mensagem", "Email de teste enviado para " + dest + " (simulação).");
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(result);
     }
 
     // ─── Base de Dados ────────────────────────────────────────────────────
@@ -726,7 +726,7 @@ public class ConfiguracaoController {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
         }
 
         try {
@@ -762,7 +762,7 @@ public class ConfiguracaoController {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
         }
 
         try {
@@ -800,7 +800,7 @@ public class ConfiguracaoController {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
         }
 
         try {
@@ -837,7 +837,7 @@ public class ConfiguracaoController {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
         }
 
         try {

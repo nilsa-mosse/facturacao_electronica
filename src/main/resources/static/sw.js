@@ -1,8 +1,8 @@
 const CACHE_NAME = 'efacturacao-v1';
 const urlsToCache = [
   '/',
-  '/dist/css/adminlte.min.css',
-  '/plugins/fontawesome-free/css/all.min.css'
+  '/plugins/adminlte/css/adminlte.min.css',
+  '/plugins/fontawesome/css/all.min.css'
 ];
 
 self.addEventListener('install', event => {

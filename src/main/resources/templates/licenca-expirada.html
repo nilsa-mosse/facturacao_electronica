@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Licença Expirada | eFacturação</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff4757;
+            --primary-glow: rgba(255, 71, 87, 0.4);
+            --accent: #ffa502;
+            --bg-dark: #0f0f13;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-dim: #a0a0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(255, 71, 87, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 165, 2, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .background-blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: -1;
+            border-radius: 50%;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from {
+                transform: translate(-10%, -10%);
+            }
+
+            to {
+                transform: translate(10%, 10%);
+            }
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 540px;
+            padding: 40px;
+            background: var(--card-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 71, 87, 0.1);
+            border-radius: 30px;
+            transform: rotate(-5deg);
+        }
+
+        .icon-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 35px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        .icon {
+            font-size: 48px;
+            animation: wobble 3s infinite ease-in-out;
+        }
+
+        @keyframes wobble {
+
+            0%,
+            100% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(10deg) scale(1.1);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .contact-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 71, 87, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-item span {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--primary);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .footer-text {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            opacity: 0.6;
+        }
+
+        .dev-tag {
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-blob"></div>
+
+    <div class="container">
+        <div class="badge">Acesso Restrito</div>
+        <div class="icon-wrapper">
+            <div class="icon">🔒</div>
+        </div>
+
+        <h1>Trial Expirado</h1>
+        <p>O seu período de demonstração de 5 minutos terminou. <br> Adquira uma licença para desbloquear todas as
+            funcionalidades do sistema.</p>
+
+        <div class="contact-card">
+            <a href="mailto:sebastiao_vunda@hotmail.com" class="contact-item">
+                <span>📧</span> sebastiao_vunda@hotmail.com
+            </a>
+            <a href="tel:+244934068121" class="contact-item">
+                <span>📞</span> +244 934 068 121
+            </a>
+            <div class="dev-tag">Eng. Sebastião Mosse</div>
+        </div>
+
+        <div class="footer-text">
+            &copy; 2026 eFacturação &bull; Sistema de Gestão Inteligente
+        </div>
+    </div>
+</body>
+
+</html>

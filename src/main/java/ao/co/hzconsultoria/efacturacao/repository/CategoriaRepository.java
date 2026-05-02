@@ -16,4 +16,8 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
     @Cacheable("categorias_por_empresa")
     List<Categoria> findByEmpresa_Id(Long empresaId);
+
+    @Override
+    @org.springframework.cache.annotation.CacheEvict(value = "categorias_por_empresa", allEntries = true)
+    <S extends Categoria> S save(S entity);
 }

@@ -1,6 +1,8 @@
 package ao.co.hzconsultoria.efacturacao.config;
 
 import ao.co.hzconsultoria.efacturacao.security.AcessoModuloInterceptor;
+import ao.co.hzconsultoria.efacturacao.security.LicencaInterceptor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private AcessoModuloInterceptor acessoModuloInterceptor;
 
+    @Autowired
+    private LicencaInterceptor licencaInterceptor;
+
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
 
@@ -23,6 +28,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(licencaInterceptor);
         registry.addInterceptor(acessoModuloInterceptor);
     }
 
@@ -33,7 +39,8 @@ public class WebConfig implements WebMvcConfigurer {
         String uploadsRoot = Paths.get(logoUploadDir)
                 .toAbsolutePath().normalize().getParent().toString()
                 .replace("\\", "/");
-        if (!uploadsRoot.endsWith("/")) uploadsRoot += "/";
+        if (!uploadsRoot.endsWith("/"))
+            uploadsRoot += "/";
 
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadsRoot);

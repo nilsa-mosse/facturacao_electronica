@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -43,7 +44,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/login", "/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**",
                         "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia",
-                        "/finalizarVenda")
+                        "/finalizarVenda", "/manifest.json", "/sw.js", "/licenca-expirada")
                 .permitAll()
                 .antMatchers("/faturas/**", "/guias/**").authenticated()
                 .antMatchers("/superadmin/**").hasRole("SUPERADMIN")
@@ -56,6 +57,8 @@ public class SecurityConfig {
                 .ignoringAntMatchers("/api/compras/guia")
                 .ignoringAntMatchers("/finalizarVenda")
                 .ignoringAntMatchers("/api/vendas-suspensas/**")
+                // Use cookie-based CSRF tokens to avoid creating an HTTP session during template rendering
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .and()
                 .formLogin()
                 .loginPage("/login")

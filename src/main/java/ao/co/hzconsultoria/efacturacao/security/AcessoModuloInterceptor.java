@@ -77,7 +77,7 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
     private String identificarModuloPorUri(String uri) {
         if (uri.startsWith("/dashboard")) return "DASHBOARD";
         if (uri.startsWith("/pos") || uri.startsWith("/historico-vendas") || uri.startsWith("/devolucoes") || uri.startsWith("/finalizarVenda") || uri.startsWith("/home")) return "VENDAS";
-        if (uri.startsWith("/produtos") || uri.startsWith("/cadastroProduto") || uri.startsWith("/inventario") || uri.startsWith("/stock")) return "STOCK";
+        if (uri.startsWith("/produtos") || uri.startsWith("/cadastroProduto") || uri.startsWith("/inventario") || uri.startsWith("/stock") || uri.startsWith("/api/categorias") || uri.startsWith("/categorias")) return "STOCK";
         if (uri.startsWith("/clientes") || uri.startsWith("/fornecedores")) return "ENTIDADES";
         if (uri.startsWith("/guias") || uri.startsWith("/notas") || uri.startsWith("/factura-eletronica") || uri.startsWith("/configuracoes/saft")) return "FACTURACAO";
         if (uri.startsWith("/despesas") || uri.startsWith("/financeiro")) return "FINANCEIRO";

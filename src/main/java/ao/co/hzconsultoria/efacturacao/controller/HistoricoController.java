@@ -252,11 +252,11 @@ public class HistoricoController {
                 .filter(f -> f.getCompra() != null && f.getCompra().getId().equals(id))
                 .sorted((f1, f2) -> f2.getId().compareTo(f1.getId()))
                 .collect(Collectors.toList());
-            
+
             if (!faturas.isEmpty()) {
                 Map<String, String> res = new HashMap<>();
                 res.put("url", "/uploads/faturas/" + faturas.get(0).getNumeroFatura() + ".pdf");
-                return ResponseEntity.ok(res);
+                return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
             }
         }
         return ResponseEntity.notFound().build();
