@@ -117,9 +117,9 @@ public class ConfiguracaoEmpresa {
     // ─── Preferências da Empresa ────────────────────────────────────────
     private boolean usarLogotipoEmDocumentos = true;
 
-    private boolean usarCabeçalhoPersonalizadoEmDocumentos = true;
+    private boolean usarCabecalhoPersonalizadoEmDocumentos = true;
 
-    private boolean usarRodapéPersonalizadoEmDocumentos = false;
+    private boolean usarRodapePersonalizadoEmDocumentos = false;
 
     @Column(length = 1000)
     private String rodapePersonalizado = "";
@@ -128,129 +128,329 @@ public class ConfiguracaoEmpresa {
     // Getters & Setters
     // ================================================================
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Empresa getEmpresa() { return empresa; }
-    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Empresa getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(Empresa empresa) {
+        this.empresa = empresa;
+    }
 
     // Email
-    public String getEmailSmtpHost() { return emailSmtpHost; }
-    public void setEmailSmtpHost(String v) { this.emailSmtpHost = v; }
+    public String getEmailSmtpHost() {
+        return emailSmtpHost;
+    }
 
-    public int getEmailSmtpPorta() { return emailSmtpPorta; }
-    public void setEmailSmtpPorta(int v) { this.emailSmtpPorta = v; }
+    public void setEmailSmtpHost(String v) {
+        this.emailSmtpHost = v;
+    }
 
-    public String getEmailSmtpUsername() { return emailSmtpUsername; }
-    public void setEmailSmtpUsername(String v) { this.emailSmtpUsername = v; }
+    public int getEmailSmtpPorta() {
+        return emailSmtpPorta;
+    }
 
-    public String getEmailSmtpPassword() { return emailSmtpPassword; }
-    public void setEmailSmtpPassword(String v) { this.emailSmtpPassword = v; }
+    public void setEmailSmtpPorta(int v) {
+        this.emailSmtpPorta = v;
+    }
 
-    public String getEmailSegurancaTipo() { return emailSegurancaTipo; }
-    public void setEmailSegurancaTipo(String v) { this.emailSegurancaTipo = v; }
+    public String getEmailSmtpUsername() {
+        return emailSmtpUsername;
+    }
 
-    public String getEmailRemetente() { return emailRemetente; }
-    public void setEmailRemetente(String v) { this.emailRemetente = v; }
+    public void setEmailSmtpUsername(String v) {
+        this.emailSmtpUsername = v;
+    }
 
-    public String getEmailNomeRemetente() { return emailNomeRemetente; }
-    public void setEmailNomeRemetente(String v) { this.emailNomeRemetente = v; }
+    public String getEmailSmtpPassword() {
+        return emailSmtpPassword;
+    }
 
-    public boolean isEmailHabilitado() { return emailHabilitado; }
-    public void setEmailHabilitado(boolean v) { this.emailHabilitado = v; }
+    public void setEmailSmtpPassword(String v) {
+        this.emailSmtpPassword = v;
+    }
+
+    public String getEmailSegurancaTipo() {
+        return emailSegurancaTipo;
+    }
+
+    public void setEmailSegurancaTipo(String v) {
+        this.emailSegurancaTipo = v;
+    }
+
+    public String getEmailRemetente() {
+        return emailRemetente;
+    }
+
+    public void setEmailRemetente(String v) {
+        this.emailRemetente = v;
+    }
+
+    public String getEmailNomeRemetente() {
+        return emailNomeRemetente;
+    }
+
+    public void setEmailNomeRemetente(String v) {
+        this.emailNomeRemetente = v;
+    }
+
+    public boolean isEmailHabilitado() {
+        return emailHabilitado;
+    }
+
+    public void setEmailHabilitado(boolean v) {
+        this.emailHabilitado = v;
+    }
 
     // Storage
-    public String getStorageTipo() { return storageTipo; }
-    public void setStorageTipo(String v) { this.storageTipo = v; }
+    public String getStorageTipo() {
+        return storageTipo;
+    }
 
-    public String getStorageCaminhoBase() { return storageCaminhoBase; }
-    public void setStorageCaminhoBase(String v) { this.storageCaminhoBase = v; }
+    public void setStorageTipo(String v) {
+        this.storageTipo = v;
+    }
 
-    public int getStorageTamanhoMaxFicheiro() { return storageTamanhoMaxFicheiro; }
-    public void setStorageTamanhoMaxFicheiro(int v) { this.storageTamanhoMaxFicheiro = v; }
+    public String getStorageCaminhoBase() {
+        return storageCaminhoBase;
+    }
 
-    public int getStorageTamanhoMaxRequest() { return storageTamanhoMaxRequest; }
-    public void setStorageTamanhoMaxRequest(int v) { this.storageTamanhoMaxRequest = v; }
+    public void setStorageCaminhoBase(String v) {
+        this.storageCaminhoBase = v;
+    }
 
-    public String getStorageEstrategiaBackup() { return storageEstrategiaBackup; }
-    public void setStorageEstrategiaBackup(String v) { this.storageEstrategiaBackup = v; }
+    public int getStorageTamanhoMaxFicheiro() {
+        return storageTamanhoMaxFicheiro;
+    }
 
-    public String getStorageCloudProvider() { return storageCloudProvider; }
-    public void setStorageCloudProvider(String v) { this.storageCloudProvider = v; }
+    public void setStorageTamanhoMaxFicheiro(int v) {
+        this.storageTamanhoMaxFicheiro = v;
+    }
 
-    public String getStorageCloudBucket() { return storageCloudBucket; }
-    public void setStorageCloudBucket(String v) { this.storageCloudBucket = v; }
+    public int getStorageTamanhoMaxRequest() {
+        return storageTamanhoMaxRequest;
+    }
 
-    public String getStorageCloudRegion() { return storageCloudRegion; }
-    public void setStorageCloudRegion(String v) { this.storageCloudRegion = v; }
+    public void setStorageTamanhoMaxRequest(int v) {
+        this.storageTamanhoMaxRequest = v;
+    }
 
-    public boolean isStorageBackupHabilitado() { return storageBackupHabilitado; }
-    public void setStorageBackupHabilitado(boolean v) { this.storageBackupHabilitado = v; }
+    public String getStorageEstrategiaBackup() {
+        return storageEstrategiaBackup;
+    }
+
+    public void setStorageEstrategiaBackup(String v) {
+        this.storageEstrategiaBackup = v;
+    }
+
+    public String getStorageCloudProvider() {
+        return storageCloudProvider;
+    }
+
+    public void setStorageCloudProvider(String v) {
+        this.storageCloudProvider = v;
+    }
+
+    public String getStorageCloudBucket() {
+        return storageCloudBucket;
+    }
+
+    public void setStorageCloudBucket(String v) {
+        this.storageCloudBucket = v;
+    }
+
+    public String getStorageCloudRegion() {
+        return storageCloudRegion;
+    }
+
+    public void setStorageCloudRegion(String v) {
+        this.storageCloudRegion = v;
+    }
+
+    public boolean isStorageBackupHabilitado() {
+        return storageBackupHabilitado;
+    }
+
+    public void setStorageBackupHabilitado(boolean v) {
+        this.storageBackupHabilitado = v;
+    }
 
     // Segurança
-    public int getSegTempoExpiracaoSessao() { return segTempoExpiracaoSessao; }
-    public void setSegTempoExpiracaoSessao(int v) { this.segTempoExpiracaoSessao = v; }
+    public int getSegTempoExpiracaoSessao() {
+        return segTempoExpiracaoSessao;
+    }
 
-    public boolean isSegTwoFactorAtivo() { return segTwoFactorAtivo; }
-    public void setSegTwoFactorAtivo(boolean v) { this.segTwoFactorAtivo = v; }
+    public void setSegTempoExpiracaoSessao(int v) {
+        this.segTempoExpiracaoSessao = v;
+    }
 
-    public boolean isSegRequireUppercase() { return segRequireUppercase; }
-    public void setSegRequireUppercase(boolean v) { this.segRequireUppercase = v; }
+    public boolean isSegTwoFactorAtivo() {
+        return segTwoFactorAtivo;
+    }
 
-    public boolean isSegRequireNumbers() { return segRequireNumbers; }
-    public void setSegRequireNumbers(boolean v) { this.segRequireNumbers = v; }
+    public void setSegTwoFactorAtivo(boolean v) {
+        this.segTwoFactorAtivo = v;
+    }
 
-    public boolean isSegRequireSpecialChars() { return segRequireSpecialChars; }
-    public void setSegRequireSpecialChars(boolean v) { this.segRequireSpecialChars = v; }
+    public boolean isSegRequireUppercase() {
+        return segRequireUppercase;
+    }
 
-    public int getSegComprimentoMinPassword() { return segComprimentoMinPassword; }
-    public void setSegComprimentoMinPassword(int v) { this.segComprimentoMinPassword = v; }
+    public void setSegRequireUppercase(boolean v) {
+        this.segRequireUppercase = v;
+    }
 
-    public String getSegIpWhitelist() { return segIpWhitelist; }
-    public void setSegIpWhitelist(String v) { this.segIpWhitelist = v; }
+    public boolean isSegRequireNumbers() {
+        return segRequireNumbers;
+    }
 
-    public boolean isSegLogAcessosAtivo() { return segLogAcessosAtivo; }
-    public void setSegLogAcessosAtivo(boolean v) { this.segLogAcessosAtivo = v; }
+    public void setSegRequireNumbers(boolean v) {
+        this.segRequireNumbers = v;
+    }
+
+    public boolean isSegRequireSpecialChars() {
+        return segRequireSpecialChars;
+    }
+
+    public void setSegRequireSpecialChars(boolean v) {
+        this.segRequireSpecialChars = v;
+    }
+
+    public int getSegComprimentoMinPassword() {
+        return segComprimentoMinPassword;
+    }
+
+    public void setSegComprimentoMinPassword(int v) {
+        this.segComprimentoMinPassword = v;
+    }
+
+    public String getSegIpWhitelist() {
+        return segIpWhitelist;
+    }
+
+    public void setSegIpWhitelist(String v) {
+        this.segIpWhitelist = v;
+    }
+
+    public boolean isSegLogAcessosAtivo() {
+        return segLogAcessosAtivo;
+    }
+
+    public void setSegLogAcessosAtivo(boolean v) {
+        this.segLogAcessosAtivo = v;
+    }
 
     // Notificações
-    public boolean isNotificacaoEmailHabilitada() { return notificacaoEmailHabilitada; }
-    public void setNotificacaoEmailHabilitada(boolean v) { this.notificacaoEmailHabilitada = v; }
+    public boolean isNotificacaoEmailHabilitada() {
+        return notificacaoEmailHabilitada;
+    }
 
-    public boolean isNotificacaoSmsHabilitada() { return notificacaoSmsHabilitada; }
-    public void setNotificacaoSmsHabilitada(boolean v) { this.notificacaoSmsHabilitada = v; }
+    public void setNotificacaoEmailHabilitada(boolean v) {
+        this.notificacaoEmailHabilitada = v;
+    }
 
-    public String getNotificacaoSmsProvider() { return notificacaoSmsProvider; }
-    public void setNotificacaoSmsProvider(String v) { this.notificacaoSmsProvider = v; }
+    public boolean isNotificacaoSmsHabilitada() {
+        return notificacaoSmsHabilitada;
+    }
 
-    public String getNotificacaoSmsApiKey() { return notificacaoSmsApiKey; }
-    public void setNotificacaoSmsApiKey(String v) { this.notificacaoSmsApiKey = v; }
+    public void setNotificacaoSmsHabilitada(boolean v) {
+        this.notificacaoSmsHabilitada = v;
+    }
+
+    public String getNotificacaoSmsProvider() {
+        return notificacaoSmsProvider;
+    }
+
+    public void setNotificacaoSmsProvider(String v) {
+        this.notificacaoSmsProvider = v;
+    }
+
+    public String getNotificacaoSmsApiKey() {
+        return notificacaoSmsApiKey;
+    }
+
+    public void setNotificacaoSmsApiKey(String v) {
+        this.notificacaoSmsApiKey = v;
+    }
 
     // AGT
-    public boolean isAgtIntegracaoHabilitada() { return agtIntegracaoHabilitada; }
-    public void setAgtIntegracaoHabilitada(boolean v) { this.agtIntegracaoHabilitada = v; }
+    public boolean isAgtIntegracaoHabilitada() {
+        return agtIntegracaoHabilitada;
+    }
 
-    public String getAgtUrlServico() { return agtUrlServico; }
-    public void setAgtUrlServico(String v) { this.agtUrlServico = v; }
+    public void setAgtIntegracaoHabilitada(boolean v) {
+        this.agtIntegracaoHabilitada = v;
+    }
 
-    public String getAgtUsuario() { return agtUsuario; }
-    public void setAgtUsuario(String v) { this.agtUsuario = v; }
+    public String getAgtUrlServico() {
+        return agtUrlServico;
+    }
 
-    public String getAgtSenha() { return agtSenha; }
-    public void setAgtSenha(String v) { this.agtSenha = v; }
+    public void setAgtUrlServico(String v) {
+        this.agtUrlServico = v;
+    }
 
-    public String getAgtCertificado() { return agtCertificado; }
-    public void setAgtCertificado(String v) { this.agtCertificado = v; }
+    public String getAgtUsuario() {
+        return agtUsuario;
+    }
+
+    public void setAgtUsuario(String v) {
+        this.agtUsuario = v;
+    }
+
+    public String getAgtSenha() {
+        return agtSenha;
+    }
+
+    public void setAgtSenha(String v) {
+        this.agtSenha = v;
+    }
+
+    public String getAgtCertificado() {
+        return agtCertificado;
+    }
+
+    public void setAgtCertificado(String v) {
+        this.agtCertificado = v;
+    }
 
     // Preferências
-    public boolean isUsarLogotipoEmDocumentos() { return usarLogotipoEmDocumentos; }
-    public void setUsarLogotipoEmDocumentos(boolean v) { this.usarLogotipoEmDocumentos = v; }
+    public boolean isUsarLogotipoEmDocumentos() {
+        return usarLogotipoEmDocumentos;
+    }
 
-    public boolean isUsarCabeçalhoPersonalizadoEmDocumentos() { return usarCabeçalhoPersonalizadoEmDocumentos; }
-    public void setUsarCabeçalhoPersonalizadoEmDocumentos(boolean v) { this.usarCabeçalhoPersonalizadoEmDocumentos = v; }
+    public void setUsarLogotipoEmDocumentos(boolean v) {
+        this.usarLogotipoEmDocumentos = v;
+    }
 
-    public boolean isUsarRodapéPersonalizadoEmDocumentos() { return usarRodapéPersonalizadoEmDocumentos; }
-    public void setUsarRodapéPersonalizadoEmDocumentos(boolean v) { this.usarRodapéPersonalizadoEmDocumentos = v; }
+    public boolean isUsarCabecalhoPersonalizadoEmDocumentos() {
+        return usarCabecalhoPersonalizadoEmDocumentos;
+    }
 
-    public String getRodapePersonalizado() { return rodapePersonalizado; }
-    public void setRodapePersonalizado(String v) { this.rodapePersonalizado = v; }
+    public void setUsarCabecalhoPersonalizadoEmDocumentos(boolean v) {
+        this.usarCabecalhoPersonalizadoEmDocumentos = v;
+    }
+
+    public boolean isUsarRodapePersonalizadoEmDocumentos() {
+        return usarRodapePersonalizadoEmDocumentos;
+    }
+
+    public void setUsarRodapePersonalizadoEmDocumentos(boolean v) {
+        this.usarRodapePersonalizadoEmDocumentos = v;
+    }
+
+    public String getRodapePersonalizado() {
+        return rodapePersonalizado;
+    }
+
+    public void setRodapePersonalizado(String v) {
+        this.rodapePersonalizado = v;
+    }
 }

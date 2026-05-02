@@ -90,10 +90,9 @@ class ConfiguracaoEmpresaServiceTest {
 
         // E modificar uma não afeta a outra
         configuracaoEmpresaService.atualizarConfiguracaoEmail(
-            empresa1.getId(), 
-            "smtp.empresa1.com", 587, "user1@emp1.com", "pass1", "TLS", 
-            "noreply@empresa1.com", "Empresa 1"
-        );
+                empresa1.getId(),
+                "smtp.empresa1.com", 587, "user1@emp1.com", "pass1", "TLS",
+                "noreply@empresa1.com", "Empresa 1");
 
         ConfiguracaoEmpresa config1Updated = configuracaoEmpresaService.obterConfiguracao(empresa1.getId());
         ConfiguracaoEmpresa config2Unchanged = configuracaoEmpresaService.obterConfiguracao(empresa2.getId());
@@ -108,15 +107,14 @@ class ConfiguracaoEmpresaServiceTest {
 
         // Quando atualizar configuração de email
         configuracaoEmpresaService.atualizarConfiguracaoEmail(
-            empresa1.getId(),
-            "smtp.empresa.com",
-            465,
-            "usuario@empresa.com",
-            "senhaSegura123",
-            "SSL",
-            "noreply@empresa.com",
-            "Empresa Teste"
-        );
+                empresa1.getId(),
+                "smtp.empresa.com",
+                465,
+                "usuario@empresa.com",
+                "senhaSegura123",
+                "SSL",
+                "noreply@empresa.com",
+                "Empresa Teste");
 
         // Então os dados devem ser salvos
         ConfiguracaoEmpresa updated = configuracaoEmpresaService.obterConfiguracao(empresa1.getId());
@@ -134,12 +132,11 @@ class ConfiguracaoEmpresaServiceTest {
     void testAtualizarConfiguracaoStorage() {
         // Quando atualizar configuração de storage
         configuracaoEmpresaService.atualizarConfiguracaoStorage(
-            empresa1.getId(),
-            "S3",
-            "s3://meu-bucket/uploads/",
-            50,
-            100
-        );
+                empresa1.getId(),
+                "S3",
+                "s3://meu-bucket/uploads/",
+                50,
+                100);
 
         // Então os dados devem ser salvos
         ConfiguracaoEmpresa updated = configuracaoEmpresaService.obterConfiguracao(empresa1.getId());
@@ -153,13 +150,13 @@ class ConfiguracaoEmpresaServiceTest {
     void testAtualizarPoliticaSeguranca() {
         // Quando atualizar política de segurança
         configuracaoEmpresaService.atualizarPoliticaSeguranca(
-            empresa1.getId(),
-            60,  // tempoExpiracaoSessao em minutos
-            true,  // twoFactorAtivo
-            false,  // requireUppercase
-            true,  // requireNumbers
-            true,  // requireSpecialChars
-            12  // comprimentoMinPassword
+                empresa1.getId(),
+                60, // tempoExpiracaoSessao em minutos
+                true, // twoFactorAtivo
+                false, // requireUppercase
+                true, // requireNumbers
+                true, // requireSpecialChars
+                12 // comprimentoMinPassword
         );
 
         // Então os dados devem ser salvos
@@ -179,10 +176,9 @@ class ConfiguracaoEmpresaServiceTest {
 
         // Depois de configurar
         configuracaoEmpresaService.atualizarConfiguracaoEmail(
-            empresa1.getId(),
-            "smtp.empresa.com", 587, "user@empresa.com", "pass", "TLS",
-            "noreply@empresa.com", "Empresa"
-        );
+                empresa1.getId(),
+                "smtp.empresa.com", 587, "user@empresa.com", "pass", "TLS",
+                "noreply@empresa.com", "Empresa");
 
         // Então deve retornar true
         assertTrue(configuracaoEmpresaService.temEmailConfigurado(empresa1.getId()));
@@ -195,13 +191,12 @@ class ConfiguracaoEmpresaServiceTest {
 
         // Depois de configurar
         configuracaoEmpresaService.atualizarConfiguracaoAGT(
-            empresa1.getId(),
-            true,
-            "https://api.agt.gov.ao/v1",
-            "usuario_agt",
-            "senha_agt",
-            "caminho/certificado.pem"
-        );
+                empresa1.getId(),
+                true,
+                "https://api.agt.gov.ao/v1",
+                "usuario_agt",
+                "senha_agt",
+                "caminho/certificado.pem");
 
         // Então deve retornar true
         assertTrue(configuracaoEmpresaService.temAgtConfigurada(empresa1.getId()));
@@ -211,13 +206,12 @@ class ConfiguracaoEmpresaServiceTest {
     void testAtualizarConfiguracaoAGT() {
         // Quando atualizar configuração de AGT
         configuracaoEmpresaService.atualizarConfiguracaoAGT(
-            empresa1.getId(),
-            true,
-            "https://api.agt.gov.ao/v1",
-            "usuario_agt",
-            "senha_agt",
-            "caminho/certificado.pem"
-        );
+                empresa1.getId(),
+                true,
+                "https://api.agt.gov.ao/v1",
+                "usuario_agt",
+                "senha_agt",
+                "caminho/certificado.pem");
 
         // Então os dados devem ser salvos
         ConfiguracaoEmpresa updated = configuracaoEmpresaService.obterConfiguracao(empresa1.getId());
@@ -231,18 +225,18 @@ class ConfiguracaoEmpresaServiceTest {
     @Test
     void testSalvarConfiguracao() {
         ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresa1.getId());
-        
+
         // Quando modificar propriedades e salvar
         config.setUsarLogotipoEmDocumentos(false);
-        config.setUsarRodapéPersonalizadoEmDocumentos(true);
+        config.setUsarRodapePersonalizadoEmDocumentos(true);
         config.setRodapePersonalizado("© 2026 Empresa Teste. Todos os direitos reservados.");
-        
+
         ConfiguracaoEmpresa saved = configuracaoEmpresaService.salvarConfiguracao(config);
 
         // Então as modificações devem ser persistidas
         assertNotNull(saved.getId());
         assertFalse(saved.isUsarLogotipoEmDocumentos());
-        assertTrue(saved.isUsarRodapéPersonalizadoEmDocumentos());
+        assertTrue(saved.isUsarRodapePersonalizadoEmDocumentos());
         assertEquals("© 2026 Empresa Teste. Todos os direitos reservados.", saved.getRodapePersonalizado());
     }
 

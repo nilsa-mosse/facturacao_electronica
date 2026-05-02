@@ -485,8 +485,8 @@ public class FaturaService {
                 p.setAlignment(Element.ALIGN_RIGHT);
                 thanksCell.addElement(p);
 
-                // Adicionar rodapé personalizado se configurado
-                if (configuracao != null && configuracao.isUsarRodapéPersonalizadoEmDocumentos() &&
+                // Adicionar rodape personalizado se configurado
+                if (configuracao != null && configuracao.isUsarRodapePersonalizadoEmDocumentos() &&
                         configuracao.getRodapePersonalizado() != null && !configuracao.getRodapePersonalizado().isEmpty()) {
                     Paragraph pRodape = new Paragraph(configuracao.getRodapePersonalizado(), smallFont);
                     pRodape.setAlignment(Element.ALIGN_RIGHT);

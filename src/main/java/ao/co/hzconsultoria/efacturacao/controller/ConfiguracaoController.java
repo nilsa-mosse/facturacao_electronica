@@ -723,17 +723,25 @@ public class ConfiguracaoController {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
-            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Acesso negado");
+            return ResponseEntity.status(403).body(res);
         }
 
         try {
             configuracaoEmpresaService.atualizarConfiguracaoEmail(empresaId, smtpHost, smtpPorta,
                     smtpUsername, smtpPassword, segurancaTipo, remetente, nomeRemetente);
             
-            return ResponseEntity.ok(Map.of("sucesso", true, 
-                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", true);
+            res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
+            return ResponseEntity.ok(res);
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            return ResponseEntity.ok(res);
         }
     }
 
@@ -751,17 +759,25 @@ public class ConfiguracaoController {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
-            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Acesso negado");
+            return ResponseEntity.status(403).body(res);
         }
 
         try {
             configuracaoEmpresaService.atualizarConfiguracaoStorage(empresaId, storageTipo, caminhoBase,
                     tamanhoMaxFicheiro, tamanhoMaxRequest);
             
-            return ResponseEntity.ok(Map.of("sucesso", true,
-                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", true);
+            res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
+            return ResponseEntity.ok(res);
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            return ResponseEntity.ok(res);
         }
     }
 
@@ -781,17 +797,25 @@ public class ConfiguracaoController {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
-            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Acesso negado");
+            return ResponseEntity.status(403).body(res);
         }
 
         try {
             configuracaoEmpresaService.atualizarPoliticaSeguranca(empresaId, tempoExpiracaoSessao,
                     twoFactorAtivo, requireUppercase, requireNumbers, requireSpecialChars, comprimentoMinPassword);
             
-            return ResponseEntity.ok(Map.of("sucesso", true,
-                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", true);
+            res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
+            return ResponseEntity.ok(res);
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            return ResponseEntity.ok(res);
         }
     }
 
@@ -810,17 +834,25 @@ public class ConfiguracaoController {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
-            return ResponseEntity.status(403).body(Map.of("sucesso", false, "mensagem", "Acesso negado"));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Acesso negado");
+            return ResponseEntity.status(403).body(res);
         }
 
         try {
             configuracaoEmpresaService.atualizarConfiguracaoAGT(empresaId, habilitada, urlServico,
                     usuario, senha, certificado != null ? certificado : "");
             
-            return ResponseEntity.ok(Map.of("sucesso", true,
-                    "mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale())));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", true);
+            res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
+            return ResponseEntity.ok(res);
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of("sucesso", false, "mensagem", "Erro ao salvar: " + e.getMessage()));
+            Map<String, Object> res = new HashMap<>();
+            res.put("sucesso", false);
+            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            return ResponseEntity.ok(res);
         }
     }
 }

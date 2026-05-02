@@ -39,32 +39,35 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authenticationProvider(authenticationProvider())
-            .authorizeRequests()
-                .antMatchers("/login", "/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**", "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia", "/finalizarVenda").permitAll()
+                .authenticationProvider(authenticationProvider())
+                .authorizeRequests()
+                .antMatchers("/login", "/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**",
+                        "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia",
+                        "/finalizarVenda")
+                .permitAll()
                 .antMatchers("/faturas/**", "/guias/**").authenticated()
                 .antMatchers("/superadmin/**").hasRole("SUPERADMIN")
                 .anyRequest().authenticated()
-            .and()
-            .csrf()
+                .and()
+                .csrf()
                 .ignoringAntMatchers("/api/compras")
                 .ignoringAntMatchers("/api/compras/single")
                 .ignoringAntMatchers("/api/compras/proforma")
                 .ignoringAntMatchers("/api/compras/guia")
                 .ignoringAntMatchers("/finalizarVenda")
                 .ignoringAntMatchers("/api/vendas-suspensas/**")
-            .and()
-            .formLogin()
+                .and()
+                .formLogin()
                 .loginPage("/login")
                 .failureHandler(failureHandler)
                 .successHandler(successHandler)
                 .permitAll()
-            .and()
-            .logout()
+                .and()
+                .logout()
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
-            .and()
-            .headers()
+                .and()
+                .headers()
                 .frameOptions().sameOrigin();
         return http.build();
     }
