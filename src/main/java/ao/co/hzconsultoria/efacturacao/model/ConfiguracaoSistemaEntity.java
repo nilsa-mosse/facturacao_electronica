@@ -118,6 +118,18 @@ public class ConfiguracaoSistemaEntity {
 
     private boolean segLogAcessosAtivo = true;
 
+    // ─── AGT Compliance ─────────────────────────────────────────────────
+    @Column(length = 20)
+    private String agtCertificadoNumero = "0000";
+
+    @Column(columnDefinition = "TEXT")
+    private String agtPrivateKey;
+
+    @Column(columnDefinition = "TEXT")
+    private String agtPublicKey;
+
+    private Integer agtChaveVersao = 1;
+
     // ─── Licença ────────────────────────────────────────────────────────
     private java.time.LocalDateTime licencaDataAtivacao;
 
@@ -250,5 +262,15 @@ public class ConfiguracaoSistemaEntity {
     private String licencaChaveAtivacao;
     public String getLicencaChaveAtivacao() { return licencaChaveAtivacao; }
     public void setLicencaChaveAtivacao(String v) { this.licencaChaveAtivacao = v; }
+
+    // AGT
+    public String getAgtCertificadoNumero() { return agtCertificadoNumero; }
+    public void setAgtCertificadoNumero(String v) { this.agtCertificadoNumero = v; }
+    public String getAgtPrivateKey() { return agtPrivateKey; }
+    public void setAgtPrivateKey(String v) { this.agtPrivateKey = v; }
+    public String getAgtPublicKey() { return agtPublicKey; }
+    public void setAgtPublicKey(String v) { this.agtPublicKey = v; }
+    public Integer getAgtChaveVersao() { return agtChaveVersao; }
+    public void setAgtChaveVersao(Integer v) { this.agtChaveVersao = v; }
 }
 

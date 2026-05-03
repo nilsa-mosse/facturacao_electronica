@@ -23,13 +23,16 @@ public class SaftService {
     private final ClienteRepository clienteRepository;
     private final ProdutoRepository produtoRepository;
     private final EmpresaRepository empresaRepository;
+    private final ConfiguracaoSistemaRepository configuracaoSistemaRepository;
 
     public SaftService(FaturaRepository faturaRepository, ClienteRepository clienteRepository, 
-                        ProdutoRepository produtoRepository, EmpresaRepository empresaRepository) {
+                        ProdutoRepository produtoRepository, EmpresaRepository empresaRepository,
+                        ConfiguracaoSistemaRepository configuracaoSistemaRepository) {
         this.faturaRepository = faturaRepository;
         this.clienteRepository = clienteRepository;
         this.produtoRepository = produtoRepository;
         this.empresaRepository = empresaRepository;
+        this.configuracaoSistemaRepository = configuracaoSistemaRepository;
     }
 
     public String generateSaftXml(Date startDate, Date endDate) throws Exception {
@@ -95,7 +98,9 @@ public class SaftService {
         appendChild(doc, header, "DateCreated", sdf.format(new Date()));
         appendChild(doc, header, "TaxEntity", "Global");
         appendChild(doc, header, "ProductCompanyId", "HZ Consultoria");
-        appendChild(doc, header, "SoftwareCertificateNumber", "0");
+        
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L).orElse(new ConfiguracaoSistemaEntity());
+        appendChild(doc, header, "SoftwareCertificateNumber", config.getAgtCertificadoNumero());
     }
 
     private void addCustomers(Document doc, Element master) {
@@ -159,14 +164,14 @@ public class SaftService {
             Element invoice = doc.createElement("Invoice");
             salesInv.appendChild(invoice);
             appendChild(doc, invoice, "InvoiceNo", f.getNumeroFatura());
-            appendChild(doc, invoice, "DocumentStatus", "N"); // Normal
+            appendChild(doc, invoice, "DocumentStatus", f.getInvoiceStatus() != null ? f.getInvoiceStatus() : "N");
             appendChild(doc, invoice, "Hash", f.getHash() != null ? f.getHash() : "0");
-            appendChild(doc, invoice, "HashControl", "1");
+            appendChild(doc, invoice, "HashControl", f.getHashControl() != null ? f.getHashControl() : "1");
             appendChild(doc, invoice, "Period", new SimpleDateFormat("MM").format(f.getDataEmissao()));
             appendChild(doc, invoice, "InvoiceDate", new SimpleDateFormat("yyyy-MM-dd").format(f.getDataEmissao()));
-            appendChild(doc, invoice, "InvoiceType", "FT");
+            appendChild(doc, invoice, "InvoiceType", f.getTipoDocumento() != null ? f.getTipoDocumento() : "FT");
             appendChild(doc, invoice, "SelfBillingIndicator", "0");
-            appendChild(doc, invoice, "SystemEntryDate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(f.getDataEmissao()));
+            appendChild(doc, invoice, "SystemEntryDate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(f.getSystemEntryDate() != null ? f.getSystemEntryDate() : f.getDataEmissao()));
             appendChild(doc, invoice, "CustomerID", (f.getCompra() != null && f.getCompra().getCliente() != null) ? f.getCompra().getCliente().getId().toString() : "1");
 
             // Simplified lines and totals

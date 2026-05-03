@@ -7,9 +7,11 @@ import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoEmpresa;
+import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoEmpresaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
@@ -32,7 +34,12 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 import java.util.Date;
+import java.util.Calendar;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -60,6 +67,9 @@ public class FaturaService {
     @Autowired
     private ConfiguracaoEmpresaRepository configuracaoEmpresaRepository;
 
+    @Autowired
+    private ConfiguracaoSistemaRepository configuracaoSistemaRepository;
+
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
 
@@ -78,10 +88,17 @@ public class FaturaService {
             fatura.setEmpresa(compra.getEmpresa());
         }
         fatura.setTipoDocumento(tipo);
-        String prefixo = tipo + "-";
-        String numeroFatura = prefixo + System.currentTimeMillis();
+        
+        // Numeração Sequencial (AGT): CODE YEAR/COUNT
+        Calendar cal = Calendar.getInstance();
+        int ano = cal.get(Calendar.YEAR);
+        long count = faturaRepository.countByTypeAndYear(tipo, ano, fatura.getEmpresa().getId()) + 1;
+        String numeroFatura = tipo + " " + ano + "/" + count;
+        
         fatura.setNumeroFatura(numeroFatura);
         fatura.setDataEmissao(new Date());
+        fatura.setSystemEntryDate(new Date());
+        fatura.setInvoiceStatus("N");
         // Calcular totais e IVA
         double totalSemImposto = 0;
         double valorIva = 0;
@@ -103,10 +120,16 @@ public class FaturaService {
         fatura.setTotal(totalFinal);
         fatura.setIva(valorIva);
 
-        // Gerar hash SHA-256 para assinatura
-        String data = new java.text.SimpleDateFormat("yyyyMMddHHmmss").format(fatura.getDataEmissao());
-        String hash = gerarHash(numeroFatura + data + totalFinal);
-        fatura.setHash(hash);
+        // --- Lógica de Assinatura AGT (RSA) ---
+        ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L).orElse(new ConfiguracaoSistemaEntity());
+        Fatura ultimaFatura = faturaRepository.findLastByType(tipo, fatura.getEmpresa().getId());
+        String hashAnterior = (ultimaFatura != null) ? ultimaFatura.getHash() : "";
+        fatura.setPreviousHash(hashAnterior);
+        fatura.setHashControl(String.valueOf(configSistema.getAgtChaveVersao()));
+
+        String dadosAssinar = montarStringAssinatura(fatura);
+        String assinatura = assinarRSA(dadosAssinar, configSistema.getAgtPrivateKey());
+        fatura.setHash(assinatura);
 
         // Guardar fatura antes de enviar (para ter ID gerado)
         fatura.setEnviadaAGT(false);
@@ -172,6 +195,47 @@ public class FaturaService {
             gerarPdfFatura(fatura);
         }
         return fatura;
+    }
+
+    private String montarStringAssinatura(Fatura f) {
+        // Formato: InvoiceDate;SystemEntryDate;InvoiceNo;GrossTotal;HashControl
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        DecimalFormat df = new DecimalFormat("0.00");
+        
+        return sdfDate.format(f.getDataEmissao()) + ";" +
+               sdfTime.format(f.getSystemEntryDate()) + ";" +
+               f.getNumeroFatura() + ";" +
+               df.format(f.getTotal()).replace(",", ".") + ";" +
+               (f.getPreviousHash() != null ? f.getPreviousHash() : "");
+    }
+
+    private String assinarRSA(String dados, String privateKeyPem) {
+        if (privateKeyPem == null || privateKeyPem.isEmpty()) {
+            log.warn("Chave privada RSA não configurada. Usando hash SHA-256 como fallback temporário.");
+            return gerarHash(dados);
+        }
+        try {
+            // Remover cabeçalhos PEM
+            String privateKeyContent = privateKeyPem
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+            
+            byte[] pkcs8EncodedKey = Base64.getDecoder().decode(privateKeyContent);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            PrivateKey privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedKey));
+            
+            Signature signature = Signature.getInstance("SHA1withRSA");
+            signature.initSign(privateKey);
+            signature.update(dados.getBytes());
+            byte[] signed = signature.sign();
+            
+            return Base64.getEncoder().encodeToString(signed);
+        } catch (Exception e) {
+            log.error("Erro ao assinar com RSA: {}", e.getMessage());
+            return gerarHash(dados);
+        }
     }
 
     private String gerarHash(String input) {
@@ -473,9 +537,20 @@ public class FaturaService {
                 } catch (Exception ignored) {
                 }
                 qrCell.addElement(new Paragraph("Hash: " + fatura.getHash(), smallFont));
-                if (fatura.getCodigoAgt() != null) {
-                    qrCell.addElement(new Paragraph("Certificado AGT: " + fatura.getCodigoAgt(), smallFont));
+                
+                // --- AGT Compliance Text ---
+                ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L).orElse(new ConfiguracaoSistemaEntity());
+                String hash = fatura.getHash();
+                String complianceHash = "-";
+                if (hash != null && hash.length() >= 31) {
+                    complianceHash = "" + hash.charAt(0) + hash.charAt(10) + hash.charAt(20) + hash.charAt(30);
                 }
+                String certNo = (configSistema != null && configSistema.getAgtCertificadoNumero() != null) 
+                               ? configSistema.getAgtCertificadoNumero() : "0000";
+                
+                Paragraph pAgt = new Paragraph(complianceHash + "-Processado por programa validado n.º " + certNo + "/AGT", smallFont);
+                qrCell.addElement(pAgt);
+                
                 footerTable.addCell(qrCell);
 
                 PdfPCell thanksCell = new PdfPCell();
@@ -500,6 +575,14 @@ public class FaturaService {
                 footerTable.addCell(thanksCell);
 
                 doc.add(footerTable);
+                
+                // Mensagem obrigatória para Pro-formas e outros documentos que não servem de fatura
+                if ("FP".equals(fatura.getTipoDocumento())) {
+                    Paragraph pWarning = new Paragraph("ESTE DOCUMENTO NÃO SERVE DE FACTURA", bold);
+                    pWarning.setAlignment(Element.ALIGN_CENTER);
+                    pWarning.setSpacingBefore(10);
+                    doc.add(pWarning);
+                }
 
             } finally {
                 // Ensure document is closed even if an exception occurs

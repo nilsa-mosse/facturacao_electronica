@@ -14,11 +14,15 @@ public class Fatura {
 
     private String numeroFatura;
     private Date dataEmissao;
-    private boolean enviada_agt;
+    private Boolean enviada_agt = false;
     private String status;
     private Double total;
     private Double iva;
     private String hash;
+    private String hashControl; // Versão da chave privada
+    private String previousHash; // Hash do documento anterior
+    private Date systemEntryDate; // Data de gravação no sistema
+    private String invoiceStatus; // N - Normal, A - Anulada, S - Auto-faturação
     private String codigoAgt;
     private String tipoDocumento; // FT, FR, FP (Pro-forma)
 
@@ -41,8 +45,8 @@ public class Fatura {
     public Date getDataEmissao() { return dataEmissao; }
     public void setDataEmissao(Date dataEmissao) { this.dataEmissao = dataEmissao; }
 
-    public boolean isEnviadaAGT() { return enviada_agt; }
-    public void setEnviadaAGT(boolean enviadaAGT) { this.enviada_agt = enviadaAGT; }
+    public Boolean isEnviadaAGT() { return enviada_agt; }
+    public void setEnviadaAGT(Boolean enviadaAGT) { this.enviada_agt = enviadaAGT; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
@@ -61,4 +65,16 @@ public class Fatura {
 
     public String getTipoDocumento() { return tipoDocumento; }
     public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
+
+    public String getHashControl() { return hashControl; }
+    public void setHashControl(String hashControl) { this.hashControl = hashControl; }
+
+    public String getPreviousHash() { return previousHash; }
+    public void setPreviousHash(String previousHash) { this.previousHash = previousHash; }
+
+    public Date getSystemEntryDate() { return systemEntryDate; }
+    public void setSystemEntryDate(Date systemEntryDate) { this.systemEntryDate = systemEntryDate; }
+
+    public String getInvoiceStatus() { return invoiceStatus; }
+    public void setInvoiceStatus(String invoiceStatus) { this.invoiceStatus = invoiceStatus; }
 }

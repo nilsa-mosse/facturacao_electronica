@@ -32,4 +32,10 @@ public interface FaturaRepository extends JpaRepository<Fatura, Long> {
     List<Fatura> findByCompraAndEmpresa_Id(Compra compra, Long empresaId);
 
     List<Fatura> findByCompra(Compra compra);
+
+    @Query(value = "SELECT * FROM fatura WHERE tipo_documento = :tipo AND empresa_id = :empresaId ORDER BY id DESC LIMIT 1", nativeQuery = true)
+    Fatura findLastByType(@Param("tipo") String tipo, @Param("empresaId") Long empresaId);
+
+    @Query(value = "SELECT COUNT(*) FROM fatura WHERE tipo_documento = :tipo AND YEAR(data_emissao) = :ano AND empresa_id = :empresaId", nativeQuery = true)
+    long countByTypeAndYear(@Param("tipo") String tipo, @Param("ano") int ano, @Param("empresaId") Long empresaId);
 }
