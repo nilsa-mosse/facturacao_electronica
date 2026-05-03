@@ -4,6 +4,8 @@ import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.model.User;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.UserRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
+import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -126,5 +128,32 @@ public class SuperAdminController {
         });
         ra.addFlashAttribute("mensagem", "Utilizador desassociado da empresa com sucesso!");
         return "redirect:/superadmin/usuarios";
+    }
+
+    // ─── Configurações Globais do Sistema ─────────────────────────────────
+    @Autowired
+    private ConfiguracaoSistemaRepository configuracaoSistemaRepository;
+
+    @GetMapping("/configuracoes")
+    public String configuracoes(Model model) {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        model.addAttribute("config", config);
+        return "superadmin/configuracoes";
+    }
+
+    @PostMapping("/configuracoes/salvar-expiracao")
+    public String salvarExpiracao(@RequestParam("tempo") int tempo,
+                                 @RequestParam("unidade") String unidade,
+                                 RedirectAttributes ra) {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        
+        config.setSegTempoExpiracaoSessao(tempo);
+        config.setSegTempoExpiracaoUnidade(unidade);
+        
+        configuracaoSistemaRepository.save(config);
+        ra.addFlashAttribute("mensagem", "Tempo de expiração atualizado com sucesso!");
+        return "redirect:/superadmin/configuracoes";
     }
 }

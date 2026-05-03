@@ -100,10 +100,10 @@
                                                 </small>
                                             </td>
                                             <td>
-                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).GERAL}" class="badge bg-info-subtle text-info rounded-pill">Geral</span>
-                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).PARCIAL}" class="badge bg-primary-subtle text-primary rounded-pill">Parcial</span>
-                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).ROTATIVO}" class="badge bg-success-subtle text-success rounded-pill">Rotativo</span>
-                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.efacturacao.model.Inventario.TipoInventario).EXTRAORDINARIO}" class="badge bg-warning-subtle text-warning rounded-pill">Extraordinário</span>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.TipoInventario).GERAL}" class="badge bg-info-subtle text-info rounded-pill">Geral</span>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.TipoInventario).PARCIAL}" class="badge bg-primary-subtle text-primary rounded-pill">Parcial</span>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.TipoInventario).ROTATIVO}" class="badge bg-success-subtle text-success rounded-pill">Rotativo</span>
+                                                <span th:if="${inv.tipo == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.TipoInventario).EXTRAORDINARIO}" class="badge bg-warning-subtle text-warning rounded-pill">Extraordinário</span>
                                             </td>
                                             <td>
                                                 <div th:text="${inv.armazem != null ? inv.armazem : 'Principal'}">Armazém Central</div>
@@ -121,10 +121,10 @@
                                             </td>
                                             <td>
                                                 <span th:class="'badge rounded-pill px-3 ' + 
-                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).RASCUNHO} ? 'bg-secondary' : 
-                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_CONTAGEM} ? 'bg-primary' : 
-                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_REVISAO} ? 'bg-warning' : 
-                                                      (${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).FINALIZADO} ? 'bg-success' : 'bg-danger'))))"
+                                                      (${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).RASCUNHO} ? 'bg-secondary' : 
+                                                      (${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).EM_CONTAGEM} ? 'bg-primary' : 
+                                                      (${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).EM_REVISAO} ? 'bg-warning' : 
+                                                      (${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).FINALIZADO} ? 'bg-success' : 'bg-danger'))))"
                                                       th:text="${inv.estado}">Rascunho</span>
                                             </td>
                                             <td class="text-end pe-4">
@@ -141,37 +141,37 @@
                                                     </a>
 
                                                     <!-- Editar (RASCUNHO) -->
-                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).RASCUNHO}"
+                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).RASCUNHO}"
                                                        class="btn btn-light rounded-circle ms-2 shadow-none" th:href="@{'/gestao-inventarios/editar/' + ${inv.id}}" title="Editar Inventário">
                                                         <i class="fas fa-edit text-dark"></i>
                                                     </a>
 
                                                     <!-- Iniciar Contagem (RASCUNHO) -->
-                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).RASCUNHO}"
+                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).RASCUNHO}"
                                                        class="btn btn-light rounded-circle ms-2 shadow-none text-primary fw-bold" th:href="@{'/gestao-inventarios/iniciar/' + ${inv.id}}" title="Iniciar Contagem">
                                                         <i class="fas fa-play"></i>
                                                     </a>
 
                                                     <!-- Continuar Contagem (EM_CONTAGEM) -->
-                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_CONTAGEM}"
+                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).EM_CONTAGEM}"
                                                        class="btn btn-light rounded-circle ms-2 shadow-none text-primary fw-bold" th:href="@{'/gestao-inventarios/contar/' + ${inv.id}}" title="Continuar Contagem">
                                                         <i class="fas fa-list-ol"></i>
                                                     </a>
 
                                                     <!-- Fechar Inventário (EM_CONTAGEM) -->
-                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_CONTAGEM}"
+                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).EM_CONTAGEM}"
                                                        class="btn btn-light rounded-circle ms-2 shadow-none text-success fw-bold" th:href="@{'/gestao-inventarios/fechar/' + ${inv.id}}" title="Fechar Inventário">
                                                         <i class="fas fa-check-double"></i>
                                                     </a>
 
                                                     <!-- Aprovar Ajustes (EM_REVISAO) -->
-                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).EM_REVISAO}"
+                                                    <a th:if="${inv.estado == T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).EM_REVISAO}"
                                                        class="btn btn-light rounded-circle ms-2 shadow-none text-success fw-bold" th:href="@{'/gestao-inventarios/aprovar/' + ${inv.id}}" title="Aprovar Ajustes">
                                                         <i class="fas fa-file-signature"></i>
                                                     </a>
 
                                                     <!-- Cancelar (not FINALIZADO and not CANCELADO) -->
-                                                    <a th:if="${inv.estado != T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).FINALIZADO and inv.estado != T(ao.co.hzconsultoria.efacturacao.model.Inventario.EstadoInventario).CANCELADO}"
+                                                    <a th:if="${inv.estado != T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).FINALIZADO and inv.estado != T(ao.co.hzconsultoria.Kwanza ERP.model.Inventario.EstadoInventario).CANCELADO}"
                                                        class="btn btn-light rounded-circle ms-2 shadow-none text-danger" th:href="@{'/gestao-inventarios/cancelar/' + ${inv.id}}"
                                                        onclick="return confirm('Tem a certeza que deseja cancelar este inventário?')" title="Cancelar Inventário">
                                                         <i class="fas fa-ban"></i>
@@ -197,7 +197,7 @@
 
         <footer class="main-footer bg-white border-0 py-3">
             <div class="container-fluid px-4">
-                <div class="float-right d-none d-sm-inline">eFacturacao v2.0</div>
+                <div class="float-right d-none d-sm-inline">Kwanza ERP v2.0</div>
                 <strong>Copyright &copy; 2024 <a href="#">HZ Consultoria</a>.</strong> Todos os direitos reservados.
             </div>
         </footer>

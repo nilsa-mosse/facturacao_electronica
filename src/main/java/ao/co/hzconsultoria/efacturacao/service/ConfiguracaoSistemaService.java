@@ -174,7 +174,7 @@ public class ConfiguracaoSistemaService {
     public ConfiguracaoSeguranca getSeguranca() {
         ConfiguracaoSistemaEntity e = loadOrCreate();
         ConfiguracaoSeguranca s = new ConfiguracaoSeguranca();
-        s.setTempoExpiracaoSessao(e.getSegTempoExpiracaoSessao());
+        s.setTempoExpiracaoSessao(e.getSegTempoExpiracaoEmMinutos());
         s.setTentativasLoginMax(e.getSegTentativasLoginMax());
         s.setLockoutDuracao(e.getSegLockoutDuracao());
         s.setPoliticaPassword(nvl(e.getSegPoliticaPassword(), "MEDIA"));

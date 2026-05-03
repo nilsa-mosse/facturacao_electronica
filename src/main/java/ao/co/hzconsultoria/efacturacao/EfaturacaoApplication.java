@@ -36,14 +36,15 @@ public class EfaturacaoApplication {
             ImpostoRepository impostoRepository,
             PasswordEncoder passwordEncoder) {
         return args -> {
-            // RESET TRIAL (Comentado para não reiniciar o tempo sempre que o servidor arranca)
+            // RESET TRIAL (Comentado para não reiniciar o tempo sempre que o servidor
+            // arranca)
             /*
-            configRepo.findById(1L).ifPresent(c -> {
-                c.setLicencaDataAtivacao(null);
-                configRepo.save(c);
-                System.out.println(">>> TRIAL RESETADO COM SUCESSO!");
-            });
-            */
+             * configRepo.findById(1L).ifPresent(c -> {
+             * c.setLicencaDataAtivacao(null);
+             * configRepo.save(c);
+             * System.out.println(">>> TRIAL RESETADO COM SUCESSO!");
+             * });
+             */
 
             // 1. Ativar utilizadores existentes (migração)
             userRepository.findAll().forEach(user -> {

@@ -14,7 +14,7 @@ public class ConfiguracaoSistemaEntity {
     private Long id = 1L;
 
     // ─── Parâmetros Gerais ──────────────────────────────────────────────
-    private String sistemaNome = "Sistema de Facturação";
+    private String sistemaNome = "Kwanza ERP";
     private String sistemaVersao = "1.0.0";
     private String sistemaEmailSuporte = "suporte@facturacao.com";
     private boolean sistemaBackup = true;
@@ -97,7 +97,10 @@ public class ConfiguracaoSistemaEntity {
     private String storageCloudRegion = "";
 
     // ─── Segurança ──────────────────────────────────────────────────────
-    private int segTempoExpiracaoSessao = 30;
+    private int segTempoExpiracaoSessao = 5;
+
+    @Column(length = 10)
+    private String segTempoExpiracaoUnidade = "MINUTOS"; // MINUTOS ou HORAS
     private int segTentativasLoginMax = 5;
     private int segLockoutDuracao = 15;
 
@@ -209,6 +212,16 @@ public class ConfiguracaoSistemaEntity {
     // Segurança
     public int getSegTempoExpiracaoSessao() { return segTempoExpiracaoSessao; }
     public void setSegTempoExpiracaoSessao(int v) { this.segTempoExpiracaoSessao = v; }
+    public String getSegTempoExpiracaoUnidade() { return segTempoExpiracaoUnidade; }
+    public void setSegTempoExpiracaoUnidade(String v) { this.segTempoExpiracaoUnidade = v; }
+
+    /** Retorna o tempo de expiração em minutos (para uso em sessões Spring) */
+    public int getSegTempoExpiracaoEmMinutos() {
+        if ("HORAS".equalsIgnoreCase(segTempoExpiracaoUnidade)) {
+            return segTempoExpiracaoSessao * 60;
+        }
+        return segTempoExpiracaoSessao;
+    }
     public int getSegTentativasLoginMax() { return segTentativasLoginMax; }
     public void setSegTentativasLoginMax(int v) { this.segTentativasLoginMax = v; }
     public int getSegLockoutDuracao() { return segLockoutDuracao; }
