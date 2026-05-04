@@ -2,383 +2,353 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${'Login - ' + globalSistemaNome}">Login - Kwanza ERP</title>
     <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
-    <!-- Fontes locais para modo offline -->
+    
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --bg-form: #f8fafc;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #06b6d4;
+            --accent: #f43f5e;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
 
-        .dark-mode {
-            --glass-bg: rgba(15, 23, 42, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --bg-form: #0f172a;
+        [data-theme='light'] {
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --glass: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            font-family: 'Outfit', sans-serif;
         }
 
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Outfit", Arial, sans-serif !important;
             margin: 0;
-            overflow: hidden;
-            height: 100vh;
-            background-color: var(--bg-form);
-        }
-
-        .login-wrapper {
+            padding: 0;
+            min-height: 100vh;
             display: flex;
-            height: 100vh;
-            width: 100%;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-gradient);
+            overflow-x: hidden;
         }
 
-        /* Hero Side */
-        .hero-side {
-            flex: 1.4;
+        /* Animated Background Elements */
+        .bg-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+            filter: blur(60px);
+            z-index: -1;
+            border-radius: 50%;
+            animation: float 20s infinite alternate;
+        }
+
+        .blob-1 { top: -10%; left: -10%; }
+        .blob-2 { bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(100px, 50px) scale(1.2); }
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 1100px;
+            height: 700px;
+            display: flex;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+            margin: 20px;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Visual Side */
+        .login-visual {
+            flex: 1.2;
             position: relative;
             background: url('/img/login_hero_billing.png') no-repeat center center;
             background-size: cover;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 60px;
             color: white;
-            padding: 5rem;
         }
 
-        .hero-side::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(225deg, rgba(79, 70, 229, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
+        /* Tenta usar a imagem gerada se existir, senão usa a padrão */
+        .login-visual {
+            background-image: linear-gradient(to top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.2)), url('/img/login_premium_bg.png');
         }
 
-        .hero-content {
-            position: relative;
-            z-index: 10;
-            max-width: 600px;
-            animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        .visual-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
         }
 
-        .hero-title {
-            font-size: 4rem;
+        .visual-title {
+            font-size: 3.5rem;
             font-weight: 700;
             line-height: 1.1;
-            margin-bottom: 2rem;
-            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            letter-spacing: -0.02em;
+            margin-bottom: 20px;
         }
 
-        .hero-subtitle {
-            font-size: 1.4rem;
-            opacity: 0.9;
-            margin-bottom: 3rem;
-            font-weight: 300;
+        .visual-text {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            max-width: 400px;
             line-height: 1.6;
         }
 
-        .hero-features {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .feature-item {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 1.25rem;
-            border-radius: 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            flex: 1;
-            transition: transform 0.3s ease;
-        }
-
-        .feature-item:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .feature-item i {
-            font-size: 1.5rem;
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-
-        .feature-item span {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
         /* Form Side */
-        .form-side {
+        .login-form-side {
             flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .brand-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            padding: 2rem;
-            background-color: var(--bg-form);
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 460px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 2.5rem;
-            padding: 3.5rem;
-            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.15);
-            animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .login-logo {
-            width: 70px;
-            height: 70px;
-            background: var(--primary-gradient);
-            border-radius: 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 2.5rem;
+            font-size: 1.8rem;
             color: white;
-            font-size: 2rem;
-            box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.4);
+            margin-bottom: 40px;
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
         }
 
-        .form-title {
-            font-size: 2rem;
+        .welcome-text {
+            margin-bottom: 40px;
+        }
+
+        .welcome-text h2 {
+            font-size: 2.2rem;
             font-weight: 700;
             color: var(--text-main);
-            margin-bottom: 0.75rem;
-            letter-spacing: -0.01em;
+            margin-bottom: 8px;
         }
 
-        .form-desc {
+        .welcome-text p {
             color: var(--text-muted);
-            margin-bottom: 3rem;
             font-size: 1.05rem;
         }
 
-        /* Modern Inputs */
-        .input-group-modern {
+        /* Input Styling */
+        .form-group-custom {
             position: relative;
-            margin-bottom: 1.75rem;
+            margin-bottom: 25px;
         }
 
-        .input-group-modern i {
+        .form-group-custom i {
             position: absolute;
-            left: 1.5rem;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
+            transition: color 0.3s ease;
         }
 
-        .input-group-modern input {
+        .form-control-custom {
             width: 100%;
-            padding: 1.1rem 1.1rem 1.1rem 3.75rem;
-            background: white;
-            border: 2px solid transparent;
-            border-radius: 1.25rem;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 0 20px 0 55px;
+            color: var(--text-main);
             font-size: 1rem;
             transition: all 0.3s ease;
+        }
+
+        .form-control-custom:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
             outline: none;
-            color: #1e293b;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        }
-
-        .dark-mode .input-group-modern input {
-            background: #1e293b;
-            color: white;
-            box-shadow: none;
-        }
-
-        .input-group-modern input:focus {
-            border-color: #6366f1;
-            background: white;
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
 
-        .dark-mode .input-group-modern input:focus {
-            background: #1e293b;
+        .form-control-custom:focus + i {
+            color: var(--primary);
         }
 
-        .input-group-modern input:focus + i {
-            color: #6366f1;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .btn-login {
+        .btn-submit {
             width: 100%;
-            padding: 1.1rem;
-            background: var(--primary-gradient);
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             border: none;
-            border-radius: 1.25rem;
+            border-radius: 20px;
             color: white;
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.75rem;
-            margin-top: 1rem;
+            gap: 12px;
+            margin-top: 20px;
         }
 
-        .btn-login:hover {
+        .btn-submit:hover {
             transform: translateY(-3px);
-            box-shadow: 0 25px 30px -10px rgba(79, 70, 229, 0.5);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
             filter: brightness(1.1);
         }
 
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-        .form-footer {
-            margin-top: 2.5rem;
-            text-align: center;
-        }
-
         /* Alerts */
-        .alert {
-            padding: 1rem 1.25rem;
-            border-radius: 1.25rem;
-            font-weight: 500;
+        .modern-alert {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            color: #fb7185;
+            padding: 16px;
+            border-radius: 18px;
+            margin-bottom: 30px;
             font-size: 0.95rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            border: none;
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            gap: 12px;
+            animation: slideDown 0.4s ease;
         }
 
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-
-        /* Animations */
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-100px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 1100px) {
-            .hero-side { flex: 1; padding: 3rem; }
-            .hero-title { font-size: 3rem; }
+        .footer-brand {
+            margin-top: auto;
+            padding-top: 40px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
 
+        .footer-brand strong {
+            color: var(--primary);
+        }
+
+        /* Responsive */
         @media (max-width: 992px) {
-            .hero-side { display: none; }
-            .form-side { flex: 1; min-height: 100vh; }
-            .login-card { padding: 2.5rem; }
+            .login-container {
+                height: auto;
+                max-width: 500px;
+            }
+            .login-visual {
+                display: none;
+            }
+            .login-form-side {
+                padding: 40px;
+            }
         }
     </style>
 </head>
 
-<body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
-    <div class="login-wrapper">
-        <!-- Section Visual (Lado Esquerdo) -->
-        <div class="hero-side">
-            <div class="hero-content">
-                <h1 class="hero-title">Inovação e Rigor na sua Facturação</h1>
-                <p class="hero-subtitle">Controle as suas finanças com agilidade e inteligência. O futuro da gestão empresarial começa aqui.</p>
-                
-                <div class="hero-features">
-                    <div class="feature-item">
-                        <i class="fas fa-shield-halved"></i>
-                        <span>100% Seguro</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-bolt-lightning"></i>
-                        <span>Ultra Rápido</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-chart-pie"></i>
-                        <span>Visão Total</span>
-                    </div>
-                </div>
+<body th:attr="data-theme=${globalTema == 'dark' ? 'dark' : 'light'}">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
+    <div class="login-container">
+        <!-- Visual Section -->
+        <div class="login-visual">
+            <div class="visual-badge">
+                <i class="fas fa-certificate me-2"></i> Certificado pela AGT
             </div>
+            <h1 class="visual-title">Inovação e Rigor na sua Gestão.</h1>
+            <p class="visual-text">
+                Controle o seu negócio com a agilidade que o futuro exige. Simples, rápido e totalmente em conformidade.
+            </p>
         </div>
 
-        <!-- Section Formulário (Lado Direito) -->
-        <div class="form-side">
-            <div class="login-card">
-                <div class="login-logo">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                </div>
-                
-                <h2 class="form-title">Bem-vindo</h2>
-                <p class="form-desc">Introduza as suas credenciais para continuar.</p>
-
-                <form th:action="@{/login}" method="post">
-                    <!-- Mensagens de Feedback -->
-                    <div th:if="${param.error}" class="alert alert-danger mb-4 shadow-sm">
-                        <i class="fas fa-circle-exclamation"></i>
-                        <span th:if="${#strings.contains(param.error, 'login.error.bloqueado')}">Conta bloqueada temporariamente por excesso de tentativas.</span>
-                        <span th:if="${#strings.contains(param.error, 'login.error.desativado')}">A sua conta foi desativada pelo administrador.</span>
-                        <span th:if="${!#strings.contains(param.error, 'login.error.bloqueado') && !#strings.contains(param.error, 'login.error.desativado')}">Utilizador ou palavra-passe incorretos.</span>
-                    </div>
-                    <div th:if="${param.logout}" class="alert alert-primary mb-4 shadow-sm">
-                        <i class="fas fa-circle-check"></i> Sessão encerrada com sucesso.
-                    </div>
-
-                    <!-- Campo Usuário -->
-                    <div class="input-group-modern">
-                        <input type="text" id="login" name="username" placeholder="Nome de Usuário" required autofocus autocomplete="username">
-                        <i class="fas fa-user"></i>
-                    </div>
-
-                    <!-- Campo Senha -->
-                    <div class="input-group-modern">
-                        <input type="password" id="senha" name="password" placeholder="Palavra-passe" required autocomplete="current-password">
-                        <i class="fas fa-lock"></i>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-                        <div class="form-check custom-check">
-                            <input class="form-check-input" type="checkbox" id="remember" style="cursor: pointer;">
-                            <label class="form-check-label small text-muted" for="remember" style="cursor: pointer;">
-                                Manter sessão
-                            </label>
-                        </div>
-                        <a href="javascript:void(0)" class="small text-primary text-decoration-none fw-bold hover-underline">
-                            Recuperar senha?
-                        </a>
-                    </div>
-
-                    <button class="btn-login" type="submit">
-                        Aceder ao Painel
-                        <i class="fas fa-chevron-right ms-1"></i>
-                    </button>
-                    
-                    <div class="form-footer">
-                        <p class="small text-muted mb-1">
-                            Desenvolvido por <strong>HZ Consultoria</strong>
-                        </p>
-                        <p class="small text-muted mb-0" style="font-size: 0.75rem; opacity: 0.7;">
-                            &copy; 2026 <span th:text="${globalSistemaNome}">Kwanza ERP</span>. Todos os direitos reservados.
-                        </p>
-                    </div>
-                </form>
+        <!-- Form Section -->
+        <div class="login-form-side">
+            <div class="brand-icon">
+                <i class="fas fa-rocket"></i>
             </div>
+
+            <div class="welcome-text">
+                <h2 th:text="${globalSistemaNome}">Kwanza ERP</h2>
+                <p>Introduza as suas credenciais para aceder.</p>
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <!-- Erros -->
+                <div th:if="${param.error}" class="modern-alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>
+                        <span th:if="${#strings.contains(param.error, 'login.error.bloqueado')}">Acesso bloqueado por segurança.</span>
+                        <span th:if="${!#strings.contains(param.error, 'login.error.bloqueado')}">Credenciais inválidas. Tente novamente.</span>
+                    </div>
+                </div>
+
+                <div th:if="${param.logout}" class="modern-alert" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #34d399;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Sessão encerrada com sucesso.</span>
+                </div>
+
+                <div class="form-group-custom">
+                    <input type="text" name="username" class="form-control-custom" placeholder="Utilizador" required autofocus>
+                    <i class="fas fa-user"></i>
+                </div>
+
+                <div class="form-group-custom">
+                    <input type="password" name="password" class="form-control-custom" placeholder="Palavra-passe" required>
+                    <i class="fas fa-lock"></i>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label small text-muted" for="rememberMe" style="cursor:pointer">
+                            Manter sessão
+                        </label>
+                    </div>
+                    <a href="#" class="small text-decoration-none fw-bold" style="color: var(--primary)">Esqueci a senha</a>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    ENTRAR NO SISTEMA <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <div class="footer-brand">
+                    <p class="mb-1">Versão <span th:text="${globalSistemaVersao}">1.0</span> | 2026 &copy; <strong>HZ Consultoria</strong></p>
+                </div>
+            </form>
         </div>
     </div>
 </body>
