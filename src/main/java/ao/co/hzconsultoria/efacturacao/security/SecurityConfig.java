@@ -6,15 +6,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
@@ -40,38 +45,78 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authenticationProvider(authenticationProvider())
-                .authorizeRequests()
-                .antMatchers("/", "/login", "/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**",
-                        "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia",
-                        "/finalizarVenda", "/manifest.json", "/sw.js", "/licenca-expirada")
-                .permitAll()
-                .antMatchers("/faturas/**", "/guias/**").authenticated()
+            .authenticationProvider(authenticationProvider())
+            .authorizeRequests()
+
+                // === Recursos Públicos (Sem Autenticação) ===
+                .antMatchers(
+                    "/login",
+                    "/licenca-expirada", "/ativar-licenca",
+                    "/manifest.json", "/sw.js",
+                    "/uploads/**", "/assets/**", "/plugins/**",
+                    "/css/**", "/js/**", "/images/**"
+                ).permitAll()
+
+                // === Área Exclusiva do SuperAdmin ===
                 .antMatchers("/superadmin/**").hasRole("SUPERADMIN")
+
+                // === APIs Administrativas (Apenas ADMIN e SUPERADMIN) ===
+                .antMatchers(
+                    "/api/limpeza/**",
+                    "/api/saft/**",
+                    "/api/inventario/ajuste/**",
+                    "/configuracao/**"
+                ).hasAnyRole("ADMIN", "SUPERADMIN")
+
+                // === APIs do POS/Vendas (Qualquer utilizador autenticado) ===
+                .antMatchers(
+                    "/api/compras/**",
+                    "/api/vendas-suspensas/**",
+                    "/api/estoque/**",
+                    "/api/categorias/**",
+                    "/finalizarVenda"
+                ).authenticated()
+
+                // === Tudo o resto exige autenticação ===
                 .anyRequest().authenticated()
-                .and()
-                .csrf()
-                .ignoringAntMatchers("/api/compras")
-                .ignoringAntMatchers("/api/compras/single")
-                .ignoringAntMatchers("/api/compras/proforma")
-                .ignoringAntMatchers("/api/compras/guia")
-                .ignoringAntMatchers("/finalizarVenda")
-                .ignoringAntMatchers("/api/vendas-suspensas/**")
-                // Use cookie-based CSRF tokens to avoid creating an HTTP session during template rendering
+
+            .and()
+            .csrf()
+                // Endpoints do POS que podem ser chamados por hardware externo (TPA físico)
+                .ignoringAntMatchers(
+                    "/api/compras", "/api/compras/single",
+                    "/api/compras/proforma", "/api/compras/guia",
+                    "/finalizarVenda",
+                    "/api/vendas-suspensas/**",
+                    "/ativar-licenca"
+                )
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .and()
-                .formLogin()
+
+            .and()
+            .formLogin()
                 .loginPage("/login")
                 .failureHandler(failureHandler)
                 .successHandler(successHandler)
                 .permitAll()
-                .and()
-                .logout()
+
+            .and()
+            .logout()
                 .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
+
+            .and()
+            .headers()
+                .frameOptions().sameOrigin()
+                .xssProtection().block(true)
                 .and()
-                .headers()
-                .frameOptions().sameOrigin();
+                .contentTypeOptions()
+                .and()
+                .referrerPolicy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                .and()
+                .cacheControl();
+
         return http.build();
     }
 }

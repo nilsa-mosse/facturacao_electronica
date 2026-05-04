@@ -12,6 +12,8 @@ import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoEmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
+import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT;
+import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoAGTRepository;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
@@ -69,6 +71,9 @@ public class FaturaService {
 
     @Autowired
     private ConfiguracaoSistemaRepository configuracaoSistemaRepository;
+
+    @Autowired
+    private ConfiguracaoAGTRepository configuracaoAGTRepository;
 
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
@@ -138,23 +143,58 @@ public class FaturaService {
 
         // Enviar para a AGT (Apenas se não for FP, ou tratar conforme regra de negócio)
         if (!"FP".equals(tipo)) {
-            try {
-                AgtResponse agtResponse = agtService.enviarFatura(faturaSalva);
-                if (agtResponse.isSucesso()) {
-                    faturaSalva.setEnviadaAGT(true);
-                    faturaSalva.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
-                    faturaSalva.setCodigoAgt(agtResponse.getCodigoAgt());
-                    log.info("{} {} enviada e validada pela AGT. Código: {}", tipo, numeroFatura,
-                            agtResponse.getCodigoAgt());
-                } else {
-                    faturaSalva.setEnviadaAGT(false);
-                    faturaSalva.setStatus("FALHA_ENVIO");
-                    faturaSalva.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
-                    log.warn("Falha no envio da {} {} para AGT: {}", tipo, numeroFatura, agtResponse.getMensagem());
+            boolean podeEnviar = true;
+            String motivoNaoEnvio = "";
+            java.util.List<ConfiguracaoAGT> configsAgt = configuracaoAGTRepository.findAll();
+            ConfiguracaoAGT configAgt = null;
+            
+            if (!configsAgt.isEmpty()) {
+                configAgt = configsAgt.get(0);
+                if (!configAgt.isEnvioAgtAtivo()) {
+                    podeEnviar = false;
+                    motivoNaoEnvio = "Envio automático para AGT desactivado globalmente.";
+                } else if (configAgt.getLimiteDocumentosDiarios() != null && configAgt.getLimiteDocumentosDiarios() > 0) {
+                    java.time.LocalDate hoje = java.time.LocalDate.now();
+                    if (configAgt.getDataUltimoEnvio() == null || !configAgt.getDataUltimoEnvio().equals(hoje)) {
+                        configAgt.setDataUltimoEnvio(hoje);
+                        configAgt.setDocumentosEnviadosHoje(0);
+                    }
+                    if (configAgt.getDocumentosEnviadosHoje() >= configAgt.getLimiteDocumentosDiarios()) {
+                        podeEnviar = false;
+                        motivoNaoEnvio = "Limite diário de envio para AGT atingido (" + configAgt.getLimiteDocumentosDiarios() + " docs).";
+                    }
                 }
-            } catch (Exception e) {
-                faturaSalva.setStatus("FALHA_ENVIO");
-                log.error("Erro crítico ao enviar {} {} para AGT: {}", tipo, numeroFatura, e.getMessage());
+            }
+
+            if (podeEnviar) {
+                try {
+                    AgtResponse agtResponse = agtService.enviarFatura(faturaSalva);
+                    if (agtResponse.isSucesso()) {
+                        faturaSalva.setEnviadaAGT(true);
+                        faturaSalva.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
+                        faturaSalva.setCodigoAgt(agtResponse.getCodigoAgt());
+                        log.info("{} {} enviada e validada pela AGT. Código: {}", tipo, numeroFatura,
+                                agtResponse.getCodigoAgt());
+                        
+                        // Atualizar contador se houver limite definido
+                        if (configAgt != null && configAgt.getLimiteDocumentosDiarios() != null && configAgt.getLimiteDocumentosDiarios() > 0) {
+                            configAgt.setDocumentosEnviadosHoje(configAgt.getDocumentosEnviadosHoje() + 1);
+                            configuracaoAGTRepository.save(configAgt);
+                        }
+                    } else {
+                        faturaSalva.setEnviadaAGT(false);
+                        faturaSalva.setStatus("FALHA_ENVIO");
+                        faturaSalva.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
+                        log.warn("Falha no envio da {} {} para AGT: {}", tipo, numeroFatura, agtResponse.getMensagem());
+                    }
+                } catch (Exception e) {
+                    faturaSalva.setStatus("FALHA_ENVIO");
+                    log.error("Erro crítico ao enviar {} {} para AGT: {}", tipo, numeroFatura, e.getMessage());
+                }
+            } else {
+                faturaSalva.setEnviadaAGT(false);
+                faturaSalva.setStatus("EMITIDA_OFFLINE");
+                log.info("A factura {} não foi enviada para a AGT. Motivo: {}", numeroFatura, motivoNaoEnvio);
             }
         } else {
             // Pró-forma não é enviada à AGT obrigatoriamente nesta simulação
@@ -171,23 +211,58 @@ public class FaturaService {
     public Fatura reenviarFatura(Long id) {
         Fatura fatura = faturaRepository.findById(id).orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
 
-        try {
-            AgtResponse agtResponse = agtService.enviarFatura(fatura);
-            if (agtResponse.isSucesso()) {
-                fatura.setEnviadaAGT(true);
-                fatura.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
-                fatura.setCodigoAgt(agtResponse.getCodigoAgt());
-                log.info("Reenvio da Fatura {} foi aceite. Código: {}", fatura.getNumeroFatura(),
-                        agtResponse.getCodigoAgt());
-            } else {
-                fatura.setEnviadaAGT(false);
-                fatura.setStatus("FALHA_ENVIO");
-                fatura.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
-                log.warn("Falha no reenvio da fatura {}: {}", fatura.getNumeroFatura(), agtResponse.getMensagem());
+        boolean podeEnviar = true;
+        String motivoNaoEnvio = "";
+        java.util.List<ConfiguracaoAGT> configsAgt = configuracaoAGTRepository.findAll();
+        ConfiguracaoAGT configAgt = null;
+        
+        if (!configsAgt.isEmpty()) {
+            configAgt = configsAgt.get(0);
+            if (!configAgt.isEnvioAgtAtivo()) {
+                podeEnviar = false;
+                motivoNaoEnvio = "Envio automático para AGT desactivado globalmente.";
+            } else if (configAgt.getLimiteDocumentosDiarios() != null && configAgt.getLimiteDocumentosDiarios() > 0) {
+                java.time.LocalDate hoje = java.time.LocalDate.now();
+                if (configAgt.getDataUltimoEnvio() == null || !configAgt.getDataUltimoEnvio().equals(hoje)) {
+                    configAgt.setDataUltimoEnvio(hoje);
+                    configAgt.setDocumentosEnviadosHoje(0);
+                }
+                if (configAgt.getDocumentosEnviadosHoje() >= configAgt.getLimiteDocumentosDiarios()) {
+                    podeEnviar = false;
+                    motivoNaoEnvio = "Limite diário de envio para AGT atingido (" + configAgt.getLimiteDocumentosDiarios() + " docs).";
+                }
             }
-        } catch (Exception e) {
-            fatura.setStatus("FALHA_ENVIO");
-            log.error("Erro crítico ao reenviar fatura {}: {}", fatura.getNumeroFatura(), e.getMessage());
+        }
+
+        if (podeEnviar) {
+            try {
+                AgtResponse agtResponse = agtService.enviarFatura(fatura);
+                if (agtResponse.isSucesso()) {
+                    fatura.setEnviadaAGT(true);
+                    fatura.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
+                    fatura.setCodigoAgt(agtResponse.getCodigoAgt());
+                    log.info("Reenvio da Fatura {} foi aceite. Código: {}", fatura.getNumeroFatura(),
+                            agtResponse.getCodigoAgt());
+                            
+                    // Atualizar contador se houver limite definido
+                    if (configAgt != null && configAgt.getLimiteDocumentosDiarios() != null && configAgt.getLimiteDocumentosDiarios() > 0) {
+                        configAgt.setDocumentosEnviadosHoje(configAgt.getDocumentosEnviadosHoje() + 1);
+                        configuracaoAGTRepository.save(configAgt);
+                    }
+                } else {
+                    fatura.setEnviadaAGT(false);
+                    fatura.setStatus("FALHA_ENVIO");
+                    fatura.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
+                    log.warn("Falha no reenvio da fatura {}: {}", fatura.getNumeroFatura(), agtResponse.getMensagem());
+                }
+            } catch (Exception e) {
+                fatura.setStatus("FALHA_ENVIO");
+                log.error("Erro crítico ao reenviar fatura {}: {}", fatura.getNumeroFatura(), e.getMessage());
+            }
+        } else {
+            fatura.setEnviadaAGT(false);
+            fatura.setStatus("EMITIDA_OFFLINE");
+            log.warn("Reenvio da fatura {} abortado: {}", fatura.getNumeroFatura(), motivoNaoEnvio);
         }
 
         fatura = faturaRepository.save(fatura);

@@ -6,10 +6,14 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(name = "categoria", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"nome", "empresa_id"})
+})
 public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private String nome;
 
     @OneToMany(mappedBy = "categoria")

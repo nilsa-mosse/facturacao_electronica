@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.HashSet;
 import java.util.Arrays;
 import java.util.Optional;
@@ -34,14 +35,64 @@ public class EfaturacaoApplication {
             EstabelecimentoRepository estabRepository,
             ConfiguracaoSistemaRepository configRepo,
             ImpostoRepository impostoRepository,
-            PasswordEncoder passwordEncoder) {
+            ao.co.hzconsultoria.efacturacao.repository.ClienteRepository clienteRepository,
+            ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository categoriaRepository,
+            ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository produtoRepository,
+            PasswordEncoder passwordEncoder,
+            JdbcTemplate jdbcTemplate) {
         return args -> {
+            // Migração de Emergência: Adicionar coluna 'exibir_datas_validade' se não
+            // existir
+            try {
+                jdbcTemplate.execute(
+                        "ALTER TABLE configuracao_sistema ADD COLUMN IF NOT EXISTS exibir_datas_validade BOOLEAN DEFAULT TRUE");
+                System.out.println(">>> Migração: Coluna 'exibir_datas_validade' verificada/adicionada com sucesso.");
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao tentar migrar tabela configuracao_sistema: " + e.getMessage());
+            }
+
+            // Migração: Adicionar colunas de controlo de envio AGT
+            try {
+                jdbcTemplate.execute(
+                        "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS envio_agt_ativo BOOLEAN DEFAULT TRUE");
+                jdbcTemplate.execute(
+                        "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS limite_documentos_diarios INT DEFAULT 0");
+                jdbcTemplate.execute(
+                        "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS documentos_enviados_hoje INT DEFAULT 0");
+                jdbcTemplate.execute("ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS data_ultimo_envio DATE");
+                System.out.println(">>> Migração: Colunas de controlo AGT verificadas/adicionadas com sucesso.");
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao migrar tabela configuracao_agt: " + e.getMessage());
+            }
+
+            // Migração: Criar tabela para gestão de licenças
+            try {
+                jdbcTemplate.execute(
+                        "CREATE TABLE IF NOT EXISTS licencas_geradas (" +
+                        "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                        "machine_id VARCHAR(255), " +
+                        "cliente_nome VARCHAR(255), " +
+                        "chave_gerada VARCHAR(500), " +
+                        "data_emissao TIMESTAMP, " +
+                        "data_expiracao TIMESTAMP, " +
+                        "ativa BOOLEAN DEFAULT TRUE, " +
+                        "observacoes VARCHAR(1000)" +
+                        ")"
+                );
+                System.out.println(">>> Migração: Tabela 'licencas_geradas' verificada/criada com sucesso.");
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao migrar tabela licencas_geradas: " + e.getMessage());
+            }
+
             // RESET TRIAL (Comentado para não reiniciar o tempo sempre que o servidor
             // arranca)
             /*
-             * configRepo.findById(1L).ifPresent(c -> {
-             * c.setLicencaDataAtivacao(null);
+             * configRepo.findById(1L
+             * ).ifPresent(c -> {
+             * c.setLicencaDataAtivac
+             * ao(null);
              * configRepo.save(c);
+             * 
              * System.out.println(">>> TRIAL RESETADO COM SUCESSO!");
              * });
              */
@@ -65,7 +116,6 @@ public class EfaturacaoApplication {
                     existingAdmin.setBloqueadoAte(null);
                     existingAdmin.setAtivo(true);
                     changed = true;
-                    System.out.println(">>> Utilizador 'admin' foi desbloqueado com sucesso!");
                 }
 
                 // If the stored password doesn't match the default and isn't a valid BCrypt
@@ -80,16 +130,12 @@ public class EfaturacaoApplication {
                     isValidBcrypt = stored.matches("^\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
                 }
 
-                if (!matchesDefault && !isValidBcrypt) {
-                    // Reset when stored password is not the default and not a valid bcrypt hash
-                    existingAdmin.setSenha(passwordEncoder.encode("admin123"));
-                    existingAdmin.setTentativasLogin(0);
-                    existingAdmin.setBloqueadoAte(null);
-                    existingAdmin.setAtivo(true);
-                    changed = true;
-                    System.out.println(
-                            ">>> Senha do 'admin' não estava em BCrypt válido — resetada para 'admin123' (bcrypt). Por favor altere após login.");
-                }
+                // FORÇAR RESET (Para garantir que admin/admin123 funcione agora)
+                existingAdmin.setSenha(passwordEncoder.encode("admin123"));
+                existingAdmin.setTentativasLogin(0);
+                existingAdmin.setBloqueadoAte(null);
+                existingAdmin.setAtivo(true);
+                changed = true;
 
                 if (changed) {
                     userRepository.save(existingAdmin);
@@ -130,7 +176,6 @@ public class EfaturacaoApplication {
                         "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO")));
 
                 userRepository.save(admin);
-                System.out.println(">>> Utilizador 'admin' criado com sucesso (Senha: admin123)");
             }
 
             // 3.1 Criar ou Resetar SuperAdmin de Sistema
@@ -146,7 +191,6 @@ public class EfaturacaoApplication {
                 superAdmin.setPermissoes(new HashSet<>(Arrays.asList(
                         "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "PAINEL_GLOBAL")));
                 userRepository.save(superAdmin);
-                System.out.println(">>> Utilizador 'superadmin' criado (Nova Senha: superadmin@2026)");
             } else {
                 // Forçar reset de senha
                 User superAdmin = superOpt.get();
@@ -155,7 +199,6 @@ public class EfaturacaoApplication {
                 superAdmin.setTentativasLogin(0);
                 superAdmin.setBloqueadoAte(null);
                 userRepository.save(superAdmin);
-                System.out.println(">>> SENHA DO SUPERADMIN ALTERADA PARA: superadmin@2026");
             }
 
             // 4. Inicializar Impostos Padrão (se necessário)
@@ -185,6 +228,21 @@ public class EfaturacaoApplication {
                 impostoRepository.save(isento);
 
                 System.out.println(">>> Impostos padrão criados com sucesso!");
+            }
+
+            // 5. Inicializar Dados Padrão (Clientes) para novas instalações
+            if (clienteRepository.count() == 0) {
+                System.out.println("Populando sistema com dados padrão...");
+
+                Empresa empPadrao = empresaRepository.findAll().stream().findFirst().orElse(null);
+                if (empPadrao != null) {
+                    // Cliente
+                    ao.co.hzconsultoria.efacturacao.model.Cliente clienteFinal = new ao.co.hzconsultoria.efacturacao.model.Cliente();
+                    clienteFinal.setNome("Consumidor Final");
+                    clienteFinal.setNif("999999999");
+                    clienteFinal.setEmpresa(empPadrao);
+                    clienteRepository.save(clienteFinal);
+                }
             }
         };
     }

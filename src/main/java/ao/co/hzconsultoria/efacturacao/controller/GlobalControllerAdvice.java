@@ -47,6 +47,15 @@ public class GlobalControllerAdvice {
         model.addAttribute("globalTema", tema);
         model.addAttribute("globalSistemaNome", nomeSistema);
         model.addAttribute("globalSistemaVersao", versaoSistema);
+        
+        boolean exibirDatasValidade = true;
+        try {
+            ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
+            if (sistemaConfig != null) {
+                exibirDatasValidade = sistemaConfig.isExibirDatasValidade();
+            }
+        } catch (Exception ignored) {}
+        model.addAttribute("globalExibirDatasValidade", exibirDatasValidade);
 
         // Adicionar Empresa atual ao modelo
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();

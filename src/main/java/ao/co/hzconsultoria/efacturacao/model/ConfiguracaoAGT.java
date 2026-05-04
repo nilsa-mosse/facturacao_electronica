@@ -24,6 +24,20 @@ public class ConfiguracaoAGT {
 
     private String nifCertificado;
 
+    // ─── Controlo de Envio AGT ───────────────────────────────────────────────
+    /** Liga/Desliga o envio de documentos para a AGT globalmente */
+    private boolean envioAgtAtivo = true;
+
+    /** Número máximo de documentos a enviar para a AGT por dia (0 = sem limite) */
+    private Integer limiteDocumentosDiarios = 0;
+
+    /** Contador dos documentos já enviados para a AGT hoje */
+    private Integer documentosEnviadosHoje = 0;
+
+    /** Data da última contagem (para reset automático diário) */
+    @Column(name = "data_ultimo_envio")
+    private java.time.LocalDate dataUltimoEnvio;
+
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -45,4 +59,16 @@ public class ConfiguracaoAGT {
 
     public String getNifCertificado() { return nifCertificado; }
     public void setNifCertificado(String nifCertificado) { this.nifCertificado = nifCertificado; }
+
+    public boolean isEnvioAgtAtivo() { return envioAgtAtivo; }
+    public void setEnvioAgtAtivo(boolean envioAgtAtivo) { this.envioAgtAtivo = envioAgtAtivo; }
+
+    public Integer getLimiteDocumentosDiarios() { return limiteDocumentosDiarios; }
+    public void setLimiteDocumentosDiarios(Integer limiteDocumentosDiarios) { this.limiteDocumentosDiarios = limiteDocumentosDiarios; }
+
+    public Integer getDocumentosEnviadosHoje() { return documentosEnviadosHoje != null ? documentosEnviadosHoje : 0; }
+    public void setDocumentosEnviadosHoje(Integer documentosEnviadosHoje) { this.documentosEnviadosHoje = documentosEnviadosHoje; }
+
+    public java.time.LocalDate getDataUltimoEnvio() { return dataUltimoEnvio; }
+    public void setDataUltimoEnvio(java.time.LocalDate dataUltimoEnvio) { this.dataUltimoEnvio = dataUltimoEnvio; }
 }

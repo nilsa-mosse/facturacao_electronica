@@ -181,7 +181,8 @@ CREATE TABLE IF NOT EXISTS configuracao_sistema (
     agt_public_key TEXT,
     agt_chave_versao INT DEFAULT 1,
     licenca_data_ativacao DATETIME,
-    licenca_chave_ativacao VARCHAR(255)
+    licenca_chave_ativacao VARCHAR(255),
+    exibir_datas_validade BOOLEAN DEFAULT TRUE
 );
 
 -- Inicializar configuração única

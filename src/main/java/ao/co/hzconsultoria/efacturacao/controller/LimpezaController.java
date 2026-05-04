@@ -3,6 +3,7 @@ package ao.co.hzconsultoria.efacturacao.controller;
 import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,7 @@ public class LimpezaController {
 
     @PostMapping("/executar")
     @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN','SUPERADMIN')")
     public ResponseEntity<?> executarLimpeza() {
         // Apenas ADMIN ou SUPERADMIN podem limpar a base de dados
         // Nota: A segurança deve ser reforçada no SecurityConfig também

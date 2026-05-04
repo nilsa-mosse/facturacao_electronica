@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -30,7 +29,6 @@ public class LicencaService {
     private ConfiguracaoSistemaRepository configuracaoSistemaRepository;
 
     private static final String NTP_SERVER = "pool.ntp.org";
-    private static final int TRIAL_MINUTES = 5;
     
     // Chave mestra para criptografia das licenças (deve ser mantida em segredo pelo desenvolvedor)
     private static final String SECRET_KEY = "HZ-FACT-2024-SYS"; 
@@ -159,16 +157,7 @@ public class LicencaService {
             return validarChave(chave);
         }
 
-        // Se não houver licença pro, validar o trial de 5 minutos
-        LocalDateTime agora = getCurrentNetworkTime();
-
-        if (config.getLicencaDataAtivacao() == null) {
-            config.setLicencaDataAtivacao(agora);
-            configuracaoSistemaRepository.save(config);
-            return true;
-        }
-
-        long minutosPassados = ChronoUnit.MINUTES.between(config.getLicencaDataAtivacao(), agora);
-        return minutosPassados < TRIAL_MINUTES;
+        // Sem período de trial. Exige licença imediatamente.
+        return false;
     }
 }

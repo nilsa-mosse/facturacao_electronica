@@ -10,12 +10,15 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
+    @Cacheable("produtos_por_empresa")
     List<Produto> findByEmpresa_Id(Long empresaId);
+
     Page<Produto> findByEmpresa_Id(Long empresaId, Pageable pageable);
     
     Produto findByCodigoBarraAndEmpresa_Id(String codigoBarra, Long empresaId);
     
     Page<Produto> findByCategoria_IdAndEmpresa_Id(Long categoriaId, Long empresaId, Pageable pageable);
+    @Cacheable("produtos_por_categoria")
     List<Produto> findByCategoria_IdAndEmpresa_Id(Long categoriaId, Long empresaId);
     
     List<Produto> findByNomeContainingIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
@@ -26,4 +29,12 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     List<Produto> findProdutosComStockBaixo(Long empresaId);
 
     List<Produto> findByDataExpiracaoBeforeAndEmPromocaoFalse(java.time.LocalDate date);
-}
+
+    @Override
+    @org.springframework.cache.annotation.CacheEvict(value = {"produtos_por_empresa", "produtos_por_categoria"}, allEntries = true)
+    <S extends Produto> S save(S entity);
+
+    @Override
+    @org.springframework.cache.annotation.CacheEvict(value = {"produtos_por_empresa", "produtos_por_categoria"}, allEntries = true)
+    void deleteById(Long id);
+}

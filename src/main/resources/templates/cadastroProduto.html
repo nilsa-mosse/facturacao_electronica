@@ -403,22 +403,24 @@
                 </div>
 
                 <!-- Datas de Validade Section -->
-                <div class="section-title">
-                  <i class="fas fa-calendar-alt"></i> Validade e Segurança
-                </div>
-                <div class="row g-4 mb-5">
-                  <div class="col-sm-6">
-                    <label class="form-label text-info">Data de Fabrico</label>
-                    <div class="input-group-premium">
-                      <i class="fas fa-calendar-day text-info"></i>
-                      <input type="date" name="dataFabrico" class="form-control input-premium border-info-subtle">
-                    </div>
+                <div th:if="${globalExibirDatasValidade}">
+                  <div class="section-title">
+                    <i class="fas fa-calendar-alt"></i> Validade e Segurança
                   </div>
-                  <div class="col-sm-6">
-                    <label class="form-label text-danger">Data de Expiração</label>
-                    <div class="input-group-premium">
-                      <i class="fas fa-calendar-times text-danger"></i>
-                      <input type="date" name="dataExpiracao" class="form-control input-premium border-danger-subtle">
+                  <div class="row g-4 mb-5">
+                    <div class="col-sm-6">
+                      <label class="form-label text-info">Data de Fabrico</label>
+                      <div class="input-group-premium">
+                        <i class="fas fa-calendar-day text-info"></i>
+                        <input type="date" name="dataFabrico" class="form-control input-premium border-info-subtle">
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                      <label class="form-label text-danger">Data de Expiração</label>
+                      <div class="input-group-premium">
+                        <i class="fas fa-calendar-times text-danger"></i>
+                        <input type="date" name="dataExpiracao" class="form-control input-premium border-danger-subtle">
+                      </div>
                     </div>
                   </div>
                 </div>

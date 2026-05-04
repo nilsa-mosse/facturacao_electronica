@@ -6,8 +6,17 @@ public class Sistema {
     private String emailSuporte;
     private boolean backup;
     private String tema;
+    private boolean exibirDatasValidade;
 
     // Getters and Setters
+    public boolean isExibirDatasValidade() {
+        return exibirDatasValidade;
+    }
+
+    public void setExibirDatasValidade(boolean exibirDatasValidade) {
+        this.exibirDatasValidade = exibirDatasValidade;
+    }
+
     public String getNome() {
         return nome;
     }

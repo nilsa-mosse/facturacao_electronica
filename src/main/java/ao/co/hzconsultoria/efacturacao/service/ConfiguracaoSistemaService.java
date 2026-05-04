@@ -39,6 +39,7 @@ public class ConfiguracaoSistemaService {
         s.setEmailSuporte(e.getSistemaEmailSuporte());
         s.setBackup(e.isSistemaBackup());
         s.setTema(e.getSistemaTema());
+        s.setExibirDatasValidade(e.isExibirDatasValidade());
         return s;
     }
 
@@ -50,6 +51,7 @@ public class ConfiguracaoSistemaService {
         e.setSistemaEmailSuporte(s.getEmailSuporte());
         e.setSistemaBackup(s.isBackup());
         e.setSistemaTema(s.getTema());
+        e.setExibirDatasValidade(s.isExibirDatasValidade());
         repository.save(e);
     }
 

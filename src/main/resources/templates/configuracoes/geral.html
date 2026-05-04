@@ -55,6 +55,11 @@
                                         <label class="custom-control-label" for="backup" th:text="#{config.geral.backup}">Backup Automático
                                             Diário</label>
                                     </div>
+                                    <div class="custom-control custom-switch mt-2">
+                                        <input type="checkbox" class="custom-control-input" id="exibirDatasValidade"
+                                            th:field="*{exibirDatasValidade}">
+                                        <label class="custom-control-label" for="exibirDatasValidade">Exibir Datas de Fabrico e Expiração nos Produtos</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

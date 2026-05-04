@@ -1,0 +1,81 @@
+===================================================================
+                KWANZA ERP - MANUAL DE UTILIZAÇÃO
+===================================================================
+Versão do Sistema: 2.0
+Editora: HZ Consultoria
+Site: https://www.hzconsultoria.co.ao
+-------------------------------------------------------------------
+
+BEM-VINDO AO KWANZA ERP!
+Este manual descreve o fluxo lógico de operação do sistema para garantir
+que a sua facturação esteja em conformidade com as regras da AGT.
+
+-------------------------------------------------------------------
+PASSO 1: ACESSO AO SISTEMA
+-------------------------------------------------------------------
+1. Inicie o sistema através do ícone "KwanzaERP" na Área de Trabalho.
+2. Aguarde que a janela preta (servidor) mostre a mensagem "Servidor pronto!".
+3. O navegador abrirá automaticamente na página de Login.
+4. Credenciais Padrão:
+   - Utilizador: admin
+   - Senha: admin123
+   (RECOMENDAÇÃO: Altere a senha no primeiro acesso em Configurações > Utilizadores)
+
+-------------------------------------------------------------------
+PASSO 2: CONFIGURAÇÃO INICIAL (ORDEM DE EXECUÇÃO)
+-------------------------------------------------------------------
+Para que o sistema funcione correctamente, siga esta ordem:
+
+1. DADOS DA EMPRESA (Menu: Configurações > Empresa)
+   - Preencha o Nome, NIF, Endereço e carregue o Logotipo.
+   - Defina o REGIME FISCAL (Geral, Simplificado ou Exclusão).
+
+2. CATEGORIAS (Menu: Stock > Categorias)
+   - Crie as categorias para organizar os seus produtos (Ex: Bebidas, Limpeza, Serviços).
+
+3. PRODUTOS/ARTIGOS (Menu: Stock > Novo Artigo)
+   - Cadastre os seus itens definindo: Nome, Preço de Venda e Taxa de IVA.
+   - O sistema já vem com taxas padrão (14%, 7%, Isento).
+
+4. CLIENTES (Menu: Entidades > Novo Cliente)
+   - O sistema já inclui o "Consumidor Final".
+   - Cadastre outros clientes se precisar de facturas nominais.
+
+-------------------------------------------------------------------
+PASSO 3: OPERAÇÃO DIÁRIA (VENDAS E FACTURAÇÃO)
+-------------------------------------------------------------------
+
+1. PONTO DE VENDA (POS) (Menu: Vendas > PDV)
+   - Seleccione os produtos clicando nas imagens ou pesquisando pelo nome.
+   - Clique em "Finalizar Venda".
+   - Escolha o método de pagamento e confirme.
+
+2. GESTÃO DE FACTURAS (Menu: Facturação > Listar Facturas)
+   - Aqui pode visualizar todas as facturas emitidas.
+   - Pode imprimir em formato A4 ou Ticket.
+   - Pode anular facturas (Nota de Crédito) se houver erro.
+
+-------------------------------------------------------------------
+PASSO 4: GESTÃO DE STOCK (LOGÍSTICA)
+-------------------------------------------------------------------
+1. ENTRADA DE STOCK (Menu: Stock > Inventário)
+   - Utilize o assistente de inventário para actualizar as quantidades físicas.
+2. LISTAGEM (Menu: Stock > Listar Artigos)
+   - Verifique alertas de stock baixo (em vermelho).
+
+-------------------------------------------------------------------
+PASSO 5: COMO PARAR O SISTEMA (ENCERRAMENTO)
+-------------------------------------------------------------------
+Para desligar o servidor de forma correta e segura:
+1. Utilize o ícone "Parar KwanzaERP" na Área de Trabalho ou no Menu Iniciar.
+2. O script irá identificar o processo e encerrá-lo automaticamente.
+3. Alternativamente, pode fechar a janela preta do servidor ou pressionar Ctrl+C na mesma.
+
+-------------------------------------------------------------------
+PASSO 6: SUPORTE TECNICO
+-------------------------------------------------------------------
+Em caso de dúvidas ou erros técnicos:
+Email: suporte@hzconsultoria.co.ao
+WhatsApp: +244 XXX XXX XXX
+===================================================================
+Conserve este ficheiro na pasta de instalação para consultas futuras.

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="menu :: head"></th:block>
+    <style>
+        .table-licenses th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .key-truncate {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            color: #2563eb;
+        }
+        .key-truncate:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1><i class="fas fa-list-alt text-primary"></i> Gestão de Licenças Geradas</h1>
+                        </div>
+                        <div class="col-sm-6 text-end">
+                            <a th:href="@{/superadmin/licenca/gerador}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Gerar Nova Licença
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    
+                    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <i class="fas fa-check-circle me-1"></i> <span th:text="${sucesso}"></span>
+                    </div>
+                    
+                    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <i class="fas fa-exclamation-triangle me-1"></i> <span th:text="${erro}"></span>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header border-0 pb-0">
+                            <h3 class="card-title">Computadores Licenciados</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle table-licenses">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente / Computador</th>
+                                            <th>Machine ID</th>
+                                            <th>Chave (Resumo)</th>
+                                            <th>Data Emissão</th>
+                                            <th>Data Expiração</th>
+                                            <th>Estado</th>
+                                            <th class="text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="lic : ${licencas}">
+                                            <td>
+                                                <div class="fw-bold" th:text="${lic.clienteNome}"></div>
+                                                <small class="text-muted" th:text="${lic.observacoes}"></small>
+                                            </td>
+                                            <td>
+                                                <code th:text="${lic.machineId}" class="bg-light px-2 py-1 rounded"></code>
+                                            </td>
+                                            <td>
+                                                <div class="key-truncate" 
+                                                     th:text="${lic.chaveGerada}" 
+                                                     th:attr="onclick=|copiarTexto('${lic.chaveGerada}')|" 
+                                                     title="Clique para copiar a chave completa">
+                                                </div>
+                                            </td>
+                                            <td th:text="${#temporals.format(lic.dataEmissao, 'dd/MM/yyyy HH:mm')}"></td>
+                                            <td>
+                                                <span th:text="${#temporals.format(lic.dataExpiracao, 'dd/MM/yyyy HH:mm')}"></span>
+                                                <br>
+                                                <small th:if="${lic.dataExpiracao.isBefore(T(java.time.LocalDateTime).now())}" 
+                                                       class="text-danger fw-bold"><i class="fas fa-times-circle"></i> Expirada</small>
+                                                <small th:unless="${lic.dataExpiracao.isBefore(T(java.time.LocalDateTime).now())}" 
+                                                       class="text-success"><i class="fas fa-clock"></i> Válida</small>
+                                            </td>
+                                            <td>
+                                                <span th:if="${lic.ativa}" class="status-badge bg-success bg-opacity-25 text-success">
+                                                    <i class="fas fa-check"></i> Activa
+                                                </span>
+                                                <span th:unless="${lic.ativa}" class="status-badge bg-danger bg-opacity-25 text-danger">
+                                                    <i class="fas fa-ban"></i> Inactiva
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <!-- Botão de Ativar/Desativar -->
+                                                <a th:href="@{/superadmin/licenca/alternar-estado/{id}(id=${lic.id})}" 
+                                                   class="btn btn-sm"
+                                                   th:classappend="${lic.ativa ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                                   th:title="${lic.ativa ? 'Desativar Licença' : 'Ativar Licença'}"
+                                                   onclick="return confirm('Tem a certeza que deseja alterar o estado desta licença?');">
+                                                    <i class="fas" th:classappend="${lic.ativa ? 'fa-power-off' : 'fa-check'}"></i>
+                                                </a>
+                                                
+                                                <!-- Botão para ver Detalhes (Modal) -->
+                                                <button type="button" class="btn btn-sm btn-outline-info ms-1" 
+                                                        data-bs-toggle="modal" 
+                                                        th:data-bs-target="'#modalDetalhes' + ${lic.id}" title="Ver Detalhes Completos">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+
+                                                <!-- Modal de Detalhes -->
+                                                <div class="modal fade text-start" th:id="'modalDetalhes' + ${lic.id}" tabindex="-1">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header bg-light">
+                                                                <h5 class="modal-title">
+                                                                    <i class="fas fa-key text-primary me-2"></i>Detalhes da Licença
+                                                                </h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p><strong>Cliente/Computador:</strong> <span th:text="${lic.clienteNome}"></span></p>
+                                                                <p><strong>Machine ID:</strong> <code th:text="${lic.machineId}"></code></p>
+                                                                <p><strong>Data de Emissão:</strong> <span th:text="${#temporals.format(lic.dataEmissao, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+                                                                <p><strong>Data de Expiração:</strong> <span th:text="${#temporals.format(lic.dataExpiracao, 'dd/MM/yyyy HH:mm:ss')}"></span></p>
+                                                                <p><strong>Estado:</strong> 
+                                                                    <span th:text="${lic.ativa ? 'Activa' : 'Inactiva'}" 
+                                                                          th:class="${lic.ativa ? 'text-success fw-bold' : 'text-danger fw-bold'}"></span>
+                                                                </p>
+                                                                <hr>
+                                                                <p class="mb-1"><strong>Chave de Ativação Completa:</strong></p>
+                                                                <div class="bg-light p-2 rounded border" style="word-break: break-all; font-family: monospace;" th:text="${lic.chaveGerada}"></div>
+                                                                <div class="mt-2 text-end">
+                                                                    <button type="button" class="btn btn-sm btn-secondary" th:attr="onclick=|copiarTexto('${lic.chaveGerada}')|">
+                                                                        <i class="fas fa-copy"></i> Copiar Chave
+                                                                    </button>
+                                                                </div>
+                                                                
+                                                                <th:block th:if="${lic.observacoes != null and !lic.observacoes.isEmpty()}">
+                                                                    <hr>
+                                                                    <p class="mb-1"><strong>Observações:</strong></p>
+                                                                    <p class="text-muted small" th:text="${lic.observacoes}"></p>
+                                                                </th:block>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fechar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(licencas)}">
+                                            <td colspan="7" class="text-center py-4 text-muted">
+                                                <i class="fas fa-info-circle fa-2x mb-2 d-block"></i>
+                                                Nenhuma licença gerada até ao momento.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function copiarTexto(texto) {
+            navigator.clipboard.writeText(texto).then(function() {
+                alert('Chave copiada com sucesso!');
+            }, function(err) {
+                console.error('Erro ao copiar chave: ', err);
+                alert('Não foi possível copiar a chave.');
+            });
+        }
+    </script>
+</body>
+</html>

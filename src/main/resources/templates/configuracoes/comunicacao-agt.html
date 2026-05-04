@@ -82,6 +82,68 @@
                                     </div>
                                 </div>
 
+                                <!-- ─── Controlo de Envio AGT ──────────────────────────────── -->
+                                <hr class="mt-4">
+                                <h5 class="mt-2 mb-3"><i class="fas fa-toggle-on me-2 text-primary"></i>Controlo de Envio para AGT</h5>
+
+                                <div class="row">
+                                    <!-- Toggle de activação global -->
+                                    <div class="form-group col-md-6">
+                                        <label class="fw-bold">Envio de Documentos para AGT</label>
+                                        <div class="custom-control custom-switch mt-2">
+                                            <input type="checkbox" class="custom-control-input" id="envioAgtAtivo"
+                                                th:field="*{envioAgtAtivo}" onchange="toggleLimiteDiario()">
+                                            <label class="custom-control-label" for="envioAgtAtivo">
+                                                Activar envio automático de documentos para a AGT
+                                            </label>
+                                        </div>
+                                        <small class="text-muted">Quando desactivado, nenhum documento será enviado para a AGT, independentemente das outras configurações.</small>
+                                    </div>
+
+                                    <!-- Limite diário -->
+                                    <div class="form-group col-md-6">
+                                        <label class="fw-bold" for="limiteDocumentosDiarios">Limite Diário de Documentos</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="limiteDocumentosDiarios"
+                                                th:field="*{limiteDocumentosDiarios}" min="0" step="1"
+                                                placeholder="0 = sem limite">
+                                            <span class="input-group-text">docs/dia</span>
+                                        </div>
+                                        <small class="text-muted">Defina <strong>0</strong> para sem limite. Após atingir o limite diário, os documentos seguintes não serão enviados para a AGT.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Status do dia atual -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="info-box bg-light shadow-sm">
+                                            <span class="info-box-icon">
+                                                <i class="fas fa-paper-plane"
+                                                   th:classappend="${config.envioAgtAtivo} ? 'text-success' : 'text-danger'"></i>
+                                            </span>
+                                            <div class="info-box-content">
+                                                <span class="info-box-text">Documentos enviados hoje</span>
+                                                <span class="info-box-number">
+                                                    <span th:text="${config.documentosEnviadosHoje}">0</span>
+                                                    <span th:if="${config.limiteDocumentosDiarios != null and config.limiteDocumentosDiarios > 0}">
+                                                        / <span th:text="${config.limiteDocumentosDiarios}">100</span>
+                                                    </span>
+                                                </span>
+                                                <div class="progress" th:if="${config.limiteDocumentosDiarios != null and config.limiteDocumentosDiarios > 0}">
+                                                    <div class="progress-bar"
+                                                         th:style="'width: ' + (${config.documentosEnviadosHoje} * 100 / ${config.limiteDocumentosDiarios}) + '%'"
+                                                         th:classappend="${config.documentosEnviadosHoje >= config.limiteDocumentosDiarios} ? 'bg-danger' : 'bg-success'">
+                                                    </div>
+                                                </div>
+                                                <span class="info-box-text text-muted small"
+                                                      th:text="${config.envioAgtAtivo} ? 'Envio activo' : 'Envio desactivado'">
+                                                    Estado do envio
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Info Box sobre o Modo -->
                                 <div class="row mt-4">
                                      <div class="col-md-6">
@@ -119,6 +181,21 @@
     <!-- JavaScript -->
     <!-- Scripts already loaded via menu :: head -->
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleLimiteDiario(); // Inicializar estado do campo limite no carregamento da página
+        });
+
+        function toggleLimiteDiario() {
+            var envioAgtAtivo = document.getElementById('envioAgtAtivo').checked;
+            var limiteField = document.getElementById('limiteDocumentosDiarios');
+            limiteField.disabled = !envioAgtAtivo;
+            if (!envioAgtAtivo) {
+                limiteField.title = "Ative o envio para configurar o limite";
+            } else {
+                limiteField.title = "";
+            }
+        }
+
         function toggleToken() {
             var field = document.getElementById('tokenField');
             var icon = document.getElementById('toggleIcon');
