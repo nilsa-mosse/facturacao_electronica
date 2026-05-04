@@ -156,4 +156,95 @@ public class SuperAdminController {
         ra.addFlashAttribute("mensagem", "Tempo de expiração atualizado com sucesso!");
         return "redirect:/superadmin/configuracoes";
     }
+
+    @PostMapping("/configuracoes/salvar-agt")
+    public String salvarAgt(@RequestParam("certificado") String certificado,
+                           @RequestParam(value = "privateKey", required = false) String privateKey,
+                           @RequestParam(value = "publicKey", required = false) String publicKey,
+                           @RequestParam(value = "versao", required = false) Integer versao,
+                           RedirectAttributes ra) {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        
+        config.setAgtCertificadoNumero(certificado);
+        if (privateKey != null) config.setAgtPrivateKey(privateKey);
+        if (publicKey != null) config.setAgtPublicKey(publicKey);
+        if (versao != null) config.setAgtChaveVersao(versao);
+        
+        configuracaoSistemaRepository.save(config);
+        ra.addFlashAttribute("mensagem", "Configurações AGT atualizadas com sucesso!");
+        return "redirect:/superadmin/configuracoes";
+    }
+
+    @PostMapping("/configuracoes/salvar-sistema")
+    public String salvarSistema(@RequestParam("nome") String nome,
+                               @RequestParam("versao") String versao,
+                               @RequestParam("email") String email,
+                               @RequestParam("tema") String tema,
+                               RedirectAttributes ra) {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        
+        config.setSistemaNome(nome);
+        config.setSistemaVersao(versao);
+        config.setSistemaEmailSuporte(email);
+        config.setSistemaTema(tema);
+        
+        configuracaoSistemaRepository.save(config);
+        ra.addFlashAttribute("mensagem", "Parâmetros do sistema atualizados!");
+        return "redirect:/superadmin/configuracoes";
+    }
+
+    @PostMapping("/configuracoes/salvar-banco-dados")
+    public String salvarBancoDados(@RequestParam("tipoBD") String tipoBD,
+                                  @RequestParam("schema") String schema,
+                                  @RequestParam("poolMax") int poolMax,
+                                  RedirectAttributes ra) {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        
+        config.setDbTipoBD(tipoBD);
+        config.setDbSchema(schema);
+        config.setDbPoolMax(poolMax);
+        
+        configuracaoSistemaRepository.save(config);
+        ra.addFlashAttribute("mensagem", "Configurações de Base de Dados atualizadas!");
+        return "redirect:/superadmin/configuracoes";
+    }
+
+    @PostMapping("/configuracoes/salvar-email")
+    public String salvarEmail(@RequestParam("host") String host,
+                             @RequestParam("porta") int porta,
+                             @RequestParam("username") String username,
+                             @RequestParam("password") String password,
+                             @RequestParam("remetente") String remetente,
+                             RedirectAttributes ra) {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        
+        config.setEmailSmtpHost(host);
+        config.setEmailSmtpPorta(porta);
+        config.setEmailSmtpUsername(username);
+        config.setEmailSmtpPassword(password);
+        config.setEmailRemetente(remetente);
+        
+        configuracaoSistemaRepository.save(config);
+        ra.addFlashAttribute("mensagem", "Configurações de Email atualizadas!");
+        return "redirect:/superadmin/configuracoes";
+    }
+
+    @PostMapping("/configuracoes/salvar-storage")
+    public String salvarStorage(@RequestParam("tipo") String tipo,
+                               @RequestParam("caminho") String caminho,
+                               RedirectAttributes ra) {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        
+        config.setStorageTipo(tipo);
+        config.setStorageCaminhoBase(caminho);
+        
+        configuracaoSistemaRepository.save(config);
+        ra.addFlashAttribute("mensagem", "Configurações de Armazenamento atualizadas!");
+        return "redirect:/superadmin/configuracoes";
+    }
 }

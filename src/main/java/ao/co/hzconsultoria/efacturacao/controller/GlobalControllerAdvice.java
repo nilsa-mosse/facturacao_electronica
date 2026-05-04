@@ -28,20 +28,25 @@ public class GlobalControllerAdvice {
         });
 
         String tema = "light";
+        String nomeSistema = "Kwanza ERP";
+        String versaoSistema = "1.0.0";
         try {
             ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
-            if (sistemaConfig != null && sistemaConfig.getTema() != null) {
+            if (sistemaConfig != null) {
+                if (sistemaConfig.getNome() != null) nomeSistema = sistemaConfig.getNome();
+                if (sistemaConfig.getVersao() != null) versaoSistema = sistemaConfig.getVersao();
+                
                 String temp = sistemaConfig.getTema();
-                if (temp.equalsIgnoreCase("escuro") || temp.equalsIgnoreCase("dark")) {
+                if (temp != null && (temp.equalsIgnoreCase("escuro") || temp.equalsIgnoreCase("dark"))) {
                     tema = "dark";
-                } else {
-                    tema = "light";
                 }
             }
         } catch (Exception ignored) {
             // BD pode estar indisponível durante arranque inicial
         }
         model.addAttribute("globalTema", tema);
+        model.addAttribute("globalSistemaNome", nomeSistema);
+        model.addAttribute("globalSistemaVersao", versaoSistema);
 
         // Adicionar Empresa atual ao modelo
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();

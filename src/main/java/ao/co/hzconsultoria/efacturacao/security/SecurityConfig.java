@@ -42,7 +42,7 @@ public class SecurityConfig {
         http
                 .authenticationProvider(authenticationProvider())
                 .authorizeRequests()
-                .antMatchers("/login", "/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**",
+                .antMatchers("/", "/login", "/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**",
                         "/api/compras", "/api/compras/single", "/api/compras/proforma", "/api/compras/guia",
                         "/finalizarVenda", "/manifest.json", "/sw.js", "/licenca-expirada")
                 .permitAll()

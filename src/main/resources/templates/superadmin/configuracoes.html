@@ -37,62 +37,204 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
-                            <!-- Session Expiration Card -->
+                        <div class="col-12">
                             <div class="card shadow-sm border-0" style="border-radius: 15px; overflow: hidden;">
-                                <div class="card-header bg-white py-3 border-bottom-0">
-                                    <h5 class="fw-bold m-0 text-dark">
-                                        <i class="fas fa-clock text-warning me-2"></i>Expiração de Sessão
-                                    </h5>
+                                <div class="card-header p-0 border-bottom-0">
+                                    <ul class="nav nav-tabs px-3 pt-3 bg-white" id="configTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active fw-bold px-4" id="sistema-tab" data-bs-toggle="tab" data-bs-target="#sistema" type="button" role="tab"><i class="fas fa-desktop me-2"></i>Sistema</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold px-4" id="agt-tab" data-bs-toggle="tab" data-bs-target="#agt" type="button" role="tab"><i class="fas fa-shield-alt me-2 text-danger"></i>AGT</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold px-4" id="db-tab" data-bs-toggle="tab" data-bs-target="#db" type="button" role="tab"><i class="fas fa-database me-2 text-info"></i>Base de Dados</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold px-4" id="email-tab" data-bs-toggle="tab" data-bs-target="#email" type="button" role="tab"><i class="fas fa-envelope me-2 text-warning"></i>Email (SMTP)</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold px-4" id="storage-tab" data-bs-toggle="tab" data-bs-target="#storage" type="button" role="tab"><i class="fas fa-hdd me-2 text-success"></i>Armazenamento</button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link fw-bold px-4" id="sessao-tab" data-bs-toggle="tab" data-bs-target="#sessao" type="button" role="tab"><i class="fas fa-clock me-2"></i>Sessão</button>
+                                        </li>
+                                    </ul>
                                 </div>
                                 <div class="card-body p-4">
-                                    <p class="text-muted small">Defina o tempo padrão de inatividade antes que o sistema solicite um novo login. O valor padrão é 5 minutos.</p>
-                                    
-                                    <form th:action="@{/superadmin/configuracoes/salvar-expiracao}" method="post">
-                                        <div class="row align-items-end g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-uppercase opacity-75">Tempo</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-hourglass-half text-muted"></i></span>
-                                                    <input type="number" name="tempo" class="form-control border-start-0 bg-light" 
-                                                           th:value="${config.segTempoExpiracaoSessao}" min="1" required>
+                                    <div class="tab-content" id="configTabContent">
+                                        
+                                        <!-- Tab: Sistema -->
+                                        <div class="tab-pane fade show active" id="sistema" role="tabpanel">
+                                            <form th:action="@{/superadmin/configuracoes/salvar-sistema}" method="post">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Nome do Software</label>
+                                                        <input type="text" name="nome" class="form-control border-0 bg-light" th:value="${config.sistemaNome}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Versão Atual</label>
+                                                        <input type="text" name="versao" class="form-control border-0 bg-light" th:value="${config.sistemaVersao}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Email Suporte</label>
+                                                        <input type="email" name="email" class="form-control border-0 bg-light" th:value="${config.sistemaEmailSuporte}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Tema Padrão</label>
+                                                        <select name="tema" class="form-select bg-light border-0">
+                                                            <option value="light" th:selected="${config.sistemaTema == 'light'}">Claro</option>
+                                                            <option value="dark" th:selected="${config.sistemaTema == 'dark'}">Escuro</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12 mt-4 text-end">
+                                                        <button type="submit" class="btn btn-primary px-5 shadow-sm"><i class="fas fa-save me-2"></i>Salvar Alterações</button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-bold text-uppercase opacity-75">Unidade</label>
-                                                <select name="unidade" class="form-select bg-light border-0" style="height: 38px;">
-                                                    <option value="MINUTOS" th:selected="${config.segTempoExpiracaoUnidade == 'MINUTOS'}">Minutos</option>
-                                                    <option value="HORAS" th:selected="${config.segTempoExpiracaoUnidade == 'HORAS'}">Horas</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-12 mt-4">
-                                                <button type="submit" class="btn btn-primary w-100 shadow-sm py-2" style="border-radius: 10px;">
-                                                    <i class="fas fa-save me-2"></i>Atualizar Configuração
-                                                </button>
-                                            </div>
+                                            </form>
                                         </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="col-md-6">
-                            <!-- Info Card -->
-                            <div class="card shadow-sm border-0 bg-gradient-primary" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); border-radius: 15px; color: white;">
-                                <div class="card-body p-4">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3">
-                                            <i class="fas fa-info-circle fa-2x"></i>
+                                        <!-- Tab: AGT -->
+                                        <div class="tab-pane fade" id="agt" role="tabpanel">
+                                            <form th:action="@{/superadmin/configuracoes/salvar-agt}" method="post">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">N.º do Certificado AGT</label>
+                                                        <input type="text" name="certificado" class="form-control border-0 bg-light" th:value="${config.agtCertificadoNumero}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Versão da Chave de Assinatura</label>
+                                                        <input type="number" name="versao" class="form-control border-0 bg-light" th:value="${config.agtChaveVersao}">
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Chave Privada RSA (PEM)</label>
+                                                        <textarea name="privateKey" class="form-control border-0 bg-light font-monospace small" rows="5" th:text="${config.agtPrivateKey}"></textarea>
+                                                    </div>
+                                                    <div class="col-12 mt-4 text-end">
+                                                        <button type="submit" class="btn btn-danger px-5 shadow-sm"><i class="fas fa-key me-2"></i>Atualizar Certificado</button>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
-                                        <h5 class="fw-bold m-0">Impacto Global</h5>
-                                    </div>
-                                    <p class="mb-0 opacity-75">
-                                        Estas definições afectam todos os utilizadores do sistema em todos os tenants (empresas).
-                                        Alterar o tempo de expiração forçará a revalidação das sessões activas no próximo ciclo de verificação.
-                                    </p>
-                                    <hr class="bg-white opacity-25">
-                                    <div class="small">
-                                        <i class="fas fa-shield-alt me-1"></i> Segurança Nível SaaS
+
+                                        <!-- Tab: Base de Dados -->
+                                        <div class="tab-pane fade" id="db" role="tabpanel">
+                                            <form th:action="@{/superadmin/configuracoes/salvar-banco-dados}" method="post">
+                                                <div class="row g-3">
+                                                    <div class="col-md-4">
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <label class="form-label small fw-bold text-uppercase opacity-75 mb-0">Motor BD</label>
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input" type="checkbox" id="enableDbEngine" onchange="document.getElementById('tipoBD').disabled = !this.checked">
+                                                                <label class="form-check-label small text-muted" for="enableDbEngine">Editar</label>
+                                                            </div>
+                                                        </div>
+                                                        <select name="tipoBD" id="tipoBD" class="form-select bg-light border-0" disabled>
+                                                            <option value="MySQL" th:selected="${config.dbTipoBD == 'MySQL'}">MySQL 8.0 (Recomendado)</option>
+                                                            <option value="PostgreSQL" th:selected="${config.dbTipoBD == 'PostgreSQL'}">PostgreSQL</option>
+                                                            <option value="H2" th:selected="${config.dbTipoBD == 'H2'}">H2 (Memória/Local)</option>
+                                                        </select>
+                                                        <input type="hidden" name="tipoBD" th:value="${config.dbTipoBD}" id="tipoBDHidden">
+                                                        <script>
+                                                            document.getElementById('enableDbEngine').addEventListener('change', function() {
+                                                                const select = document.getElementById('tipoBD');
+                                                                const hidden = document.getElementById('tipoBDHidden');
+                                                                select.disabled = !this.checked;
+                                                                hidden.disabled = this.checked; // Se habilitar o select, desabilita o hidden
+                                                            });
+                                                        </script>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Nome do Schema/Database</label>
+                                                        <input type="text" name="schema" class="form-control border-0 bg-light" th:value="${config.dbSchema}" required>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Pool Máximo de Conexões</label>
+                                                        <input type="number" name="poolMax" class="form-control border-0 bg-light" th:value="${config.dbPoolMax}" required>
+                                                    </div>
+                                                    <div class="col-12 mt-4 text-end">
+                                                        <button type="submit" class="btn btn-info text-white px-5 shadow-sm"><i class="fas fa-database me-2"></i>Salvar Parâmetros DB</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <!-- Tab: Email -->
+                                        <div class="tab-pane fade" id="email" role="tabpanel">
+                                            <form th:action="@{/superadmin/configuracoes/salvar-email}" method="post">
+                                                <div class="row g-3">
+                                                    <div class="col-md-8">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Servidor SMTP (Host)</label>
+                                                        <input type="text" name="host" class="form-control border-0 bg-light" th:value="${config.emailSmtpHost}" required>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Porta SMTP</label>
+                                                        <input type="number" name="porta" class="form-control border-0 bg-light" th:value="${config.emailSmtpPorta}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Utilizador SMTP</label>
+                                                        <input type="text" name="username" class="form-control border-0 bg-light" th:value="${config.emailSmtpUsername}">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Palavra-passe SMTP</label>
+                                                        <input type="password" name="password" class="form-control border-0 bg-light" th:value="${config.emailSmtpPassword}">
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Email do Remetente</label>
+                                                        <input type="email" name="remetente" class="form-control border-0 bg-light" th:value="${config.emailRemetente}" required>
+                                                    </div>
+                                                    <div class="col-12 mt-4 text-end">
+                                                        <button type="submit" class="btn btn-warning px-5 shadow-sm"><i class="fas fa-paper-plane me-2"></i>Salvar SMTP</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <!-- Tab: Armazenamento -->
+                                        <div class="tab-pane fade" id="storage" role="tabpanel">
+                                            <form th:action="@{/superadmin/configuracoes/salvar-storage}" method="post">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Tipo de Armazenamento</label>
+                                                        <select name="tipo" class="form-select bg-light border-0">
+                                                            <option value="LOCAL" th:selected="${config.storageTipo == 'LOCAL'}">Disco Local</option>
+                                                            <option value="S3" th:selected="${config.storageTipo == 'S3'}">Amazon S3 / DigitalOcean Spaces</option>
+                                                            <option value="AZURE" th:selected="${config.storageTipo == 'AZURE'}">Azure Blob Storage</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Caminho Base / Bucket Name</label>
+                                                        <input type="text" name="caminho" class="form-control border-0 bg-light" th:value="${config.storageCaminhoBase}" required>
+                                                    </div>
+                                                    <div class="col-12 mt-4 text-end">
+                                                        <button type="submit" class="btn btn-success px-5 shadow-sm"><i class="fas fa-save me-2"></i>Salvar Storage</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <!-- Tab: Sessão -->
+                                        <div class="tab-pane fade" id="sessao" role="tabpanel">
+                                            <form th:action="@{/superadmin/configuracoes/salvar-expiracao}" method="post">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Tempo Máximo de Inatividade</label>
+                                                        <input type="number" name="tempo" class="form-control border-0 bg-light" th:value="${config.segTempoExpiracaoSessao}" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Unidade</label>
+                                                        <select name="unidade" class="form-select bg-light border-0">
+                                                            <option value="MINUTOS" th:selected="${config.segTempoExpiracaoUnidade == 'MINUTOS'}">Minutos</option>
+                                                            <option value="HORAS" th:selected="${config.segTempoExpiracaoUnidade == 'HORAS'}">Horas</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12 mt-4 text-end">
+                                                        <button type="submit" class="btn btn-primary px-5 shadow-sm"><i class="fas fa-save me-2"></i>Salvar Sessão</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -104,7 +246,7 @@
         </div>
         
         <footer class="main-footer bg-white border-0 text-center small text-muted">
-            <strong>&copy; 2026 SaaS Engine v2.0</strong> | Gestão de Infraestrutura.
+            <strong>&copy; 2026 SaaS Engine v2.0</strong> | Gestão de Infraestrutura Global.
         </footer>
     </div>
 </body>

@@ -35,7 +35,9 @@ public class HomeController {
     
     @GetMapping("/")
     public String root(Authentication auth) {
-        if (auth != null) {
+        if (auth != null && auth.isAuthenticated() && 
+            !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            
             boolean isManager = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || 
                                a.getAuthority().equals("ROLE_SUPERADMIN") || 

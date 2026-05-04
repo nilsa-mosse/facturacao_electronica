@@ -26,6 +26,12 @@ public class LicencaAdminController {
         return "geradorLicenca";
     }
 
+    @GetMapping("/gerar")
+    @PreAuthorize("hasRole('SUPERADMIN')")
+    public String gerarGet() {
+        return "redirect:/superadmin/licenca/gerador";
+    }
+
     @PostMapping("/gerar")
     @PreAuthorize("hasRole('SUPERADMIN')")
     public String gerar(@RequestParam("machineId") String machineId,

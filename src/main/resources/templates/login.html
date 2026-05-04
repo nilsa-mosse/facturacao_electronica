@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Login - Kwanza ERP</title>
+    <title th:text="${'Login - ' + globalSistemaNome}">Login - Kwanza ERP</title>
     <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
     <!-- Fontes locais para modo offline -->
@@ -374,7 +374,7 @@
                             Desenvolvido por <strong>HZ Consultoria</strong>
                         </p>
                         <p class="small text-muted mb-0" style="font-size: 0.75rem; opacity: 0.7;">
-                            &copy; 2026 Kwanza ERP. Todos os direitos reservados.
+                            &copy; 2026 <span th:text="${globalSistemaNome}">Kwanza ERP</span>. Todos os direitos reservados.
                         </p>
                     </div>
                 </form>

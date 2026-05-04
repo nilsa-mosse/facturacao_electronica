@@ -10,12 +10,21 @@ CREATE TABLE produto (
     nome VARCHAR(100) NOT NULL,
     descricao VARCHAR(255),
     preco DECIMAL(10,2) NOT NULL,
-    quantidade_estoque INT NOT NULL,
+    quantidade_estoque DECIMAL(10,2) NOT NULL,
+    estoque_minimo DECIMAL(10,2) DEFAULT 0.0,
+    unidade_medida VARCHAR(20),
+    preco_compra DECIMAL(10,2),
+    preco_original DECIMAL(10,2),
     imagem VARCHAR(255),
     imagem_blob LONGBLOB,
     codigo_barra VARCHAR(50),
     categoria_id BIGINT,
+    estado_id BIGINT,
+    empresa_id BIGINT,
     iva_percentual DECIMAL(5,2) NULL,
+    data_fabrico DATE,
+    data_expiracao DATE,
+    em_promocao BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (categoria_id) REFERENCES categoria(id)
 );
 
@@ -25,7 +34,8 @@ CREATE TABLE cliente (
     nif VARCHAR(20) NOT NULL,
     email VARCHAR(100),
     telefone VARCHAR(20),
-    endereco VARCHAR(255)
+    endereco VARCHAR(255),
+    empresa_id BIGINT
 );
 
 CREATE TABLE venda (
@@ -55,7 +65,13 @@ CREATE TABLE fatura (
     total DECIMAL(15,2),
     iva DECIMAL(15,2),
     hash VARCHAR(255),
+    hash_control VARCHAR(255), -- Versão da chave privada
+    previous_hash VARCHAR(255), -- Hash do documento anterior
+    system_entry_date DATETIME, -- Data de gravação no sistema
+    invoice_status VARCHAR(1), -- N - Normal, A - Anulada, S - Auto-faturação
+    tipo_documento VARCHAR(10), -- FT, FR, FP
     codigo_agt VARCHAR(100),
+    empresa_id BIGINT,
     FOREIGN KEY (venda_id) REFERENCES venda(id)
 );
 
@@ -74,7 +90,10 @@ CREATE TABLE IF NOT EXISTS usuario (
     login VARCHAR(50) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
     nome VARCHAR(100) NOT NULL,
-    role VARCHAR(20) NOT NULL
+    email VARCHAR(100),
+    telefone VARCHAR(50),
+    role VARCHAR(20) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE
 );
 
 -- Criação da tabela de clientes
@@ -106,6 +125,67 @@ CREATE TABLE IF NOT EXISTS estoque (
     FOREIGN KEY (produto_id) REFERENCES produto(id),
     FOREIGN KEY (estabelecimento_id) REFERENCES estabelecimento(id)
 );
+
+-- Tabela de Configuração Global do Sistema (Singleton)
+CREATE TABLE IF NOT EXISTS configuracao_sistema (
+    id BIGINT PRIMARY KEY,
+    sistema_nome VARCHAR(255) DEFAULT 'Kwanza ERP',
+    sistema_versao VARCHAR(20) DEFAULT '1.0.0',
+    sistema_email_suporte VARCHAR(100) DEFAULT 'suporte@facturacao.com',
+    sistema_backup BOOLEAN DEFAULT TRUE,
+    sistema_tema VARCHAR(20) DEFAULT 'light',
+    servidor_porta INT DEFAULT 8080,
+    servidor_hostname VARCHAR(255) DEFAULT 'localhost',
+    servidor_base_url VARCHAR(500) DEFAULT 'http://localhost:8080',
+    servidor_proxy_habilitado BOOLEAN DEFAULT FALSE,
+    servidor_proxy_host VARCHAR(255) DEFAULT '',
+    servidor_proxy_porta INT DEFAULT 80,
+    servidor_cors_origens VARCHAR(1000) DEFAULT '*',
+    email_smtp_host VARCHAR(255) DEFAULT 'smtp.gmail.com',
+    email_smtp_porta INT DEFAULT 587,
+    email_smtp_username VARCHAR(255) DEFAULT '',
+    email_smtp_password VARCHAR(500) DEFAULT '',
+    email_seguranca_tipo VARCHAR(10) DEFAULT 'TLS',
+    email_remetente VARCHAR(255) DEFAULT 'noreply@empresa.ao',
+    email_nome_remetente VARCHAR(255) DEFAULT 'Sistema de Facturação',
+    db_tipobd VARCHAR(50) DEFAULT 'MySQL',
+    db_connection_timeout INT DEFAULT 30000,
+    db_query_timeout INT DEFAULT 60000,
+    db_pool_min INT DEFAULT 5,
+    db_pool_max INT DEFAULT 20,
+    db_idle_timeout INT DEFAULT 30000,
+    db_max_lifetime INT DEFAULT 60000,
+    db_schema VARCHAR(100) DEFAULT 'efacturacao',
+    storage_tipo VARCHAR(20) DEFAULT 'LOCAL',
+    storage_caminho_base VARCHAR(500) DEFAULT 'uploads/',
+    storage_tamanho_max_ficheiro INT DEFAULT 10,
+    storage_tamanho_max_request INT DEFAULT 20,
+    storage_estrategia_backup VARCHAR(20) DEFAULT 'DIARIO',
+    storage_cloud_provider VARCHAR(20) DEFAULT '',
+    storage_cloud_bucket VARCHAR(255) DEFAULT '',
+    storage_cloud_region VARCHAR(100) DEFAULT '',
+    seg_tempo_expiracao_sessao INT DEFAULT 5,
+    seg_tempo_expiracao_unidade VARCHAR(10) DEFAULT 'MINUTOS',
+    seg_tentativas_login_max INT DEFAULT 5,
+    seg_lockout_duracao INT DEFAULT 15,
+    seg_politica_password VARCHAR(20) DEFAULT 'MEDIA',
+    seg_comprimento_min_password INT DEFAULT 8,
+    seg_two_factor_ativo BOOLEAN DEFAULT FALSE,
+    seg_require_uppercase BOOLEAN DEFAULT TRUE,
+    seg_require_numbers BOOLEAN DEFAULT TRUE,
+    seg_require_special_chars BOOLEAN DEFAULT FALSE,
+    seg_ip_whitelist VARCHAR(2000) DEFAULT '',
+    seg_log_acessos_ativo BOOLEAN DEFAULT TRUE,
+    agt_certificado_numero VARCHAR(20) DEFAULT '0000',
+    agt_private_key TEXT,
+    agt_public_key TEXT,
+    agt_chave_versao INT DEFAULT 1,
+    licenca_data_ativacao DATETIME,
+    licenca_chave_ativacao VARCHAR(255)
+);
+
+-- Inicializar configuração única
+INSERT IGNORE INTO configuracao_sistema (id) VALUES (1);
 
 -- Dados fake para categoria
 INSERT INTO categoria (nome) VALUES
