@@ -6,19 +6,20 @@
 <!-- Custom POS Styles -->
 <style>
   :root {
-    --pos-primary: #4361ee;
-    --pos-secondary: #3f37c9;
-    --pos-accent: #4cc9f0;
-    --pos-bg: #f8f9fa;
-    --pos-card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    --pos-glass-bg: rgba(255, 255, 255, 0.85);
-    --pos-glass-border: rgba(255, 255, 255, 0.5);
+    --pos-primary: #6366f1;
+    --pos-secondary: #4f46e5;
+    --pos-accent: #818cf8;
+    --pos-bg: #f8fafc;
+    --pos-card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    --pos-glass-bg: rgba(255, 255, 255, 0.7);
+    --pos-glass-border: rgba(255, 255, 255, 0.4);
+    --pos-sidebar-width: 420px;
   }
 
   .dark-mode {
-    --pos-bg: #1a1d20;
-    --pos-glass-bg: rgba(30, 34, 40, 0.9);
-    --pos-glass-border: rgba(255, 255, 255, 0.1);
+    --pos-bg: #0f172a;
+    --pos-glass-bg: rgba(30, 41, 59, 0.8);
+    --pos-glass-border: rgba(255, 255, 255, 0.05);
   }
 
   body {
@@ -78,24 +79,24 @@
   /* Product Card */
   .product-card {
     background: #ffffff;
-    border-radius: 24px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
     height: 100%;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   }
 
   .dark-mode .product-card {
-    background: #23272b;
+    background: #1e293b;
     border-color: rgba(255, 255, 255, 0.05);
   }
 
   .product-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     border-color: var(--pos-primary);
   }
 
@@ -462,20 +463,22 @@
 
   /* Cart Section */
   .cart-section {
-    width: 400px;
+    width: var(--pos-sidebar-width);
     background: var(--pos-glass-bg);
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border-left: 1px solid var(--pos-glass-border);
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.03);
+    box-shadow: -15px 0 35px rgba(0, 0, 0, 0.05);
+    z-index: 10;
   }
 
   .cart-header {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--pos-glass-border);
+    margin-bottom: 2rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
   }
 
   .cart-items-container {
@@ -487,17 +490,25 @@
 
   .cart-item-card {
     background: white;
-    border-radius: 15px;
-    padding: 0.8rem;
-    margin-bottom: 0.8rem;
+    border-radius: 18px;
+    padding: 1rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-    animation: slideIn 0.3s ease;
+    gap: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    transition: all 0.2s ease;
+  }
+
+  .cart-item-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
   }
 
   .dark-mode .cart-item-card {
-    background: #343a40;
+    background: #1e293b;
+    border-color: rgba(255, 255, 255, 0.05);
   }
 
   @keyframes slideIn {
@@ -559,28 +570,33 @@
   }
 
   .cart-summary {
-    background: #f8f9fa;
-    border-radius: 20px;
-    padding: 1.2rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
   }
 
   .dark-mode .cart-summary {
-    background: #2c3136;
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(255, 255, 255, 0.05);
   }
 
   .summary-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
   }
 
   .summary-total {
-    border-top: 1px dashed #dee2e6;
-    margin-top: 0.8rem;
-    padding-top: 0.8rem;
-    font-weight: 800;
-    font-size: 1.4rem;
+    border-top: 2px solid rgba(99, 102, 241, 0.1);
+    margin-top: 1rem;
+    padding-top: 1rem;
+    font-weight: 900;
+    font-size: 1.6rem;
     color: var(--pos-primary);
+    letter-spacing: -0.02em;
   }
 
   /* Custom Scrollbar */
@@ -663,6 +679,19 @@
     backdrop-filter: blur(5px);
     border-radius: 24px;
   }
+
+  /* Color Utilities */
+  .text-slate-800 { color: #1e293b; }
+  .text-slate-700 { color: #334155; }
+  .text-slate-500 { color: #64748b; }
+  .text-indigo-600 { color: #4f46e5; }
+  .text-indigo-500 { color: #6366f1; }
+  .text-amber-500 { color: #f59e0b; }
+  .bg-slate-100 { background-color: #f1f5f9; }
+  .bg-amber-100 { background-color: #fef3c7; }
+  .text-amber-700 { color: #b45309; }
+  .bg-indigo-600 { background-color: #4f46e5; }
+  .letter-spacing-1 { letter-spacing: 1px; }
 </style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
@@ -677,11 +706,11 @@
           <!-- Seção de Produtos -->
           <div class="product-section">
             <div class="container-fluid">
-              <div class="sticky-top bg-white py-3 mb-3 dark-mode-bg-fix" style="z-index: 1020;">
-                <div class="search-wrapper mb-3 shadow-sm border" style="border-radius: 16px;">
-                  <i class="fas fa-search search-icon text-primary"></i>
-                  <input type="text" id="search" class="form-control border-0 bg-transparent"
-                    th:placeholder="#{pos.procurar}" style="box-shadow: none;">
+              <div class="sticky-top bg-white py-3 mb-4 dark-mode-bg-fix" style="z-index: 1020; border-radius: 0 0 24px 24px;">
+                <div class="search-wrapper mb-3">
+                  <i class="fas fa-search search-icon text-indigo-500"></i>
+                  <input type="text" id="search" class="form-control"
+                    th:placeholder="#{pos.procurar}">
                 </div>
 
                 <!-- Categorias Reais -->
@@ -761,16 +790,20 @@
           <!-- Seção de Carrinho -->
           <div class="cart-section">
             <div class="cart-header d-flex justify-content-between align-items-center">
-              <h4 class="fw-bold mb-0"><i class="fas fa-shopping-basket me-2 text-primary"></i><span
-                  th:text="#{pos.carrinho.titulo}">Carrinho</span></h4>
+              <div>
+                <h4 class="fw-bold mb-0 text-slate-800">
+                  <i class="fas fa-shopping-bag me-2 text-indigo-600"></i>
+                  <span th:text="#{pos.carrinho.titulo}">Carrinho</span>
+                </h4>
+              </div>
               <div class="d-flex gap-2 align-items-center">
-                <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold"
+                <button type="button" class="btn btn-sm btn-light rounded-pill px-3 fw-bold border"
                   onclick="abrirModalVendasSuspensas()" title="Recuperar Vendas Suspensas">
-                  <i class="fas fa-history me-1"></i> <span style="font-size: 0.7rem;">SUSPENSAS</span>
-                  <span id="suspendedCountBadge" class="badge bg-warning text-dark rounded-pill ms-1"
-                    style="font-size: 0.6rem; display: none;">0</span>
+                  <i class="fas fa-history me-1 text-amber-500"></i>
+                  <span id="suspendedCountBadge" class="badge bg-amber-100 text-amber-700 rounded-pill ms-1"
+                    style="display: none;">0</span>
                 </button>
-                <span id="cartCountBadge" class="badge bg-primary rounded-pill">0 Itens</span>
+                <span id="cartCountBadge" class="badge bg-indigo-600 rounded-pill px-3 py-2">0 Itens</span>
               </div>
             </div>
 
@@ -779,24 +812,24 @@
             </div>
 
             <div class="cart-footer">
-              <div class="cart-summary shadow-sm mb-4">
+              <div class="cart-summary mb-4">
                 <div class="summary-row">
-                  <span class="text-muted" th:text="#{pos.total.sem_imposto}">Subtotal</span>
-                  <span class="fw-bold" id="totalSemImposto">0.00 Kz</span>
+                  <span class="text-slate-500" th:text="#{pos.total.sem_imposto}">Subtotal</span>
+                  <span class="fw-bold text-slate-700" id="totalSemImposto">0.00 Kz</span>
                 </div>
                 <div class="summary-row">
-                  <span class="text-muted" th:text="#{pos.iva}">IVA Acumulado</span>
-                  <span class="fw-bold text-info" id="valorIva">0.00 Kz</span>
+                  <span class="text-slate-500" th:text="#{pos.iva}">IVA Acumulado</span>
+                  <span class="fw-bold text-indigo-500" id="valorIva">0.00 Kz</span>
                 </div>
                 <div class="summary-row summary-total">
-                  <span th:text="#{pos.total}">Total Final</span>
+                  <span class="text-slate-800" th:text="#{pos.total}">Total</span>
                   <span id="totalFinal">0.00 Kz</span>
                 </div>
               </div>
 
-              <button type="button" id="btnContinuar" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm"
+              <button type="button" id="btnContinuar" class="btn btn-premium-success w-100 py-3 rounded-pill fw-bold text-uppercase letter-spacing-1"
                 onclick="abrirModalCheckout()">
-                <i class="fas fa-arrow-right me-2"></i> Continuar
+                <i class="fas fa-check-circle me-2"></i> Finalizar Venda
               </button>
 
             </div>
@@ -1375,16 +1408,18 @@
           var cardHtml =
             '<div class="cart-item-card">' +
             '<div class="cart-item-info">' +
-            '<h6 class="fw-bold mb-1 small text-truncate" style="max-width: 150px;">' + item.nome + '</h6>' +
-            '<div class="text-muted small">' + item.preco.toFixed(2) + ' Kz</div>' +
+            '<h6 class="fw-bold mb-0 text-slate-800 text-truncate" style="max-width: 180px;">' + item.nome + '</h6>' +
+            '<div class="text-indigo-600 fw-bold small mt-1">' + item.preco.toFixed(2) + ' Kz</div>' +
             '</div>' +
-            '<div class="d-flex align-items-center gap-3">' +
-            '<div class="cart-item-qty">' +
-            '<button class="qty-btn" onclick="decreaseQty(' + index + ')"><i class="fas fa-minus"></i></button>' +
-            '<span class="qty-count">' + item.qtd + '</span>' +
-            '<button class="qty-btn" onclick="increaseQty(' + index + ')"><i class="fas fa-plus"></i></button>' +
+            '<div class="d-flex align-items-center gap-2">' +
+            '<div class="cart-item-qty bg-slate-100 p-1 d-flex align-items-center" style="border-radius: 30px;">' +
+            '<button class="qty-btn bg-white shadow-sm border-0 rounded-circle" onclick="decreaseQty(' + index + ')"><i class="fas fa-minus"></i></button>' +
+            '<span class="qty-count px-2 fw-bold text-slate-700">' + item.qtd + '</span>' +
+            '<button class="qty-btn bg-white shadow-sm border-0 rounded-circle" onclick="increaseQty(' + index + ')"><i class="fas fa-plus"></i></button>' +
             '</div>' +
-            '<button class="btn btn-sm btn-link text-danger p-0 border-0" onclick="removeItem(' + index + ')"><i class="fas fa-times"></i></button>' +
+            '<button class="btn btn-sm btn-ghost-danger rounded-circle p-2 ms-2" onclick="removeItem(' + index + ')" title="Remover">' +
+            '<i class="fas fa-trash-alt"></i>' +
+            '</button>' +
             '</div>' +
             '</div>';
           container.append(cardHtml);

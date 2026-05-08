@@ -1,111 +1,293 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="menu :: head"></head>
+<head th:replace="menu :: head">
+    <link rel="stylesheet" th:href="@{/css/premium-style.css}">
+</head>
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <div class="wrapper">
         <nav th:replace="menu :: topbar"></nav>
         <aside th:replace="menu :: sidebar"></aside>
 
-        <div class="content-wrapper">
-            <section class="content-header">
+        <div class="content-wrapper bg-light">
+            <section class="content-header pt-4">
                 <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1><i class="fas fa-store me-2"></i>Gestão de Estabelecimentos</h1>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 class="mb-0 fw-800"><i class="fas fa-store-alt text-primary me-3"></i>Gestão de Estabelecimentos</h1>
+                            <p class="text-muted small mb-0">Configure suas lojas, armazéns e pontos de venda globais.</p>
                         </div>
+                        <button class="btn btn-primary rounded-pill shadow-sm px-4" data-bs-toggle="collapse" data-bs-target="#collapseForm">
+                            <i class="fas fa-plus-circle me-2"></i>Novo Estabelecimento
+                        </button>
                     </div>
                 </div>
             </section>
 
             <section class="content">
                 <div class="container-fluid">
-                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <i class="fas fa-check-circle me-1"></i>
-                        <span th:text="${mensagem}"></span>
-                    </div>
-
-                    <div class="card card-outline card-dark">
-                        <div class="card-header border-0">
-                            <h3 class="card-title">Listagem de Lojas e Armazéns</h3>
-                        </div>
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-striped table-valign-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Tipo</th>
-                                        <th>Endereço</th>
-                                        <th th:if="${isSuperAdmin}">Empresa</th>
-                                        <th>Estado</th>
-                                        <th>Acções</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="e : ${estabelecimentos}">
-                                        <td th:text="${e.nome}">Sede</td>
-                                        <td>
-                                            <span class="badge" th:classappend="${e.tipo == 'LOJA' ? 'bg-primary' : 'bg-warning'}" th:text="${e.tipo}">LOJA</span>
-                                        </td>
-                                        <td th:text="${e.endereco}">Luanda</td>
-                                        <td th:if="${isSuperAdmin}" th:text="${e.empresa?.nome}">Empresa</td>
-                                        <td>
-                                            <span class="badge" th:classappend="${e.visivel ? 'bg-success' : 'bg-secondary'}" th:text="${e.visivel ? 'Ativo' : 'Inativo'}">Ativo</span>
-                                        </td>
-                                        <td>
-                                            <a th:href="@{'/configuracoes/estabelecimentos/eliminar/' + ${e.id}}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Deseja eliminar este estabelecimento?')">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <!-- Feedback Messages -->
+                    <div th:if="${mensagem}" class="alert alert-success border-0 shadow-sm rounded-pill mb-4 py-3 px-4 animate__animated animate__fadeInDown">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white rounded-circle p-2 me-3 shadow-sm">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                            <span th:text="${mensagem}" class="fw-600"></span>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
                         </div>
                     </div>
 
-                    <div class="card card-outline card-secondary">
-                        <div class="card-header">
-                            <h3 class="card-title">Registar Novo Estabelecimento</h3>
-                        </div>
-                        <form th:action="@{/configuracoes/estabelecimentos/salvar}" th:object="${novoEstabelecimento}" method="post">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div th:if="${isSuperAdmin}" class="form-group col-md-12 mb-3 text-danger fw-bold">
-                                         Modo SuperAdmin: Você pode associar este estabelecimento a qualquer empresa.
+                    <!-- Form Section (Collapsible) -->
+                    <div class="collapse mb-4" id="collapseForm">
+                        <div class="card border-0 shadow-soft overflow-hidden animate__animated animate__fadeIn">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-soft-primary rounded-pill p-2 me-3">
+                                        <i class="fas fa-edit"></i>
                                     </div>
-
-                                    <div th:if="${isSuperAdmin}" class="form-group col-md-4">
-                                        <label>Associar à Empresa</label>
-                                        <select class="form-select" name="empresaSelecionadaId" required>
-                                            <option th:each="emp : ${empresas}" th:value="${emp.id}" th:text="${emp.nome}"></option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group col-md-4">
-                                        <label>Nome do Estabelecimento</label>
-                                        <input type="text" class="form-control" th:field="*{nome}" required>
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label>Tipo</label>
-                                        <select class="form-select" th:field="*{tipo}">
-                                            <option value="LOJA">LOJA</option>
-                                            <option value="ARMAZEM">ARMAZÉM</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group col-md-12 mt-3">
-                                        <label>Endereço Completo</label>
-                                        <input type="text" class="form-control" th:field="*{endereco}">
-                                    </div>
+                                    <h5 class="mb-0 fw-700">Registar Novo Estabelecimento</h5>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button type="submit" class="btn btn-secondary"><i class="fas fa-save me-1"></i>Guardar Estabelecimento</button>
+                            <form th:action="@{/configuracoes/estabelecimentos/salvar}" th:object="${novoEstabelecimento}" method="post">
+                                <div class="card-body bg-white">
+                                    <div class="row g-4">
+                                        <div th:if="${isSuperAdmin}" class="col-12">
+                                            <div class="alert bg-soft-danger border-0 rounded-pill d-inline-flex align-items-center px-4 py-2">
+                                                <i class="fas fa-shield-alt me-2 text-danger"></i>
+                                                <span class="small fw-700 text-danger uppercase tracking-wider">Modo SuperAdmin Ativo</span>
+                                            </div>
+                                        </div>
+
+                                        <div th:if="${isSuperAdmin}" class="col-md-4">
+                                            <label class="form-label text-muted small fw-700">EMPRESA DESTINO</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-0"><i class="fas fa-building text-muted"></i></span>
+                                                <select class="form-select border-0 bg-light" name="empresaSelecionadaId" required>
+                                                    <option value="" disabled selected>Selecionar Empresa...</option>
+                                                    <option th:each="emp : ${empresas}" th:value="${emp.id}" th:text="${emp.nome}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label text-muted small fw-700">NOME DO ESTABELECIMENTO</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-0"><i class="fas fa-id-badge text-muted"></i></span>
+                                                <input type="text" class="form-control border-0 bg-light" th:field="*{nome}" placeholder="Ex: Loja Central" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label class="form-label text-muted small fw-700">TIPO DE LOCAL</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-0"><i class="fas fa-tags text-muted"></i></span>
+                                                <select class="form-select border-0 bg-light" th:field="*{tipo}">
+                                                    <option value="LOJA">LOJA</option>
+                                                    <option value="ARMAZEM">ARMAZÉM</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 mt-4">
+                                            <label class="form-label text-muted small fw-700">ENDEREÇO COMPLETO</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light border-0"><i class="fas fa-map-marker-alt text-muted"></i></span>
+                                                <input type="text" class="form-control border-0 bg-light" th:field="*{endereco}" placeholder="Rua, Número, Bairro, Cidade...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-0 py-4 d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-toggle="collapse" data-bs-target="#collapseForm">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="fas fa-save me-2"></i>Salvar Estabelecimento</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- List Section -->
+                    <div class="card border-0 shadow-soft overflow-hidden">
+                        <div class="card-header bg-white border-0 py-3 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-soft-success rounded-pill p-2 me-3">
+                                    <i class="fas fa-list-ul"></i>
+                                </div>
+                                <h5 class="mb-0 fw-700 text-dark">Estabelecimentos Cadastrados</h5>
                             </div>
-                        </form>
+                            <div class="input-group input-group-sm w-25 border rounded-pill overflow-hidden">
+                                <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted small"></i></span>
+                                <input type="text" id="tableSearch" class="form-control border-0 px-2" placeholder="Filtrar lojas...">
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-valign-middle mb-0" id="estabTable">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4">Estabelecimento</th>
+                                            <th>Tipo</th>
+                                            <th>Localização</th>
+                                            <th th:if="${isSuperAdmin}">Empresa</th>
+                                            <th class="text-center">Status</th>
+                                            <th class="text-end pe-4">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="border-top-0">
+                                        <tr th:each="e : ${estabelecimentos}" class="transition-all hover-translate-x">
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-light rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-store text-primary small"></i>
+                                                    </div>
+                                                    <span th:text="${e.nome}" class="fw-700 text-dark"></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge rounded-pill px-3 py-2 fw-600" 
+                                                      th:classappend="${e.tipo == 'LOJA' ? 'bg-soft-primary' : 'bg-soft-warning'}" 
+                                                      th:text="${e.tipo}"></span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center text-muted small">
+                                                    <i class="fas fa-map-pin me-2 opacity-50"></i>
+                                                    <span th:text="${e.endereco != null && !e.endereco.isEmpty() ? e.endereco : 'Sem endereço informado'}"></span>
+                                                    <button th:if="${e.endereco != null && !e.endereco.isEmpty()}" 
+                                                            class="btn btn-link btn-xs p-0 ms-2 copy-btn" 
+                                                            th:data-text="${e.endereco}" title="Copiar endereço">
+                                                        <i class="fas fa-copy fa-xs text-muted"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td th:if="${isSuperAdmin}">
+                                                <span class="badge bg-light text-dark fw-400 border py-1 px-2" th:text="${e.empresa?.nome}"></span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="form-check form-switch d-inline-block">
+                                                    <input class="form-check-input" type="checkbox" th:checked="${e.visivel}" disabled>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-info rounded-circle me-1" title="Editar">
+                                                        <i class="fas fa-pen fa-xs"></i>
+                                                    </button>
+                                                    <a th:href="@{'/configuracoes/estabelecimentos/eliminar/' + ${e.id}}" 
+                                                       class="btn btn-outline-danger rounded-circle" 
+                                                       onclick="return confirm('Tem certeza que deseja eliminar este estabelecimento?')"
+                                                       title="Eliminar">
+                                                        <i class="fas fa-trash-alt fa-xs"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(estabelecimentos)}">
+                                            <td colspan="6" class="text-center py-5">
+                                                <div class="py-4">
+                                                    <i class="fas fa-store-slash fa-3x text-muted opacity-20 mb-3"></i>
+                                                    <h6 class="text-muted fw-400">Nenhum estabelecimento encontrado.</h6>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small" th:text="'Total: ' + ${#lists.size(estabelecimentos)} + ' estabelecimentos'"></span>
+                                <nav th:if="${#lists.size(estabelecimentos) > 10}">
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">Próximo</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </div>
     </div>
+
+    <style>
+        .fw-800 { font-weight: 800; }
+        .fw-700 { font-weight: 700; }
+        .fw-600 { font-weight: 600; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-wider { letter-spacing: 0.1em; }
+        
+        .transition-all { transition: all 0.3s ease; }
+        .hover-translate-x:hover { transform: translateX(5px); }
+        
+        .shadow-soft { box-shadow: var(--shadow-soft); }
+
+        /* Local Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+        .animate-fade-in-down { animation: fadeInDown 0.5s ease forwards; }
+        
+        /* Custom Table Styling */
+        #estabTable thead th {
+            border-bottom: 0;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 20px;
+        }
+        #estabTable tbody td {
+            padding: 15px 20px;
+            vertical-align: middle;
+        }
+
+        /* Search input focus effect */
+        #tableSearch:focus {
+            box-shadow: none;
+            background: #fff;
+            border-color: var(--primary) !important;
+        }
+
+        .copy-btn {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        tr:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        /* Dark mode overrides */
+        .dark-mode .bg-light { background-color: #2c3136 !important; }
+        .dark-mode .card { background-color: #343a40 !important; }
+        .dark-mode .card-header, .dark-mode .card-body, .dark-mode .card-footer { background-color: #343a40 !important; color: #fff !important; }
+        .dark-mode .text-dark { color: #fff !important; }
+        .dark-mode .form-control, .dark-mode .form-select { background-color: #2c3136 !important; color: #fff !important; }
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            // Search Functionality
+            $("#tableSearch").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#estabTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Smooth animations on load
+            $(".card").addClass("animate-fade-in");
+            $(".alert").addClass("animate-fade-in-down");
+
+            // Copy Address Functionality
+            $(".copy-btn").on("click", function() {
+                var text = $(this).data("text");
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalIcon = $(this).html();
+                    $(this).html('<i class="fas fa-check text-success fa-xs"></i>');
+                    setTimeout(() => $(this).html(originalIcon), 2000);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

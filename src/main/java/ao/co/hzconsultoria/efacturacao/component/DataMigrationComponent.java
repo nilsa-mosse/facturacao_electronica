@@ -100,7 +100,7 @@ public class DataMigrationComponent implements CommandLineRunner {
             superAdmin.setNome("Super Administrador");
             superAdmin.setSenha(passwordEncoder.encode("super123"));
             superAdmin.setRole("ROLE_SUPERADMIN");
-            superAdmin.setEmpresa(target); // SuperAdmin também precisa de uma empresa base
+            // SuperAdmin não pertence a nenhuma empresa
             userRepository.save(superAdmin);
             System.out.println(">>> Utilizador 'superadmin' criado (senha: super123).");
         }

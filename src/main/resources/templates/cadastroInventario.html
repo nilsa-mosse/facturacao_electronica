@@ -230,7 +230,7 @@
                                                     <th class="text-end">Valor em stock</th>
                                                     <th>Localização</th>
                                                     <th>Lote</th>
-                                                    <th>Validade</th>
+                                                    <th th:if="${globalExibirDatasValidade}">Validade</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -263,7 +263,7 @@
                                                         0,00</td>
                                                     <td><small class="text-muted">N/D</small></td>
                                                     <td><small class="text-muted">N/D</small></td>
-                                                    <td
+                                                    <td th:if="${globalExibirDatasValidade}"
                                                         th:text="${prod.dataExpiracao != null ? #temporals.format(prod.dataExpiracao, 'dd/MM/yyyy') : 'N/D'}">
                                                         N/D</td>
                                                 </tr>

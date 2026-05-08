@@ -8,6 +8,7 @@ const urlsToCache = [
   '/plugins/jquery/jquery-3.6.0.min.js',
   '/plugins/bootstrap/css/bootstrap.min.css',
   '/plugins/bootstrap/js/bootstrap.bundle.min.js',
+  '/img/logo.png',
   '/manifest.json'
 ];
 

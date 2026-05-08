@@ -69,16 +69,15 @@ public class EfaturacaoApplication {
             try {
                 jdbcTemplate.execute(
                         "CREATE TABLE IF NOT EXISTS licencas_geradas (" +
-                        "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                        "machine_id VARCHAR(255), " +
-                        "cliente_nome VARCHAR(255), " +
-                        "chave_gerada VARCHAR(500), " +
-                        "data_emissao TIMESTAMP, " +
-                        "data_expiracao TIMESTAMP, " +
-                        "ativa BOOLEAN DEFAULT TRUE, " +
-                        "observacoes VARCHAR(1000)" +
-                        ")"
-                );
+                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                "machine_id VARCHAR(255), " +
+                                "cliente_nome VARCHAR(255), " +
+                                "chave_gerada VARCHAR(500), " +
+                                "data_emissao TIMESTAMP, " +
+                                "data_expiracao TIMESTAMP, " +
+                                "ativa BOOLEAN DEFAULT TRUE, " +
+                                "observacoes VARCHAR(1000)" +
+                                ")");
                 System.out.println(">>> Migração: Tabela 'licencas_geradas' verificada/criada com sucesso.");
             } catch (Exception e) {
                 System.err.println(">>> Erro ao migrar tabela licencas_geradas: " + e.getMessage());
@@ -96,6 +95,12 @@ public class EfaturacaoApplication {
              * System.out.println(">>> TRIAL RESETADO COM SUCESSO!");
              * });
              */
+
+            // RESET DE DADOS TRANSACIONAIS (Limpeza de Tabelas)
+            // Para usar: Descomente as linhas abaixo para limpar todos os dados de vendas,
+            // compras e movimentos.
+            // NOTA: Usa sintaxe H2 (SET REFERENTIAL_INTEGRITY) - compatível com o banco
+            // embutido do sistema.
 
             // 1. Ativar utilizadores existentes (migração)
             userRepository.findAll().forEach(user -> {
@@ -117,7 +122,6 @@ public class EfaturacaoApplication {
                     existingAdmin.setAtivo(true);
                     changed = true;
                 }
-
                 // If the stored password doesn't match the default and isn't a valid BCrypt
                 // hash,
                 // reset it to the known default. Use regex to verify real BCrypt format (60
@@ -211,7 +215,6 @@ public class EfaturacaoApplication {
                 iva14.setTipo("IVA");
                 iva14.setCodigoAgt("NOR");
                 impostoRepository.save(iva14);
-
                 Imposto iva7 = new Imposto();
                 iva7.setNome("IVA - Taxa Simplificada");
                 iva7.setPercentagem(new BigDecimal("7.0"));

@@ -45,9 +45,13 @@ public class ListarProdutosController {
         Pageable pageable = PageRequest.of(page, 10);
         Page<Produto> produtosPage;
         if (cat != null) {
-            produtosPage = produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
+            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+                ? produtoRepository.findAll(pageable)
+                : produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
         } else {
-            produtosPage = produtoRepository.findByEmpresa_Id(empresaId, pageable);
+            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+                ? produtoRepository.findAll(pageable)
+                : produtoRepository.findByEmpresa_Id(empresaId, pageable);
         }
         List<Produto> produtos = produtosPage.getContent();
         if (busca != null && !busca.isEmpty()) {
@@ -93,9 +97,13 @@ public class ListarProdutosController {
         Pageable pageable = PageRequest.of(page, 10);
         Page<Produto> produtosPage;
         if (cat != null) {
-            produtosPage = produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
+            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+                ? produtoRepository.findAll(pageable)
+                : produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
         } else {
-            produtosPage = produtoRepository.findByEmpresa_Id(empresaId, pageable);
+            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+                ? produtoRepository.findAll(pageable)
+                : produtoRepository.findByEmpresa_Id(empresaId, pageable);
         }
         List<Produto> produtos = produtosPage.getContent();
         if (busca != null && !busca.isEmpty()) {

@@ -68,6 +68,9 @@ public class ProdutoController {
     @Autowired
     private EstabelecimentoRepository estabelecimentoRepository;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository configuracaoSistemaRepository;
+
     @GetMapping({ "/cadastroProduto", "/produtos/novo" })
 
     public String cadastroProduto(Model model) {
@@ -80,8 +83,6 @@ public class ProdutoController {
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
         String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
                 : "GERAL";
-
-        System.out.println("REGIME FISCAL: " + regimeFiscal);
 
         model.addAttribute("regimeFiscal", regimeFiscal);
         return "cadastroProduto";
@@ -160,7 +161,8 @@ public class ProdutoController {
         } catch (Exception e) {
             e.printStackTrace(); // Log completo no console do servidor
             System.err.println("Erro ao cadastrar produto: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("erro", "Erro ao cadastrar produto: " + (e.getMessage() != null ? e.getMessage() : "Erro interno de persistência"));
+            redirectAttributes.addFlashAttribute("erro", "Erro ao cadastrar produto: "
+                    + (e.getMessage() != null ? e.getMessage() : "Erro interno de persistência"));
             return "redirect:/produtos/novo";
         }
     }
@@ -264,7 +266,7 @@ public class ProdutoController {
                 Estabelecimento principal = estabelecimentos.get(0);
                 Estoque estoque = estoqueRepository.findByProdutoAndEstabelecimento(produto, principal)
                         .orElse(new Estoque());
-                
+
                 estoque.setProduto(produto);
                 estoque.setEstabelecimento(principal);
                 estoque.setQuantidade(quantidadeEstoque != null ? quantidadeEstoque : 0.0);
@@ -291,7 +293,7 @@ public class ProdutoController {
             // Limpar stock relacionado antes de apagar o produto
             List<Estoque> estoques = estoqueRepository.findByProduto(produto);
             estoqueRepository.deleteAll(estoques);
-            
+
             produtoRepository.deleteById(id);
             redirectAttributes.addFlashAttribute("mensagem",
                     messageSource.getMessage("msg.produto.apagado", null, LocaleContextHolder.getLocale()));
@@ -343,5 +345,16 @@ public class ProdutoController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(403).build();
+    }
+
+    @PostMapping("/api/produtos/config/toggle-datas")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<?> toggleDatas(@RequestParam("exibir") boolean exibir) {
+        ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity());
+        config.setExibirDatasValidade(exibir);
+        configuracaoSistemaRepository.save(config);
+        return ResponseEntity.ok().build();
     }
 }

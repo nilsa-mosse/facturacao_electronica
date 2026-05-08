@@ -8,12 +8,13 @@
         <nav th:replace="menu :: topbar"></nav>
         <aside th:replace="menu :: sidebar"></aside>
 
-        <div class="content-wrapper">
-            <section class="content-header">
+        <div class="content-wrapper bg-light">
+            <section class="content-header pt-4">
                 <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1><i class="fas fa-building me-2"></i><span th:text="#{config.empresa.titulo}">Dados da Empresa</span></h1>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h1 class="mb-0 fw-800"><i class="fas fa-building text-primary me-3"></i><span th:text="#{config.empresa.titulo}">Dados da Empresa</span></h1>
+                            <p class="text-muted small mb-0">Gerencie as informações institucionais e fiscais da sua organização.</p>
                         </div>
                     </div>
                 </div>
@@ -21,84 +22,207 @@
 
             <section class="content">
                 <div class="container-fluid">
-                     <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        <i class="fas fa-check-circle me-1"></i>
-                        <span th:text="${mensagem}">Dados salvos correctamente.</span>
+                    <!-- Alertas -->
+                    <div th:if="${mensagem}" class="alert alert-success border-0 shadow-sm rounded-pill mb-4 py-3 px-4 animate__animated animate__fadeInDown">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white rounded-circle p-2 me-3 shadow-sm">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                            <span th:text="${mensagem}" class="fw-600 text-success"></span>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                        </div>
                     </div>
 
-                    <div class="card card-outline card-info">
-                         <div class="card-header">
-                            <h3 class="card-title" th:text="#{config.empresa.info_geral}">Informações Gerais</h3>
-                        </div>
-                        <form th:action="@{/configuracoes/empresa/salvar}" th:object="${empresa}" method="post" enctype="multipart/form-data">
-                            <input type="hidden" th:field="*{id}" />
-                            <input type="hidden" th:field="*{logotipo}" />
-                            <div class="card-body">
-                                <div class="row">
-                                     <div class="form-group col-md-4">
-                                        <label th:text="#{config.empresa.nome}">Nome Comercial</label>
-                                        <input type="text" class="form-control" th:field="*{nome}" required>
+                    <form th:action="@{/configuracoes/empresa/salvar}" th:object="${empresa}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" th:field="*{id}" />
+                        <input type="hidden" th:field="*{logotipo}" />
+                        
+                        <div class="row">
+                            <!-- Coluna Esquerda: Perfil e Logo -->
+                            <div class="col-lg-4">
+                                <div class="card border-0 shadow-soft overflow-hidden mb-4">
+                                    <div class="card-header border-0 bg-dark py-5 text-center position-relative">
+                                        <div class="profile-header-bg"></div>
+                                        <div class="logo-preview-container mx-auto">
+                                            <img id="previewLogo" th:src="*{logotipo != null and !logotipo.isEmpty() ? logotipo : '/img/company-placeholder.png'}" 
+                                                 class="img-fluid rounded-circle shadow-lg border border-4 border-white bg-white" 
+                                                 style="width: 150px; height: 150px; object-fit: contain;">
+                                            <label for="logoInput" class="btn btn-primary btn-sm rounded-circle position-absolute bottom-0 end-0 shadow" title="Trocar Logotipo">
+                                                <i class="fas fa-camera"></i>
+                                                <input type="file" id="logoInput" name="logoFile" class="d-none" accept="image/*" onchange="previewImage(this)">
+                                            </label>
+                                        </div>
                                     </div>
-                                     <div class="form-group col-md-4">
-                                         <label th:text="#{config.empresa.nif}">NIF (Número de Identificação Fiscal)</label>
-                                         <input type="text" class="form-control" th:field="*{nif}"
-                                             th:placeholder="#{produto.placeholder.codigoBarra}" required>
-                                     </div>
-                                     <div class="form-group col-md-4">
-                                         <label th:text="#{config.empresa.email}">E-mail</label>
-                                         <input type="email" class="form-control" th:field="*{email}">
-                                     </div>
+                                    <div class="card-body text-center pt-5">
+                                        <h4 class="fw-800 mb-1" th:text="*{nome != null ? nome : 'Sua Empresa'}">Nome da Empresa</h4>
+                                        <p class="text-muted small" th:text="*{nif != null ? 'NIF: ' + nif : 'Aguardando NIF'}"></p>
+                                        <div class="d-flex justify-content-center gap-2 mt-3">
+                                            <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill fw-600">
+                                                <i class="fas fa-certificate me-1"></i> Entidade Activa
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-white border-0 py-4">
+                                        <button type="submit" class="btn btn-primary w-100 rounded-pill shadow-soft py-2 fw-700">
+                                            <i class="fas fa-save me-2"></i>Salvar Alterações
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="row mt-3">
-                                     <div class="form-group col-md-4">
-                                         <label th:text="#{config.empresa.telefone}">Telefone</label>
-                                         <input type="text" class="form-control" th:field="*{telefone}">
-                                     </div>
-                                     <div class="form-group col-md-4">
-                                         <label th:text="#{config.empresa.website}">Website</label>
-                                         <input type="text" class="form-control" th:field="*{website}">
-                                     </div>
-                                     <div class="form-group col-md-4">
-                                         <label th:text="#{config.empresa.logotipo}">Carregar Logotipo</label>
-                                         <div class="d-flex align-items-center gap-3">
-                                            <input type="file" name="logoFile" class="form-control" accept="image/*">
-                                            <div th:if="*{logotipo != null and !logotipo.isEmpty()}" class="border rounded bg-light p-1" title="Logotipo actual">
-                                                <img th:src="*{logotipo}" alt="Logo" style="height: 38px; max-width: 60px; object-fit: contain;"
-                                                     onerror="this.parentElement.style.display='none'">
+                                
+                                <div class="card border-0 shadow-soft">
+                                    <div class="card-body">
+                                        <h6 class="fw-700 text-dark mb-3"><i class="fas fa-info-circle text-primary me-2"></i>Dicas</h6>
+                                        <p class="small text-muted mb-0">
+                                            Certifique-se de que o NIF está correcto, pois este será utilizado em todos os documentos fiscais emitidos.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coluna Direita: Formulários -->
+                            <div class="col-lg-8">
+                                <!-- Informações Gerais -->
+                                <div class="card border-0 shadow-soft mb-4">
+                                    <div class="card-header bg-white border-0 py-3 d-flex align-items-center">
+                                        <div class="bg-soft-primary rounded-pill p-2 me-3">
+                                            <i class="fas fa-id-card text-primary"></i>
+                                        </div>
+                                        <h5 class="mb-0 fw-700 text-dark">Informações Gerais</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-7">
+                                                <label class="form-label text-muted small fw-700">NOME COMERCIAL</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-building text-muted"></i></span>
+                                                    <input type="text" class="form-control bg-light border-0" th:field="*{nome}" placeholder="Nome Oficial da Empresa" required>
+                                                </div>
                                             </div>
-                                         </div>
-                                         <small class="text-muted" th:if="*{logotipo != null and !logotipo.isEmpty()}"
-                                                th:text="*{logotipo}"></small>
-                                     </div>
+                                            <div class="col-md-5">
+                                                <label class="form-label text-muted small fw-700">NIF</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-fingerprint text-muted"></i></span>
+                                                    <input type="text" class="form-control bg-light border-0" th:field="*{nif}" placeholder="000000000" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small fw-700">REGIME FISCAL</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-gavel text-muted"></i></span>
+                                                    <select class="form-select bg-light border-0" th:field="*{regimeFiscal}">
+                                                        <option value="" disabled>Seleccione um regime...</option>
+                                                        <option th:each="r : ${regimes}" th:value="${r.codigo}" th:text="${r.nome}"></option>
+                                                    </select>
+                                                </div>
+                                                <div class="mt-1">
+                                                    <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="text-info small fw-600"><i class="fas fa-external-link-alt me-1"></i>Gerir Regimes</a>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small fw-700">WEBSITE</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-globe text-muted"></i></span>
+                                                    <input type="text" class="form-control bg-light border-0" th:field="*{website}" placeholder="https://www.empresa.ao">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                 <div class="row mt-3">
-                                      <div class="form-group col-md-8">
-                                          <label th:text="#{config.empresa.endereco}">Endereço Completo</label>
-                                          <textarea class="form-control" th:field="*{endereco}" rows="2"></textarea>
-                                      </div>
-                                      <div class="form-group col-md-4">
-                                          <label>Regime Fiscal</label>
-                                          <select class="form-control select2" th:field="*{regimeFiscal}">
-                                              <option value="" disabled>Seleccione um regime...</option>
-                                              <option th:each="r : ${regimes}" th:value="${r.codigo}" th:text="${r.nome}"></option>
-                                          </select>
-                                          <small class="text-muted"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="text-info"><i class="fas fa-external-link-alt me-1"></i>Gerir Regimes</a></small>
-                                      </div>
-                                 </div>
+
+                                <!-- Contactos -->
+                                <div class="card border-0 shadow-soft mb-4">
+                                    <div class="card-header bg-white border-0 py-3 d-flex align-items-center">
+                                        <div class="bg-soft-success rounded-pill p-2 me-3">
+                                            <i class="fas fa-phone-alt text-success"></i>
+                                        </div>
+                                        <h5 class="mb-0 fw-700 text-dark">Contactos e Localização</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small fw-700">E-MAIL INSTITUCIONAL</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-envelope text-muted"></i></span>
+                                                    <input type="email" class="form-control bg-light border-0" th:field="*{email}" placeholder="geral@empresa.ao">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label text-muted small fw-700">TELEFONE</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-phone text-muted"></i></span>
+                                                    <input type="text" class="form-control bg-light border-0" th:field="*{telefone}" placeholder="+244 000 000 000">
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label text-muted small fw-700">ENDEREÇO COMPLETO</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-map-marker-alt text-muted"></i></span>
+                                                    <textarea class="form-control bg-light border-0" th:field="*{endereco}" rows="3" placeholder="Rua, Bairro, Cidade..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                             <div class="card-footer">
-                                <button type="submit" class="btn btn-info"><i class="fas fa-save me-1"></i><span th:text="#{config.empresa.btn.actualizar}">Actualizar Empresa</span></button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </section>
         </div>
     </div>
 
-    <!-- JavaScript -->
-    <!-- Scripts already loaded via menu :: head -->
+    <style>
+        :root {
+            --primary: #007bff;
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --bg-soft-primary: rgba(0, 123, 255, 0.08);
+            --bg-soft-success: rgba(40, 167, 69, 0.08);
+        }
+
+        .fw-800 { font-weight: 800; }
+        .fw-700 { font-weight: 700; }
+        .fw-600 { font-weight: 600; }
+        
+        .shadow-soft { box-shadow: var(--shadow-soft); }
+        .bg-soft-primary { background-color: var(--bg-soft-primary); }
+        .bg-soft-success { background-color: var(--bg-soft-success); }
+        
+        .profile-header-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, #212529, #343a40);
+            z-index: 0;
+        }
+
+        .logo-preview-container {
+            position: relative;
+            z-index: 1;
+            width: 150px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: none;
+            background-color: #fff !important;
+            border-color: var(--primary) !important;
+        }
+
+        .card { border-radius: 1rem !important; }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate__fadeInDown { animation: fadeInDown 0.5s ease forwards; }
+    </style>
+
+    <script th:inline="javascript">
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewLogo').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </body>
 
 </html>

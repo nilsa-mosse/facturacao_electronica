@@ -21,6 +21,24 @@ public class SecurityUtils {
         return null;
     }
 
+    public static boolean isSuperAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+            String role = ((CustomUserDetails) auth.getPrincipal()).getRole();
+            return "SUPERADMIN".equals(role) || "ROLE_SUPERADMIN".equals(role);
+        }
+        return false;
+    }
+
+    public static boolean isAnyAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
+            String role = ((CustomUserDetails) auth.getPrincipal()).getRole();
+            return role != null && (role.contains("ADMIN") || role.contains("SUPERADMIN"));
+        }
+        return false;
+    }
+
     /**
      * Obtém a empresa do utilizador autenticado
      * Útil para garantir que cada utilizador acessa apenas a sua empresa

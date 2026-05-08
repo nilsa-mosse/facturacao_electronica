@@ -3,273 +3,340 @@
 
 <head th:replace="menu :: head"></head>
 
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        --primary-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+        --success-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --info-grad: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        --warning-grad: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --danger-grad: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .content-wrapper {
+        background-color: #f8fafc !important;
+    }
+
+    .welcome-hero {
+        background: var(--primary-grad);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px -5px rgba(67, 56, 202, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-hero::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .kpi-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1);
+        border-color: #6366f1;
+    }
+
+    .kpi-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .kpi-info .kpi-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .kpi-info .kpi-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-top: 2px;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: var(--glass-shadow);
+        margin-bottom: 25px;
+        overflow: hidden; /* Prevents resize loops */
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .canvas-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .top-products-list .list-group-item {
+        border: none;
+        padding: 12px 0;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .product-rank {
+        width: 30px;
+        height: 30px;
+        background: #f1f5f9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+</style>
+
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <div class="wrapper">
-        <!-- Top Navbar -->
         <nav th:replace="menu :: topbar"></nav>
-
-        <!-- Including the sidebar menu -->
         <aside th:replace="menu :: sidebar"></aside>
 
-        <main class="py-4">
-            <div class="content-wrapper">
-                <div class="container-fluid px-4">
-                    <h3 class="fw-bold mb-4" th:text="#{dashboard.titulo}">Dashboard - Visão Geral</h3>
+        <main class="content-wrapper">
+            <div class="container-fluid px-4 pt-4">
+                
+                <!-- Welcome Hero Section -->
+                <div class="welcome-hero">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="fw-bold mb-1">Olá, <span th:text="${usuario_NOME != null ? usuario_NOME : 'Utilizador'}">Utilizador</span>! 👋</h2>
+                            <p class="mb-0 opacity-75">Aqui está o que está a acontecer no seu negócio hoje.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end d-none d-md-block">
+                            <h5 class="mb-0 fw-bold" id="currentDate">--/--/----</h5>
+                            <span class="badge bg-white bg-opacity-25" id="currentTime">00:00</span>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Indicadores principais - 1ª Linha -->
-                    <div class="row mb-4">
-                        <div class="col-md col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-success shadow-sm"
-                                th:onclick="|location.href='@{/dashboard/vendas-dia}'|">
-                                <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_hoje}">Vendas
-                                        Hoje</span>
-                                    <span class="info-box-number"
-                                        th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
-                                        0,00</span>
-                                </div>
+                <!-- KPI Cards Grid -->
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="kpi-card" th:onclick="|location.href='@{/dashboard/vendas-dia}'|">
+                            <div class="kpi-icon" style="background: var(--success-grad)">
+                                <i class="fas fa-shopping-cart"></i>
                             </div>
-                        </div>
-                        <div class="col-md col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-primary shadow-sm"
-                                th:onclick="|location.href='@{/dashboard/receita-mensal}'|">
-                                <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.vendas_mes}">Vendas
-                                        Mês</span>
-                                    <span class="info-box-number"
-                                        th:text="${'Kz ' + #numbers.formatDecimal(vendasMes, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
-                                        0,00</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-danger shadow-sm"
-                                th:onclick="|location.href='@{/historico-vendas}'|">
-                                <span class="info-box-icon"><i class="fas fa-file-invoice"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold" th:text="#{dashboard.facturas}">Facturas</span>
-                                    <span class="info-box-number" th:text="${totalFacturas}">0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-warning shadow-sm"
-                                th:onclick="|location.href='@{/dashboard/lucro-liquido-mensal}'|">
-                                <span class="info-box-icon"><i class="fas fa-hand-holding-usd"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold">Lucro L&iacute;quido Mensal</span>
-                                    <span class="info-box-number"
-                                        th:text="${'Kz ' + #numbers.formatDecimal(lucroLiquidoMensal, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz
-                                        0,00</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md col-sm-6 col-12 mb-3">
-                            <div class="premium-card grad-indigo shadow-sm"
-                                th:onclick="|location.href='@{/financeiro/fluxo-caixa}'|">
-                                <span class="info-box-icon"><i class="fas fa-exchange-alt"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text fw-bold"
-                                        th:text="#{dashboard.movimentos}">Movimentos</span>
-                                    <span class="info-box-number" th:text="${totalMovimentos}">0</span>
-                                </div>
+                            <div class="kpi-info">
+                                <div class="kpi-label" th:text="#{dashboard.vendas_hoje}">Vendas Hoje</div>
+                                <div class="kpi-value" th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje != null ? vendasHoje : 0, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</div>
                             </div>
                         </div>
                     </div>
-
-
-
-                    <!-- Novos Gráficos - Linha 1 -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-white">
-                                    <h5 class="card-title mb-0 fw-bold">Receita vs Despesas (Últimos 6 Meses)</h5>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="graficoReceitaDespesa" height="200"></canvas>
-                                </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="kpi-card" th:onclick="|location.href='@{/dashboard/receita-mensal}'|">
+                            <div class="kpi-icon" style="background: var(--primary-grad)">
+                                <i class="fas fa-chart-line"></i>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-white">
-                                    <h5 class="card-title mb-0 fw-bold">Comparação de Vendas (Mês Atual vs Passado)</h5>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="graficoComparacao" height="200"></canvas>
-                                </div>
+                            <div class="kpi-info">
+                                <div class="kpi-label" th:text="#{dashboard.vendas_mes}">Vendas Mês</div>
+                                <div class="kpi-value" th:text="${'Kz ' + #numbers.formatDecimal(vendasMes != null ? vendasMes : 0, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="kpi-card" th:onclick="|location.href='@{/dashboard/lucro-liquido-mensal}'|">
+                            <div class="kpi-icon" style="background: var(--warning-grad)">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">Lucro Líquido</div>
+                                <div class="kpi-value" th:text="${'Kz ' + #numbers.formatDecimal(lucroLiquidoMensal != null ? lucroLiquidoMensal : 0, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="kpi-card" th:onclick="|location.href='@{/historico-vendas}'|">
+                            <div class="kpi-icon" style="background: var(--danger-grad)">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <div class="kpi-label" th:text="#{dashboard.facturas}">Facturas</div>
+                                <div class="kpi-value" th:text="${totalFacturas != null ? totalFacturas : 0}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Novos Gráficos - Linha 2 -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-white">
-                                    <h5 class="card-title mb-0 fw-bold">Vendas por Localização</h5>
+                <!-- Charts Section - Main -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="chart-container">
+                            <div class="chart-header">
+                                <h5 class="chart-title">Desempenho Financeiro (Receita vs Despesas)</h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm rounded-pill px-3" onclick="exportarGrafico('graficoReceitaDespesa')">
+                                        <i class="fas fa-download me-1"></i> Exportar
+                                    </button>
                                 </div>
-                                <div class="card-body">
-                                    <div style="height: 300px; display: flex; justify-content: center;">
+                            </div>
+                            <div class="canvas-wrapper" style="height: 300px;">
+                                <canvas id="graficoReceitaDespesa"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 class="chart-title mb-4">Vendas por Localização</h5>
+                                    <div class="canvas-wrapper" style="height: 250px;">
                                         <canvas id="graficoLocalizacao"></canvas>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-white">
-                                    <h5 class="card-title mb-0 fw-bold">Horários de Pico de Vendas</h5>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="graficoHorarios" height="200"></canvas>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <h5 class="chart-title mb-4">Horários de Pico</h5>
+                                    <div class="canvas-wrapper" style="height: 250px;">
+                                        <canvas id="graficoHorarios"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Gráfico de vendas (Old) -->
-                    <div class="row mb-4">
-                        <div class="col-md-8">
-                            <div class="card mb-3 shadow-sm">
-                                <div class="card-header bg-white">Vendas nos últimos 30 dias</div>
-                                <div class="card-body">
-                                    <canvas id="graficoVendas" height="150"></canvas>
-                                </div>
+                    <div class="col-lg-4">
+                        <!-- Top Products -->
+                        <div class="chart-container">
+                            <h5 class="chart-title mb-4">Produtos Mais Vendidos</h5>
+                            <div class="top-products-list">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item" th:each="produto, iter : ${produtosMaisVendidos}">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="product-rank" th:text="${iter.index + 1}">1</div>
+                                            <span class="fw-semibold text-slate-700" th:text="${produto.nome}">Produto</span>
+                                        </div>
+                                        <span class="badge bg-indigo-100 text-indigo-700 rounded-pill px-3" th:text="${produto.quantidadeVendida + ' un'}">0 un</span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card mb-3 shadow-sm">
-                                <div class="card-header bg-white fw-bold text-success">Top 10 de Produtos Mais Vendidos
-                                </div>
-                                <div class="card-body p-0">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center"
-                                            th:each="produto : ${produtosMaisVendidos}">
-                                            <span>
-                                                <i class="fa fa-cube text-success me-2"></i>
-                                                <span th:text="${produto.nome}">Produto Exemplo</span>
-                                            </span>
-                                            <span class="badge bg-success rounded-pill"
-                                                th:text="${produto.quantidadeVendida}">0</span>
-                                        </li>
-                                    </ul>
-                                </div>
+
+                        <!-- Summary Comparison -->
+                        <div class="chart-container">
+                            <h5 class="chart-title mb-4">Mês Atual vs Passado</h5>
+                            <div class="canvas-wrapper" style="height: 300px;">
+                                <canvas id="graficoComparacao"></canvas>
                             </div>
                         </div>
                     </div>
-
-
-
-
                 </div>
+
             </div>
         </main>
+        <footer th:replace="menu :: footer"></footer>
     </div>
 
-    <!-- AdminLTE -->
-    <!-- Scripts already loaded in menu :: head -->
-
     <script th:src="@{/plugins/chartjs/chart.min.js}"></script>
-    <script th:src="@{/plugins/chartjs/chartjs-plugin-datalabels.min.js}"></script>
-    <script th:src="@{/plugins/sweetalert2/sweetalert2.all.min.js}"></script>
-
     <script th:inline="javascript">
-        // Alerta de Acesso Negado
-        document.addEventListener('DOMContentLoaded', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('error') === 'access_denied') {
-                const modulo = urlParams.get('module') || '';
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Acesso Restrito',
-                    text: 'Lamentamos, mas o seu perfil não tem permissão para aceder ao módulo: ' + modulo,
-                    confirmButtonColor: '#007bff'
-                });
-                // Limpar URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        });
+        // Data e Hora Atual
+        function updateTime() {
+            const agora = new Date();
+            const options = { day: '2-digit', month: 'long', year: 'numeric' };
+            document.getElementById('currentDate').textContent = agora.toLocaleDateString('pt-PT', options);
+            document.getElementById('currentTime').textContent = agora.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
 
-        // 1. Gráfico de Vendas 30 Dias
-        var vendasUltimos30Dias = /*[[${vendasUltimos30Dias}]]*/ {};
-        var labels30 = Object.keys(vendasUltimos30Dias).map(function (dateStr) {
-            var d = new Date(dateStr);
-            return (d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0'));
-        });
-        var data30 = Object.values(vendasUltimos30Dias);
+        // Configurações Globais do Chart.js
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.font.family = "'Inter', sans-serif";
 
-        new Chart(document.getElementById('graficoVendas'), {
-            type: 'bar',
-            data: {
-                labels: labels30,
-                datasets: [{
-                    label: 'Vendas',
-                    data: data30,
-                    backgroundColor: '#28a745'
-                }]
-            },
-            options: { responsive: true }
-        });
-
-        // 2. Gráfico Receita vs Despesas
+        // 1. Gráfico Receita vs Despesas (Line Chart com Gradiente)
         var rdData = /*[[${receitaVsDespesa}]]*/ { labels: [], receitas: [], despesas: [] };
-        new Chart(document.getElementById('graficoReceitaDespesa'), {
+        const ctxRD = document.getElementById('graficoReceitaDespesa').getContext('2d');
+        
+        const gradReceita = ctxRD.createLinearGradient(0, 0, 0, 400);
+        gradReceita.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+        gradReceita.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+        new Chart(ctxRD, {
             type: 'line',
             data: {
                 labels: rdData.labels,
-                datasets: [
-                    {
-                        label: 'Receita',
-                        data: rdData.receitas,
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Despesas',
-                        data: rdData.despesas,
-                        borderColor: '#dc3545',
-                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: { responsive: true }
-        });
-
-        // 3. Gráfico Comparação de Períodos
-        var compData = /*[[${comparacaoPeriodos}]]*/ { labels: [], atual: [], passado: [] };
-        new Chart(document.getElementById('graficoComparacao'), {
-            type: 'bar',
-            data: {
-                labels: compData.labels,
-                datasets: [
-                    {
-                        label: 'Mês Atual',
-                        data: compData.atual,
-                        backgroundColor: '#007bff'
-                    },
-                    {
-                        label: 'Mês Passado',
-                        data: compData.passado,
-                        backgroundColor: '#6c757d'
-                    }
-                ]
+                datasets: [{
+                    label: 'Receita',
+                    data: rdData.receitas,
+                    borderColor: '#6366f1',
+                    borderWidth: 3,
+                    backgroundColor: gradReceita,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#6366f1'
+                }, {
+                    label: 'Despesas',
+                    data: rdData.despesas,
+                    borderColor: '#f43f5e',
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 4
+                }]
             },
             options: {
                 responsive: true,
-                scales: { x: { title: { display: true, text: 'Dia do Mês' } } }
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', align: 'end' } },
+                scales: {
+                    y: { grid: { borderDash: [2, 2] }, ticks: { callback: v => 'Kz ' + v.toLocaleString() } },
+                    x: { grid: { display: false } }
+                }
             }
         });
 
-        // 4. Gráfico Vendas por Localização
+        // 2. Gráfico Localização (Doughnut)
         var locData = /*[[${vendasPorLocalizacao}]]*/ {};
         new Chart(document.getElementById('graficoLocalizacao'), {
             type: 'doughnut',
@@ -277,46 +344,59 @@
                 labels: Object.keys(locData),
                 datasets: [{
                     data: Object.values(locData),
-                    backgroundColor: ['#17a2b8', '#ffc107', '#fd7e14', '#20c997', '#6f42c1']
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-
-        // 5. Gráfico Horários de Pico
-        var picoData = /*[[${horariosPico}]]*/ {};
-        var picoLabels = Object.keys(picoData).map(h => h + ':00');
-        new Chart(document.getElementById('graficoHorarios'), {
-            type: 'line',
-            data: {
-                labels: picoLabels,
-                datasets: [{
-                    label: 'Vendas por Hora',
-                    data: Object.values(picoData),
-                    borderColor: '#fd7e14',
-                    backgroundColor: 'rgba(253, 126, 20, 0.2)',
-                    fill: true,
-                    pointRadius: 5,
-                    pointHoverRadius: 8
+                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                    borderWidth: 0,
+                    hoverOffset: 15
                 }]
             },
             options: {
                 responsive: true,
-                scales: { x: { title: { display: true, text: 'Hora do Dia' } } }
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: { legend: { position: 'bottom' } }
             }
         });
 
-        function exportarGrafico() {
-            // Simplified export for the main chart
-            var canvas = document.getElementById('graficoVendas');
-            var link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = 'vendas.png';
+        // 3. Gráfico Horários de Pico
+        var picoData = /*[[${horariosPico}]]*/ {};
+        new Chart(document.getElementById('graficoHorarios'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(picoData).map(h => h + 'h'),
+                datasets: [{
+                    label: 'Vendas',
+                    data: Object.values(picoData),
+                    backgroundColor: '#6366f1',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { display: false }, x: { grid: { display: false } } }
+            }
+        });
+
+        // 4. Comparação de Períodos
+        var compData = /*[[${comparacaoPeriodos}]]*/ { labels: [], atual: [], passado: [] };
+        new Chart(document.getElementById('graficoComparacao'), {
+            type: 'bar',
+            data: {
+                labels: ['Vendas'],
+                datasets: [
+                    { label: 'Atual', data: [compData.atual.reduce((a,b) => a+b, 0)], backgroundColor: '#6366f1', borderRadius: 10 },
+                    { label: 'Passado', data: [compData.passado.reduce((a,b) => a+b, 0)], backgroundColor: '#e2e8f0', borderRadius: 10 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        function exportarGrafico(id) {
+            const link = document.createElement('a');
+            link.href = document.getElementById(id).toDataURL('image/png');
+            link.download = 'dashboard-report.png';
             link.click();
         }
     </script>
-    <button class="btn btn-outline-primary mt-2" onclick="exportarGrafico()"><i class="fa fa-download"></i> Exportar
-        Gráfico</button>
 </body>
-
 </html>

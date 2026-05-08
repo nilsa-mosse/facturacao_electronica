@@ -1,129 +1,196 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="menu :: head"></head>
+
+<style>
+    :root {
+        --primary-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+        --success-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --info-grad: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        --danger-grad: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    .content-wrapper {
+        background-color: #f8fafc !important;
+    }
+
+    .welcome-hero {
+        background: var(--primary-grad);
+        border-radius: 20px;
+        padding: 40px;
+        color: white;
+        margin-bottom: 40px;
+        box-shadow: 0 10px 25px -5px rgba(67, 56, 202, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-hero::after {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px 30px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        text-align: center;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        border-color: #6366f1;
+    }
+
+    .action-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .action-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+    }
+
+    .action-desc {
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .card-bg-icon {
+        position: absolute;
+        right: -20px;
+        bottom: -20px;
+        font-size: 8rem;
+        opacity: 0.03;
+        transform: rotate(-15deg);
+        transition: all 0.4s ease;
+    }
+
+    .action-card:hover .card-bg-icon {
+        opacity: 0.08;
+        transform: rotate(-5deg) scale(1.1);
+    }
+</style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <div class="wrapper">
         <nav th:replace="menu :: topbar"></nav>
         <aside th:replace="menu :: sidebar"></aside>
 
-        <div class="content-wrapper">
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">Bem-vindo, <span th:text="${usuario_NOME}">Utilizador</span>!</h1>
+        <main class="content-wrapper">
+            <div class="container-fluid px-4 pt-4">
+                
+                <!-- Welcome Hero Section -->
+                <div class="welcome-hero">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="fw-bold mb-2">Bem-vindo ao Portal, <span th:text="${usuario_NOME}">Utilizador</span>! 👋</h1>
+                            <p class="mb-0 opacity-75 fs-5">O que deseja processar hoje?</p>
+                        </div>
+                        <div class="col-md-4 text-md-end d-none d-md-block">
+                            <i class="fas fa-desktop fa-4x opacity-25"></i>
                         </div>
                     </div>
+                </div>
+
+                <!-- Messages -->
+                <div th:if="${mensagem}" class="alert alert-success border-0 shadow-sm rounded-pill px-4 mb-4" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> <span th:text="${mensagem}"></span>
+                </div>
+                <div th:if="${mensagem_erro}" class="alert alert-danger border-0 shadow-sm rounded-pill px-4 mb-4" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${mensagem_erro}"></span>
+                </div>
+
+                <!-- Actions Grid -->
+                <div class="row justify-content-center">
+                    
+                    <!-- Abrir Caixa -->
+                    <div class="col-xl-4 col-lg-5 mb-4" th:if="${!isCaixaAberto}">
+                        <a th:href="@{/caixa/abertura}" class="text-decoration-none">
+                            <div class="action-card">
+                                <div class="action-icon-wrapper" style="background: var(--success-grad)">
+                                    <i class="fas fa-door-open"></i>
+                                </div>
+                                <h2 class="action-title">Abrir Caixa</h2>
+                                <p class="action-desc">Inicie o seu turno e comece a vender.</p>
+                                <i class="fas fa-unlock card-bg-icon"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Aceder ao POS -->
+                    <div class="col-xl-4 col-lg-5 mb-4" th:if="${isCaixaAberto}">
+                        <a th:href="@{/pos}" class="text-decoration-none">
+                            <div class="action-card">
+                                <div class="action-icon-wrapper" style="background: var(--success-grad)">
+                                    <i class="fas fa-cash-register"></i>
+                                </div>
+                                <h2 class="action-title">Aceder ao POS</h2>
+                                <p class="action-desc">Realize vendas e emita faturas rapidamente.</p>
+                                <i class="fas fa-shopping-cart card-bg-icon"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Histórico -->
+                    <div class="col-xl-4 col-lg-5 mb-4">
+                        <a th:href="@{/historico-vendas}" class="text-decoration-none">
+                            <div class="action-card">
+                                <div class="action-icon-wrapper" style="background: var(--info-grad)">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <h2 class="action-title">Histórico</h2>
+                                <p class="action-desc">Consulte vendas anteriores e emita 2ª vias.</p>
+                                <i class="fas fa-list-alt card-bg-icon"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Fechar Caixa -->
+                    <div class="col-xl-4 col-lg-5 mb-4" th:if="${isCaixaAberto}">
+                        <a th:href="@{/caixa/fecho}" class="text-decoration-none">
+                            <div class="action-card">
+                                <div class="action-icon-wrapper" style="background: var(--danger-grad)">
+                                    <i class="fas fa-power-off"></i>
+                                </div>
+                                <h2 class="action-title">Fechar Caixa</h2>
+                                <p class="action-desc">Encerre o turno e verifique o fecho de caixa.</p>
+                                <i class="fas fa-lock card-bg-icon"></i>
+                            </div>
+                        </a>
+                    </div>
+
                 </div>
             </div>
-
-            <section class="content">
-                <div class="container-fluid">
-                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        <i class="fas fa-check-circle me-1"></i> <span th:text="${mensagem}"></span>
-                    </div>
-                    <div th:if="${mensagem_erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        <i class="fas fa-exclamation-triangle me-1"></i> <span th:text="${mensagem_erro}"></span>
-                    </div>
-                    <div class="row mt-4 mb-5 justify-content-center">
-                        <div class="col-lg-10">
-                            <div class="text-center mb-5">
-                                <h2 class="display-5 fw-bold text-dark">Portal do Operador</h2>
-                                <p class="lead text-muted">Selecione uma das opções abaixo para continuar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row justify-content-center">
-                        
-                        <!-- Botão ABRIR CAIXA (Se estiver fechado) -->
-                        <div class="col-md-5 mb-4 d-flex" th:if="${!isCaixaAberto}">
-                            <a th:href="@{/caixa/abertura}" class="text-decoration-none w-100">
-                                <div class="card bg-success text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
-                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
-                                    <i class="fas fa-unlock"
-                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 14rem; opacity: 0.15; transform: rotate(-10deg);"></i>
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
-                                        style="z-index: 1;">
-                                        <i class="fas fa-box-open fa-4x mb-3"></i>
-                                        <h2 class="fw-bold fs-1 m-0">Abrir Caixa</h2>
-                                        <p class="fs-5 mt-2 mb-0">Inicie o seu turno de trabalho</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Botão ACEDER AO POS (Se estiver aberto) -->
-                        <div class="col-md-4 mb-4 d-flex" th:if="${isCaixaAberto}">
-                            <a th:href="@{/pos}" class="text-decoration-none w-100">
-                                <div class="card bg-success text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
-                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
-                                    <i class="fas fa-cash-register"
-                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 12rem; opacity: 0.15; transform: rotate(-10deg);"></i>
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
-                                        style="z-index: 1;">
-                                        <i class="fas fa-shopping-cart fa-3x mb-3"></i>
-                                        <h2 class="fw-bold fs-2 m-0">Aceder ao POS</h2>
-                                        <p class="fs-6 mt-2 mb-0">Vendas e Faturas</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Histórico de Vendas (Sempre visível) -->
-                        <div class="col-md-4 mb-4 d-flex">
-                            <a th:href="@{/historico-vendas}" class="text-decoration-none w-100">
-                                <div class="card bg-info text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
-                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
-                                    <i class="fas fa-history"
-                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 12rem; opacity: 0.15; transform: rotate(-10deg);"></i>
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
-                                        style="z-index: 1;">
-                                        <i class="fas fa-list-alt fa-3x mb-3"></i>
-                                        <h2 class="fw-bold fs-2 m-0">Histórico</h2>
-                                        <p class="fs-6 mt-2 mb-0">Consultas e 2ª vias</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-
-                        <!-- Botão FECHAR CAIXA (Se estiver aberto) -->
-                        <div class="col-md-4 mb-4 d-flex" th:if="${isCaixaAberto}">
-                            <a th:href="@{/caixa/fecho}" class="text-decoration-none w-100">
-                                <div class="card bg-danger text-white shadow-lg border-0 btn-hover overflow-hidden h-100"
-                                    style="border-radius: 20px; cursor: pointer; min-height: 250px; position: relative;">
-                                    <i class="fas fa-lock"
-                                        style="position: absolute; right: -10px; bottom: -20px; font-size: 12rem; opacity: 0.15; transform: rotate(-10deg);"></i>
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center text-center position-relative"
-                                        style="z-index: 1;">
-                                        <i class="fas fa-power-off fa-3x mb-3"></i>
-                                        <h2 class="fw-bold fs-2 m-0">Fechar Caixa</h2>
-                                        <p class="fs-6 mt-2 mb-0">Encerramento de turno</p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+        </main>
     </div>
-
-    <style>
-        .btn-hover:hover {
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 1rem 3rem rgba(0, 0, 0, .175) !important;
-        }
-
-        .btn-hover {
-            transition: all 0.3s ease;
-        }
-    </style>
 </body>
-
 </html>

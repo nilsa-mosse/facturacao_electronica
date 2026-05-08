@@ -28,46 +28,63 @@
                     </div>
 
                     <!-- Tabela de Utilizadores -->
-                    <div class="card card-outline card-dark">
-                         <div class="card-header border-0 d-flex justify-content-between align-items-center">
-                            <h3 class="card-title" th:text="#{config.utilizadores.listagem}">Listagem de Utilizadores</h3>
-                            <button class="btn btn-dark shadow-sm btn-sm rounded-pill px-4 ms-auto" onclick="novoUtilizador()">
+                    <div class="card border-0 shadow-soft overflow-hidden animate__animated animate__fadeIn">
+                         <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-soft-dark rounded-pill p-2 me-3">
+                                    <i class="fas fa-users text-dark"></i>
+                                </div>
+                                <h5 class="mb-0 fw-700 text-dark" th:text="#{config.utilizadores.listagem}">Listagem de Utilizadores</h5>
+                            </div>
+                            <button class="btn btn-dark shadow-sm btn-sm rounded-pill px-4 ms-auto fw-600" onclick="novoUtilizador()">
                                 <i class="fas fa-user-plus me-1"></i> Cadastrar Novo Utilizador
                             </button>
                         </div>
                         <div class="card-body table-responsive p-0">
-                            <table class="table table-striped table-valign-middle">
-                                 <thead>
+                            <table class="table table-hover table-valign-middle mb-0">
+                                 <thead class="bg-light">
                                     <tr>
-                                        <th th:text="#{config.utilizadores.nome}">Nome</th>
+                                        <th class="ps-4" th:text="#{config.utilizadores.nome}">Nome</th>
                                         <th th:text="#{config.utilizadores.login}">Login</th>
                                         <th>Empresa</th>
-                                        <th>Estabelecimentos</th>
+                                        <th>Estabelecimentos e Moradas</th>
                                         <th th:text="#{config.utilizadores.perfil}">Perfil (Role)</th>
-                                        <th th:text="#{column.acoes}">Acções</th>
+                                        <th class="text-end pe-4" th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="u : ${utilizadores}">
-                                        <td th:text="${u.nome}" class="fw-bold text-dark"></td>
+                                    <tr th:each="u : ${utilizadores}" class="transition-all hover-translate-x">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-light rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                                    <i class="fas fa-user text-muted small"></i>
+                                                </div>
+                                                <span th:text="${u.nome}" class="fw-700 text-dark"></span>
+                                            </div>
+                                        </td>
                                         <td th:text="${u.login}" class="text-muted"></td>
-                                        <td th:text="${u.empresa != null ? u.empresa.nome : 'N/A'}"></td>
                                         <td>
-                                            <div class="d-flex flex-wrap gap-1">
-                                                <span th:each="est : ${u.estabelecimentos}" 
-                                                      class="badge bg-light border text-dark fw-normal"
-                                                      th:text="${est.nome}"></span>
+                                            <span class="badge bg-light text-dark border fw-normal" th:text="${u.empresa != null ? u.empresa.nome : 'N/A'}"></span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column gap-1">
+                                                <div th:each="est : ${u.estabelecimentos}" class="d-flex align-items-center">
+                                                    <span class="badge bg-soft-primary text-primary me-2" style="font-size: 0.65rem;" th:text="${est.tipo}"></span>
+                                                    <span class="fw-600 small text-dark" th:text="${est.nome}"></span>
+                                                    <span class="text-muted small ms-2 d-none d-lg-inline" th:if="${est.endereco}" 
+                                                          th:text="'| ' + ${est.endereco}" style="font-size: 0.75rem;"></span>
+                                                </div>
                                                 <span th:if="${#lists.isEmpty(u.estabelecimentos)}" class="text-muted small italicText">Nenhum associado</span>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge rounded-pill px-3 py-2 shadow-sm"
+                                            <span class="badge rounded-pill px-3 py-2 shadow-sm fw-600"
                                                 th:classappend="${u.role == 'ADMIN' ? 'bg-danger' : 'bg-primary'}"
                                                 th:text="${u.role}">ADMIN</span>
                                         </td>
-                                         <td>
-                                             <div class="d-flex gap-2">
-                                                 <button class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm btn-editar-local"
+                                         <td class="text-end pe-4">
+                                             <div class="btn-group btn-group-sm">
+                                                 <button class="btn btn-outline-info rounded-circle me-2 btn-editar-local"
                                                          th:data-id="${u.id}"
                                                          th:data-nome="${u.nome}"
                                                          th:data-login="${u.login}"
@@ -77,7 +94,7 @@
                                                      <i class="fas fa-edit"></i>
                                                  </button>
                                                  <a th:href="@{'/configuracoes/utilizadores/eliminar/' + ${u.id}}"
-                                                    class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm"
+                                                    class="btn btn-outline-danger rounded-circle"
                                                     th:onclick="return confirm([[#{config.utilizadores.confirmar_eliminar}]])"
                                                     title="Eliminar Utilizador">
                                                     <i class="fas fa-trash"></i>
@@ -92,53 +109,99 @@
 
                     <!-- Modal Utilizador -->
                     <div class="modal fade" id="modalUtilizador" tabindex="-1" aria-labelledby="modalUtilizadorLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header bg-dark text-white">
-                                    <h5 class="modal-title" id="formHeader">Novo Utilizador</h5>
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg overflow-hidden" style="border-radius: 1.5rem;">
+                                <div class="modal-header bg-dark text-white border-0 py-4 px-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-soft-light rounded-circle p-3 me-3">
+                                            <i class="fas fa-user-shield fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="modal-title fw-800 mb-0" id="formHeader">Novo Utilizador</h5>
+                                            <p class="text-light small opacity-75 mb-0">Configure os acessos e permissões do sistema.</p>
+                                        </div>
+                                    </div>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <form th:action="@{/configuracoes/utilizadores/salvar}" method="post">
+                                <form th:action="@{/configuracoes/utilizadores/salvar}" method="post" id="userForm">
                                     <input type="hidden" id="userId" name="id">
-                                    <div class="modal-body">
-                                        <div class="row g-3">
+                                    <div class="modal-body p-4 bg-white">
+                                        <div class="row g-4">
                                             <div class="col-md-6">
-                                                <label class="form-label" th:text="#{config.utilizadores.nome}">Nome Completo</label>
-                                                <input type="text" class="form-control" id="uNome" name="nome" required>
+                                                <label class="form-label text-muted small fw-700">NOME COMPLETO</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-id-card text-muted"></i></span>
+                                                    <input type="text" class="form-control bg-light border-0" id="uNome" name="nome" placeholder="Ex: João Silva" required>
+                                                </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label" th:text="#{config.utilizadores.login}">Login de Acesso</label>
-                                                <input type="text" class="form-control" id="uLogin" name="login" required>
+                                                <label class="form-label text-muted small fw-700">LOGIN DE ACESSO</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-at text-muted"></i></span>
+                                                    <input type="text" class="form-control bg-light border-0" id="uLogin" name="login" placeholder="Ex: joao.silva" required>
+                                                </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label" th:text="#{config.utilizadores.senha}">Palavra-passe</label>
-                                                <input type="password" class="form-control" id="uSenha" name="senha" placeholder="Palavra-passe">
-                                                <small class="text-muted d-block" id="senhaHelp">Obrigatório para novos utilizadores.</small>
+                                                <label class="form-label text-muted small fw-700">PALAVRA-PASSE</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-lock text-muted"></i></span>
+                                                    <input type="password" class="form-control bg-light border-0" id="uSenha" name="senha" placeholder="••••••••">
+                                                </div>
+                                                <small class="text-muted mt-1 d-block" id="senhaHelp" style="font-size: 0.7rem;">Obrigatório para novos utilizadores.</small>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label" th:text="#{config.utilizadores.perfil}">Perfil (Role)</label>
-                                                <select class="form-select" id="uRole" name="role" required>
-                                                    <option value="OPERADOR">OPERADOR (Ponto de Venda)</option>
-                                                    <option value="GESTOR">GESTOR (Gestão Operacional)</option>
-                                                    <option value="CONSULTOR">CONSULTOR (Apenas Leitura)</option>
-                                                    <option th:if="${isSuperAdmin}" value="ADMIN">ADMINISTRADOR (Gestão)</option>
-                                                </select>
+                                                <label class="form-label text-muted small fw-700">PERFIL (ROLE)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-user-tag text-muted"></i></span>
+                                                    <select class="form-select bg-light border-0" id="uRole" name="role" required>
+                                                        <option value="OPERADOR">OPERADOR (Ponto de Venda)</option>
+                                                        <option value="GESTOR">GESTOR (Gestão Operacional)</option>
+                                                        <option value="CONSULTOR">CONSULTOR (Apenas Leitura)</option>
+                                                        <option th:if="${isSuperAdmin}" value="ADMIN">ADMINISTRADOR (Gestão)</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div class="col-md-12 mt-3">
-                                                <label class="form-label">Atribuir Estabelecimentos da Empresa</label>
-                                                <select class="form-select" id="uEst" name="estabelecimentoIds" multiple="multiple" size="5">
-                                                    <option th:each="est : ${estabelecimentos}" 
-                                                            th:value="${est.id}" 
-                                                            th:text="${est.nome} + ' (' + ${est.tipo} + ')'"></option>
-                                                </select>
-                                                <small class="text-info d-block mt-1"><i class="fas fa-info-circle me-1"></i>Estes utilizadores apenas verão dados relativos aos estabelecimentos selecionados.</small>
+                                            
+                                            <div class="col-12 mt-4">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="bg-soft-primary rounded-pill p-2 me-2">
+                                                        <i class="fas fa-store-alt text-primary small"></i>
+                                                    </div>
+                                                    <h6 class="mb-0 fw-700">Atribuição de Estabelecimentos</h6>
+                                                </div>
+                                                
+                                                <div class="row g-2 overflow-auto" style="max-height: 250px;">
+                                                    <div th:each="est : ${estabelecimentos}" class="col-md-6">
+                                                        <div class="card border border-light shadow-none mb-0 h-100 selection-card transition-all">
+                                                            <div class="card-body p-3">
+                                                                <div class="form-check d-flex align-items-start">
+                                                                    <input class="form-check-input mt-1 me-3 est-check" type="checkbox" 
+                                                                           name="estabelecimentoIds" th:value="${est.id}" th:id="'checkEst' + ${est.id}">
+                                                                    <label class="form-check-label w-100" th:for="'checkEst' + ${est.id}" style="cursor: pointer;">
+                                                                        <div class="d-flex justify-content-between">
+                                                                            <span class="fw-700 text-dark d-block" th:text="${est.nome}"></span>
+                                                                            <span class="badge bg-soft-primary text-primary" style="font-size: 0.6rem;" th:text="${est.tipo}"></span>
+                                                                        </div>
+                                                                        <div class="text-muted small mt-1">
+                                                                            <i class="fas fa-map-marker-alt me-1 opacity-50"></i>
+                                                                            <span th:text="${est.endereco != null && !est.endereco.isEmpty() ? est.endereco : 'Sem endereço informado'}"></span>
+                                                                        </div>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <small class="text-info d-block mt-2" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-info-circle me-1"></i>O utilizador terá acesso restrito apenas aos estabelecimentos selecionados.
+                                                </small>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="submit" class="btn btn-dark shadow-sm">
-                                            <i class="fas fa-save me-1"></i> Gravar Utilizador
+                                    <div class="modal-footer border-0 p-4 bg-light d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-white rounded-pill px-4 fw-600" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-dark shadow-dark rounded-pill px-4 fw-700">
+                                            <i class="fas fa-save me-2"></i>Gravar Utilizador
                                         </button>
                                     </div>
                                 </form>
@@ -149,6 +212,53 @@
             </section>
         </div>
     </div>
+
+    <style>
+        :root {
+            --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --bg-soft-dark: rgba(52, 58, 64, 0.1);
+            --bg-soft-primary: rgba(0, 123, 255, 0.1);
+            --bg-soft-light: rgba(255, 255, 255, 0.15);
+        }
+
+        .fw-800 { font-weight: 800; }
+        .fw-700 { font-weight: 700; }
+        .fw-600 { font-weight: 600; }
+        .shadow-soft { box-shadow: var(--shadow-soft); }
+        .shadow-dark { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        
+        .bg-soft-dark { background-color: var(--bg-soft-dark); }
+        .bg-soft-primary { background-color: var(--bg-soft-primary); }
+        .bg-soft-light { background-color: var(--bg-soft-light); }
+
+        .transition-all { transition: all 0.3s ease; }
+        .hover-translate-x:hover { transform: translateX(5px); }
+
+        .modal-content { border-radius: 1.5rem !important; }
+        
+        .selection-card:hover {
+            border-color: #007bff !important;
+            background-color: #f8fbff;
+        }
+        
+        .selection-card input:checked + label .fw-700 {
+            color: #007bff !important;
+        }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: none;
+            background-color: #fff !important;
+        }
+
+        .btn-white {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            color: #495057;
+        }
+        .btn-white:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
 
     <script th:inline="javascript">
         const modal = new bootstrap.Modal(document.getElementById('modalUtilizador'));
@@ -165,16 +275,24 @@
                 document.getElementById('uSenha').required = false;
                 document.getElementById('senhaHelp').innerText = "Deixe vazio para manter a senha actual.";
                 
-                // Pré-selecionar estabelecimentos
+                // Pré-selecionar estabelecimentos (Checkboxes)
                 const ests = String(btn.data('estabelecimentos')).split(',');
-                const estSelect = document.getElementById('uEst');
-                for (let i = 0; i < estSelect.options.length; i++) {
-                    if (ests.includes(estSelect.options[i].value)) {
-                        estSelect.options[i].selected = true;
+                $('.est-check').each(function() {
+                    if (ests.includes($(this).val())) {
+                        $(this).prop('checked', true);
                     }
-                }
+                });
 
                 modal.show();
+            });
+            
+            // Visual feedback for selection cards
+            $('.est-check').on('change', function() {
+                if($(this).is(':checked')) {
+                    $(this).closest('.selection-card').css({'border-color': '#007bff', 'background-color': '#f8fbff'});
+                } else {
+                    $(this).closest('.selection-card').css({'border-color': '#dee2e6', 'background-color': '#fff'});
+                }
             });
         });
 
@@ -194,10 +312,7 @@
             document.getElementById('senhaHelp').innerText = "Obrigatório para novos utilizadores.";
             
             // Limpar estabelecimentos
-            const estSelect = document.getElementById('uEst');
-            for (let i = 0; i < estSelect.options.length; i++) {
-                estSelect.options[i].selected = false;
-            }
+            $('.est-check').prop('checked', false).closest('.selection-card').css({'border-color': '#dee2e6', 'background-color': '#fff'});
         }
     </script>
 </body>

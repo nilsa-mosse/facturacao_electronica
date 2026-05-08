@@ -193,8 +193,29 @@
                     document.getElementById('formLogin').value = "";
                     document.getElementById('formRole').value = "ADMIN";
                     document.getElementById('formEmpresa').value = "";
+                    document.getElementById('formEmpresa').disabled = false;
                     document.getElementById('formAtivo').checked = true;
                 }
+            });
+
+            // Lógica para desabilitar empresa se for SUPERADMIN
+            $('#formRole').on('change', function() {
+                if ($(this).val() === 'SUPERADMIN') {
+                    $('#formEmpresa').val('').attr('disabled', true);
+                } else {
+                    $('#formEmpresa').attr('disabled', false);
+                }
+            });
+
+            // No editar, também aplicar a lógica
+            $('.btn-editar').on('click', function() {
+                setTimeout(() => {
+                    if ($('#formRole').val() === 'SUPERADMIN') {
+                        $('#formEmpresa').val('').attr('disabled', true);
+                    } else {
+                        $('#formEmpresa').attr('disabled', false);
+                    }
+                }, 100);
             });
         });
     </script>

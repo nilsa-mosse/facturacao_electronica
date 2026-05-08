@@ -27,7 +27,7 @@
                                 <div class="card-header bg-white py-3">
                                     <h5 class="m-0 fw-bold" th:text="${empresa.id == null ? 'Registar Novo Tenant' : 'Actualizar Dados da Empresa'}">Nova Empresa</h5>
                                 </div>
-                                <form th:action="@{/superadmin/empresas/salvar}" th:object="${empresa}" method="post">
+                                <form th:action="@{/superadmin/empresas/salvar}" th:object="${empresa}" method="post" enctype="multipart/form-data">
                                     <input type="hidden" th:field="*{id}">
                                     
                                     <div class="card-body p-4">
@@ -95,6 +95,23 @@
                                                 </div>
                                             </div>
 
+                                            <div class="col-md-12 mt-4">
+                                                <label class="form-label text-muted small fw-bold">Logotipo da Empresa</label>
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-upload"></i></span>
+                                                    <input type="file" name="logoFile" id="logoFileInput" class="form-control border-0 bg-light" accept="image/*" onchange="previewLogo(this)">
+                                                </div>
+                                                
+                                                <input type="hidden" th:field="*{logotipo}" id="logotipoHidden">
+                                                
+                                                <!-- Preview Container -->
+                                                <div id="logoPreviewContainer" class="mt-2 text-center p-3 border rounded bg-white shadow-sm" 
+                                                     th:style="${empresa.logotipo != null and !empresa.logotipo.isEmpty() ? 'display: block; max-width: 250px;' : 'display: none; max-width: 250px;'}">
+                                                    <img id="logoPreview" th:src="${empresa.logotipo}" alt="Preview" style="max-height: 120px; max-width: 100%; object-fit: contain;">
+                                                    <p class="small text-muted mb-0 mt-2 fw-bold" id="previewLabel">Logotipo Actual</p>
+                                                </div>
+                                            </div>
+
                                             <div class="col-12 mt-4">
                                                 <label class="form-label text-muted small fw-bold">Endereço da Sede</label>
                                                 <textarea class="form-control border-0 bg-light" th:field="*{endereco}" rows="3" placeholder="Logradouro, Bairro, Província..."></textarea>
@@ -130,5 +147,26 @@
             <strong>&copy; 2026 SaaS Engine v2.0</strong> | Console de Administração de Infraestrutura Multi-Tenant.
         </footer>
     </div>
+    <script>
+        function previewLogo(input) {
+            const previewContainer = document.getElementById('logoPreviewContainer');
+            const previewImg = document.getElementById('logoPreview');
+            const previewLabel = document.getElementById('previewLabel');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    previewContainer.style.maxWidth = '250px';
+                    previewLabel.textContent = 'Nova Imagem Seleccionada';
+                    previewLabel.className = 'small text-primary mb-0 mt-2 fw-bold';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </body>
 </html>

@@ -53,7 +53,7 @@ public class SecurityConfig {
                     "/login",
                     "/licenca-expirada", "/ativar-licenca",
                     "/manifest.json", "/sw.js",
-                    "/uploads/**", "/assets/**", "/plugins/**",
+                    "/img/**", "/uploads/**", "/assets/**", "/plugins/**",
                     "/css/**", "/js/**", "/images/**"
                 ).permitAll()
 

@@ -202,29 +202,49 @@ public class GuiaRemessaService {
                 Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
                 Empresa configEmpresa = empresaRepository.findById(empresaId).orElse(new Empresa());
 
-                java.awt.Color blackColor = new java.awt.Color(33, 37, 41);
-                Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 22, blackColor);
-                Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
-                Font normal = FontFactory.getFont(FontFactory.HELVETICA, 10, new java.awt.Color(73, 80, 87));
-                Font small = FontFactory.getFont(FontFactory.HELVETICA, 7);
-                Font smallBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8);
-                Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, blackColor);
+                // --- PALETA DE CORES PREMIUM ---
+                java.awt.Color primaryColor = new java.awt.Color(0, 86, 179); // Corporate Blue
+                java.awt.Color textColor = new java.awt.Color(44, 62, 80);    // Anthracite Gray
+                java.awt.Color lightGrayBg = new java.awt.Color(248, 249, 250);
+                java.awt.Color zebraColor = new java.awt.Color(251, 251, 252);
+                java.awt.Color borderColor = new java.awt.Color(233, 236, 239);
+
+                // Fonts
+                Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, primaryColor);
+                Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, textColor);
+                Font normal = FontFactory.getFont(FontFactory.HELVETICA, 9, textColor);
+                Font bold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, textColor);
+                Font tableHeaderFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, java.awt.Color.WHITE);
+                Font small = FontFactory.getFont(FontFactory.HELVETICA, 7, new java.awt.Color(108, 117, 125));
+                Font smallBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, textColor);
+
+                // Barra de topo (Design Element)
+                PdfPTable topBar = new PdfPTable(1);
+                topBar.setWidthPercentage(100);
+                PdfPCell barCell = new PdfPCell();
+                barCell.setFixedHeight(4f);
+                barCell.setBackgroundColor(primaryColor);
+                barCell.setBorder(0);
+                topBar.addCell(barCell);
+                doc.add(topBar);
+                doc.add(new Paragraph(" "));
 
                 // Header
                 PdfPTable mainHeader = new PdfPTable(2);
                 mainHeader.setWidthPercentage(100);
-                mainHeader.setWidths(new float[] { 6, 4 });
+                mainHeader.setWidths(new float[] { 7, 3 });
 
-                PdfPCell titleCell = new PdfPCell(new Phrase("GUIA DE REMESSA", fontTitle));
+                PdfPCell titleCell = new PdfPCell();
                 titleCell.setBorder(0);
-                titleCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                titleCell.addElement(new Phrase("GUIA DE REMESSA", fontTitle));
+                titleCell.addElement(new Paragraph(guia.getNumeroGuia(), fontSubtitle));
                 mainHeader.addCell(titleCell);
 
                 PdfPCell logoCell = new PdfPCell();
                 try {
                     if (configEmpresa.getLogotipo() != null) {
                         Image logo = Image.getInstance(configEmpresa.getLogotipo());
-                        logo.scaleToFit(150, 150);
+                        logo.scaleToFit(120, 60);
                         logoCell = new PdfPCell(logo);
                     } else {
                         logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
@@ -236,6 +256,19 @@ public class GuiaRemessaService {
                 logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
                 mainHeader.addCell(logoCell);
                 doc.add(mainHeader);
+                
+                doc.add(new Paragraph(" "));
+                
+                // Linha Separadora
+                PdfPTable lineTable = new PdfPTable(1);
+                lineTable.setWidthPercentage(100);
+                PdfPCell lineCell = new PdfPCell();
+                lineCell.setBorder(0);
+                lineCell.setBorderWidthBottom(1f);
+                lineCell.setBorderColorBottom(borderColor);
+                lineTable.addCell(lineCell);
+                doc.add(lineTable);
+                
                 doc.add(new Paragraph(" "));
 
                 // Info Sections
@@ -245,6 +278,8 @@ public class GuiaRemessaService {
                 // From (Company)
                 PdfPCell cellDe = new PdfPCell();
                 cellDe.setBorder(0);
+                cellDe.setPaddingRight(20);
+                cellDe.addElement(new Paragraph("DE:", small));
                 cellDe.addElement(new Paragraph(configEmpresa.getNome(), bold));
                 cellDe.addElement(new Paragraph(configEmpresa.getEndereco(), normal));
                 cellDe.addElement(new Paragraph("NIF: " + configEmpresa.getNif(), normal));
@@ -253,23 +288,14 @@ public class GuiaRemessaService {
                 // Meta (Doc info)
                 PdfPCell cellMeta = new PdfPCell();
                 cellMeta.setBorder(0);
-                cellMeta.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                String numeroDoc = guia.getNumeroGuia() != null ? guia.getNumeroGuia() : "-";
+                cellMeta.addElement(new Paragraph("PARA:", small));
+                cellMeta.addElement(new Paragraph(guia.getCliente() != null ? guia.getCliente().getNome() : "Consumidor Final", bold));
+                cellMeta.addElement(new Paragraph("NIF: " + (guia.getCliente() != null ? guia.getCliente().getNif() : "999999999"), normal));
+                
                 String dataDoc = guia.getDataEmissao() != null ? guia.getDataEmissao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-";
-                cellMeta.addElement(new Paragraph("Nº DOCUMENTO: " + numeroDoc, bold));
-                cellMeta.addElement(new Paragraph("DATA: " + dataDoc, normal));
-                
-                if (guia.getCodigoValidacao() != null) {
-                    Paragraph agtCode = new Paragraph("CÓD. AGT: " + guia.getCodigoValidacao(), smallBold);
-                    agtCode.setSpacingBefore(5);
-                    cellMeta.addElement(agtCode);
-                    
-                    String miniHash = guia.getHashAgt() != null && guia.getHashAgt().length() > 10 ? 
-                                      guia.getHashAgt().substring(0, 4) + "..." + guia.getHashAgt().substring(guia.getHashAgt().length() - 4) : "-";
-                    cellMeta.addElement(new Paragraph("HASH: " + miniHash, small));
-                }
-                
+                cellMeta.addElement(new Paragraph("DATA EMISSÃO: " + dataDoc, normal));
                 infoTable.addCell(cellMeta);
+                
                 doc.add(infoTable);
                 doc.add(new Paragraph(" "));
 
@@ -277,20 +303,28 @@ public class GuiaRemessaService {
                 PdfPTable transportTable = new PdfPTable(1);
                 transportTable.setWidthPercentage(100);
                 PdfPCell transHeader = new PdfPCell(new Phrase("DETALHES DE TRANSPORTE", fontSubtitle));
-                transHeader.setBackgroundColor(new java.awt.Color(248, 249, 250));
+                transHeader.setBackgroundColor(lightGrayBg);
+                transHeader.setBorderColor(borderColor);
                 transHeader.setPadding(8);
                 transportTable.addCell(transHeader);
                 
                 PdfPCell transBody = new PdfPCell();
                 transBody.setPadding(10);
+                transBody.setBorderColor(borderColor);
+                
                 String origem = guia.getLocalCarga() != null ? guia.getLocalCarga() : "-";
                 String destino = guia.getLocalDescarga() != null ? guia.getLocalDescarga() : "-";
                 String viatura = guia.getMatriculaViatura() != null ? guia.getMatriculaViatura() : "-";
                 String motorista = guia.getMotorista() != null ? guia.getMotorista() : "-";
                 
-                transBody.addElement(new Paragraph("ORIGEM: " + origem, normal));
-                transBody.addElement(new Paragraph("DESTINO: " + destino, normal));
-                transBody.addElement(new Paragraph("VIATURA: " + viatura + " | MOTORISTA: " + motorista, normal));
+                PdfPTable tInner = new PdfPTable(2);
+                tInner.setWidthPercentage(100);
+                addTransportRow(tInner, "ORIGEM:", origem, small, normal);
+                addTransportRow(tInner, "DESTINO:", destino, small, normal);
+                addTransportRow(tInner, "VIATURA:", viatura, small, normal);
+                addTransportRow(tInner, "MOTORISTA:", motorista, small, normal);
+                
+                transBody.addElement(tInner);
                 transportTable.addCell(transBody);
                 doc.add(transportTable);
                 doc.add(new Paragraph(" "));
@@ -301,24 +335,48 @@ public class GuiaRemessaService {
                 
                 String[] headers = { "ARTIGO / DESIGNAÇÃO", "QTD", "UNIDADE" };
                 for (String h : headers) {
-                    PdfPCell c = new PdfPCell(new Phrase(h, bold));
-                    c.setBackgroundColor(new java.awt.Color(241, 243, 245));
-                    c.setPadding(8);
+                    PdfPCell c = new PdfPCell(new Phrase(h, tableHeaderFont));
+                    c.setBackgroundColor(primaryColor);
+                    c.setBorder(0);
+                    c.setPadding(10);
                     itemsTable.addCell(c);
                 }
 
+                int rowIdx = 0;
                 for (ItemGuiaRemessa item : guia.getItens()) {
-                    itemsTable.addCell(new PdfPCell(new Phrase(item.getNomeProduto(), normal)));
-                    itemsTable.addCell(new PdfPCell(new Phrase(String.valueOf(item.getQuantidade()), normal)));
-                    itemsTable.addCell(new PdfPCell(new Phrase(item.getUnidadeMedida(), normal)));
+                    java.awt.Color rowBg = (rowIdx % 2 == 0) ? java.awt.Color.WHITE : zebraColor;
+                    itemsTable.addCell(modernCell(item.getNomeProduto(), normal, rowBg, borderColor));
+                    itemsTable.addCell(modernCell(String.valueOf(item.getQuantidade()), normal, rowBg, borderColor));
+                    itemsTable.addCell(modernCell(item.getUnidadeMedida(), normal, rowBg, borderColor));
+                    rowIdx++;
                 }
                 doc.add(itemsTable);
+                
+                doc.add(new Paragraph(" "));
+                
+                // Footer Fiscal Info
+                PdfPTable footerTable = new PdfPTable(1);
+                footerTable.setWidthPercentage(100);
+                footerTable.setSpacingBefore(30);
+                
+                PdfPCell fCell = new PdfPCell();
+                fCell.setBorder(0);
+                fCell.setBorderWidthTop(0.5f);
+                fCell.setBorderColorTop(borderColor);
+                fCell.setPaddingTop(10);
+                
+                if (guia.getCodigoValidacao() != null) {
+                    fCell.addElement(new Paragraph("CÓDIGO DE VALIDAÇÃO AGT: " + guia.getCodigoValidacao(), smallBold));
+                    String miniHash = guia.getHashAgt() != null ? guia.getHashAgt() : "-";
+                    fCell.addElement(new Paragraph("HASH: " + miniHash, small));
+                }
+                fCell.addElement(new Paragraph("Os bens foram colocados à disposição na data do documento.", small));
+                footerTable.addCell(fCell);
+                doc.add(footerTable);
 
                 doc.close();
             } finally {
-                if (doc.isOpen()) {
-                    try { doc.close(); } catch (Exception ex) { /* ignore */ }
-                }
+                if (doc.isOpen()) { doc.close(); }
             }
 
             try {
@@ -403,5 +461,26 @@ public class GuiaRemessaService {
         guia.setTrackingStatus(status);
         
         guiaRemessaRepository.save(guia);
+    }
+    private void addTransportRow(PdfPTable table, String label, String value, Font labelFont, Font valueFont) {
+        PdfPCell c1 = new PdfPCell(new Phrase(label, labelFont));
+        c1.setBorder(0);
+        c1.setPadding(2);
+        table.addCell(c1);
+        
+        PdfPCell c2 = new PdfPCell(new Phrase(value, valueFont));
+        c2.setBorder(0);
+        c2.setPadding(2);
+        table.addCell(c2);
+    }
+
+    private PdfPCell modernCell(String text, Font font, java.awt.Color bg, java.awt.Color borderColor) {
+        PdfPCell c = new PdfPCell(new Phrase(text, font));
+        c.setBackgroundColor(bg);
+        c.setBorder(0);
+        c.setBorderWidthBottom(0.5f);
+        c.setBorderColorBottom(borderColor);
+        c.setPadding(8);
+        return c;
     }
 }

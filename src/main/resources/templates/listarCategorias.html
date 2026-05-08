@@ -39,8 +39,16 @@
                                         <td th:text="${cat.id}"></td>
                                         <td th:text="${cat.nome}" class="font-weight-bold"></td>
                                         <td class="text-center">
-                                            <button class="btn btn-sm btn-info" title="Editar"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-sm btn-danger" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                            <button class="btn btn-sm btn-info btn-editar" title="Editar"
+                                                    th:data-id="${cat.id}"
+                                                    th:data-nome="${cat.nome}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger btn-eliminar" title="Eliminar"
+                                                    th:data-id="${cat.id}"
+                                                    th:data-nome="${cat.nome}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(categorias)}">
@@ -67,8 +75,8 @@
                     <form id="formCategoria">
                         <div class="modal-body">
                             <div class="form-group">
-                                <label for="nome">Nome da Categoria</label>
-                                <input type="text" class="form-control" id="nome" name="nome" placeholder="Ex: Bebidas, Limpeza..." required>
+                                <label for="nomeCadastro">Nome da Categoria</label>
+                                <input type="text" class="form-control" id="nomeCadastro" name="nome" placeholder="Ex: Bebidas, Limpeza..." required>
                                 <small class="text-muted">Este nome será exibido no cadastro de produtos.</small>
                             </div>
                         </div>
@@ -81,41 +89,131 @@
             </div>
         </div>
 
+        <!-- Modal Edição -->
+        <div class="modal fade" id="modalEdicao" tabindex="-1" aria-labelledby="modalEdicaoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title" id="modalEdicaoLabel"><i class="fas fa-edit"></i> Editar Categoria</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="formEdicao">
+                        <input type="hidden" id="editId">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="editNome">Nome da Categoria</label>
+                                <input type="text" class="form-control" id="editNome" name="nome" placeholder="Nome da categoria" required>
+                                <small class="text-muted">Altere o nome desta categoria.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-info px-4 text-white">Guardar Alterações</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <footer th:replace="menu :: footer"></footer>
     </div>
 
     <script th:inline="javascript">
         $(document).ready(function() {
-            // Configurar CSRF para AJAX
-            const token = $("meta[name='_csrf']").attr("content");
-            const header = $("meta[name='_csrf_header']").attr("content");
+            // CSRF via Cookie (CookieCsrfTokenRepository — lê o cookie XSRF-TOKEN)
+            function csrfHeader(xhr) {
+                const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+                if (match) {
+                    xhr.setRequestHeader('X-XSRF-TOKEN', decodeURIComponent(match[1]));
+                }
+            }
 
+            // ── CADASTRAR ──────────────────────────────────────────
             $('#formCategoria').on('submit', function(e) {
                 e.preventDefault();
-                
-                const categoria = {
-                    nome: $('#nome').val()
-                };
+                const categoria = { nome: $('#nomeCadastro').val().trim() };
+                if (!categoria.nome) return;
 
                 $.ajax({
                     url: '/api/categorias',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(categoria),
-                    beforeSend: function(xhr) {
-                        if (header && token) {
-                            xhr.setRequestHeader(header, token);
-                        }
-                    },
-                    success: function(response) {
+                    beforeSend: csrfHeader,
+                    success: function() {
                         alert('Categoria cadastrada com sucesso!');
-                        location.reload();
+                        window.location.href = '/categorias/listar?r=' + Date.now();
                     },
                     error: function(xhr) {
                         if (xhr.status === 403) {
                             alert('Erro de permissão (CSRF). Por favor, recarregue a página.');
                         } else {
-                            alert('Erro ao cadastrar categoria: ' + (xhr.responseText || 'Erro desconhecido'));
+                            alert('Erro ao cadastrar: ' + (xhr.responseText || 'Erro desconhecido'));
+                        }
+                    }
+                });
+            });
+
+            // ── ABRIR MODAL DE EDIÇÃO ──────────────────────────────
+            $(document).on('click', '.btn-editar', function() {
+                const id   = $(this).data('id');
+                const nome = $(this).data('nome');
+                $('#editId').val(id);
+                $('#editNome').val(nome);
+                $('#modalEdicao').modal('show');
+            });
+
+            // ── GUARDAR EDIÇÃO ─────────────────────────────────────
+            $('#formEdicao').on('submit', function(e) {
+                e.preventDefault();
+                const id   = $('#editId').val();
+                const nome = $('#editNome').val().trim();
+                if (!nome) return;
+
+                $.ajax({
+                    url: '/api/categorias/' + id,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ nome: nome }),
+                    beforeSend: csrfHeader,
+                    success: function() {
+                        alert('Categoria actualizada com sucesso!');
+                        window.location.href = '/categorias/listar?r=' + Date.now();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert('Erro de permissão (CSRF). Por favor, recarregue a página.');
+                        } else {
+                            alert('Erro ao editar: ' + (xhr.responseText || 'Erro desconhecido'));
+                        }
+                    }
+                });
+            });
+
+            // ── ELIMINAR ───────────────────────────────────────────
+            $(document).on('click', '.btn-eliminar', function() {
+                const id   = $(this).data('id');
+                const nome = $(this).data('nome');
+
+                if (!confirm('Tem a certeza que deseja eliminar a categoria "' + nome + '"?')) {
+                    return;
+                }
+
+                $.ajax({
+                    url: '/api/categorias/' + id,
+                    type: 'DELETE',
+                    beforeSend: csrfHeader,
+                    success: function() {
+                        alert('Categoria eliminada com sucesso!');
+                        window.location.href = '/categorias/listar?r=' + Date.now();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert('Erro de permissão (CSRF). Por favor, recarregue a página.');
+                        } else if (xhr.status === 400) {
+                            alert(xhr.responseText);
+                        } else {
+                            alert('Erro ao eliminar categoria. Tente novamente mais tarde.');
                         }
                     }
                 });

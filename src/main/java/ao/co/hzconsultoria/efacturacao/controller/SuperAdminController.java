@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.beans.factory.annotation.Value;
 
 @Controller
 @RequestMapping("/superadmin")
@@ -33,8 +34,34 @@ public class SuperAdminController {
         return "superadmin/empresa_form";
     }
 
+    @Value("${app.upload.logo.dir:./uploads/logo/}")
+    private String logoUploadDir;
+
     @PostMapping("/empresas/salvar")
-    public String salvarEmpresa(@ModelAttribute Empresa empresa, RedirectAttributes redirectAttributes) {
+    public String salvarEmpresa(@ModelAttribute Empresa empresa, 
+                               @RequestParam(value = "logoFile", required = false) org.springframework.web.multipart.MultipartFile logoFile,
+                               RedirectAttributes redirectAttributes) {
+        
+        if (logoFile != null && !logoFile.isEmpty()) {
+            try {
+                java.nio.file.Path uploadPath = java.nio.file.Paths.get(logoUploadDir).toAbsolutePath().normalize();
+                if (!java.nio.file.Files.exists(uploadPath)) {
+                    java.nio.file.Files.createDirectories(uploadPath);
+                }
+                
+                String originalName = logoFile.getOriginalFilename();
+                String safeName = (originalName != null) ? originalName.replaceAll("[^a-zA-Z0-9._-]", "_") : "logo";
+                String fileName = "logo_empresa_" + (empresa.getId() != null ? empresa.getId() : "new") + "_" + safeName;
+                java.nio.file.Path filePath = uploadPath.resolve(fileName);
+                java.nio.file.Files.copy(logoFile.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                
+                empresa.setLogotipo("/uploads/logo/" + fileName);
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+                redirectAttributes.addFlashAttribute("erro", "Erro ao carregar o logotipo: " + e.getMessage());
+            }
+        }
+
         empresaRepository.save(empresa);
         redirectAttributes.addFlashAttribute("mensagem", "Empresa salva com sucesso!");
         return "redirect:/superadmin/dashboard";
@@ -63,7 +90,7 @@ public class SuperAdminController {
     @GetMapping("/usuarios")
     public String usuarios(Model model) {
         java.util.List<User> admins = userRepository.findAll().stream()
-            .filter(u -> "ADMIN".equals(u.getRole()) || "SUPERADMIN".equals(u.getRole()) || "ROLE_SUPERADMIN".equals(u.getRole()))
+            .filter(u -> u.getRole() != null && (u.getRole().contains("ADMIN") || u.getRole().contains("SUPERADMIN")))
             .collect(java.util.stream.Collectors.toList());
         model.addAttribute("usuarios", admins);
         model.addAttribute("empresas", empresaRepository.findAll());
@@ -77,7 +104,10 @@ public class SuperAdminController {
                                RedirectAttributes ra) {
         
         // Validação de segurança: apenas ADMIN e SUPERADMIN permitidos aqui
-        if (user.getRole() != null && !user.getRole().equals("ADMIN") && !user.getRole().equals("SUPERADMIN")) {
+        String role = user.getRole();
+        boolean isAdminRole = role != null && (role.contains("ADMIN") || role.contains("SUPERADMIN"));
+        
+        if (!isAdminRole) {
             ra.addFlashAttribute("mensagem_erro", "Operação não permitida: Apenas perfis Administrativos podem ser geridos aqui.");
             return "redirect:/superadmin/usuarios";
         }
@@ -102,7 +132,10 @@ public class SuperAdminController {
         }
 
         // Lógica de desassociação: se empresaId for nulo, limpamos a empresa
-        if (empresaId != null) {
+        // O SuperAdmin NUNCA deve fazer parte de uma empresa (Acesso Global)
+        if ("SUPERADMIN".equals(userToSave.getRole()) || "ROLE_SUPERADMIN".equals(userToSave.getRole())) {
+            userToSave.setEmpresa(null);
+        } else if (empresaId != null) {
             userToSave.setEmpresa(empresaRepository.findById(empresaId).orElse(null));
         } else {
             userToSave.setEmpresa(null);
@@ -181,6 +214,7 @@ public class SuperAdminController {
                                @RequestParam("versao") String versao,
                                @RequestParam("email") String email,
                                @RequestParam("tema") String tema,
+                               @RequestParam(value = "exibirDatasValidade", required = false, defaultValue = "false") boolean exibirDatasValidade,
                                RedirectAttributes ra) {
         ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
                 .orElse(new ConfiguracaoSistemaEntity());
@@ -189,6 +223,7 @@ public class SuperAdminController {
         config.setSistemaVersao(versao);
         config.setSistemaEmailSuporte(email);
         config.setSistemaTema(tema);
+        config.setExibirDatasValidade(exibirDatasValidade);
         
         configuracaoSistemaRepository.save(config);
         ra.addFlashAttribute("mensagem", "Parâmetros do sistema atualizados!");

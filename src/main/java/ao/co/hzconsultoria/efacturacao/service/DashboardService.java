@@ -30,7 +30,7 @@ public class DashboardService {
     private DespesaRepository despesaRepository;
 
     public List<ProdutoMaisVendidoDTO> getProdutosMaisVendidos(Long empresaId, int limite) {
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         Map<String, ProdutoMaisVendidoDTO> mapa = new HashMap<>();
         for (Compra compra : compras) {
             if (compra.getItens() != null) {
@@ -51,7 +51,7 @@ public class DashboardService {
 
     public Map<String, Integer> getVendasUltimos30Dias(Long empresaId) 
     {
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         Map<String, Integer> vendasPorDia = new LinkedHashMap<>();
         java.time.LocalDate hoje = java.time.LocalDate.now();
         for (int i = 29; i >= 0; i--) {
@@ -71,7 +71,7 @@ public class DashboardService {
     }
 
     public int getVendasDia(Long empresaId) {
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
         int total = 0;
         for (Compra compra : compras) {
@@ -83,7 +83,7 @@ public class DashboardService {
     }
 
     public double getReceitaDia(Long empresaId) {
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
         double receita = 0.0;
         for (Compra compra : compras) {
@@ -95,7 +95,7 @@ public class DashboardService {
     }
 
     public double getTotalIvaMes(Long empresaId) {
-        List<Fatura> faturas = faturaRepository.findByEmpresa_Id(empresaId);
+        List<Fatura> faturas = (empresaId == null) ? faturaRepository.findAll() : faturaRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
         int mesAtual = hoje.getMonthValue();
         int anoAtual = hoje.getYear();
@@ -112,7 +112,7 @@ public class DashboardService {
     }
 
     public long getTotalFacturasMes(Long empresaId) {
-        List<Fatura> faturas = faturaRepository.findByEmpresa_Id(empresaId);
+        List<Fatura> faturas = (empresaId == null) ? faturaRepository.findAll() : faturaRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
         int mesAtual = hoje.getMonthValue();
         int anoAtual = hoje.getYear();
@@ -133,11 +133,11 @@ public class DashboardService {
     }
 
     public long getTotalClientes(Long empresaId) {
-        return clienteRepository.findByEmpresa_Id(empresaId).size();
+        return (empresaId == null) ? clienteRepository.count() : clienteRepository.findByEmpresa_Id(empresaId).size();
     }
 
     public long getTotalPendentes(Long empresaId) {
-        List<Fatura> faturas = faturaRepository.findByEmpresa_Id(empresaId);
+        List<Fatura> faturas = (empresaId == null) ? faturaRepository.findAll() : faturaRepository.findByEmpresa_Id(empresaId);
         return faturas.stream().filter(f -> "PENDENTE".equalsIgnoreCase(f.getStatus())).count();
     }
 
@@ -168,7 +168,8 @@ public class DashboardService {
     }
 
     public double getLucroTotal(Long empresaId) {
-        double receitaTotal = compraRepository.findByEmpresa_Id(empresaId).stream()
+        List<Compra> todasCompras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
+        double receitaTotal = todasCompras.stream()
                 .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
                 .sum();
         double despesasTotais = despesaRepository.findAll().stream()
@@ -179,7 +180,7 @@ public class DashboardService {
     }
 
     public long getTotalMovimentos(Long empresaId) {
-        long vendasCount = compraRepository.findByEmpresa_Id(empresaId).size();
+        long vendasCount = (empresaId == null) ? compraRepository.count() : compraRepository.findByEmpresa_Id(empresaId).size();
         long despesasCount = despesaRepository.findAll().stream()
                 .filter(d -> d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
                 .count();
@@ -248,7 +249,7 @@ public class DashboardService {
         List<Integer> passado = new ArrayList<>();
         List<String> labels = new ArrayList<>();
 
-        List<Compra> comprasDaEmpresa = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> comprasDaEmpresa = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
 
         for (int i = 1; i <= 31; i++) {
             labels.add(String.valueOf(i));
@@ -272,7 +273,7 @@ public class DashboardService {
     }
 
     public Map<String, Long> getVendasPorLocalizacao(Long empresaId) {
-        List<Cliente> clientes = clienteRepository.findByEmpresa_Id(empresaId);
+        List<Cliente> clientes = (empresaId == null) ? clienteRepository.findAll() : clienteRepository.findByEmpresa_Id(empresaId);
         Map<String, Long> localizacoes = clientes.stream()
             .filter(c -> c.getEndereco() != null && !c.getEndereco().isEmpty())
             .map(c -> {
@@ -287,7 +288,7 @@ public class DashboardService {
         Map<Integer, Long> pico = new TreeMap<>();
         for (int i = 0; i < 24; i++) pico.put(i, 0L);
 
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         for (Compra c : compras) {
             if (c.getDataCompra() != null) {
                 int hora = c.getDataCompra().getHour();
@@ -298,7 +299,7 @@ public class DashboardService {
     }
 
     public double getReceitaMensal(Long empresaId) {
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
         int mesAtual = hoje.getMonthValue();
         int anoAtual = hoje.getYear();
@@ -315,7 +316,7 @@ public class DashboardService {
     }
 
     public List<Produto> getProdutosEstoqueBaixo(Long empresaId, int limiteEstoque) {
-        List<Produto> produtos = produtoRepository.findByEmpresa_Id(empresaId);
+        List<Produto> produtos = (empresaId == null) ? produtoRepository.findAll() : produtoRepository.findByEmpresa_Id(empresaId);
         List<Produto> estoqueBaixo = new ArrayList<>();
         for (Produto produto : produtos) {
             if (produto.getQuantidadeEstoque() <= (produto.getEstoqueMinimo() != null ? produto.getEstoqueMinimo() : limiteEstoque)) {
@@ -326,7 +327,7 @@ public class DashboardService {
     }
 
     public List<Compra> getComprasDoDia(Long empresaId) {
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
         List<Compra> vendasDoDia = new ArrayList<>();
         for (Compra compra : compras) {
@@ -338,7 +339,7 @@ public class DashboardService {
     }
 
     public List<Compra> getComprasDoMes(Long empresaId) {
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
         int mesAtual = hoje.getMonthValue();
         int anoAtual = hoje.getYear();
@@ -363,7 +364,8 @@ public class DashboardService {
         int mesAtual = hoje.getMonthValue();
         int anoAtual = hoje.getYear();
         long total = 0;
-        for (Compra compra : compraRepository.findByEmpresa_Id(empresaId)) {
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
+        for (Compra compra : compras) {
             if (compra.getDataCompra() != null) {
                 java.time.LocalDate data = compra.getDataCompra().toLocalDate();
                 if (data.getMonthValue() == mesAtual && data.getYear() == anoAtual && compra.getItens() != null) {
@@ -378,7 +380,8 @@ public class DashboardService {
         java.time.LocalDate mesAnterior = java.time.LocalDate.now().minusMonths(1);
         int mes = mesAnterior.getMonthValue();
         int ano = mesAnterior.getYear();
-        return compraRepository.findByEmpresa_Id(empresaId).stream()
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
+        return compras.stream()
             .filter(c -> c.getDataCompra() != null
                 && c.getDataCompra().toLocalDate().getMonthValue() == mes
                 && c.getDataCompra().toLocalDate().getYear() == ano)
@@ -389,7 +392,8 @@ public class DashboardService {
         java.time.LocalDate mesAnterior = java.time.LocalDate.now().minusMonths(1);
         int mes = mesAnterior.getMonthValue();
         int ano = mesAnterior.getYear();
-        return compraRepository.findByEmpresa_Id(empresaId).stream()
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
+        return compras.stream()
             .filter(c -> c.getDataCompra() != null
                 && c.getDataCompra().toLocalDate().getMonthValue() == mes
                 && c.getDataCompra().toLocalDate().getYear() == ano)
@@ -415,7 +419,7 @@ public class DashboardService {
 
     public List<ClienteTopComprasDTO> getClientesTopCompras(Long empresaId, int limite) {
         List<ClienteTopComprasDTO> lista = new ArrayList<>();
-        List<Compra> compras = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         for (Compra compra : compras) {
             lista.add(new ClienteTopComprasDTO(compra.getId(), "Venda #" + compra.getId(), 1));
         }
@@ -425,7 +429,7 @@ public class DashboardService {
     public List<Long> getVendasPorMes(Long empresaId) {
         java.time.LocalDate hoje = java.time.LocalDate.now();
         List<Long> resultado = new ArrayList<>();
-        List<Compra> comprasDaEmpresa = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> comprasDaEmpresa = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         for (int i = 11; i >= 0; i--) {
             java.time.LocalDate mes = hoje.minusMonths(i);
             int m = mes.getMonthValue();
@@ -443,7 +447,7 @@ public class DashboardService {
     public List<Double> getReceitaPorMes(Long empresaId) {
         java.time.LocalDate hoje = java.time.LocalDate.now();
         List<Double> resultado = new ArrayList<>();
-        List<Compra> comprasDaEmpresa = compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> comprasDaEmpresa = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         for (int i = 11; i >= 0; i--) {
             java.time.LocalDate mes = hoje.minusMonths(i);
             int m = mes.getMonthValue();

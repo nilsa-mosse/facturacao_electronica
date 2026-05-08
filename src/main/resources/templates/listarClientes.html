@@ -1,67 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="menu :: head"></head>
+
+<style>
+    :root {
+        --primary-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+    }
+
+    .content-wrapper {
+        background-color: #f8fafc !important;
+    }
+
+    .page-header-modern {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .page-header-modern h2 {
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .premium-table-card {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table tbody td {
+        padding: 20px 24px;
+        color: #1e293b;
+        font-weight: 500;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .client-id {
+        font-weight: 700;
+        color: #94a3b8;
+    }
+
+    .client-name {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .client-badge {
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-action {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-action-edit {
+        background: #eef2ff;
+        color: #6366f1;
+    }
+
+    .btn-action-edit:hover {
+        background: #6366f1;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-action-delete {
+        background: #fff1f2;
+        color: #ef4444;
+    }
+
+    .btn-action-delete:hover {
+        background: #ef4444;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-add-premium {
+        background: var(--primary-grad);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 16px;
+        font-weight: 700;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+    }
+
+    .btn-add-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
+        color: white;
+    }
+
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #e2e8f0;
+        margin-bottom: 20px;
+    }
+
+    .text-slate-500 { color: #64748b; }
+    .text-slate-700 { color: #334155; }
+</style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <div class="wrapper">
-    <!-- Top Navbar -->
-    <nav th:replace="menu :: topbar"></nav>
-    <aside th:replace="menu :: sidebar"></aside>
-    
-    <div class="content-wrapper">
-        <section class="content py-4">
-            <div class="container-fluid">
-                <div class="card">
-                    <div class="card-header" th:text="#{listagem.clientes.titulo}">Lista de Clientes</div>
-        <div class="card-body">
-             <!-- Alerta de Mensagem -->
-             <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-                 <i class="fas fa-check-circle me-2"></i>
-                 <span th:text="${mensagem}">Mensagem de sucesso</span>
-                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-             </div>
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
 
-            <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle mb-3">
-                    <thead class="table-light">
-                        <tr>
-                            <th th:text="#{column.id}">ID</th>
-                            <th th:text="#{column.nome}">Nome</th>
-                            <th th:text="#{column.nif}">NIF</th>
-                            <th th:text="#{column.email}">Email</th>
-                            <th th:text="#{column.telefone}">Telefone</th>
-                            <th th:text="#{column.endereco}">Endereço</th>
-                            <th th:text="#{column.acoes}">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="cliente : ${clientes}">
-                            <td th:text="${cliente.id}"></td>
-                            <td th:text="${cliente.nome}"></td>
-                            <td th:text="${cliente.nif}"></td>
-                            <td th:text="${cliente.email}"></td>
-                            <td th:text="${cliente.telefone}"></td>
-                            <td th:text="${cliente.endereco}"></td>
-                            <td>
-                                <div class="btn-group">
-                                    <a th:href="@{'/clientes/editar/' + ${cliente.id}}"
-                                        class="btn btn-warning btn-sm"><i class="fas fa-edit me-1"></i><span th:text="#{form.editar}">Editar</span></a>
-                                    <a th:href="@{'/clientes/delete/' + ${cliente.id}}" class="btn btn-danger btn-sm"><i
-                                            class="fas fa-trash me-1"></i><span th:text="#{form.excluir}">Excluir</span></a>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <main class="content-wrapper">
+            <div class="container-fluid px-4 py-4">
+                
+                <div class="page-header-modern">
+                    <div>
+                        <h2 th:text="#{listagem.clientes.titulo}">Clientes</h2>
+                        <p class="text-slate-500 mb-0">Gestão e controlo de entidades e parceiros</p>
+                    </div>
+                    <a th:href="@{/clientes/adicionar}" class="btn btn-add-premium">
+                        <i class="fas fa-plus me-2"></i> <span th:text="#{listagem.clientes.novo}">Novo Cliente</span>
+                    </a>
+                </div>
 
-            <div class="text-center mt-3">
-                <a th:href="@{/clientes/adicionar}" class="btn btn-primary"><i class="fas fa-plus me-1"></i> <span th:text="#{listagem.clientes.novo}">Cadastrar Novo Cliente</span></a>
-            </div>
-        </div>
+                <!-- Alerta de Mensagem -->
+                <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 16px; background: #ecfdf5; color: #065f46;">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${mensagem}">Mensagem de sucesso</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="premium-table-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{column.id}">ID</th>
+                                    <th th:text="#{column.nome}">Nome</th>
+                                    <th th:text="#{column.nif}">NIF</th>
+                                    <th th:text="#{column.email}">Email</th>
+                                    <th th:text="#{column.telefone}">Telefone</th>
+                                    <th class="text-end" th:text="#{column.acoes}">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="cliente : ${clientes}">
+                                    <td><span class="client-id" th:text="'#' + ${cliente.id}"></span></td>
+                                    <td>
+                                        <div class="client-name" th:text="${cliente.nome}">Nome</div>
+                                        <div class="small text-slate-500 text-truncate" style="max-width: 250px;" th:text="${cliente.endereco}">Endereço</div>
+                                    </td>
+                                    <td><span class="client-badge" th:text="${cliente.nif}"></span></td>
+                                    <td th:text="${cliente.email}"></td>
+                                    <td th:text="${cliente.telefone}"></td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a th:href="@{'/clientes/editar/' + ${cliente.id}}" class="btn-action btn-action-edit" th:title="#{form.editar}">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a th:href="@{'/clientes/delete/' + ${cliente.id}}" class="btn-action btn-action-delete" th:title="#{form.excluir}" onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(clientes)}">
+                                    <td colspan="6">
+                                        <div class="empty-state">
+                                            <i class="fas fa-users-slash"></i>
+                                            <h5 class="text-slate-700 fw-bold">Nenhum cliente encontrado</h5>
+                                            <p class="text-slate-500">Comece por adicionar o seu primeiro cliente ao sistema.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </section>
+        </main>
     </div>
-    </div>    <!-- Scripts already loaded via menu :: head -->
 </body>
-
 </html>

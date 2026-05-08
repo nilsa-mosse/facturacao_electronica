@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Controller
@@ -19,7 +20,10 @@ public class CategoriaViewController {
     private CategoriaRepository categoriaRepository;
 
     @GetMapping("/listar")
-    public String listarCategorias(Model model) {
+    public String listarCategorias(Model model, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
         if (empresaId != null) {
             List<Categoria> categorias = categoriaRepository.findByEmpresa_Id(empresaId);

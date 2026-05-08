@@ -301,7 +301,7 @@
               <thead>
                 <tr>
                   <th style="width: auto;">Nome do Artigo</th>
-                  <th class="text-center" style="width: 15%;">Expiração</th>
+                  <th th:if="${globalExibirDatasValidade}" class="text-center" style="width: 15%;">Expiração</th>
                   <th class="text-center" style="width: 12%;">Preço Unitário</th>
                   <th class="text-center" style="width: 10%;">Lucro</th>
                   <th class="text-center" style="width: 8%;">Stock</th>
@@ -327,7 +327,7 @@
                       </div>
                     </div>
                   </td>
-                  <td class="text-center">
+                  <td th:if="${globalExibirDatasValidade}" class="text-center">
                     <span th:if="${produto.dataExpiracao != null}" 
                           class="badge rounded-pill fw-700" 
                           th:classappend="${produto.pertoDeExpirar ? 'bg-danger-soft text-danger' : 'bg-light text-muted'}"
@@ -468,14 +468,16 @@
                     <label class="form-label fw-700">Imagem do Artigo</label>
                     <input type="file" name="imagem" class="form-control search-input">
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-700 text-info">Data de Fabrico</label>
-                    <input type="date" name="dataFabrico" class="form-control search-input border-info-subtle" th:value="${produto.dataFabrico}">
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label fw-700 text-danger">Data de Expiração</label>
-                    <input type="date" name="dataExpiracao" class="form-control search-input border-danger-subtle" th:value="${produto.dataExpiracao}">
-                  </div>
+                  <th:block th:if="${globalExibirDatasValidade}">
+                    <div class="col-md-6">
+                      <label class="form-label fw-700 text-info">Data de Fabrico</label>
+                      <input type="date" name="dataFabrico" class="form-control search-input border-info-subtle" th:value="${produto.dataFabrico}">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label fw-700 text-danger">Data de Expiração</label>
+                      <input type="date" name="dataExpiracao" class="form-control search-input border-danger-subtle" th:value="${produto.dataExpiracao}">
+                    </div>
+                  </th:block>
                 </div>
               </div>
               <div class="modal-footer border-0 p-4 pt-0">
