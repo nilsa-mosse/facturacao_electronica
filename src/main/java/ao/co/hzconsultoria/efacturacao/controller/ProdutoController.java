@@ -26,6 +26,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,7 +78,7 @@ public class ProdutoController {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("produto", new Produto());
-        model.addAttribute("categorias", categoriaRepository.findAll());
+        model.addAttribute("categorias", (empresaId != null) ? categoriaRepository.findByEmpresa_Id(empresaId) : java.util.Collections.emptyList());
 
         model.addAttribute("impostos", impostoRepository.findAll());
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
@@ -308,6 +309,12 @@ public class ProdutoController {
         if (nome == null || nome.length() < 1) {
             return ResponseEntity.ok(new java.util.ArrayList<>());
         }
+        
+        if (empresaId == null) {
+            // Se for SuperAdmin sem empresa, pesquisa globalmente
+            return ResponseEntity.ok(produtoRepository.findByNomeContainingIgnoreCase(nome));
+        }
+        
         return ResponseEntity.ok(produtoRepository.findByNomeContainingIgnoreCaseAndEmpresa_Id(nome, empresaId));
     }
 

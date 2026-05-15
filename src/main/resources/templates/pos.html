@@ -1487,7 +1487,14 @@
         spinner.removeClass('d-none');
 
         var url = '/api/produtos/' + produtoId + '/disponibilidade?showZero=' + (showZero ? 'true' : 'false') + '&includeAll=' + (includeAll ? 'true' : 'false');
-        fetch(url).then(function (resp) { if (!resp.ok) throw new Error('Erro'); return resp.json(); }).then(function (data) {
+        fetch(url).then(function (resp) { 
+          if (!resp.ok) throw new Error('Erro na rede'); 
+          var contentType = resp.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new TypeError("Resposta não é JSON!");
+          }
+          return resp.json(); 
+        }).then(function (data) {
           spinner.addClass('d-none');
           body.empty();
           $('#estoqueModalNomeSmall').text($('#estoqueModalNome').text());
@@ -2516,6 +2523,47 @@
       </div>
     </div>
   </div> <!-- Fim de wrapper -->
-</body>
+    <!-- Drag to Scroll Categories Logic -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const slider = document.getElementById('categoryFilters');
+        if (!slider) return;
+        
+        let isDown = false;
+        let startX;
+        let scrollLeft;
 
+        slider.addEventListener('mousedown', (e) => {
+          isDown = true;
+          slider.style.cursor = 'grabbing';
+          slider.classList.add('active');
+          startX = e.pageX - slider.offsetLeft;
+          scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+          isDown = false;
+          slider.style.cursor = 'grab';
+          slider.classList.remove('active');
+        });
+
+        slider.addEventListener('mouseup', () => {
+          isDown = false;
+          slider.style.cursor = 'grab';
+          slider.classList.remove('active');
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - slider.offsetLeft;
+          const walk = (x - startX) * 2; // scroll speed multiplier
+          slider.scrollLeft = scrollLeft - walk;
+        });
+        
+        // Initial style
+        slider.style.cursor = 'grab';
+      });
+    </script>
+</body>
 </html>

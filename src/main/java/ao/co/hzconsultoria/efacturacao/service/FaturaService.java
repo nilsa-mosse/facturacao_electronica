@@ -13,7 +13,10 @@ import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoEmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
 import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT;
+import ao.co.hzconsultoria.efacturacao.model.Devolucao;
+import ao.co.hzconsultoria.efacturacao.model.ItemDevolucao;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoAGTRepository;
+import ao.co.hzconsultoria.efacturacao.repository.DevolucaoRepository;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
@@ -75,11 +78,59 @@ public class FaturaService {
     @Autowired
     private ConfiguracaoAGTRepository configuracaoAGTRepository;
 
+    @Autowired
+    private DevolucaoRepository devolucaoRepository;
+
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
 
     public Fatura emitirFatura(Compra compra) {
         return emitirDocumento(compra, "FT");
+    }
+
+    public Fatura emitirNotaCredito(Devolucao devolucao) {
+        Fatura fatura = new Fatura();
+        fatura.setEmpresa(devolucao.getEmpresa());
+        fatura.setTipoDocumento("NC");
+        
+        // Numeração Sequencial NC
+        Calendar cal = Calendar.getInstance();
+        int ano = cal.get(Calendar.YEAR);
+        long count = faturaRepository.countByTypeAndYear("NC", ano, fatura.getEmpresa().getId()) + 1;
+        String numeroNC = "NC " + ano + "/" + count;
+        
+        fatura.setNumeroFatura(numeroNC);
+        fatura.setDataEmissao(new Date());
+        fatura.setSystemEntryDate(new Date());
+        fatura.setInvoiceStatus("N");
+        
+        // Totais da Devolução
+        fatura.setTotal(devolucao.getTotal() + (devolucao.getIva() != null ? devolucao.getIva() : 0.0));
+        fatura.setIva(devolucao.getIva() != null ? devolucao.getIva() : 0.0);
+        
+        // Link com a transação original via Compra (se existir)
+        if (devolucao.getFatura() != null) {
+            fatura.setCompra(devolucao.getFatura().getCompra());
+        }
+
+        // Assinatura RSA
+        ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L).orElse(new ConfiguracaoSistemaEntity());
+        Fatura ultimaNC = faturaRepository.findLastByType("NC", fatura.getEmpresa().getId());
+        fatura.setPreviousHash((ultimaNC != null) ? ultimaNC.getHash() : "");
+        fatura.setHashControl(String.valueOf(configSistema.getAgtChaveVersao()));
+
+        String dadosAssinar = montarStringAssinatura(fatura);
+        String assinatura = assinarRSA(dadosAssinar, configSistema.getAgtPrivateKey());
+        fatura.setHash(assinatura);
+
+        fatura.setEnviadaAGT(false);
+        fatura.setStatus("PENDENTE");
+        
+        Fatura faturaSalva = faturaRepository.save(fatura);
+        faturaSalva = processarEnvioAGT(faturaSalva);
+        
+        // O PDF será gerado pelo DevolucaoService após salvar o vínculo bidirecional
+        return faturaSalva;
     }
 
     public Fatura emitirProforma(Compra compra) {
@@ -141,63 +192,9 @@ public class FaturaService {
         fatura.setStatus("PENDENTE");
         Fatura faturaSalva = faturaRepository.save(fatura);
 
-        // Enviar para a AGT (Apenas se não for FP, ou tratar conforme regra de negócio)
         if (!"FP".equals(tipo)) {
-            boolean podeEnviar = true;
-            String motivoNaoEnvio = "";
-            java.util.List<ConfiguracaoAGT> configsAgt = configuracaoAGTRepository.findAll();
-            ConfiguracaoAGT configAgt = null;
-            
-            if (!configsAgt.isEmpty()) {
-                configAgt = configsAgt.get(0);
-                if (!configAgt.isEnvioAgtAtivo()) {
-                    podeEnviar = false;
-                    motivoNaoEnvio = "Envio automático para AGT desactivado globalmente.";
-                } else if (configAgt.getLimiteDocumentosDiarios() != null && configAgt.getLimiteDocumentosDiarios() > 0) {
-                    java.time.LocalDate hoje = java.time.LocalDate.now();
-                    if (configAgt.getDataUltimoEnvio() == null || !configAgt.getDataUltimoEnvio().equals(hoje)) {
-                        configAgt.setDataUltimoEnvio(hoje);
-                        configAgt.setDocumentosEnviadosHoje(0);
-                    }
-                    if (configAgt.getDocumentosEnviadosHoje() >= configAgt.getLimiteDocumentosDiarios()) {
-                        podeEnviar = false;
-                        motivoNaoEnvio = "Limite diário de envio para AGT atingido (" + configAgt.getLimiteDocumentosDiarios() + " docs).";
-                    }
-                }
-            }
-
-            if (podeEnviar) {
-                try {
-                    AgtResponse agtResponse = agtService.enviarFatura(faturaSalva);
-                    if (agtResponse.isSucesso()) {
-                        faturaSalva.setEnviadaAGT(true);
-                        faturaSalva.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
-                        faturaSalva.setCodigoAgt(agtResponse.getCodigoAgt());
-                        log.info("{} {} enviada e validada pela AGT. Código: {}", tipo, numeroFatura,
-                                agtResponse.getCodigoAgt());
-                        
-                        // Atualizar contador se houver limite definido
-                        if (configAgt != null && configAgt.getLimiteDocumentosDiarios() != null && configAgt.getLimiteDocumentosDiarios() > 0) {
-                            configAgt.setDocumentosEnviadosHoje(configAgt.getDocumentosEnviadosHoje() + 1);
-                            configuracaoAGTRepository.save(configAgt);
-                        }
-                    } else {
-                        faturaSalva.setEnviadaAGT(false);
-                        faturaSalva.setStatus("FALHA_ENVIO");
-                        faturaSalva.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
-                        log.warn("Falha no envio da {} {} para AGT: {}", tipo, numeroFatura, agtResponse.getMensagem());
-                    }
-                } catch (Exception e) {
-                    faturaSalva.setStatus("FALHA_ENVIO");
-                    log.error("Erro crítico ao enviar {} {} para AGT: {}", tipo, numeroFatura, e.getMessage());
-                }
-            } else {
-                faturaSalva.setEnviadaAGT(false);
-                faturaSalva.setStatus("EMITIDA_OFFLINE");
-                log.info("A factura {} não foi enviada para a AGT. Motivo: {}", numeroFatura, motivoNaoEnvio);
-            }
+            faturaSalva = processarEnvioAGT(faturaSalva);
         } else {
-            // Pró-forma não é enviada à AGT obrigatoriamente nesta simulação
             faturaSalva.setStatus("EMITIDA");
             log.info("Pró-forma {} emitida com sucesso.", numeroFatura);
         }
@@ -208,9 +205,7 @@ public class FaturaService {
         return faturaSalva;
     }
 
-    public Fatura reenviarFatura(Long id) {
-        Fatura fatura = faturaRepository.findById(id).orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
-
+    private Fatura processarEnvioAGT(Fatura fatura) {
         boolean podeEnviar = true;
         String motivoNaoEnvio = "";
         java.util.List<ConfiguracaoAGT> configsAgt = configuracaoAGTRepository.findAll();
@@ -241,10 +236,9 @@ public class FaturaService {
                     fatura.setEnviadaAGT(true);
                     fatura.setStatus(agtResponse.getStatus() != null ? agtResponse.getStatus() : "VALIDADA");
                     fatura.setCodigoAgt(agtResponse.getCodigoAgt());
-                    log.info("Reenvio da Fatura {} foi aceite. Código: {}", fatura.getNumeroFatura(),
-                            agtResponse.getCodigoAgt());
-                            
-                    // Atualizar contador se houver limite definido
+                    log.info("{} {} enviada e validada pela AGT. Código: {}", 
+                            fatura.getTipoDocumento(), fatura.getNumeroFatura(), agtResponse.getCodigoAgt());
+                    
                     if (configAgt != null && configAgt.getLimiteDocumentosDiarios() != null && configAgt.getLimiteDocumentosDiarios() > 0) {
                         configAgt.setDocumentosEnviadosHoje(configAgt.getDocumentosEnviadosHoje() + 1);
                         configuracaoAGTRepository.save(configAgt);
@@ -253,23 +247,31 @@ public class FaturaService {
                     fatura.setEnviadaAGT(false);
                     fatura.setStatus("FALHA_ENVIO");
                     fatura.setCodigoAgt("ERRO: " + agtResponse.getMensagem());
-                    log.warn("Falha no reenvio da fatura {}: {}", fatura.getNumeroFatura(), agtResponse.getMensagem());
+                    log.warn("Falha no envio da {} {} para AGT: {}", 
+                            fatura.getTipoDocumento(), fatura.getNumeroFatura(), agtResponse.getMensagem());
                 }
             } catch (Exception e) {
                 fatura.setStatus("FALHA_ENVIO");
-                log.error("Erro crítico ao reenviar fatura {}: {}", fatura.getNumeroFatura(), e.getMessage());
+                log.error("Erro crítico ao enviar {} {} para AGT: {}", 
+                        fatura.getTipoDocumento(), fatura.getNumeroFatura(), e.getMessage());
             }
         } else {
             fatura.setEnviadaAGT(false);
             fatura.setStatus("EMITIDA_OFFLINE");
-            log.warn("Reenvio da fatura {} abortado: {}", fatura.getNumeroFatura(), motivoNaoEnvio);
-        }
-
-        fatura = faturaRepository.save(fatura);
-        if (fatura.isEnviadaAGT()) {
-            gerarPdfFatura(fatura);
+            log.info("O documento {} não foi enviado para a AGT. Motivo: {}", 
+                    fatura.getNumeroFatura(), motivoNaoEnvio);
         }
         return fatura;
+    }
+
+    public Fatura reenviarFatura(Long id) {
+        Fatura fatura = faturaRepository.findById(id).orElseThrow(() -> new RuntimeException("Fatura não encontrada"));
+        Fatura processada = processarEnvioAGT(fatura);
+        processada = faturaRepository.save(processada);
+        if (processada.isEnviadaAGT()) {
+            gerarPdfFatura(processada);
+        }
+        return processada;
     }
 
     private String montarStringAssinatura(Fatura f) {
@@ -327,7 +329,7 @@ public class FaturaService {
         }
     }
 
-    private void gerarPdfFatura(Fatura fatura) {
+    public void gerarPdfFatura(Fatura fatura) {
         try {
             // Salva em ./uploads/faturas (pasta externa, acessível via /uploads/faturas/**)
             File dir = new File("./uploads/faturas");
@@ -423,6 +425,8 @@ public class FaturaService {
                     tituloDocumento = "FACTURA PRÓ-FORMA";
                 } else if ("FR".equals(fatura.getTipoDocumento())) {
                     tituloDocumento = "FACTURA RECIBO";
+                } else if ("NC".equals(fatura.getTipoDocumento())) {
+                    tituloDocumento = "NOTA DE CRÉDITO";
                 }
 
                 PdfPCell titleCell = new PdfPCell();
@@ -540,7 +544,29 @@ public class FaturaService {
                 double subtotalGeral = 0;
                 int rowCount = 0;
 
-                if (fatura.getCompra() != null && fatura.getCompra().getItens() != null) {
+                if ("NC".equals(fatura.getTipoDocumento())) {
+                    Devolucao dev = devolucaoRepository.findByNotaCredito(fatura);
+                    if (dev != null && dev.getItens() != null) {
+                        for (ItemDevolucao item : dev.getItens()) {
+                            java.awt.Color currentBg = (rowCount % 2 == 0) ? java.awt.Color.WHITE : zebraColor;
+                            double subtotal = item.getSubtotal() != null ? item.getSubtotal() : 0.0;
+                            double valorIvaItem = item.getIvaValor() != null ? item.getIvaValor() : 0.0;
+                            double percIva = item.getIvaPercentual() != null ? item.getIvaPercentual() : 0.0;
+
+                            subtotalGeral += subtotal;
+                            totalIva += valorIvaItem;
+
+                            String nomeProd = item.getProduto() != null ? item.getProduto().getNome() : "Produto N/A";
+                            table.addCell(modernCell(nomeProd, normal, Element.ALIGN_LEFT, currentBg, borderColor));
+                            table.addCell(modernCell(String.valueOf(item.getQuantidade()), normal, Element.ALIGN_CENTER, currentBg, borderColor));
+                            table.addCell(modernCell(df.format(item.getPreco()), normal, Element.ALIGN_RIGHT, currentBg, borderColor));
+                            table.addCell(modernCell(df.format(percIva) + "%", normal, Element.ALIGN_CENTER, currentBg, borderColor));
+                            table.addCell(modernCell(df.format(valorIvaItem), normal, Element.ALIGN_RIGHT, currentBg, borderColor));
+                            table.addCell(modernCell(df.format(subtotal), bold, Element.ALIGN_RIGHT, currentBg, borderColor));
+                            rowCount++;
+                        }
+                    }
+                } else if (fatura.getCompra() != null && fatura.getCompra().getItens() != null) {
                     for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : fatura.getCompra().getItens()) {
                         java.awt.Color currentBg = (rowCount % 2 == 0) ? java.awt.Color.WHITE : zebraColor;
                         double subtotal = item.getSubtotal() != null ? item.getSubtotal() : 0.0;

@@ -90,8 +90,17 @@ public class InventarioController {
             Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
             inventario.setEmpresa(empresa);
         }
-        
         try {
+            // Garantir que o código existe (caso não tenha vindo do formulário)
+            if (inventario.getCodigo() == null || inventario.getCodigo().trim().isEmpty()) {
+                int anoAtual = java.time.LocalDate.now().getYear();
+                long totalInventariosAno = inventarioRepository.findByEmpresa_Id(empresaId).stream()
+                        .filter(i -> i.getCreatedAt() != null && i.getCreatedAt().getYear() == anoAtual)
+                        .count();
+                String codigoGerado = String.format("INV-%d-%03d", anoAtual, totalInventariosAno + 1);
+                inventario.setCodigo(codigoGerado);
+            }
+
             // Processar Itens do Inventário
             if (itemProdutoIds != null && !itemProdutoIds.isEmpty()) {
                 java.util.List<ItemInventario> itens = new java.util.ArrayList<>();
@@ -263,12 +272,27 @@ public class InventarioController {
         double precisao = totalItens > 0 ? ((double)(totalItens - divergencias) / totalItens) * 100 : 100.0;
 
         // 4. Valores Monetários
-        double valorTotalStock = inv.getItens().stream()
+        double valorTotalStockSistema = inv.getItens().stream()
                 .mapToDouble(it -> (it.getQuantidadeSistema() != null ? it.getQuantidadeSistema() : 0.0) * 
                                   (it.getProduto() != null && it.getProduto().getPrecoCompra() != null ? it.getProduto().getPrecoCompra() : 0.0))
                 .sum();
         
-        double valorAjustado = inv.getValorDivergencias();
+        double valorTotalStockFisico = inv.getItens().stream()
+                .mapToDouble(it -> (it.getQuantidadeContada() != null ? it.getQuantidadeContada() : 0.0) * 
+                                  (it.getProduto() != null && it.getProduto().getPrecoCompra() != null ? it.getProduto().getPrecoCompra() : 0.0))
+                .sum();
+
+        double valorTotalFaltas = inv.getItens().stream()
+                .filter(it -> it.getDivergencia() < 0)
+                .mapToDouble(it -> Math.abs(it.getValorDivergencia()))
+                .sum();
+
+        double valorTotalSobras = inv.getItens().stream()
+                .filter(it -> it.getDivergencia() > 0)
+                .mapToDouble(it -> it.getValorDivergencia())
+                .sum();
+        
+        double valorAjustadoNet = inv.getValorDivergencias();
 
         // 5. Produtos Críticos (Maiores divergências em valor absoluto)
         java.util.List<ItemInventario> criticos = inv.getItens().stream()
@@ -283,8 +307,11 @@ public class InventarioController {
         model.addAttribute("itensPorContar", itensPorContar);
         model.addAttribute("divergencias", divergencias);
         model.addAttribute("precisao", precisao);
-        model.addAttribute("valorTotalStock", valorTotalStock);
-        model.addAttribute("valorAjustado", valorAjustado);
+        model.addAttribute("valorTotalStock", valorTotalStockSistema);
+        model.addAttribute("valorTotalFisico", valorTotalStockFisico);
+        model.addAttribute("valorTotalFaltas", valorTotalFaltas);
+        model.addAttribute("valorTotalSobras", valorTotalSobras);
+        model.addAttribute("valorAjustado", valorAjustadoNet);
         model.addAttribute("produtosCriticos", criticos);
 
         return "dashboardInventario";

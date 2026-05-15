@@ -98,7 +98,9 @@ public class StockService {
 
     public List<Produto> buscarProdutosComStockBaixo() {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        if (empresaId != null) {
+        boolean isSuperAdmin = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.isSuperAdmin();
+        
+        if (empresaId != null || isSuperAdmin) {
             return produtoRepository.findProdutosComStockBaixo(empresaId);
         } else {
             return java.util.Collections.emptyList();

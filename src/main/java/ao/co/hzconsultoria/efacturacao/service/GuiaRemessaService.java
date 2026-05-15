@@ -68,11 +68,20 @@ public class GuiaRemessaService {
         guia.setNumeroGuia("GR-" + System.currentTimeMillis());
         guia.setStatus("ATIVA");
         
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         List<ItemGuiaRemessa> itensGuia = fatura.getItens().stream().map(item -> {
             ItemGuiaRemessa ig = new ItemGuiaRemessa();
             ig.setNomeProduto(item.getNomeProduto());
             ig.setQuantidade(Double.valueOf(item.getQuantidade()));
-            ig.setUnidadeMedida("UN");
+            
+            // Tentar buscar unidade real do produto
+            String unidade = "UN";
+            java.util.List<Produto> prods = produtoRepository.findByNomeStartingWithIgnoreCaseAndEmpresa_Id(item.getNomeProduto(), empresaId);
+            if (prods != null && !prods.isEmpty()) {
+                unidade = prods.get(0).getUnidadeMedida();
+            }
+            
+            ig.setUnidadeMedida(unidade != null ? unidade : "UN");
             ig.setGuiaRemessa(guia);
             return ig;
         }).collect(Collectors.toList());
@@ -104,6 +113,14 @@ public class GuiaRemessaService {
         // Limpar referência se o ID for nulo ou inválido (evita TransientPropertyValueException)
         if (guia.getGuiaReferencia() != null && (guia.getGuiaReferencia().getId() == null || guia.getGuiaReferencia().getId() <= 0)) {
             guia.setGuiaReferencia(null);
+        }
+
+        // Garantir vínculo com a empresa
+        if (guia.getEmpresa() == null) {
+            Long empId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+            if (empId != null) {
+                guia.setEmpresa(empresaRepository.findById(empId).orElse(null));
+            }
         }
 
         // Se for uma retificação, marcar a guia anterior como SUBSTITUIDA
@@ -138,6 +155,7 @@ public class GuiaRemessaService {
         comunicarAGT(guia);
         
         guiaRemessaRepository.save(guia);
+        log.info("Guia {} salva com {} itens.", guia.getNumeroGuia(), guia.getItens() != null ? guia.getItens().size() : 0);
         gerarPdfGuia(guia);
     }
 
@@ -199,8 +217,12 @@ public class GuiaRemessaService {
             try {
                 doc.open();
 
-                Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-                Empresa configEmpresa = empresaRepository.findById(empresaId).orElse(new Empresa());
+                // Priorizar empresa da guia, fallback para sessão
+                Empresa configEmpresa = guia.getEmpresa();
+                if (configEmpresa == null) {
+                    Long currentEmpId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+                    configEmpresa = empresaRepository.findById(currentEmpId).orElse(new Empresa());
+                }
 
                 // --- PALETA DE CORES PREMIUM ---
                 java.awt.Color primaryColor = new java.awt.Color(0, 86, 179); // Corporate Blue
@@ -242,10 +264,16 @@ public class GuiaRemessaService {
 
                 PdfPCell logoCell = new PdfPCell();
                 try {
-                    if (configEmpresa.getLogotipo() != null) {
-                        Image logo = Image.getInstance(configEmpresa.getLogotipo());
-                        logo.scaleToFit(120, 60);
-                        logoCell = new PdfPCell(logo);
+                    String logoPath = configEmpresa.getLogotipo();
+                    if (logoPath != null && !logoPath.isEmpty()) {
+                        String caminhoAbsoluto = resolverCaminhoImagem(logoPath);
+                        if (caminhoAbsoluto != null) {
+                            Image logo = Image.getInstance(caminhoAbsoluto);
+                            logo.scaleToFit(120, 60);
+                            logoCell = new PdfPCell(logo);
+                        } else {
+                            logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
+                        }
                     } else {
                         logoCell = new PdfPCell(new Phrase(configEmpresa.getNome(), fontSubtitle));
                     }
@@ -344,6 +372,7 @@ public class GuiaRemessaService {
 
                 int rowIdx = 0;
                 for (ItemGuiaRemessa item : guia.getItens()) {
+                    if (item == null) continue;
                     java.awt.Color rowBg = (rowIdx % 2 == 0) ? java.awt.Color.WHITE : zebraColor;
                     itemsTable.addCell(modernCell(item.getNomeProduto(), normal, rowBg, borderColor));
                     itemsTable.addCell(modernCell(String.valueOf(item.getQuantidade()), normal, rowBg, borderColor));
@@ -482,5 +511,24 @@ public class GuiaRemessaService {
         c.setBorderColorBottom(borderColor);
         c.setPadding(8);
         return c;
+    }
+
+    private String resolverCaminhoImagem(String caminhoRelativo) {
+        if (caminhoRelativo == null || caminhoRelativo.isEmpty()) return null;
+        if (new File(caminhoRelativo).isAbsolute()) return caminhoRelativo;
+
+        String caminhoLimpo = caminhoRelativo.startsWith("/") ? caminhoRelativo.substring(1) : caminhoRelativo;
+        
+        if (!caminhoLimpo.contains("/") && !caminhoLimpo.contains("\\")) {
+            caminhoLimpo = "uploads/logo/" + caminhoLimpo;
+        }
+
+        java.nio.file.Path projectRoot = java.nio.file.Paths.get("").toAbsolutePath().normalize();
+        java.nio.file.Path imagemPath = projectRoot.resolve(caminhoLimpo).normalize();
+
+        if (java.nio.file.Files.exists(imagemPath)) return imagemPath.toString();
+        
+        log.warn("Arquivo de imagem não encontrado em: {}", imagemPath);
+        return null;
     }
 }

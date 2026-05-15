@@ -24,6 +24,9 @@ public class DashboardController {
     @Autowired
     private DespesaRepository despesaRepository;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.DevolucaoRepository devolucaoRepository;
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
@@ -109,7 +112,8 @@ public class DashboardController {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         List<Compra> vendas = dashboardService.getComprasDoDia(empresaId);
         
-        double totalVendas = vendas.stream()
+        double totalVendasGross = vendas.stream()
+            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()))
             .mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0)
             .sum();
             
@@ -117,10 +121,12 @@ public class DashboardController {
         java.util.Map<Long, String> faturasMap = new java.util.HashMap<>();
         
         for (Compra v : vendas) {
-            if (v.getItens() != null) {
-                totalIva += v.getItens().stream()
-                    .mapToDouble(i -> i.getIva() != null ? i.getIva() : 0.0)
-                    .sum();
+            if (!"CANCELADA".equalsIgnoreCase(v.getStatus())) {
+                if (v.getItens() != null) {
+                    totalIva += v.getItens().stream()
+                        .mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0)
+                        .sum();
+                }
             }
             
             // Buscar o número da fatura associada a esta compra
@@ -131,7 +137,7 @@ public class DashboardController {
         }
 
         model.addAttribute("vendasDoDia", vendas);
-        model.addAttribute("totalVendasDia", totalVendas);
+        model.addAttribute("totalVendasDia", totalVendasGross - totalIva); // Venda Líquida
         model.addAttribute("totalIvaDia", totalIva);
         model.addAttribute("faturasMap", faturasMap);
         return "vendasDia";
@@ -142,7 +148,8 @@ public class DashboardController {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         List<Compra> vendas = dashboardService.getComprasDoMes(empresaId);
         
-        double totalVendas = vendas.stream()
+        double totalVendasGross = vendas.stream()
+            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()))
             .mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0)
             .sum();
             
@@ -150,10 +157,12 @@ public class DashboardController {
         java.util.Map<Long, String> faturasMap = new java.util.HashMap<>();
         
         for (Compra v : vendas) {
-            if (v.getItens() != null) {
-                totalIva += v.getItens().stream()
-                    .mapToDouble(i -> i.getIva() != null ? i.getIva() : 0.0)
-                    .sum();
+            if (!"CANCELADA".equalsIgnoreCase(v.getStatus())) {
+                if (v.getItens() != null) {
+                    totalIva += v.getItens().stream()
+                        .mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0)
+                        .sum();
+                }
             }
             
             // Buscar o número da fatura associada a esta compra
@@ -164,7 +173,7 @@ public class DashboardController {
         }
 
         model.addAttribute("vendasDoMes", vendas);
-        model.addAttribute("totalVendasMes", totalVendas);
+        model.addAttribute("totalVendasMes", totalVendasGross - totalIva); // Venda Líquida
         model.addAttribute("totalIvaMes", totalIva);
         model.addAttribute("faturasMap", faturasMap);
         return "receitaMensal";
@@ -178,15 +187,35 @@ public class DashboardController {
         java.time.LocalDate inicioMes = hoje.withDayOfMonth(1);
         java.time.LocalDate fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth());
 
-        // Vendas do mês
-        List<Compra> vendasDoMes = dashboardService.getComprasDoMes(empresaId);
+        // Vendas do mês (Excluindo canceladas)
+        List<Compra> vendasDoMes = dashboardService.getComprasDoMes(empresaId).stream()
+            .filter(c -> !"CANCELADA".equalsIgnoreCase(c.getStatus()))
+            .collect(Collectors.toList());
 
-        // Receita total mensal
-        double receitaMensal = vendasDoMes.stream()
+        // Receita total mensal (Bruta das não canceladas)
+        double receitaMensalBruta = vendasDoMes.stream()
             .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
             .sum();
+        
+        // IVA total das vendas do mês
+        double totalIvaVendas = vendasDoMes.stream()
+            .mapToDouble(c -> c.getItens() != null ? c.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0)
+            .sum();
 
-        // COGS (Custo dos Produtos Vendidos)
+        // Devoluções do mês
+        List<ao.co.hzconsultoria.efacturacao.model.Devolucao> devolucoesDoMes = (empresaId == null) ? devolucaoRepository.findAll() : devolucaoRepository.findByEmpresa_Id(empresaId);
+        devolucoesDoMes = devolucoesDoMes.stream()
+            .filter(d -> d.getDataDevolucao() != null && !d.getDataDevolucao().toLocalDate().isBefore(inicioMes) && !d.getDataDevolucao().toLocalDate().isAfter(fimMes))
+            .collect(Collectors.toList());
+        
+        double totalDevolucoes = devolucoesDoMes.stream()
+            .mapToDouble(d -> d.getTotal() != null ? d.getTotal() : 0.0)
+            .sum();
+
+        // Receita Líquida Real (Vendas Brutas - IVA - Devoluções Líquidas)
+        double receitaMensal = (receitaMensalBruta - totalIvaVendas) - totalDevolucoes;
+
+        // COGS (Custo dos Produtos Vendidos) - Baseado apenas nas vendas efectivas
         double cogs = 0.0;
         for (Compra compra : vendasDoMes) {
             if (compra.getItens() != null) {
@@ -200,7 +229,7 @@ public class DashboardController {
             }
         }
 
-        // Despesas do mês (inclui despesas associadas à empresa + despesas sem empresa para compatibilidade)
+        // Despesas do mês
         List<Despesa> todasDespesas = despesaRepository.findAll().stream()
             .filter(d -> d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
             .collect(Collectors.toList());
@@ -213,10 +242,10 @@ public class DashboardController {
             .mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0)
             .sum();
 
-        // Lucro Bruto = Receita - COGS
+        // Lucro Bruto = Receita Líquida - COGS
         double lucroBruto = receitaMensal - cogs;
 
-        // Lucro Líquido = Receita - COGS - Despesas
+        // Lucro Líquido = Receita Líquida - COGS - Despesas
         double lucroLiquido = lucroBruto - totalDespesas;
 
         // Margem de Lucro (%)
@@ -226,6 +255,8 @@ public class DashboardController {
         long totalVendasCount = vendasDoMes.size();
 
         model.addAttribute("receitaMensal", receitaMensal);
+        model.addAttribute("receitaMensalBruta", receitaMensalBruta - totalIvaVendas); // Agora mostrando Net aqui também
+        model.addAttribute("totalDevolucoes", totalDevolucoes);
         model.addAttribute("cogs", cogs);
         model.addAttribute("totalDespesas", totalDespesas);
         model.addAttribute("lucroBruto", lucroBruto);
@@ -234,6 +265,7 @@ public class DashboardController {
         model.addAttribute("totalVendasCount", totalVendasCount);
         model.addAttribute("vendasDoMes", vendasDoMes);
         model.addAttribute("despesasDoMes", despesasDoMes);
+        model.addAttribute("devolucoesDoMes", devolucoesDoMes);
 
         return "lucroMensal";
     }

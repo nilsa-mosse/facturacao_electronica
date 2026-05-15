@@ -1,10 +1,12 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "empresa")
-public class Empresa {
+public class Empresa implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +25,7 @@ public class Empresa {
     private String logotipo;
     private String regimeFiscal;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToOne(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
     private ConfiguracaoEmpresa configuracao;
 
@@ -50,8 +53,6 @@ public class Empresa {
 
     public String getLogotipo() { return logotipo; }
     public void setLogotipo(String logotipo) { this.logotipo = logotipo; }
-
-    // ...existing code...
 
     public String getRegimeFiscal() { return regimeFiscal; }
     public void setRegimeFiscal(String regimeFiscal) { this.regimeFiscal = regimeFiscal; }

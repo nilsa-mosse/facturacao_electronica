@@ -357,7 +357,7 @@
                     </span>
                   </td>
                   <td class="text-end" style="white-space: nowrap;">
-                    <button th:if="${produto.pertoDeExpirar && !produto.emPromocao}" 
+                    <button th:if="${!produto.emPromocao}" 
                             class="btn-action bg-warning-soft text-warning me-2" 
                             th:onclick="|promoverProduto('${produto.id}')|" 
                             title="Colocar em Promoção">
@@ -412,7 +412,7 @@
                   </div>
                   <div class="col-md-12">
                     <label class="form-label fw-700">Descrição Detalhada</label>
-                    <textarea name="descricao" class="form-control search-input" rows="3" th:text="${produto.descricao}"></textarea>
+                    <textarea name="descricao" class="form-control search-input" rows="3" maxlength="255" th:text="${produto.descricao}"></textarea>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-700">Categoria</label>

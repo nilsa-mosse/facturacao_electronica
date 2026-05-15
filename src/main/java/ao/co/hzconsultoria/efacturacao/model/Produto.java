@@ -18,6 +18,7 @@ public class Produto {
     private Double estoqueMinimo = 0.0;
     private String imagem;
     private String codigoBarra;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Lob
     @Column(columnDefinition="LONGBLOB")
     private byte[] imagemBlob;
@@ -40,6 +41,7 @@ public class Produto {
 
 
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;

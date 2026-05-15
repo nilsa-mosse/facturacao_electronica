@@ -38,4 +38,8 @@ public interface FaturaRepository extends JpaRepository<Fatura, Long> {
 
     @Query(value = "SELECT COUNT(*) FROM fatura WHERE tipo_documento = :tipo AND YEAR(data_emissao) = :ano AND empresa_id = :empresaId", nativeQuery = true)
     long countByTypeAndYear(@Param("tipo") String tipo, @Param("ano") int ano, @Param("empresaId") Long empresaId);
+
+    java.util.Optional<Fatura> findByNumeroFaturaAndEmpresa_Id(String numeroFatura, Long empresaId);
+
+    List<Fatura> findByTipoDocumentoAndEmpresa_IdOrderByDataEmissaoDesc(String tipoDocumento, Long empresaId);
 }

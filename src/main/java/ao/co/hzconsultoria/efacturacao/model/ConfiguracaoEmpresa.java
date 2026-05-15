@@ -1,6 +1,7 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * Configurações específicas de cada empresa
@@ -12,12 +13,14 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "configuracao_empresa")
-public class ConfiguracaoEmpresa {
+public class ConfiguracaoEmpresa implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToOne
     @JoinColumn(name = "empresa_id", nullable = false, unique = true)
     private Empresa empresa;

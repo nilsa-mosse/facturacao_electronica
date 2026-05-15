@@ -5,179 +5,383 @@
     <title>Alertas de Stock - Kwanza ERP</title>
     <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4361ee;
-            --danger: #ef4444;
+            --primary: #6366f1;
+            --primary-soft: #e0e7ff;
+            --danger: #f43f5e;
+            --danger-soft: #ffe4e6;
             --warning: #f59e0b;
+            --warning-soft: #fef3c7;
+            --success: #10b981;
+            --success-soft: #d1fae5;
             --dark: #0f172a;
+            --slate: #64748b;
             --bg: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.75);
+            --glass: rgba(255, 255, 255, 0.85);
         }
         
         body { 
             background: var(--bg); 
-            background-image: radial-gradient(at 0% 0%, hsla(0,100%,94%,1) 0, transparent 50%), 
-                              radial-gradient(at 50% 0%, hsla(225,100%,94%,1) 0, transparent 50%);
-            font-family: 'Outfit', sans-serif; 
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(230,100%,96%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(340,100%,96%,1) 0, transparent 50%),
+                radial-gradient(at 50% 100%, hsla(210,100%,96%,1) 0, transparent 50%);
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             color: var(--dark);
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 60px 20px;
+            margin: 0;
         }
 
         .premium-container {
             max-width: 1200px;
             margin: 0 auto;
-            animation: fadeIn 0.8s ease-out;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        .header-section { margin-bottom: 50px; }
-        
-        .alert-card {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-            overflow: hidden;
-            padding: 30px;
-        }
-
-        .table {
-            border-collapse: separate;
-            border-spacing: 0 10px;
-        }
-
-        .table thead th {
-            border: none;
-            color: #64748b;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            padding: 15px 25px;
-        }
-
-        .table tbody tr td {
-            background: white;
-            border: none;
-            padding: 20px 25px;
-            vertical-align: middle;
-        }
-
-        .table tbody tr td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
-        .table tbody tr td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
-
-        .progress { height: 8px; border-radius: 4px; background: #e2e8f0; }
-        .progress-bar { border-radius: 4px; }
-
-        .status-pill {
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .status-critical { background: #fee2e2; color: #991b1b; }
-        .status-warning { background: #fef3c7; color: #92400e; }
-
-        .product-icon {
-            width: 44px; height: 44px;
-            background: #f1f5f9;
-            color: var(--primary);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
         }
 
         .btn-back {
             background: white;
-            color: var(--dark);
-            border-radius: 14px;
-            padding: 10px 20px;
+            color: var(--slate);
+            border-radius: 16px;
+            padding: 12px 24px;
             font-weight: 700;
             text-decoration: none;
-            display: inline-flex; align-items: center; gap: 8px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 10px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
         }
-        .btn-back:hover { background: #f8fafc; transform: translateX(-5px); }
+        .btn-back:hover { 
+            color: var(--primary);
+            background: white; 
+            transform: translateX(-8px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
 
+        .header-section { 
+            margin-bottom: 60px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .page-title {
+            font-weight: 800;
+            font-size: 3.5rem;
+            letter-spacing: -2px;
+            line-height: 1;
+            margin: 0;
+        }
+        .page-subtitle {
+            color: var(--slate);
+            font-weight: 500;
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .summary-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s ease;
+        }
+        .summary-card:hover { transform: translateY(-5px); }
+        .summary-icon {
+            width: 56px; height: 56px;
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+        }
+        .icon-danger { background: var(--danger-soft); color: var(--danger); }
+        .icon-warning { background: var(--warning-soft); color: var(--warning); }
+        .icon-success { background: var(--success-soft); color: var(--success); }
+        
+        .summary-info h3 { margin: 0; font-size: 1.8rem; font-weight: 800; line-height: 1.2; }
+        .summary-info p { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Table Card */
+        .alert-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid white;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .table-container { padding: 20px; }
+
+        .table { border-collapse: separate; border-spacing: 0 12px; margin-bottom: 0; }
+        .table thead th {
+            border: none;
+            color: var(--slate);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            padding: 15px 25px;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .table tbody tr td {
+            background: white;
+            border: none;
+            padding: 24px 25px;
+            vertical-align: middle;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .table tbody tr td:first-child { border-top-left-radius: 20px; border-bottom-left-radius: 20px; }
+        .table tbody tr td:last-child { border-top-right-radius: 20px; border-bottom-right-radius: 20px; }
+
+        .table tbody tr:hover td {
+            background: #fdfdfd;
+            transform: scale(1.005);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .product-info { display: flex; align-items: center; gap: 16px; }
+        .product-img {
+            width: 48px; height: 48px;
+            background: var(--bg);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .stock-value { font-size: 1.25rem; font-weight: 800; color: var(--dark); }
+        .progress-container { width: 100px; }
+        .progress { 
+            height: 6px; 
+            border-radius: 10px; 
+            background: #f1f5f9; 
+            overflow: visible;
+        }
+        .progress-bar { 
+            border-radius: 10px; 
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+        .badge-critical { background: var(--danger-soft); color: var(--danger); border: 1px solid rgba(244, 63, 94, 0.2); }
+        .badge-warning { background: var(--warning-soft); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+        .btn-action {
+            background: var(--dark);
+            color: white;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 700;
+            border: none;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-action:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .empty-state {
+            padding: 80px 20px;
+            text-align: center;
+        }
+        .empty-icon {
+            font-size: 5rem;
+            background: var(--success-soft);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header-section { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .page-title { font-size: 2.5rem; }
+            .summary-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="premium-container">
-        <div class="header-section d-flex justify-content-between align-items-center">
+        <!-- Back Button -->
+        <a th:href="@{/dashboard}" class="btn-back mb-4">
+            <i class="fas fa-chevron-left"></i> 
+            PAINEL DE CONTROLO
+        </a>
+
+        <!-- Header -->
+        <div class="header-section">
             <div>
-                <a th:href="@{/dashboard}" class="btn-back mb-3"><i class="fas fa-arrow-left"></i> VOLTAR AO PAINEL</a>
-                <h1 class="fw-900 mb-0" style="letter-spacing: -1.5px; font-size: 3rem;">Risco de <span style="color: var(--danger);">Ruptura</span></h1>
-                <p class="text-muted fw-600">Produtos que atingiram ou estão abaixo do stock de segurança.</p>
+                <h1 class="page-title">Alertas de <span style="color: var(--danger);">Stock</span></h1>
+                <p class="page-subtitle">Monitorização em tempo real dos níveis críticos de inventário.</p>
             </div>
-            <div class="text-end">
-                <div class="fw-800 text-danger" style="font-size: 2.5rem;" th:text="${#lists.size(produtosEstoqueBaixo)}">0</div>
-                <div class="small fw-700 text-muted text-uppercase">Itens Críticos</div>
+            <div class="d-none d-md-block text-end">
+                <div class="fw-800" style="font-size: 1rem; color: var(--slate); margin-bottom: 5px;">DATA DO RELATÓRIO</div>
+                <div class="fw-800" style="font-size: 1.2rem;" th:text="${#temporals.format(#temporals.createNow(), 'dd MMM, yyyy - HH:mm')}">15 Mai, 2026</div>
             </div>
         </div>
 
+        <!-- Summary Statistics -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon icon-danger">
+                    <i class="fas fa-radiation"></i>
+                </div>
+                <div class="summary-info">
+                    <h3 th:text="${#lists.size(produtosEstoqueBaixo.?[quantidadeEstoque <= (estoqueMinimo * 0.5)])}">0</h3>
+                    <p>Itens Críticos</p>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon icon-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="summary-info">
+                    <h3 th:text="${#lists.size(produtosEstoqueBaixo.?[quantidadeEstoque > (estoqueMinimo * 0.5)])}">0</h3>
+                    <p>Risco Elevado</p>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon icon-success">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <div class="summary-info">
+                    <h3 th:text="${#lists.size(produtosEstoqueBaixo)}">0</h3>
+                    <p>Total em Alerta</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Alert Table -->
         <div class="alert-card">
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th>Produto</th>
-                            <th>Stock Atual</th>
-                            <th>Stock Mínimo</th>
-                            <th>Estado de Urgência</th>
-                            <th>Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="produto : ${produtosEstoqueBaixo}">
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-icon"><i class="fas fa-box"></i></div>
-                                    <div>
-                                        <div class="fw-800" th:text="${produto.nome}"></div>
-                                        <div class="small text-muted fw-600" th:text="${produto.codigoBarra}"></div>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%">Produto</th>
+                                <th style="width: 15%">Stock Atual</th>
+                                <th style="width: 15%">Meta Mínima</th>
+                                <th style="width: 15%">Estado</th>
+                                <th style="width: 15%">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="produto : ${produtosEstoqueBaixo}">
+                                <td>
+                                    <div class="product-info">
+                                        <div class="product-img">
+                                            <i class="fas fa-box-open"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-800" style="font-size: 1.1rem;" th:text="${produto.nome}">Nome do Produto</div>
+                                            <div class="fw-600" style="font-size: 0.8rem; color: var(--slate);" th:text="${produto.codigoBarra}">SKU-0000</div>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="fw-900" style="font-size: 1.2rem;" th:text="${produto.quantidadeEstoque}">0</div>
-                                <div class="progress mt-2" style="width: 100px;">
-                                    <div class="progress-bar bg-danger" th:style="'width: ' + ((produto.quantidadeEstoque / (produto.estoqueMinimo == 0 ? 1 : produto.estoqueMinimo)) * 100) + '%'"></div>
-                                </div>
-                            </td>
-                            <td class="fw-700 text-muted" th:text="${produto.estoqueMinimo}">0.0</td>
-                            <td>
-                                <span th:class="'status-pill ' + (${produto.quantidadeEstoque <= (produto.estoqueMinimo * 0.5)} ? 'status-critical' : 'status-warning')">
-                                    <i th:class="${produto.quantidadeEstoque <= (produto.estoqueMinimo * 0.5)} ? 'fas fa-radiation' : 'fas fa-exclamation-triangle'"></i>
-                                    <span th:text="${produto.quantidadeEstoque <= (produto.estoqueMinimo * 0.5)} ? 'CRÍTICO' : 'ALTO RISCO'"></span>
-                                </span>
-                            </td>
-                            <td>
-                                <a th:href="@{/stock/entrada(produtoId=${produto.id})}" class="btn btn-sm btn-dark fw-800 rounded-pill px-3">REPOR</a>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
-                            <td colspan="5" class="text-center py-5">
-                                <div class="py-4 opacity-50">
-                                    <i class="fas fa-shield-alt fa-4x text-success mb-3"></i>
-                                    <h4 class="fw-800">Operação Segura</h4>
-                                    <p>Todos os produtos estão acima dos níveis críticos de stock.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                                <td>
+                                    <div class="stock-value" th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : 0.0}">0.0</div>
+                                    <div class="progress-container mt-2">
+                                        <div class="progress">
+                                            <div class="progress-bar" 
+                                                 th:classappend="${(produto.quantidadeEstoque != null ? produto.quantidadeEstoque : 0) <= ((produto.estoqueMinimo != null ? produto.estoqueMinimo : 0) * 0.5)} ? 'bg-danger' : 'bg-warning'"
+                                                 th:style="'width: ' + (${((produto.quantidadeEstoque != null ? produto.quantidadeEstoque : 0) / ((produto.estoqueMinimo != null && produto.estoqueMinimo > 0) ? produto.estoqueMinimo : 1)) * 100}) + '%'">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-700" style="font-size: 1.1rem; color: var(--slate);" th:text="${produto.estoqueMinimo != null ? produto.estoqueMinimo : 0.0}">0.0</div>
+                                </td>
+                                <td>
+                                    <span th:class="'status-badge ' + (${(produto.quantidadeEstoque != null ? produto.quantidadeEstoque : 0) <= ((produto.estoqueMinimo != null ? produto.estoqueMinimo : 0) * 0.5)} ? 'badge-critical' : 'badge-warning')">
+                                        <i th:class="${(produto.quantidadeEstoque != null ? produto.quantidadeEstoque : 0) <= ((produto.estoqueMinimo != null ? produto.estoqueMinimo : 0) * 0.5)} ? 'fas fa-skull-crossbones' : 'fas fa-clock'"></i>
+                                        <span th:text="${(produto.quantidadeEstoque != null ? produto.quantidadeEstoque : 0) <= ((produto.estoqueMinimo != null ? produto.estoqueMinimo : 0) * 0.5)} ? 'CRÍTICO' : 'ATENÇÃO'"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/stock/entrada(produtoId=${produto.id})}" class="btn-action">
+                                        <i class="fas fa-plus-circle"></i> REPOR
+                                    </a>
+                                </td>
+                            </tr>
+                            
+                            <!-- Empty State -->
+                            <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <h2 class="fw-800">Tudo em Conformidade!</h2>
+                                        <p class="text-muted fw-500">Não existem produtos com stock abaixo do limite de segurança no momento.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Micro-animations Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.4s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
 </body>
 </html>

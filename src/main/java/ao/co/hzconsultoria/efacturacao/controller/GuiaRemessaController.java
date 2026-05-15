@@ -111,6 +111,7 @@ public class GuiaRemessaController {
         nova.setMatriculaViatura(original.getMatriculaViatura());
         nova.setMotorista(original.getMotorista());
         nova.setGuiaReferencia(original);
+        nova.setEmpresa(original.getEmpresa());
         
         java.util.List<ItemGuiaRemessa> novosItens = new ArrayList<>();
         if (original.getItens() != null) {

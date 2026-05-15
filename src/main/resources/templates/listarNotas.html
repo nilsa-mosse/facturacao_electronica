@@ -1,162 +1,284 @@
 <!DOCTYPE html>
 <html lang="pt" xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="menu :: head"></head>
 
+<style>
+    :root {
+        --nc-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+        --nc-color: #4338ca;
+        --nc-soft: rgba(99, 102, 241, 0.1);
+    }
+
+    .content-wrapper { background-color: #f8fafc !important; }
+
+    .page-header-modern {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .page-header-modern h2 {
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08); }
+    .stat-card .stat-icon {
+        width: 52px; height: 52px; border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; margin-bottom: 16px;
+    }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 800; color: #1e293b; }
+    .stat-card .stat-label { font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .premium-table-card {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .table-toolbar {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .search-box { position: relative; flex: 1; max-width: 380px; }
+    .search-box i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+    .search-box input {
+        width: 100%; padding: 10px 14px 10px 40px;
+        border: 1px solid #e2e8f0; border-radius: 12px;
+        font-size: 0.9rem; background: #f8fafc; transition: all 0.2s;
+    }
+    .search-box input:focus { outline: none; border-color: var(--nc-color); background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+
+    .table thead th {
+        background: #f8fafc; color: #64748b;
+        font-weight: 700; text-transform: uppercase;
+        font-size: 0.72rem; letter-spacing: 0.06em;
+        padding: 16px 20px; border-bottom: 1px solid #f1f5f9;
+    }
+    .table tbody td {
+        padding: 16px 20px; color: #1e293b;
+        font-weight: 500; vertical-align: middle;
+        border-bottom: 1px solid #f8fafc;
+    }
+    .table tbody tr:hover { background: #fafbff; }
+
+    .badge-nc { padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.03em; }
+    .badge-validada { background: #dcfce7; color: #16a34a; }
+    .badge-cancelada { background: #fee2e2; color: #dc2626; }
+    .badge-pendente  { background: #fef3c7; color: #d97706; }
+    .badge-offline   { background: #f1f5f9; color: #64748b; }
+
+    .doc-number { font-weight: 800; color: #1e293b; font-family: 'Courier New', monospace; font-size: 0.9rem; }
+    .total-value { font-weight: 800; color: var(--nc-color); }
+
+    .btn-primary-nc {
+        background: var(--nc-grad); color: white; border: none;
+        padding: 11px 22px; border-radius: 14px; font-weight: 700;
+        font-size: 0.88rem; box-shadow: 0 8px 16px -4px rgba(99,102,241,0.35);
+        transition: all 0.3s ease; text-decoration: none !important; white-space: nowrap;
+    }
+    .btn-primary-nc:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -4px rgba(99,102,241,0.45); color: white; }
+
+    .btn-pdf {
+        background: #fee2e2; color: #dc2626; border: none;
+        padding: 6px 14px; border-radius: 8px; font-weight: 600;
+        font-size: 0.8rem; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-pdf:hover { background: #dc2626; color: white; }
+
+    .empty-state { padding: 70px 20px; text-align: center; }
+    .empty-state i { font-size: 4rem; color: #e2e8f0; margin-bottom: 16px; display: block; }
+</style>
+
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
-    <div class="wrapper">
-        <nav th:replace="menu :: topbar"></nav>
-        <aside th:replace="menu :: sidebar"></aside>
-        
-        <!-- Content Wrapper -->
-        <div class="content-wrapper bg-light">
-            <div class="container-fluid px-4 py-4">
-                
-                <!-- Page Header -->
-                <div class="row mb-4 align-items-center">
-                    <div class="col-md-6">
-                        <h2 class="fw-800 text-dark"><i class="fas fa-file-invoice me-2 text-danger"></i> Notas de Crédito / Débito</h2>
-                        <p class="text-muted">Rectificações de facturação e notas de devolução de mercadoria.</p>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <a th:href="@{/notas/selecionar-fatura}" class="btn btn-danger shadow-sm px-4 py-2 rounded-pill">
-                            <i class="fas fa-plus-circle me-2"></i> Emitir Rectificação
-                        </a>
-                    </div>
-                </div>
+<div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
 
-                <!-- KPI Cards Row -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="premium-card grad-danger">
-                            <div class="info-box-icon"><i class="fas fa-undo-alt"></i></div>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Total de Notas</span>
-                                <span class="info-box-number" th:text="${notas.size()}">0</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="premium-card grad-dark">
-                            <div class="info-box-icon"><i class="fas fa-money-bill-wave"></i></div>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Valor Total Creditado</span>
-                                <span class="info-box-number" th:text="${#numbers.formatDecimal(notas.stream().mapToDouble(n -> n.totalCredito).sum(), 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="premium-card grad-primary">
-                            <div class="info-box-icon"><i class="fas fa-shield-alt"></i></div>
-                            <div class="info-box-content">
-                                <span class="info-box-text">Status AGT</span>
-                                <span class="info-box-number">Sincronizado</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <main class="content-wrapper">
+        <div class="container-fluid px-4 py-4">
 
-                <!-- List Content -->
-                <div class="card border-0 shadow-sm overflow-hidden">
-                    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fs-16 fw-700 text-dark">Histórico de Rectificações</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="bg-light small fw-bold text-muted uppercase">
-                                    <tr>
-                                        <th class="ps-4">Nº da Nota</th>
-                                        <th>Data Emissão</th>
-                                        <th>Ref. Factura</th>
-                                        <th>Cliente / Empresa</th>
-                                        <th>Valor Creditado</th>
-                                        <th class="text-center">Estado</th>
-                                        <th class="text-center pe-4">Acções</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="nota : ${notas}">
-                                        <td class="ps-4 fw-bold text-danger" th:text="${nota.numeroNota}"></td>
-                                        <td th:text="${#temporals.format(nota.dataEmissao, 'dd/MM/yyyy HH:mm')}"></td>
-                                        <td>
-                                            <span class="badge bg-soft-primary" th:text="'Factura #' + ${nota.faturaOriginal?.id}"></span>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold text-dark" th:text="${nota.cliente?.nome != null ? nota.cliente.nome : 'Consumidor Final'}"></span>
-                                        </td>
-                                        <td>
-                                            <span class="fw-800 text-danger" th:text="${#numbers.formatDecimal(nota.totalCredito, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-2">
-                                                <i class="fas fa-check-double me-1"></i> Validada
-                                            </span>
-                                        </td>
-                                        <td class="text-center pe-4">
-                                            <div class="btn-group shadow-sm border rounded">
-                                                <a href="#" class="btn btn-white btn-sm border-0" title="Ver Detalhes">
-                                                    <i class="fas fa-eye text-info"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-white btn-sm border-0 border-start" title="Imprimir PDF">
-                                                    <i class="fas fa-file-pdf text-danger"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${#lists.isEmpty(notas)}">
-                                        <td colspan="7" class="text-center py-5 text-muted bg-white">
-                                            <div class="py-4">
-                                                <i class="fas fa-file-invoice mb-3 fs-40 opacity-20 text-danger"></i>
-                                                <p class="mb-0">Não foram encontradas notas de crédito ou débito.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <!-- Header -->
+            <div class="page-header-modern">
+                <div>
+                    <h2><i class="fas fa-file-invoice me-2" style="color: var(--nc-color);"></i>Notas de Crédito</h2>
+                    <p class="mb-0" style="color:#64748b;">Documentos fiscais de crédito emitidos com conformidade AGT</p>
                 </div>
-
-                <!-- Footer Navigation -->
-                <div class="row mt-4">
-                    <div class="col-12 text-end">
-                        <a th:href="@{/dashboard}" class="btn btn-light shadow-sm border px-4 py-2">
-                            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
-                        </a>
-                    </div>
-                </div>
-
+                <a th:href="@{/notas/novo}" class="btn-primary-nc">
+                    <i class="fas fa-plus me-2"></i>Nova Devolução / NC
+                </a>
             </div>
+
+            <!-- Alertas -->
+            <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show mb-4"
+                 style="border-radius:16px; border:none; box-shadow:0 4px 12px rgba(22,163,74,0.12);" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${mensagemSucesso}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Stat Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--nc-soft); color: var(--nc-color);">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                        <div class="stat-value" th:text="${faturasNC != null ? #lists.size(faturasNC) : 0}">0</div>
+                        <div class="stat-label">NCs Emitidas</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #dcfce7; color: #16a34a;">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                        <div class="stat-value" th:text="${faturasNC != null ? faturasNC.?[status == 'VALIDADA'].size() : 0}">0</div>
+                        <div class="stat-label">Validadas AGT</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="stat-value" th:text="${faturasNC != null ? faturasNC.?[status == 'EMITIDA_OFFLINE'].size() : 0}">0</div>
+                        <div class="stat-label">Emitidas Offline</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fee2e2; color: #dc2626;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-value" th:text="${faturasNC != null ? faturasNC.?[status == 'FALHA_ENVIO'].size() : 0}">0</div>
+                        <div class="stat-label">Falha no Envio</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela Principal -->
+            <div class="premium-table-card">
+                <div class="table-toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Pesquisar número, estado...">
+                    </div>
+                    <span style="font-size:0.82rem; color:#94a3b8;"
+                          th:text="'Total: ' + ${faturasNC != null ? #lists.size(faturasNC) : 0} + ' documentos'"></span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="ncTable">
+                        <thead>
+                            <tr>
+                                <th>Nº Nota de Crédito</th>
+                                <th>Data de Emissão</th>
+                                <th>Factura de Origem</th>
+                                <th class="text-end">Total Crédito</th>
+                                <th>Estado AGT</th>
+                                <th>Código AGT</th>
+                                <th class="text-center">Documento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${faturasNC != null and not #lists.isEmpty(faturasNC)}"
+                                th:each="nc : ${faturasNC}" class="nc-row">
+                                <td>
+                                    <span class="doc-number" th:text="${nc.numeroFatura}">NC 2024/1</span>
+                                </td>
+                                <td>
+                                    <div style="font-weight:700;" th:text="${nc.dataEmissao != null ? #dates.format(nc.dataEmissao,'dd/MM/yyyy') : '—'}">Data</div>
+                                    <div style="font-size:0.78rem; color:#94a3b8;" th:text="${nc.dataEmissao != null ? #dates.format(nc.dataEmissao,'HH:mm') : ''}">Hora</div>
+                                </td>
+                                <td>
+                                    <span th:if="${nc.compra != null}" class="badge bg-light text-dark border"
+                                          th:text="${faturasOrigem.containsKey(nc.id) ? faturasOrigem.get(nc.id) : 'Compra #' + nc.compra.id}">Ref.</span>
+                                    <span th:if="${nc.compra == null}" class="text-muted" style="font-size:0.85rem;">—</span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="total-value"
+                                          th:text="${#numbers.formatDecimal(nc.total != null ? nc.total : 0, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+                                </td>
+                                <td>
+                                    <span th:if="${nc.status == 'VALIDADA'}" class="badge-nc badge-validada">
+                                        <i class="fas fa-check-circle me-1"></i>Validada AGT
+                                    </span>
+                                    <span th:if="${nc.status == 'EMITIDA_OFFLINE'}" class="badge-nc badge-offline">
+                                        <i class="fas fa-wifi me-1"></i>Offline
+                                    </span>
+                                    <span th:if="${nc.status == 'PENDENTE'}" class="badge-nc badge-pendente">
+                                        <i class="fas fa-clock me-1"></i>Pendente
+                                    </span>
+                                    <span th:if="${nc.status == 'FALHA_ENVIO'}" class="badge-nc badge-cancelada">
+                                        <i class="fas fa-times-circle me-1"></i>Falha Envio
+                                    </span>
+                                    <span th:if="${nc.status != 'VALIDADA' and nc.status != 'EMITIDA_OFFLINE' and nc.status != 'PENDENTE' and nc.status != 'FALHA_ENVIO'}"
+                                          class="badge-nc badge-offline" th:text="${nc.status}">Estado</span>
+                                </td>
+                                <td>
+                                    <code th:if="${nc.codigoAgt != null and !#strings.startsWith(nc.codigoAgt,'ERRO')}"
+                                          style="font-size:0.78rem; color:#16a34a;" th:text="${nc.codigoAgt}">—</code>
+                                    <span th:if="${nc.codigoAgt == null}" class="text-muted" style="font-size:0.82rem;">—</span>
+                                    <span th:if="${nc.codigoAgt != null and #strings.startsWith(nc.codigoAgt,'ERRO')}"
+                                          class="text-danger" style="font-size:0.78rem;" th:text="${nc.codigoAgt}">ERRO</span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{'/uploads/faturas/' + ${nc.numeroFatura} + '.pdf'}"
+                                       target="_blank" class="btn-pdf" title="Ver PDF">
+                                        <i class="fas fa-file-pdf me-1"></i>PDF
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <!-- Estado vazio -->
+                            <tr th:if="${faturasNC == null or #lists.isEmpty(faturasNC)}">
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <i class="fas fa-file-invoice"></i>
+                                        <h5 style="font-weight:700; color:#1e293b;">Nenhuma Nota de Crédito emitida</h5>
+                                        <p style="color:#64748b;">As Notas de Crédito são geradas automaticamente ao processar uma devolução.</p>
+                                        <a th:href="@{/notas/novo}" class="btn-primary-nc mt-3 d-inline-block">
+                                            <i class="fas fa-plus me-2"></i>Processar Devolução
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
-    </div>
+    </main>
+</div>
 
-    <!-- Scripts Handling -->
-    <script th:inline="javascript">
-        $(document).ready(function() {
-            var msgSucesso = /*[[${mensagemSucesso}]]*/ null;
-            var msgErro = /*[[${mensagemErro}]]*/ null;
-            
-            if(msgSucesso) {
-                $(document).Toasts('create', {
-                    class: 'bg-success',
-                    title: 'Sucesso',
-                    autohide: true,
-                    delay: 5000,
-                    body: msgSucesso
-                });
-            }
-            if(msgErro) {
-                $(document).Toasts('create', {
-                    class: 'bg-danger',
-                    title: 'Erro',
-                    autohide: true,
-                    delay: 7000,
-                    body: msgErro
-                });
-            }
+<script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const val = this.value.toLowerCase();
+        document.querySelectorAll('#ncTable tbody tr.nc-row').forEach(function(row) {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
         });
-    </script>
+    });
+</script>
 </body>
-
 </html>

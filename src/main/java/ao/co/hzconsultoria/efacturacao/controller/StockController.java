@@ -83,25 +83,32 @@ public class StockController {
     @GetMapping("/documento/{id}")
     public ResponseEntity<Resource> visualizarDocumento(@PathVariable Long id) {
         MovimentoStock movimento = stockService.buscarPorId(id);
-        if (movimento == null || movimento.getDocumentoBlob() == null) {
+        if (movimento == null || movimento.getDocumentoBlob() == null || movimento.getDocumentoBlob().length == 0) {
             return ResponseEntity.notFound().build();
         }
 
+        byte[] blob = movimento.getDocumentoBlob();
         String fileName = movimento.getNomeDocumento() != null ? movimento.getNomeDocumento() : "documento_" + id;
-        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
         
-        if (fileName.toLowerCase().endsWith(".pdf")) {
+        // Determinar o MediaType de forma mais robusta
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        String lowerFileName = fileName.toLowerCase();
+        
+        if (lowerFileName.endsWith(".pdf")) {
             mediaType = MediaType.APPLICATION_PDF;
-        } else if (fileName.toLowerCase().endsWith(".jpg") || fileName.toLowerCase().endsWith(".jpeg")) {
+        } else if (lowerFileName.endsWith(".jpg") || lowerFileName.endsWith(".jpeg")) {
             mediaType = MediaType.IMAGE_JPEG;
-        } else if (fileName.toLowerCase().endsWith(".png")) {
+        } else if (lowerFileName.endsWith(".png")) {
             mediaType = MediaType.IMAGE_PNG;
+        } else if (lowerFileName.endsWith(".gif")) {
+            mediaType = MediaType.IMAGE_GIF;
         }
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
+                .contentLength(blob.length)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
-                .body(new ByteArrayResource(movimento.getDocumentoBlob()));
+                .body(new ByteArrayResource(blob));
     }
 
     @GetMapping("/saldos")

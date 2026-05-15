@@ -82,8 +82,15 @@ public class CompraController {
 
         System.out.println("[POS] empresaId=" + empresaId + " produtos.size=" + (produtos != null ? produtos.size() : 0));
 
+        List<ao.co.hzconsultoria.efacturacao.model.Categoria> categorias;
+        if (empresaId != null) {
+            categorias = categoriaRepository.findByEmpresa_Id(empresaId);
+        } else {
+            categorias = categoriaRepository.findAll();
+        }
+
         model.addAttribute("produtos", produtos);
-        model.addAttribute("categorias", categoriaRepository.findAll());
+        model.addAttribute("categorias", categorias);
         // Passa lista de clientes para o modal de identificacao
         model.addAttribute("clientes", clienteRepository.findAll());
 

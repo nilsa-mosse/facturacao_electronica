@@ -1,10 +1,12 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "estabelecimento")
-public class Estabelecimento {
+public class Estabelecimento implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

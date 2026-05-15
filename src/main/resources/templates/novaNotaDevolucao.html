@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="menu :: head"></th:block>
+    <style>
+        :root {
+            --primary: #f43f5e;
+            --primary-dark: #be123c;
+            --slate-700: #334155;
+        }
+
+        .content-wrapper {
+            background-color: #f4f6f9 !important;
+        }
+
+        /* Card Customization */
+        .card-devolucao {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-top: 20px;
+        }
+
+        .card-devolucao .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .card-devolucao .card-body {
+            padding: 30px;
+        }
+
+        /* Forms */
+        .form-control-modern {
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            height: 45px;
+            padding: 0 15px;
+        }
+
+        .form-control-modern:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.1);
+        }
+
+        /* Rows */
+        .item-row {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-remove {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        .summary-box {
+            background: var(--slate-700);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .btn-primary-modern {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .btn-primary-modern:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <h1 class="fw-bold">Gestão de Devoluções</h1>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-11">
+                            
+                            <div class="card card-devolucao">
+                                <div class="card-header">
+                                    <i class="fas fa-undo-alt fa-2x mb-2"></i>
+                                    <h3 class="card-title d-block w-100 fw-bold">Emitir Nova Nota de Crédito</h3>
+                                    <p class="mb-0 opacity-75">Vincule a uma factura para preenchimento automático</p>
+                                </div>
+
+                                <form th:action="@{/notas/salvar-devolucao}" th:object="${devolucao}" method="post">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                    
+                                    <div class="card-body">
+                                        
+                                        <div class="row mb-4">
+                                            <div class="col-md-8">
+                                                <div class="input-group">
+                                                    <input type="text" id="invoiceNumber" class="form-control form-control-modern" placeholder="Número da Factura (Ex: FT 2024/1)">
+                                                    <button type="button" class="btn btn-dark" id="btnSearchInvoice">
+                                                        <i class="fas fa-search me-1"></i> BUSCAR FACTURA
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 pt-2 text-success fw-bold" id="foundMsg" style="display:none;">
+                                                <i class="fas fa-check-circle"></i> Factura Identificada!
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label class="fw-bold mb-1">Motivo da Devolução</label>
+                                            <textarea class="form-control form-control-modern" th:field="*{motivo}" style="height: 80px;" required placeholder="Descreva o motivo..."></textarea>
+                                        </div>
+
+                                        <input type="hidden" id="faturaId" th:field="*{fatura.id}">
+
+                                        <h5 class="fw-bold mb-3 mt-5"><i class="fas fa-list text-danger me-2"></i> Artigos Devolvidos</h5>
+                                        
+                                        <div id="itemsList">
+                                            <!-- Inserido via JS -->
+                                        </div>
+
+                                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="btnAddManual">
+                                            <i class="fas fa-plus me-1"></i> Adicionar Item Manualmente
+                                        </button>
+
+                                        <div class="summary-box mt-5">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-8">
+                                                    <p class="mb-0">Ao confirmar, o stock será reposto automaticamente e a Nota de Crédito será gerada.</p>
+                                                </div>
+                                                <div class="col-md-4 text-end">
+                                                    <span class="small opacity-75">VALOR TOTAL</span>
+                                                    <h2 class="fw-bold mb-0" id="grandTotal">0,00 Kz</h2>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-4 g-3">
+                                            <div class="col-md-6">
+                                                <a th:href="@{/devolucoes}" class="btn btn-light w-100 py-3 fw-bold">CANCELAR</a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <button type="submit" class="btn btn-primary-modern py-3">CONFIRMAR E EMITIR NC</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="menu :: footer"></footer>
+    </div>
+
+    <!-- Template -->
+    <template id="rowTemplate">
+        <div class="item-row row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="small fw-bold">Produto</label>
+                <select class="form-control form-control-modern select-produto" required>
+                    <option value="">Selecione...</option>
+                    <option th:each="p : ${produtos}" th:value="${p.id}" th:text="${p.nome}" th:data-preco="${p.preco}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="small fw-bold">Qtd</label>
+                <input type="number" class="form-control form-control-modern input-qtd" value="1" min="1" required>
+            </div>
+            <div class="col-md-3">
+                <label class="small fw-bold">Preço Unit.</label>
+                <input type="number" step="0.01" class="form-control form-control-modern input-preco" required>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn-remove btnDeleteRow"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    </template>
+
+    <script th:inline="javascript">
+        const itemsList = document.getElementById('itemsList');
+        const rowTemplate = document.getElementById('rowTemplate');
+        let index = 0;
+
+        function calculateTotal() {
+            let total = 0;
+            itemsList.querySelectorAll('.item-row').forEach(row => {
+                const qtd = parseFloat(row.querySelector('.input-qtd').value) || 0;
+                const preco = parseFloat(row.querySelector('.input-preco').value) || 0;
+                total += (qtd * preco);
+            });
+            document.getElementById('grandTotal').textContent = total.toLocaleString('pt-AO', { minimumFractionDigits: 2 }) + ' Kz';
+        }
+
+        function addRow(data = null) {
+            const clone = rowTemplate.content.cloneNode(true);
+            const row = clone.querySelector('.item-row');
+            const select = row.querySelector('.select-produto');
+            const inputQtd = row.querySelector('.input-qtd');
+            const inputPreco = row.querySelector('.input-preco');
+            
+            select.name = `itens[${index}].produto.id`;
+            inputQtd.name = `itens[${index}].quantidade`;
+            inputPreco.name = `itens[${index}].preco`;
+
+            if (data) {
+                // Forçar conversão para string para matching no select
+                if (data.produtoId) {
+                    select.value = String(data.produtoId);
+                }
+                inputQtd.value = data.quantidade || 1;
+                inputPreco.value = data.preco || 0;
+            }
+
+            row.querySelector('.btnDeleteRow').onclick = () => { row.remove(); calculateTotal(); };
+            inputQtd.oninput = calculateTotal;
+            inputPreco.oninput = calculateTotal;
+            select.onchange = function() {
+                const p = this.options[this.selectedIndex].getAttribute('data-preco');
+                inputPreco.value = p || 0;
+                calculateTotal();
+            };
+
+            itemsList.appendChild(row);
+            index++;
+            calculateTotal();
+        }
+
+        document.getElementById('btnSearchInvoice').onclick = async function() {
+            const num = document.getElementById('invoiceNumber').value.trim();
+            if (!num) return;
+            
+            const btn = this;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> BUSCANDO...';
+            btn.disabled = true;
+
+            try {
+                const r = await fetch(`/api/devolucoes/buscar-fatura?numero=${encodeURIComponent(num)}`);
+                const d = await r.json();
+                
+                if (d.sucesso) {
+                    document.getElementById('faturaId').value = d.id;
+                    document.getElementById('foundMsg').style.display = 'block';
+                    itemsList.innerHTML = '';
+                    index = 0;
+                    if (d.itens && d.itens.length > 0) {
+                        d.itens.forEach(i => addRow(i));
+                    } else {
+                        alert('Esta factura não contém itens válidos para devolução.');
+                        addRow();
+                    }
+                } else {
+                    alert(d.mensagem);
+                }
+            } catch (e) { 
+                console.error(e);
+                alert('Erro na comunicação com o servidor.'); 
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        };
+
+        document.getElementById('btnAddManual').onclick = () => addRow();
+        window.onload = () => { if (itemsList.children.length === 0) addRow(); };
+    </script>
+</body>
+</html>

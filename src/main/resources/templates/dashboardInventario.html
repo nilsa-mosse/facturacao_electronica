@@ -131,28 +131,45 @@
                                     <div class="row g-3">
                                         <div class="col-sm-6">
                                             <div class="p-3 bg-light rounded-3">
-                                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 10px;">Valor Total em Stock</small>
-                                                <h4 class="fw-bold text-dark mb-0" th:text="${#numbers.formatDecimal(valorTotalStock, 1, 'COMMA', 2, 'POINT') + ' Kz'}">1.250.000,00 Kz</h4>
+                                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 10px;">Stock Teórico (Sistema)</small>
+                                                <h5 class="fw-bold text-dark mb-0" th:text="${#numbers.formatDecimal(valorTotalStock, 1, 'COMMA', 2, 'POINT') + ' Kz'}">1.250.000,00 Kz</h5>
                                             </div>
                                         </div>
                                         <div class="col-sm-6">
-                                            <div class="p-3 bg-light rounded-3 border-start border-4" th:classappend="${valorAjustado < 0 ? 'border-danger' : 'border-success'}">
-                                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 10px;">Valor Ajustado (Net)</small>
-                                                <h4 class="fw-bold mb-0" th:classappend="${valorAjustado < 0 ? 'text-danger' : 'text-success'}" 
-                                                    th:text="${#numbers.formatDecimal(valorAjustado, 1, 'COMMA', 2, 'POINT') + ' Kz'}">
-                                                    -15.400,00 Kz
-                                                </h4>
+                                            <div class="p-3 bg-light rounded-3 border-start border-4 border-primary">
+                                                <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 10px;">Stock Real (Físico)</small>
+                                                <h5 class="fw-bold text-primary mb-0" th:text="${#numbers.formatDecimal(valorTotalFisico, 1, 'COMMA', 2, 'POINT') + ' Kz'}">1.234.600,00 Kz</h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="p-2 bg-danger-subtle rounded-3 text-center">
+                                                <small class="text-danger d-block text-uppercase fw-bold mb-1" style="font-size: 9px;">Total Perdas</small>
+                                                <span class="fw-bold text-danger" th:text="${#numbers.formatDecimal(valorTotalFaltas, 1, 'COMMA', 2, 'POINT') + ' Kz'}">20.000,00 Kz</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="p-2 bg-success-subtle rounded-3 text-center">
+                                                <small class="text-success d-block text-uppercase fw-bold mb-1" style="font-size: 9px;">Total Ganhos</small>
+                                                <span class="fw-bold text-success" th:text="${#numbers.formatDecimal(valorTotalSobras, 1, 'COMMA', 2, 'POINT') + ' Kz'}">5.000,00 Kz</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="p-2 bg-dark-subtle rounded-3 text-center">
+                                                <small class="text-dark d-block text-uppercase fw-bold mb-1" style="font-size: 9px;">Ajuste Líquido</small>
+                                                <span class="fw-bold" th:classappend="${valorAjustado < 0 ? 'text-danger' : 'text-success'}" 
+                                                      th:text="${#numbers.formatDecimal(valorAjustado, 1, 'COMMA', 2, 'POINT') + ' Kz'}">-15.000,00 Kz</span>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="mt-4 pt-2">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="text-muted small">Estado do Inventário</span>
+                                            <span class="text-muted small">Estado do Processo</span>
                                             <span class="badge rounded-pill bg-primary px-3" th:text="${inventario.estado}">EM_CONTAGEM</span>
                                         </div>
                                         <div class="progress" style="height: 10px; border-radius: 5px;">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 75%"></div>
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                                                 th:style="'width: ' + (${totalItens > 0 ? (itensContados * 100 / totalItens) : 0}) + '%'"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -171,6 +188,7 @@
                                             <thead class="bg-light-subtle">
                                                 <tr>
                                                     <th class="ps-4 py-3 small text-uppercase fw-bold">Produto</th>
+                                                    <th class="text-center py-3 small text-uppercase fw-bold">Sis. vs Fís.</th>
                                                     <th class="text-center py-3 small text-uppercase fw-bold">Diverg.</th>
                                                     <th class="text-end pe-4 py-3 small text-uppercase fw-bold">V. Impacto</th>
                                                 </tr>
@@ -182,17 +200,20 @@
                                                         <small class="text-muted" th:text="${item.produto.codigoBarra}">560123...</small>
                                                     </td>
                                                     <td class="text-center">
-                                                        <span class="badge rounded-pill" 
-                                                              th:classappend="${item.divergencia < 0 ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'}"
-                                                              th:text="${(item.divergencia > 0 ? '+' : '') + item.divergencia}">-5</span>
+                                                        <span class="small text-muted" th:text="${item.quantidadeSistema} + ' → ' + ${item.quantidadeContada}">10 → 5</span>
                                                     </td>
-                                                    <td class="text-end pe-4 fw-bold" th:classappend="${item.valorDivergencia < 0 ? 'text-danger' : 'text-success'}"
-                                                        th:text="${#numbers.formatDecimal(item.valorDivergencia, 1, 'COMMA', 2, 'POINT') + ' Kz'}">
+                                                    <td class="text-center">
+                                                        <span class="badge rounded-pill" 
+                                                              th:classappend="${item.getDivergencia() < 0 ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'}"
+                                                              th:text="${(item.getDivergencia() > 0 ? '+' : '') + item.getDivergencia()}">-5</span>
+                                                    </td>
+                                                    <td class="text-end pe-4 fw-bold" th:classappend="${item.getValorDivergencia() < 0 ? 'text-danger' : 'text-success'}"
+                                                        th:text="${#numbers.formatDecimal(item.getValorDivergencia(), 1, 'COMMA', 2, 'POINT') + ' Kz'}">
                                                         -2.500,00 Kz
                                                     </td>
                                                 </tr>
                                                 <tr th:if="${#lists.isEmpty(produtosCriticos)}">
-                                                    <td colspan="3" class="text-center py-4 text-muted">
+                                                    <td colspan="4" class="text-center py-4 text-muted">
                                                         <i class="fas fa-check-circle text-success me-2"></i> Sem divergências críticas.
                                                     </td>
                                                 </tr>

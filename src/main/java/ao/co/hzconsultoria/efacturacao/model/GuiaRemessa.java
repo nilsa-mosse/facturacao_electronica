@@ -28,6 +28,9 @@ public class GuiaRemessa {
     @ManyToOne
     private Compra faturaOrigem; // Vínculo opcional com a fatura
 
+    @ManyToOne
+    private Empresa empresa;
+
     private String status = "ATIVA"; // ATIVA, FECHADA, ANULADA, SUBSTITUIDA
     private String motivoAnulacao;
 
@@ -68,6 +71,8 @@ public class GuiaRemessa {
     public void setMotorista(String motorista) { this.motorista = motorista; }
     public Compra getFaturaOrigem() { return faturaOrigem; }
     public void setFaturaOrigem(Compra faturaOrigem) { this.faturaOrigem = faturaOrigem; }
+    public Empresa getEmpresa() { return empresa; }
+    public void setEmpresa(Empresa empresa) { this.empresa = empresa; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 

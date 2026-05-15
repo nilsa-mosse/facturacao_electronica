@@ -21683,3 +21683,6 @@ select configurac0_.id as id1_6_0_, configurac0_.agt_certificado_numero as agt_c
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
 	at java.lang.Thread.run(Thread.java:748)
+2026-05-09 00:51:29 jdbc[213]: exception
+org.h2.jdbc.JdbcSQLDataException: Value too long for column "descricao CHARACTER VARYING(255)": "U&'Especifica\\00e7\\00f5es do Port\\00e1til\\000d\\000aHP Omen 15-5001na\\000d\\000aHP... (282)"; SQL statement:
+insert into produto (id, categoria_id, codigo_barra, data_expiracao, data_fabrico, descricao, em_promocao, empresa_id, estado_id, estoque_minimo, imagem, imagem_blob, iva_percentual, nome, preco, preco_compra, preco_original, quantidade_estoque, unidade_medida) values (default, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) [22001-214]

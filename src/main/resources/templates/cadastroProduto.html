@@ -251,6 +251,8 @@
 
         <div class="form-card">
           <form th:action="@{/salvarProduto}" method="post" enctype="multipart/form-data">
+            <!-- CSRF Token manual para formulários multipart -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
             <div class="row g-5">
               <!-- COLUNA ESQUERDA -->
@@ -281,7 +283,7 @@
                   </div>
                   <div class="col-12">
                     <label class="form-label">Descrição Detalhada</label>
-                    <textarea name="descricao" class="form-control input-premium" rows="5"
+                    <textarea name="descricao" class="form-control input-premium" rows="5" maxlength="255"
                       th:placeholder="#{produto.placeholder.descricao}"></textarea>
                   </div>
                 </div>

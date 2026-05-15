@@ -103,6 +103,11 @@
                                         <td class="ps-4">
                                             <div class="d-flex flex-column">
                                                 <span class="fw-bold text-primary" th:text="${guia.numeroGuia}"></span>
+                                                <div class="mt-1">
+                                                    <div th:each="item : ${guia.itens}" class="small text-muted border-start ps-2 mb-1" style="font-size: 0.7rem; border-color: #dee2e6 !important;">
+                                                        <span th:text="${item.quantidade} + ' ' + ${item.unidadeMedida} + ' - ' + ${item.nomeProduto}"></span>
+                                                    </div>
+                                                </div>
                                                 <small th:if="${guia.guiaReferencia != null}" class="text-warning" style="font-size: 0.75rem;">
                                                     <i class="fas fa-history me-1"></i> Substitui <span th:text="${guia.guiaReferencia.numeroGuia}"></span>
                                                 </small>

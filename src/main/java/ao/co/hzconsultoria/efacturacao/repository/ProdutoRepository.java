@@ -23,10 +23,12 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     
     List<Produto> findByNomeContainingIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
     
+    List<Produto> findByNomeContainingIgnoreCase(String nome);
+    
     List<Produto> findByNomeStartingWithIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT p FROM Produto p WHERE p.empresa.id = :empresaId AND p.quantidadeEstoque <= p.estoqueMinimo")
-    List<Produto> findProdutosComStockBaixo(Long empresaId);
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Produto p WHERE (:empresaId IS NULL OR p.empresa.id = :empresaId) AND (p.quantidadeEstoque <= p.estoqueMinimo OR (p.estoqueMinimo = 0 AND p.quantidadeEstoque <= 5))")
+    List<Produto> findProdutosComStockBaixo(@org.springframework.data.repository.query.Param("empresaId") Long empresaId);
 
     List<Produto> findByDataExpiracaoBeforeAndEmPromocaoFalse(java.time.LocalDate date);
 

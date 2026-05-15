@@ -1,4 +1,4 @@
-const CACHE_NAME = 'efacturacao-v2';
+const CACHE_NAME = 'efacturacao-v3';
 const urlsToCache = [
   '/',
   '/login',
@@ -56,7 +56,10 @@ self.addEventListener('fetch', event => {
         if (response.status === 200 && response.type === 'basic') {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
+            cache.put(event.request, responseToCache).catch(err => {
+              // É normal falhar se a rede cair a meio de uma leitura de stream
+              console.warn('Não foi possível guardar no cache de forma assíncrona:', err);
+            });
           });
         }
 
@@ -73,13 +76,23 @@ self.addEventListener('fetch', event => {
 
             // Fallback especial para navegação offline
             if (event.request.mode === 'navigate') {
-              return caches.match('/login') || caches.match('/');
+              return caches.match('/login').then(loginRes => {
+                if (loginRes) return loginRes;
+                return caches.match('/').then(rootRes => {
+                  if (rootRes) return rootRes;
+                  return new Response('Página Offline. Por favor verifique a sua ligação.', {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                    headers: new Headers({ 'Content-Type': 'text/html; charset=utf-8' })
+                  });
+                });
+              });
             }
             
             return new Response('Offline e recurso não cacheado.', {
               status: 503,
               statusText: 'Service Unavailable',
-              headers: new Headers({ 'Content-Type': 'text/plain' })
+              headers: new Headers({ 'Content-Type': 'text/plain; charset=utf-8' })
             });
           });
       })

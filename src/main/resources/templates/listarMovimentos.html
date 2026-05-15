@@ -419,13 +419,15 @@
                                     <i class="fas fa-warehouse me-2 text-primary opacity-50"></i>
                                     <span th:text="${mov.origem}"></span>
                                 </div>
-                                <div th:if="${mov.documentoReferencia != null}">
-                                    <a th:href="@{/stock/documento/{id}(id=${mov.id})}" target="_blank" class="doc-chip">
-                                        <i class="fas fa-file-invoice"></i>
-                                        <span th:text="${mov.documentoReferencia}"></span>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span th:if="${mov.documentoReferencia != null}" class="badge bg-light text-dark border fw-bold p-2" th:text="${mov.documentoReferencia}"></span>
+                                    
+                                    <a th:if="${mov.documentoBlob != null}" th:href="@{/stock/documento/{id}(id=${mov.id})}" target="_blank" class="doc-chip">
+                                        <i class="fas fa-file-download"></i>
+                                        <span>Anexo</span>
                                     </a>
                                 </div>
-                                <div th:if="${mov.origem == null && mov.documentoReferencia == null}" class="text-muted small italic">S/ Ref Doc</div>
+                                <div th:if="${mov.origem == null && mov.documentoReferencia == null && mov.documentoBlob == null}" class="text-muted small italic">S/ Ref Doc</div>
                             </td>
                             <td>
                                 <div class="small text-muted fw-500" style="max-width: 250px; line-height: 1.4;" th:text="${mov.motivo}"></div>

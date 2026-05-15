@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+
+<style>
+    .content-wrapper {
+        background-color: #f8fafc !important;
+    }
+
+    .premium-form-card {
+        border-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
+        margin-top: 40px;
+        overflow: hidden;
+    }
+
+    .premium-form-header {
+        background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;
+        color: white !important;
+        text-align: center;
+        padding: 30px !important;
+        border: none !important;
+    }
+
+    .premium-form-header h3 {
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .form-icon-header {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-control-modern {
+        height: 55px !important;
+        border-radius: 12px !important;
+        border: 1.5px solid #e2e8f0 !important;
+        padding-left: 15px !important;
+        font-weight: 500 !important;
+        background: #f8fafc !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .form-control-modern:focus {
+        background: #fff !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+    }
+
+    .input-label-modern {
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+
+    .btn-save-premium {
+        height: 55px;
+        background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        color: white !important;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .btn-save-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4) !important;
+    }
+
+    .btn-cancel-premium {
+        height: 55px;
+        background: #f1f5f9 !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: 700 !important;
+        color: #64748b !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .btn-cancel-premium:hover {
+        background: #e2e8f0 !important;
+        color: #1e293b !important;
+    }
+</style>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col-md-10 col-lg-8 col-xl-6">
+                            
+                            <div class="card premium-form-card">
+                                <div class="card-header premium-form-header">
+                                    <i class="fas fa-truck-field form-icon-header"></i>
+                                    <h3>Novo Fornecedor</h3>
+                                </div>
+                                
+                                <form th:action="@{/fornecedores/adicionar}" th:object="${fornecedor}" method="post">
+                                    <div class="card-body p-4">
+                                        <div class="row">
+                                            <div class="col-12 mb-4">
+                                                <label class="input-label-modern">Nome / Razão Social</label>
+                                                <input type="text" class="form-control form-control-modern" th:field="*{nome}" required placeholder="Ex: Fornecedor de Alimentos Lda">
+                                            </div>
+
+                                            <div class="col-md-6 mb-4">
+                                                <label class="input-label-modern">NIF</label>
+                                                <input type="text" class="form-control form-control-modern" th:field="*{nif}" required placeholder="Número de Identificação Fiscal">
+                                            </div>
+
+                                            <div class="col-md-6 mb-4">
+                                                <label class="input-label-modern">Telefone</label>
+                                                <input type="text" class="form-control form-control-modern" th:field="*{telefone}" required placeholder="Contacto telefónico">
+                                            </div>
+
+                                            <div class="col-12 mb-4">
+                                                <label class="input-label-modern">Email</label>
+                                                <input type="email" class="form-control form-control-modern" th:field="*{email}" required placeholder="email@fornecedor.com">
+                                            </div>
+
+                                            <div class="col-12 mb-4">
+                                                <label class="input-label-modern">Endereço Fiscal / Sede</label>
+                                                <textarea class="form-control form-control-modern" th:field="*{endereco}" rows="3" required placeholder="Localização completa do fornecedor" style="height: auto !important;"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3 mt-2">
+                                            <div class="col-6">
+                                                <a th:href="@{/fornecedores/listar}" class="btn btn-cancel-premium w-100 text-decoration-none d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-arrow-left me-2"></i> <span>Voltar</span>
+                                                </a>
+                                            </div>
+                                            <div class="col-6">
+                                                <button type="submit" class="btn btn-save-premium w-100 d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-check-circle me-2"></i> <span>Cadastrar</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

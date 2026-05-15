@@ -3,8 +3,10 @@ package ao.co.hzconsultoria.efacturacao.service;
 import ao.co.hzconsultoria.efacturacao.dto.MovimentacaoDTO;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Despesa;
+import ao.co.hzconsultoria.efacturacao.model.Devolucao;
 import ao.co.hzconsultoria.efacturacao.repository.CompraRepository;
 import ao.co.hzconsultoria.efacturacao.repository.DespesaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.DevolucaoRepository;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfPCell;
@@ -26,10 +28,13 @@ import java.util.stream.Collectors;
 public class FinanceiroService {
 
     @Autowired
-    private CompraRepository compraRepository;
+    private DespesaRepository despesaRepository;
 
     @Autowired
-    private DespesaRepository despesaRepository;
+    private DevolucaoRepository devolucaoRepository;
+
+    @Autowired
+    private CompraRepository compraRepository;
 
     public List<MovimentacaoDTO> obterFluxoDeCaixa(LocalDate inicio, LocalDate fim) {
         List<MovimentacaoDTO> movimentacoes = new ArrayList<>();
@@ -59,6 +64,21 @@ public class FinanceiroService {
                 "SAIDA",
                 d.getValor() != null ? d.getValor() : 0.0,
                 d.getCategoria() != null ? d.getCategoria() : "Despesas"
+            ));
+        }
+
+        // Adicionar Saídas (Devoluções)
+        List<Devolucao> devolucoes = devolucaoRepository.findAll().stream()
+            .filter(d -> d.getDataDevolucao() != null && !d.getDataDevolucao().toLocalDate().isBefore(inicio) && !d.getDataDevolucao().toLocalDate().isAfter(fim))
+            .collect(Collectors.toList());
+        for (Devolucao d : devolucoes) {
+            String desc = "Devolução #" + d.getId() + (d.getFatura() != null ? " (Ref: " + d.getFatura().getNumeroFatura() + ")" : "");
+            movimentacoes.add(new MovimentacaoDTO(
+                d.getDataDevolucao(),
+                desc,
+                "SAIDA",
+                (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0),
+                "Devoluções"
             ));
         }
 

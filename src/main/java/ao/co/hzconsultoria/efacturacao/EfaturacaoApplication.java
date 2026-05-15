@@ -91,16 +91,41 @@ public class EfaturacaoApplication {
              * c.setLicencaDataAtivac
              * ao(null);
              * configRepo.save(c);
-             * 
+             * ss
              * System.out.println(">>> TRIAL RESETADO COM SUCESSO!");
              * });
              */
 
-            // RESET DE DADOS TRANSACIONAIS (Limpeza de Tabelas)
-            // Para usar: Descomente as linhas abaixo para limpar todos os dados de vendas,
-            // compras e movimentos.
-            // NOTA: Usa sintaxe H2 (SET REFERENTIAL_INTEGRITY) - compatível com o banco
-            // embutido do sistema.
+            // RESET DE DADOS TRANSACIONAIS (Comentado para não limpar sempre que iniciar a
+            // aplicação)
+            /*
+             * try {
+             * System.out.println(">>> Iniciando limpeza total de dados transacionais...");
+             * jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+             * 
+             * String[] tables = {
+             * "item_factura", "fatura", "item_nota_credito", "nota_credito",
+             * "item_guia_remessa", "guia_remessa", "item_devolucao", "devolucao",
+             * "item_compra", "compra", "venda_suspensa", "movimento_stock", "caixa"
+             * };
+             * 
+             * for (String table : tables) {
+             * try {
+             * jdbcTemplate.execute("TRUNCATE TABLE " + table);
+             * System.out.println(">>> Tabela '" + table + "' limpa com sucesso.");
+             * } catch (Exception e) {
+             * System.err.println(">>> Erro ao limpar tabela '" + table + "': " +
+             * e.getMessage());
+             * }
+             * }
+             * 
+             * jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+             * System.out.println(">>> Limpeza de dados concluída!");
+             * } catch (Exception e) {
+             * System.err.println(">>> Erro crítico durante a limpeza de dados: " +
+             * e.getMessage());
+             * }
+             */
 
             // 1. Ativar utilizadores existentes (migração)
             userRepository.findAll().forEach(user -> {
@@ -229,7 +254,6 @@ public class EfaturacaoApplication {
                 isento.setCodigoAgt("ISE");
                 isento.setMotivoIsencao("Isenção nos termos da lei");
                 impostoRepository.save(isento);
-
                 System.out.println(">>> Impostos padrão criados com sucesso!");
             }
 
@@ -239,7 +263,7 @@ public class EfaturacaoApplication {
 
                 Empresa empPadrao = empresaRepository.findAll().stream().findFirst().orElse(null);
                 if (empPadrao != null) {
-                    // Cliente
+                    // Cliente*
                     ao.co.hzconsultoria.efacturacao.model.Cliente clienteFinal = new ao.co.hzconsultoria.efacturacao.model.Cliente();
                     clienteFinal.setNome("Consumidor Final");
                     clienteFinal.setNif("999999999");

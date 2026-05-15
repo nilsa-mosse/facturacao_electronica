@@ -150,7 +150,8 @@
 
     <!-- UI Scripts -->
     <script th:inline="javascript">
-        let contadorLinhas = [[${guia.itens != null ? #lists.size(guia.itens) : 0}]];
+        // Se a lista estiver vazia, o Thymeleaf renderiza uma linha padrão (index 0), logo o contador deve começar em 1
+        let contadorLinhas = [[${guia.itens != null && !#lists.isEmpty(guia.itens) ? #lists.size(guia.itens) : 1}]];
 
         $(document).ready(function() {
             // Inicializar busca para todos os campos existentes
@@ -167,6 +168,10 @@
         });
 
         function vincularBuscaProduto(input) {
+            // Evitar vinculação dupla
+            if (input.data('viculado')) return;
+            input.data('viculado', true);
+
             const $wrapper = $('<div class="autocomplete-wrapper"></div>');
             input.wrap($wrapper);
             const $list = $('<div class="suggestions-list shadow-lg"></div>');
@@ -179,23 +184,55 @@
                     return;
                 }
 
+                console.log('Pesquisando produtos com:', query);
+
                 fetch(`/api/produtos/pesquisar?nome=${encodeURIComponent(query)}`)
-                    .then(res => res.json())
+                    .then(res => {
+                        console.log('Resposta da pesquisa:', res.status, res.headers.get('content-type'));
+                        if (!res.ok) throw new Error('Erro na rede: ' + res.status);
+                        const contentType = res.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            throw new TypeError("Resposta não é JSON! Tipo: " + contentType);
+                        }
+                        return res.json();
+                    })
                     .then(data => {
+                        console.log('Dados recebidos:', data ? data.length : 0, 'itens');
                         $list.empty();
-                        if (data.length > 0) {
+                        if (data && data.length > 0) {
                             data.forEach(prod => {
                                 const $item = $(`<div class="suggestion-item"><i class="fas fa-box me-2 opacity-50"></i> ${prod.nome}</div>`);
                                 $item.on('click', function() {
+                                    console.log('Produto selecionado:', prod.nome);
                                     input.val(prod.nome);
+                                    
+                                    // Preencher dados automáticos na linha
+                                    const $row = input.closest('tr');
+                                    const $qtdInput = $row.find('input[name*="quantidade"]');
+                                    const $unSelect = $row.find('select[name*="unidadeMedida"]');
+                                    
+                                    if ($qtdInput.val() === '' || $qtdInput.val() == 0) {
+                                        $qtdInput.val(1);
+                                    }
+                                    if (prod.unidadeMedida) {
+                                        $unSelect.val(prod.unidadeMedida);
+                                    } else {
+                                        $unSelect.val('UN');
+                                    }
+                                    
                                     $list.hide();
                                 });
                                 $list.append($item);
                             });
                             $list.show();
                         } else {
+                            console.log('Nenhum produto encontrado');
                             $list.hide();
                         }
+                    })
+                    .catch(err => {
+                        console.error('Erro na pesquisa de produtos:', err);
+                        $list.hide();
                     });
             });
         }

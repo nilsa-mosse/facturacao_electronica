@@ -281,8 +281,18 @@
                         <h4 class="mb-0 fw-bold"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Demonstra&ccedil;&atilde;o de Resultados</h4>
                     </div>
                     <div class="pnl-row">
-                        <span><i class="fas fa-plus-circle text-success me-2"></i>Receita Total de Vendas</span>
+                        <span><i class="fas fa-plus-circle text-success me-2"></i>Receita Total de Vendas (Bruta)</span>
                         <span class="badge-positive"
+                            th:text="${#numbers.formatDecimal(receitaMensalBruta, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+                    </div>
+                    <div class="pnl-row">
+                        <span><i class="fas fa-undo text-danger me-2"></i>Devoluções (Notas de Crédito)</span>
+                        <span class="badge-negative"
+                            th:text="'- ' + ${#numbers.formatDecimal(totalDevolucoes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">- 0,00 Kz</span>
+                    </div>
+                    <div class="pnl-row" style="background: #fdfdfd;">
+                        <span><i class="fas fa-arrow-right text-muted me-2"></i>Receita Líquida</span>
+                        <span class="fw-bold"
                             th:text="${#numbers.formatDecimal(receitaMensal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
                     </div>
                     <div class="pnl-row">
@@ -395,10 +405,57 @@
             </div>
         </div>
 
+        <!-- Devoluções do Mês -->
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <div class="table-modern">
+                    <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0 fw-bold"><i class="fas fa-undo me-2 text-danger"></i>Devoluções do Mês (Notas de Crédito)</h4>
+                        <span class="badge bg-danger rounded-pill fs-6" th:text="${devolucoesDoMes.size()} + ' registos'">0 registos</span>
+                    </div>
+                    <div class="table-responsive p-3">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">Nº Nota Crédito</th>
+                                    <th>Ref. Factura</th>
+                                    <th>Data</th>
+                                    <th class="text-end pe-3">Valor Estornado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="dev : ${devolucoesDoMes}">
+                                    <td class="ps-3">
+                                        <span class="badge bg-danger text-white fw-bold" th:text="${dev.fatura != null ? dev.fatura.numeroFatura : 'N/A'}">NC 001</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted" th:text="${dev.facturaRef != null ? dev.facturaRef : '-'}">FT 001</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${#temporals.format(dev.dataDevolucao, 'dd/MM/yyyy HH:mm')}">28/04/2026</span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <span class="fw-bold text-danger"
+                                            th:text="${#numbers.formatDecimal(dev.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(devolucoesDoMes)}">
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        <i class="fas fa-check-circle fa-2x mb-2 d-block text-success opacity-50"></i>
+                                        Nenhuma devolução registada neste mês
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Footer Info -->
         <div class="text-center text-muted small mt-4">
             <i class="fas fa-info-circle me-1"></i>
-            O Lucro L&iacute;quido &eacute; calculado como: <strong>Receita de Vendas</strong> &minus; <strong>Custo das Mercadorias</strong> &minus; <strong>Despesas Operacionais</strong>.
+            O Lucro L&iacute;quido &eacute; calculado como: (<strong>Receita Bruta</strong> &minus; <strong>Devolu&ccedil;&otilde;es</strong>) &minus; <strong>Custo das Mercadorias</strong> &minus; <strong>Despesas Operacionais</strong>.
             Os valores s&atilde;o actualizados em tempo real com base nos registos do m&ecirc;s corrente.
         </div>
     </div>
