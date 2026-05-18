@@ -209,11 +209,11 @@ public class DashboardController {
             .collect(Collectors.toList());
         
         double totalDevolucoes = devolucoesDoMes.stream()
-            .mapToDouble(d -> d.getTotal() != null ? d.getTotal() : 0.0)
+            .mapToDouble(d -> (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0))
             .sum();
 
-        // Receita Líquida Real (Vendas Brutas - IVA - Devoluções Líquidas)
-        double receitaMensal = (receitaMensalBruta - totalIvaVendas) - totalDevolucoes;
+        // Receita Bruta Real (Vendas Brutas - Devoluções Brutas)
+        double receitaMensal = receitaMensalBruta - totalDevolucoes;
 
         // COGS (Custo dos Produtos Vendidos) - Baseado apenas nas vendas efectivas
         double cogs = 0.0;
@@ -242,10 +242,10 @@ public class DashboardController {
             .mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0)
             .sum();
 
-        // Lucro Bruto = Receita Líquida - COGS
+        // Lucro Bruto = Receita - COGS
         double lucroBruto = receitaMensal - cogs;
 
-        // Lucro Líquido = Receita Líquida - COGS - Despesas
+        // Lucro Líquido = Receita - COGS - Despesas
         double lucroLiquido = lucroBruto - totalDespesas;
 
         // Margem de Lucro (%)
@@ -255,7 +255,7 @@ public class DashboardController {
         long totalVendasCount = vendasDoMes.size();
 
         model.addAttribute("receitaMensal", receitaMensal);
-        model.addAttribute("receitaMensalBruta", receitaMensalBruta - totalIvaVendas); // Agora mostrando Net aqui também
+        model.addAttribute("receitaMensalBruta", receitaMensalBruta); // Mostrar valor bruto real
         model.addAttribute("totalDevolucoes", totalDevolucoes);
         model.addAttribute("cogs", cogs);
         model.addAttribute("totalDespesas", totalDespesas);

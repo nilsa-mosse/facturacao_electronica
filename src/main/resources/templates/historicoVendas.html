@@ -145,14 +145,13 @@
                                                 </div>
                                             </div>
                                             <span th:unless="${compra.formaPagamento != null}" class="badge bg-secondary">CASH</span>
-                                        </td>
-                                        <td class="text-center">
+                                                                                <td class="text-center">
                                             <span th:if="${compra.status == 'EMITIDA'}" class="badge bg-soft-success text-success border border-success px-3 py-2 rounded-pill">
                                                 <i class="fas fa-check-circle me-1"></i> Emitida
                                             </span>
                                             <div th:if="${compra.status == 'CANCELADA'}" class="d-flex flex-column align-items-center">
                                                 <span class="badge bg-soft-danger text-danger border border-danger px-3 py-2 rounded-pill mb-1"
-                                                      th:title="${compra.motivoAnulacao}">
+                                                       th:title="${compra.motivoAnulacao}">
                                                     <i class="fas fa-times-circle me-1"></i> Anulada
                                                 </span>
                                                 <small class="text-danger font-italic" style="font-size: 0.7rem;" th:text="${compra.motivoAnulacao}"></small>
@@ -160,6 +159,11 @@
                                             <span th:if="${compra.status == 'SUBSTITUIDA'}" class="badge bg-soft-warning text-warning border border-warning px-3 py-2 rounded-pill">
                                                 <i class="fas fa-sync me-1"></i> Substituída
                                             </span>
+                                            <div th:if="${comprasEnviadasAgt != null and #lists.contains(comprasEnviadasAgt, compra.id)}" class="mt-1">
+                                                <span class="badge bg-soft-primary text-primary border border-primary px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-lock me-1"></i> Enviada AGT
+                                                </span>
+                                            </div>
                                         </td>
                                         <td class="text-center pe-4">
                                             <div class="btn-group shadow-sm border rounded">
@@ -168,29 +172,20 @@
                                                    class="btn btn-white btn-sm border-0" title="Ver Detalhes">
                                                     <i class="fas fa-eye text-info"></i>
                                                 </a>
-                                                <!-- Editar / Rectificar (Só Admin) -->
-                                                <a th:if="${isAdmin and compra.status == 'EMITIDA'}" 
-                                                   th:href="@{'/historico-vendas/rectificar/' + ${compra.id}}" 
-                                                   class="btn btn-white btn-sm border-0 border-start" 
-                                                   title="Editar / Rectificar Factura">
-                                                    <i class="fas fa-edit text-warning"></i>
-                                                </a>
-                                                <!-- Anular com Justificativa (Só Admin) -->
-                                                <a th:if="${isAdmin and compra.status == 'EMITIDA'}" 
-                                                   href="javascript:void(0)" 
-                                                   th:onclick="'abrirModalAnular(' + ${compra.id} + ')'"
-                                                   class="btn btn-white btn-sm border-0 border-start" 
-                                                   title="Anular Factura">
-                                                    <i class="fas fa-trash-alt text-danger"></i>
-                                                </a>
                                                 <!-- Restaurar (Só Admin) -->
-                                                <a th:if="${isAdmin and compra.status == 'CANCELADA'}" 
+                                                <a th:if="${isAdmin and compra.status == 'CANCELADA' and (comprasEnviadasAgt == null or not #lists.contains(comprasEnviadasAgt, compra.id))}" 
                                                    th:href="@{'/historico-vendas/restaurar/' + ${compra.id}}" 
                                                    class="btn btn-white btn-sm border-0 border-start" 
                                                    title="Restaurar Factura"
                                                    onclick="return confirm('Confirmar restauração da factura?')">
                                                     <i class="fas fa-undo-alt text-success"></i>
                                                 </a>
+                                                <span th:if="${isAdmin and compra.status == 'CANCELADA' and comprasEnviadasAgt != null and #lists.contains(comprasEnviadasAgt, compra.id)}" 
+                                                      class="btn btn-white btn-sm border-0 border-start disabled" 
+                                                      title="Restauração Bloqueada: Factura enviada para a AGT" 
+                                                      style="cursor: not-allowed; opacity: 0.5;">
+                                                    <i class="fas fa-lock text-muted"></i>
+                                                </span>
                                             </div>
                                         </td>
                                     </tr>

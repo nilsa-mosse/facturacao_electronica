@@ -19,6 +19,7 @@ public class ConfiguracaoSistemaEntity {
     private String sistemaEmailSuporte = "suporte@facturacao.com";
     private boolean sistemaBackup = true;
     private String sistemaTema = "light";
+    private String sistemaLogotipo = "/img/logo.png";
 
     // ─── Servidor e Rede ────────────────────────────────────────────────
     private int servidorPorta = 8080;
@@ -153,6 +154,8 @@ public class ConfiguracaoSistemaEntity {
     public void setSistemaBackup(boolean v) { this.sistemaBackup = v; }
     public String getSistemaTema() { return sistemaTema; }
     public void setSistemaTema(String v) { this.sistemaTema = v; }
+    public String getSistemaLogotipo() { return sistemaLogotipo; }
+    public void setSistemaLogotipo(String v) { this.sistemaLogotipo = v; }
 
     // Servidor
     public int getServidorPorta() { return servidorPorta; }

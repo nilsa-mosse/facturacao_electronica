@@ -45,6 +45,8 @@ public class DevolucaoService {
         devolucao.setEmpresa(empresaRepository.findById(empresaId).orElse(null));
         devolucao.setUsuario(userRepository.findById(usuarioId).orElse(null));
         devolucao.setDataDevolucao(LocalDateTime.now());
+        
+        String tipoNota = devolucao.getTipoNota();
 
         List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findByEmpresa_Id(empresaId);
         if (estabelecimentos.isEmpty()) {
@@ -80,7 +82,12 @@ public class DevolucaoService {
                             return novoEstoque;
                         });
                 
-                estoque.setQuantidade(estoque.getQuantidade() + item.getQuantidade());
+                double qtdAjuste = item.getQuantidade();
+                if ("ND".equals(tipoNota)) {
+                    estoque.setQuantidade(estoque.getQuantidade() - qtdAjuste);
+                } else {
+                    estoque.setQuantidade(estoque.getQuantidade() + qtdAjuste);
+                }
                 estoque.setUpdatedAt(LocalDateTime.now());
                 estoqueRepository.save(estoque);
 
@@ -89,7 +96,11 @@ public class DevolucaoService {
                     Produto p = produtoRepository.findById(item.getProduto().getId()).orElse(null);
                     if (p != null) {
                         double qAtual = p.getQuantidadeEstoque() != null ? p.getQuantidadeEstoque() : 0.0;
-                        p.setQuantidadeEstoque(qAtual + item.getQuantidade());
+                        if ("ND".equals(tipoNota)) {
+                            p.setQuantidadeEstoque(qAtual - qtdAjuste);
+                        } else {
+                            p.setQuantidadeEstoque(qAtual + qtdAjuste);
+                        }
                         produtoRepository.save(p);
                     }
                 }
@@ -100,9 +111,9 @@ public class DevolucaoService {
         devolucao.setIva(totalIva);
         Devolucao salva = devolucaoRepository.save(devolucao);
 
-        // GERAR NOTA DE CRÉDITO (DOCUMENTO FISCAL)
+        // GERAR NOTA DE CRÉDITO OU NOTA DE DÉBITO (DOCUMENTO FISCAL)
         if (salva.getFatura() != null) {
-            Fatura nc = faturaService.emitirNotaCredito(salva);
+            Fatura nc = faturaService.emitirNota(salva, tipoNota);
             salva.setNotaCredito(nc);
             devolucaoRepository.save(salva);
             

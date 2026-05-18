@@ -7,8 +7,16 @@ public class Sistema {
     private boolean backup;
     private String tema;
     private boolean exibirDatasValidade;
+    private String logotipo;
 
     // Getters and Setters
+    public String getLogotipo() {
+        return logotipo;
+    }
+
+    public void setLogotipo(String logotipo) {
+        this.logotipo = logotipo;
+    }
     public boolean isExibirDatasValidade() {
         return exibirDatasValidade;
     }

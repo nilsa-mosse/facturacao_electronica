@@ -113,6 +113,12 @@
     th:classappend="${globalTema == 'dark' ? 'sidebar-dark-primary' : 'sidebar-light-primary'}" th:fragment="sidebar">
 
     <div class="sidebar">
+      <!-- Logo do Sistema -->
+      <div class="text-center py-4 border-bottom mb-2" style="border-color: rgba(120, 120, 120, 0.15) !important;">
+        <a th:href="@{/dashboard}" class="d-inline-block">
+          <img th:src="@{${globalSistemaLogotipo != null ? globalSistemaLogotipo : '/img/logo.png'}}" alt="Logo" class="img-fluid" style="max-height: 85px; transition: transform 0.3s ease; filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.08));" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        </a>
+      </div>
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- HOME MODULE (OPERATORS AND USERS) -->

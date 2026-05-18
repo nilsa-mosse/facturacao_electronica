@@ -40,6 +40,7 @@ public class ConfiguracaoSistemaService {
         s.setBackup(e.isSistemaBackup());
         s.setTema(e.getSistemaTema());
         s.setExibirDatasValidade(e.isExibirDatasValidade());
+        s.setLogotipo(e.getSistemaLogotipo() != null ? e.getSistemaLogotipo() : "/img/logo.png");
         return s;
     }
 

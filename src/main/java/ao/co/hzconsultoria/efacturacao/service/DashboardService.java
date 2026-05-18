@@ -93,8 +93,7 @@ public class DashboardService {
         for (Compra compra : compras) {
             if (compra.getDataCompra() != null && compra.getDataCompra().toLocalDate().equals(hoje) && !"CANCELADA".equalsIgnoreCase(compra.getStatus())) {
                 double total = (compra.getTotal() != null ? compra.getTotal() : 0.0);
-                double iva = (compra.getItens() != null) ? compra.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0;
-                receita += (total - iva);
+                receita += total;
             }
         }
         
@@ -102,9 +101,8 @@ public class DashboardService {
         List<Devolucao> devolucoes = (empresaId == null) ? devolucaoRepository.findAll() : devolucaoRepository.findByEmpresa_Id(empresaId);
         for (Devolucao d : devolucoes) {
             if (d.getDataDevolucao() != null && d.getDataDevolucao().toLocalDate().equals(hoje)) {
-                // Devolucao.total já é líquido no sistema, mas vamos garantir subtraindo apenas o valor que não é IVA
-                // No entanto, como d.getTotal() já é o somatório dos subtotais dos itens (Net), usamos d.getTotal()
-                receita -= (d.getTotal() != null ? d.getTotal() : 0.0);
+                double totalDevolucao = (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0);
+                receita -= totalDevolucao;
             }
         }
         
@@ -185,8 +183,7 @@ public class DashboardService {
         for (Compra compra : vendasDoMes) {
             if (!"CANCELADA".equalsIgnoreCase(compra.getStatus())) {
                 double total = (compra.getTotal() != null ? compra.getTotal() : 0.0);
-                double iva = (compra.getItens() != null) ? compra.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0;
-                receitaMensal += (total - iva);
+                receitaMensal += total;
                 
                 if (compra.getItens() != null) {
                     for (ItemCompra item : compra.getItens()) {
@@ -205,7 +202,7 @@ public class DashboardService {
         java.time.LocalDate hoje = java.time.LocalDate.now();
         for (Devolucao d : devolucoesMes) {
             if (d.getDataDevolucao() != null && d.getDataDevolucao().toLocalDate().getMonthValue() == hoje.getMonthValue()) {
-                totalDevolucoes += (d.getTotal() != null ? d.getTotal() : 0.0);
+                totalDevolucoes += (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0);
             }
         }
 
@@ -216,15 +213,11 @@ public class DashboardService {
         List<Compra> todasCompras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         double receitaTotal = todasCompras.stream()
                 .filter(c -> !"CANCELADA".equalsIgnoreCase(c.getStatus()))
-                .mapToDouble(c -> {
-                    double total = (c.getTotal() != null ? c.getTotal() : 0.0);
-                    double iva = (c.getItens() != null) ? c.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0;
-                    return total - iva;
-                })
+                .mapToDouble(c -> (c.getTotal() != null ? c.getTotal() : 0.0))
                 .sum();
         
-        double totalDevolucoes = (empresaId == null) ? devolucaoRepository.findAll().stream().mapToDouble(d -> d.getTotal() != null ? d.getTotal() : 0.0).sum()
-                                                   : devolucaoRepository.findByEmpresa_Id(empresaId).stream().mapToDouble(d -> d.getTotal() != null ? d.getTotal() : 0.0).sum();
+        double totalDevolucoes = (empresaId == null) ? devolucaoRepository.findAll().stream().mapToDouble(d -> (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0)).sum()
+                                                   : devolucaoRepository.findByEmpresa_Id(empresaId).stream().mapToDouble(d -> (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0)).sum();
         
         double despesasTotais = despesaRepository.findAll().stream()
                 .filter(d -> d.getEmpresa() == null || (empresaId != null && d.getEmpresa().getId().equals(empresaId)))
@@ -272,20 +265,16 @@ public class DashboardService {
             java.time.LocalDate inicio = mes.withDayOfMonth(1);
             java.time.LocalDate fim = mes.withDayOfMonth(mes.lengthOfMonth());
 
-            // Receitas (Vendas Líquidas - Devoluções Líquidas)
+            // Receitas (Vendas Brutas - Devoluções Brutas)
             List<Compra> comprasMes = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
             double receitaMesVal = comprasMes.stream()
                 .filter(c -> c.getDataCompra() != null && !"CANCELADA".equalsIgnoreCase(c.getStatus()) && !c.getDataCompra().toLocalDate().isBefore(inicio) && !c.getDataCompra().toLocalDate().isAfter(fim))
-                .mapToDouble(c -> {
-                    double total = (c.getTotal() != null ? c.getTotal() : 0.0);
-                    double iva = (c.getItens() != null) ? c.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0;
-                    return total - iva;
-                }).sum();
+                .mapToDouble(c -> (c.getTotal() != null ? c.getTotal() : 0.0)).sum();
             
             List<Devolucao> devolucoesMesChart = (empresaId == null) ? devolucaoRepository.findAll() : devolucaoRepository.findByEmpresa_Id(empresaId);
             double devolucoesMesVal = devolucoesMesChart.stream()
                 .filter(d -> d.getDataDevolucao() != null && !d.getDataDevolucao().toLocalDate().isBefore(inicio) && !d.getDataDevolucao().toLocalDate().isAfter(fim))
-                .mapToDouble(d -> d.getTotal() != null ? d.getTotal() : 0.0).sum();
+                .mapToDouble(d -> (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0)).sum();
             
             receitas.add(receitaMesVal - devolucoesMesVal);
 
@@ -374,8 +363,7 @@ public class DashboardService {
                 java.time.LocalDate data = compra.getDataCompra().toLocalDate();
                 if (data.getMonthValue() == mesAtual && data.getYear() == anoAtual) {
                     double total = (compra.getTotal() != null ? compra.getTotal() : 0.0);
-                    double iva = (compra.getItens() != null) ? compra.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0;
-                    receita += (total - iva);
+                    receita += total;
                 }
             }
         }
@@ -386,7 +374,8 @@ public class DashboardService {
             if (d.getDataDevolucao() != null) {
                 java.time.LocalDate data = d.getDataDevolucao().toLocalDate();
                 if (data.getMonthValue() == mesAtual && data.getYear() == anoAtual) {
-                    receita -= (d.getTotal() != null ? d.getTotal() : 0.0);
+                    double totalDevolucao = (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0);
+                    receita -= totalDevolucao;
                 }
             }
         }
@@ -503,11 +492,7 @@ public class DashboardService {
             .filter(c -> c.getDataCompra() != null && !"CANCELADA".equalsIgnoreCase(c.getStatus())
                 && c.getDataCompra().toLocalDate().getMonthValue() == mes
                 && c.getDataCompra().toLocalDate().getYear() == ano)
-            .mapToDouble(c -> {
-                double total = (c.getTotal() != null ? c.getTotal() : 0.0);
-                double iva = (c.getItens() != null) ? c.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0;
-                return total - iva;
-            })
+            .mapToDouble(c -> (c.getTotal() != null ? c.getTotal() : 0.0))
             .sum();
             
         List<Devolucao> devolucoes = (empresaId == null) ? devolucaoRepository.findAll() : devolucaoRepository.findByEmpresa_Id(empresaId);
@@ -515,7 +500,7 @@ public class DashboardService {
             .filter(d -> d.getDataDevolucao() != null
                 && d.getDataDevolucao().toLocalDate().getMonthValue() == mes
                 && d.getDataDevolucao().toLocalDate().getYear() == ano)
-            .mapToDouble(d -> d.getTotal() != null ? d.getTotal() : 0.0)
+            .mapToDouble(d -> (d.getTotal() != null ? d.getTotal() : 0.0) + (d.getIva() != null ? d.getIva() : 0.0))
             .sum();
             
         return receita - devs;
@@ -576,11 +561,7 @@ public class DashboardService {
                 .filter(c -> c.getDataCompra() != null && !"CANCELADA".equalsIgnoreCase(c.getStatus())
                     && c.getDataCompra().toLocalDate().getMonthValue() == m
                     && c.getDataCompra().toLocalDate().getYear() == a)
-                .mapToDouble(c -> {
-                    double total = (c.getTotal() != null ? c.getTotal() : 0.0);
-                    double iva = (c.getItens() != null) ? c.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum() : 0.0;
-                    return total - iva;
-                })
+                .mapToDouble(c -> (c.getTotal() != null ? c.getTotal() : 0.0))
                 .sum();
             resultado.add(receita);
         }

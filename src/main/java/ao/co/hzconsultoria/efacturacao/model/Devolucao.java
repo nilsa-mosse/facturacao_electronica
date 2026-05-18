@@ -34,7 +34,13 @@ public class Devolucao {
     @OneToMany(mappedBy = "devolucao", cascade = CascadeType.ALL)
     private List<ItemDevolucao> itens;
 
+    @Transient
+    private String tipoNota = "NC";
+
     // Getters e Setters
+    public String getTipoNota() { return tipoNota != null ? tipoNota : "NC"; }
+    public void setTipoNota(String tipoNota) { this.tipoNota = tipoNota; }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public LocalDateTime getDataDevolucao() { return dataDevolucao; }

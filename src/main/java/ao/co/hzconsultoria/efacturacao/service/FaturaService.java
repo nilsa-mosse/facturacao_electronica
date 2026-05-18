@@ -89,22 +89,26 @@ public class FaturaService {
     }
 
     public Fatura emitirNotaCredito(Devolucao devolucao) {
+        return emitirNota(devolucao, "NC");
+    }
+
+    public Fatura emitirNota(Devolucao devolucao, String tipoNota) {
         Fatura fatura = new Fatura();
         fatura.setEmpresa(devolucao.getEmpresa());
-        fatura.setTipoDocumento("NC");
+        fatura.setTipoDocumento(tipoNota);
         
-        // Numeração Sequencial NC
+        // Numeração Sequencial NC ou ND
         Calendar cal = Calendar.getInstance();
         int ano = cal.get(Calendar.YEAR);
-        long count = faturaRepository.countByTypeAndYear("NC", ano, fatura.getEmpresa().getId()) + 1;
-        String numeroNC = "NC " + ano + "/" + count;
+        long count = faturaRepository.countByTypeAndYear(tipoNota, ano, fatura.getEmpresa().getId()) + 1;
+        String numeroNota = tipoNota + " " + ano + "/" + count;
         
-        fatura.setNumeroFatura(numeroNC);
+        fatura.setNumeroFatura(numeroNota);
         fatura.setDataEmissao(new Date());
         fatura.setSystemEntryDate(new Date());
         fatura.setInvoiceStatus("N");
         
-        // Totais da Devolução
+        // Totais
         fatura.setTotal(devolucao.getTotal() + (devolucao.getIva() != null ? devolucao.getIva() : 0.0));
         fatura.setIva(devolucao.getIva() != null ? devolucao.getIva() : 0.0);
         
@@ -115,8 +119,8 @@ public class FaturaService {
 
         // Assinatura RSA
         ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L).orElse(new ConfiguracaoSistemaEntity());
-        Fatura ultimaNC = faturaRepository.findLastByType("NC", fatura.getEmpresa().getId());
-        fatura.setPreviousHash((ultimaNC != null) ? ultimaNC.getHash() : "");
+        Fatura ultimaNota = faturaRepository.findLastByType(tipoNota, fatura.getEmpresa().getId());
+        fatura.setPreviousHash((ultimaNota != null) ? ultimaNota.getHash() : "");
         fatura.setHashControl(String.valueOf(configSistema.getAgtChaveVersao()));
 
         String dadosAssinar = montarStringAssinatura(fatura);
@@ -129,7 +133,6 @@ public class FaturaService {
         Fatura faturaSalva = faturaRepository.save(fatura);
         faturaSalva = processarEnvioAGT(faturaSalva);
         
-        // O PDF será gerado pelo DevolucaoService após salvar o vínculo bidirecional
         return faturaSalva;
     }
 
@@ -427,6 +430,8 @@ public class FaturaService {
                     tituloDocumento = "FACTURA RECIBO";
                 } else if ("NC".equals(fatura.getTipoDocumento())) {
                     tituloDocumento = "NOTA DE CRÉDITO";
+                } else if ("ND".equals(fatura.getTipoDocumento())) {
+                    tituloDocumento = "NOTA DE DÉBITO";
                 }
 
                 PdfPCell titleCell = new PdfPCell();
@@ -544,7 +549,7 @@ public class FaturaService {
                 double subtotalGeral = 0;
                 int rowCount = 0;
 
-                if ("NC".equals(fatura.getTipoDocumento())) {
+                if ("NC".equals(fatura.getTipoDocumento()) || "ND".equals(fatura.getTipoDocumento())) {
                     Devolucao dev = devolucaoRepository.findByNotaCredito(fatura);
                     if (dev != null && dev.getItens() != null) {
                         for (ItemDevolucao item : dev.getItens()) {

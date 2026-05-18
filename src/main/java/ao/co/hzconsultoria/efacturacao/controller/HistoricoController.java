@@ -120,6 +120,12 @@ public class HistoricoController {
         int toIndex = Math.min(fromIndex + pageSize, filtradas.size());
         List<Compra> compras = filtradas.subList(fromIndex, toIndex);
 
+        // Obter os IDs das compras cujas faturas foram enviadas para a AGT
+        List<Long> comprasEnviadasAgt = faturaRepository.findAll().stream()
+            .filter(f -> f.getCompra() != null && Boolean.TRUE.equals(f.isEnviadaAGT()))
+            .map(f -> f.getCompra().getId())
+            .collect(Collectors.toList());
+
         model.addAttribute("compras", compras);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("currentPage", page);
@@ -132,6 +138,7 @@ public class HistoricoController {
         model.addAttribute("pesquisa", pesquisa);
         model.addAttribute("tipo", tipo);
         model.addAttribute("isAdmin", isAdmin); // Passar permissão para o template
+        model.addAttribute("comprasEnviadasAgt", comprasEnviadasAgt);
         return "historicoVendas";
     }
 
@@ -151,6 +158,14 @@ public class HistoricoController {
 
         if (id == null || motivo == null || motivo.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Dados inválidos para anulação.");
+            return "redirect:/historico-vendas";
+        }
+
+        // Bloqueio rígido se enviada para a AGT
+        boolean enviadaAgt = faturaRepository.findAll().stream()
+            .anyMatch(f -> f.getCompra() != null && f.getCompra().getId().equals(id) && Boolean.TRUE.equals(f.isEnviadaAGT()));
+        if (enviadaAgt) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Esta fatura já foi enviada para a AGT e não pode ser anulada, rectificada ou alterada.");
             return "redirect:/historico-vendas";
         }
 
@@ -175,6 +190,15 @@ public class HistoricoController {
         Optional<Compra> compraOpt = compraRepository.findById(id);
         if (compraOpt.isPresent()) {
             Compra original = compraOpt.get();
+            
+            // Bloqueio rígido se enviada para a AGT
+            boolean enviadaAgt = faturaRepository.findAll().stream()
+                .anyMatch(f -> f.getCompra() != null && f.getCompra().getId().equals(id) && Boolean.TRUE.equals(f.isEnviadaAGT()));
+            if (enviadaAgt) {
+                redirectAttributes.addFlashAttribute("mensagemErro", "Esta fatura já foi enviada para a AGT e não pode ser anulada, rectificada ou alterada.");
+                return "redirect:/historico-vendas";
+            }
+            
             Compra nova = new Compra();
             nova.setCliente(original.getCliente());
             nova.setFaturaReferencia(original);
@@ -206,6 +230,17 @@ public class HistoricoController {
     @PostMapping("/historico-vendas/salvar-rectificacao")
     public String salvarRectificacao(Compra compra, RedirectAttributes redirectAttributes) {
         try {
+            // Bloqueio rígido se enviada para a AGT
+            if (compra.getFaturaReferencia() != null) {
+                Long originalId = compra.getFaturaReferencia().getId();
+                boolean enviadaAgt = faturaRepository.findAll().stream()
+                    .anyMatch(f -> f.getCompra() != null && f.getCompra().getId().equals(originalId) && Boolean.TRUE.equals(f.isEnviadaAGT()));
+                if (enviadaAgt) {
+                    redirectAttributes.addFlashAttribute("mensagemErro", "Esta fatura já foi enviada para a AGT e não pode ser anulada, rectificada ou alterada.");
+                    return "redirect:/historico-vendas";
+                }
+            }
+            
             // 1. Marcar a original como SUBSTITUIDA
             if (compra.getFaturaReferencia() != null) {
                 Compra original = compraRepository.findById(compra.getFaturaReferencia().getId()).orElse(null);
@@ -232,6 +267,14 @@ public class HistoricoController {
         boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_SUPERADMIN"));
         if (!isAdmin) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Acesso negado: Apenas administradores podem restaurar facturas.");
+            return "redirect:/historico-vendas";
+        }
+
+        // Bloqueio rígido se enviada para a AGT
+        boolean enviadaAgt = faturaRepository.findAll().stream()
+            .anyMatch(f -> f.getCompra() != null && f.getCompra().getId().equals(id) && Boolean.TRUE.equals(f.isEnviadaAGT()));
+        if (enviadaAgt) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Esta fatura já foi enviada para a AGT e não pode ser anulada, rectificada ou alterada.");
             return "redirect:/historico-vendas";
         }
 

@@ -47,6 +47,15 @@ public class GlobalControllerAdvice {
         model.addAttribute("globalTema", tema);
         model.addAttribute("globalSistemaNome", nomeSistema);
         model.addAttribute("globalSistemaVersao", versaoSistema);
+
+        String sistemaLogotipo = "/img/logo.png";
+        try {
+            ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
+            if (sistemaConfig != null && sistemaConfig.getLogotipo() != null) {
+                sistemaLogotipo = sistemaConfig.getLogotipo();
+            }
+        } catch (Exception ignored) {}
+        model.addAttribute("globalSistemaLogotipo", sistemaLogotipo);
         
         boolean exibirDatasValidade = true;
         try {

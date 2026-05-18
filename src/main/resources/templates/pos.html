@@ -1688,8 +1688,8 @@
             valorPagoCash: vCash,
             bancoMulticaixa: $('#multicaixaBanco').val(),
             referenciaMulticaixa: $('#multicaixaReferencia').val(),
-            comissaoMulticaixa: vMulticaixa * 0.015,
-            valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015),
+            comissaoMulticaixa: 0.0,
+            valorLiquidoMulticaixa: vMulticaixa,
 
             // Novos campos Cliente
             moradaCliente: obterMoradaCliente(),
@@ -2050,15 +2050,11 @@
           if (cashRestante < 0) cashRestante = 0;
           $('#mistoCashRestante').val(cashRestante.toFixed(2));
 
-          var comissao = valorPagoMCX * 0.015;
-          var liquido = totalGeral - comissao;
+          var comissao = 0;
+          var liquido = totalGeral;
 
-          // Mostrar comissão apenas se houver pagamento via TPA
-          if (valorPagoMCX > 0) {
-            $('#linhaComissaoTPA').attr('style', 'display: flex !important;');
-          } else {
-            $('#linhaComissaoTPA').attr('style', 'display: none !important;');
-          }
+          // Habilitar se necessário, mas por padrão manter oculto
+          $('#linhaComissaoTPA').attr('style', 'display: none !important;');
 
           $('#multicaixaComissao').text(comissao.toFixed(2) + ' Kz');
           $('#multicaixaValorLiquido').text(liquido.toFixed(2) + ' Kz');
@@ -2278,8 +2274,8 @@
             valorPagoCash: vCash,
             bancoMulticaixa: $('#multicaixaBanco').val(),
             referenciaMulticaixa: $('#multicaixaReferencia').val(),
-            comissaoMulticaixa: vMulticaixa * 0.015,
-            valorLiquidoMulticaixa: vMulticaixa * (1 - 0.015),
+            comissaoMulticaixa: 0.0,
+            valorLiquidoMulticaixa: vMulticaixa,
 
             // Dados de Transporte
             motorista: motorista,

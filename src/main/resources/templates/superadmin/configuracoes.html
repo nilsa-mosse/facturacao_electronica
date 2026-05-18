@@ -66,7 +66,7 @@
                                         
                                         <!-- Tab: Sistema -->
                                         <div class="tab-pane fade show active" id="sistema" role="tabpanel">
-                                            <form th:action="@{/superadmin/configuracoes/salvar-sistema}" method="post">
+                                            <form th:action="@{/superadmin/configuracoes/salvar-sistema}" method="post" enctype="multipart/form-data">
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label small fw-bold text-uppercase opacity-75">Nome do Software</label>
@@ -95,6 +95,29 @@
                                                                 <small class="d-block text-muted fw-normal">Se desactivado, os campos de validade serão ocultados no cadastro de produtos.</small>
                                                             </label>
                                                         </div>
+                                                    </div>
+                                                    <div class="col-md-12 mt-3">
+                                                        <label class="form-label small fw-bold text-uppercase opacity-75">Logótipo do Sistema</label>
+                                                        <div class="d-flex align-items-center gap-4 bg-white p-3 rounded-3 shadow-sm border border-light">
+                                                            <div class="border rounded p-2 bg-light d-flex align-items-center justify-content-center" style="width: 100px; height: 100px; overflow: hidden;">
+                                                                <img th:src="@{${globalSistemaLogotipo != null ? globalSistemaLogotipo : '/img/logo.png'}}" alt="Logo Atual" class="img-fluid" style="max-height: 80px;" id="previewLogo">
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <input type="file" name="logoFile" id="logoFile" class="form-control border-0 bg-light rounded-pill" accept="image/*" onchange="previewImage(this)">
+                                                                <small class="text-muted d-block mt-2">Escolha uma imagem de formato PNG ou JPEG (tamanho recomendado: 250x100px ou formato horizontal).</small>
+                                                            </div>
+                                                        </div>
+                                                        <script>
+                                                        function previewImage(input) {
+                                                            if (input.files && input.files[0]) {
+                                                                var reader = new FileReader();
+                                                                reader.onload = function(e) {
+                                                                    document.getElementById('previewLogo').src = e.target.result;
+                                                                }
+                                                                reader.readAsDataURL(input.files[0]);
+                                                            }
+                                                        }
+                                                        </script>
                                                     </div>
                                                     <div class="col-12 mt-4 text-end">
                                                         <button type="submit" class="btn btn-primary px-5 shadow-sm"><i class="fas fa-save me-2"></i>Salvar Alterações</button>

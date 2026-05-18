@@ -30,17 +30,26 @@ public class NotaCreditoController {
     @GetMapping("/listar")
     public String listarNotas(Model model) {
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
-        // NCs do novo fluxo AGT (Fatura com tipo NC)
+        // NCs e NDs do novo fluxo AGT (Faturas com tipo NC ou ND)
         List<Fatura> faturasNC = faturaRepository.findByTipoDocumentoAndEmpresa_IdOrderByDataEmissaoDesc("NC", empresaId);
+        List<Fatura> faturasND = faturaRepository.findByTipoDocumentoAndEmpresa_IdOrderByDataEmissaoDesc("ND", empresaId);
         
-        // Mapa para guardar o número da factura original de cada NC
+        List<Fatura> faturasNotas = new java.util.ArrayList<>();
+        faturasNotas.addAll(faturasNC);
+        faturasNotas.addAll(faturasND);
+        faturasNotas.sort((f1, f2) -> {
+            if (f1.getDataEmissao() == null || f2.getDataEmissao() == null) return 0;
+            return f2.getDataEmissao().compareTo(f1.getDataEmissao());
+        });
+        
+        // Mapa para guardar o número da factura original de cada NC/ND
         java.util.Map<Long, String> faturasOrigem = new java.util.HashMap<>();
-        for (Fatura nc : faturasNC) {
+        for (Fatura nc : faturasNotas) {
             if (nc.getCompra() != null) {
                 List<Fatura> faturasDaCompra = faturaRepository.findByCompra(nc.getCompra());
                 for (Fatura f : faturasDaCompra) {
-                    // Ignora as próprias notas de crédito para encontrar a factura FT, FR ou FP original
-                    if (!"NC".equals(f.getTipoDocumento())) {
+                    // Ignora as próprias notas de crédito/débito para encontrar a factura original
+                    if (!"NC".equals(f.getTipoDocumento()) && !"ND".equals(f.getTipoDocumento())) {
                         faturasOrigem.put(nc.getId(), f.getNumeroFatura());
                         break;
                     }
@@ -50,9 +59,14 @@ public class NotaCreditoController {
         
         // NCs do fluxo legado
         List<NotaCredito> notasLegadas = notaCreditoService.listarTodas();
-        model.addAttribute("faturasNC", faturasNC);
+        model.addAttribute("faturasNC", faturasNotas);
         model.addAttribute("faturasOrigem", faturasOrigem);
         model.addAttribute("notasLegadas", notasLegadas);
+        
+        // Estatísticas para os cards
+        model.addAttribute("totalNC", (long) faturasNC.size());
+        model.addAttribute("totalND", (long) faturasND.size());
+        
         return "listarNotas";
     }
 
@@ -103,20 +117,23 @@ public class NotaCreditoController {
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
         Long usuarioId = SecurityUtils.getCurrentUserId();
         
+        String tipoNota = devolucao.getTipoNota();
+        String label = "NC".equals(tipoNota) ? "Nota de Crédito" : "Nota de Débito";
+        
         try {
             if (devolucao.getItens() != null) {
                 devolucao.getItens().removeIf(item -> item.getProduto() == null || item.getProduto().getId() == null);
             }
-
+ 
             if (devolucao.getItens() == null || devolucao.getItens().isEmpty()) {
-                redirectAttributes.addFlashAttribute("erro", "Adicione pelo menos um produto para devolver.");
+                redirectAttributes.addFlashAttribute("erro", "Adicione pelo menos um produto para a nota.");
                 return "redirect:/notas/novo";
             }
-
+ 
             devolucaoService.registrarDevolucao(devolucao, empresaId, usuarioId);
-            redirectAttributes.addFlashAttribute("mensagemSucesso", "Nota de Crédito registada com sucesso!");
+            redirectAttributes.addFlashAttribute("mensagemSucesso", label + " registada com sucesso!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("erro", "Erro ao emitir Nota de Crédito: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("erro", "Erro ao emitir " + label + ": " + e.getMessage());
             return "redirect:/notas/novo";
         }
         

@@ -119,6 +119,20 @@
                                     
                                     <div class="card-body">
                                         
+                                        <!-- Tipo de Nota Selection -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <label class="fw-bold mb-1"><i class="fas fa-file-invoice me-1"></i> Tipo de Nota / Documento</label>
+                                                <select th:field="*{tipoNota}" id="tipoNota" class="form-control form-control-modern" style="border: 2px solid var(--primary); font-weight: 700; border-radius: 10px;">
+                                                    <option value="NC">Nota de Crédito (NC)</option>
+                                                    <option value="ND">Nota de Débito (ND)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6 pt-4 text-muted small d-flex align-items-center">
+                                                <span id="tipoNotaInfo" style="font-weight: 500;">A Nota de Crédito (NC) repõe itens ao stock. A Nota de Débito (ND) retira itens do stock.</span>
+                                            </div>
+                                        </div>
+
                                         <div class="row mb-4">
                                             <div class="col-md-8">
                                                 <div class="input-group">
@@ -134,7 +148,7 @@
                                         </div>
 
                                         <div class="mb-4">
-                                            <label class="fw-bold mb-1">Motivo da Devolução</label>
+                                            <label class="fw-bold mb-1" id="motivoLabel">Motivo da Devolução</label>
                                             <textarea class="form-control form-control-modern" th:field="*{motivo}" style="height: 80px;" required placeholder="Descreva o motivo..."></textarea>
                                         </div>
 
@@ -153,7 +167,7 @@
                                         <div class="summary-box mt-5">
                                             <div class="row align-items-center">
                                                 <div class="col-md-8">
-                                                    <p class="mb-0">Ao confirmar, o stock será reposto automaticamente e a Nota de Crédito será gerada.</p>
+                                                    <p class="mb-0" id="summaryText">Ao confirmar, o stock será reposto automaticamente e a Nota de Crédito será gerada.</p>
                                                 </div>
                                                 <div class="col-md-4 text-end">
                                                     <span class="small opacity-75">VALOR TOTAL</span>
@@ -164,10 +178,10 @@
 
                                         <div class="row mt-4 g-3">
                                             <div class="col-md-6">
-                                                <a th:href="@{/devolucoes}" class="btn btn-light w-100 py-3 fw-bold">CANCELAR</a>
+                                                <a th:href="@{/notas/listar}" class="btn btn-light w-100 py-3 fw-bold">CANCELAR</a>
                                             </div>
                                             <div class="col-md-6">
-                                                <button type="submit" class="btn btn-primary-modern py-3">CONFIRMAR E EMITIR NC</button>
+                                                <button type="submit" id="btnSubmit" class="btn btn-primary-modern py-3">CONFIRMAR E EMITIR NC</button>
                                             </div>
                                         </div>
                                     </div>
@@ -293,7 +307,51 @@
         };
 
         document.getElementById('btnAddManual').onclick = () => addRow();
-        window.onload = () => { if (itemsList.children.length === 0) addRow(); };
+        
+        const selectTipoNota = document.getElementById('tipoNota');
+        const cardHeader = document.querySelector('.card-devolucao .card-header');
+        const cardTitle = document.querySelector('.card-devolucao .card-title');
+        const motivoLabel = document.getElementById('motivoLabel');
+        const tableHeader = document.querySelector('h5.fw-bold');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const summaryText = document.getElementById('summaryText');
+        const tipoNotaInfo = document.getElementById('tipoNotaInfo');
+        
+        function updateTipoNotaUI() {
+            const val = selectTipoNota.value;
+            if (val === 'ND') {
+                document.documentElement.style.setProperty('--primary', '#10b981');
+                document.documentElement.style.setProperty('--primary-dark', '#059669');
+                
+                cardHeader.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                cardTitle.innerHTML = '<i class="fas fa-arrow-circle-up me-2"></i>Emitir Nova Nota de Débito';
+                motivoLabel.textContent = 'Motivo do Débito / Correção';
+                tableHeader.innerHTML = '<i class="fas fa-list text-success me-2"></i> Artigos Cobrados / Débito';
+                btnSubmit.textContent = 'CONFIRMAR E EMITIR ND';
+                btnSubmit.style.background = '#10b981';
+                summaryText.textContent = 'Ao confirmar, o stock será reduzido automaticamente e a Nota de Débito será gerada.';
+                tipoNotaInfo.textContent = 'A Nota de Débito (ND) retira itens do stock e gera uma cobrança adicional.';
+            } else {
+                document.documentElement.style.setProperty('--primary', '#f43f5e');
+                document.documentElement.style.setProperty('--primary-dark', '#be123c');
+                
+                cardHeader.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)';
+                cardTitle.innerHTML = '<i class="fas fa-undo-alt me-2"></i>Emitir Nova Nota de Crédito';
+                motivoLabel.textContent = 'Motivo da Devolução';
+                tableHeader.innerHTML = '<i class="fas fa-list text-danger me-2"></i> Artigos Devolvidos';
+                btnSubmit.textContent = 'CONFIRMAR E EMITIR NC';
+                btnSubmit.style.background = '#f43f5e';
+                summaryText.textContent = 'Ao confirmar, o stock será reposto automaticamente e a Nota de Crédito será gerada.';
+                tipoNotaInfo.textContent = 'A Nota de Crédito (NC) repõe itens ao stock e gera um reembolso/crédito.';
+            }
+        }
+        
+        selectTipoNota.onchange = updateTipoNotaUI;
+        
+        window.onload = () => { 
+            if (itemsList.children.length === 0) addRow(); 
+            updateTipoNotaUI();
+        };
     </script>
 </body>
 </html>

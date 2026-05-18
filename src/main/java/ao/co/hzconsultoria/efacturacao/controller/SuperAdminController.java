@@ -215,6 +215,7 @@ public class SuperAdminController {
                                @RequestParam("email") String email,
                                @RequestParam("tema") String tema,
                                @RequestParam(value = "exibirDatasValidade", required = false, defaultValue = "false") boolean exibirDatasValidade,
+                               @RequestParam(value = "logoFile", required = false) org.springframework.web.multipart.MultipartFile logoFile,
                                RedirectAttributes ra) {
         ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L)
                 .orElse(new ConfiguracaoSistemaEntity());
@@ -224,6 +225,26 @@ public class SuperAdminController {
         config.setSistemaEmailSuporte(email);
         config.setSistemaTema(tema);
         config.setExibirDatasValidade(exibirDatasValidade);
+
+        if (logoFile != null && !logoFile.isEmpty()) {
+            try {
+                java.nio.file.Path uploadPath = java.nio.file.Paths.get(logoUploadDir).toAbsolutePath().normalize();
+                if (!java.nio.file.Files.exists(uploadPath)) {
+                    java.nio.file.Files.createDirectories(uploadPath);
+                }
+                
+                String originalName = logoFile.getOriginalFilename();
+                String safeName = (originalName != null) ? originalName.replaceAll("[^a-zA-Z0-9._-]", "_") : "system_logo";
+                String fileName = "sistema_logo_" + System.currentTimeMillis() + "_" + safeName;
+                java.nio.file.Path filePath = uploadPath.resolve(fileName);
+                java.nio.file.Files.copy(logoFile.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                
+                config.setSistemaLogotipo("/uploads/logo/" + fileName);
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+                ra.addFlashAttribute("erro", "Erro ao carregar o logotipo do sistema: " + e.getMessage());
+            }
+        }
         
         configuracaoSistemaRepository.save(config);
         ra.addFlashAttribute("mensagem", "Parâmetros do sistema atualizados!");
