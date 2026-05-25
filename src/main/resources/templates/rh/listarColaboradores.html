@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid px-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                        <div>
+                            <h1 class="fw-bold text-dark">Cadastro de <span class="text-primary">Colaboradores</span></h1>
+                            <p class="text-muted">Faça o registo e a gestão da ficha completa de funcionários da empresa.</p>
+                        </div>
+                        <div>
+                            <a th:href="@{/rh/colaboradores/novo}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-plus-circle me-2"></i> Novo Colaborador
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid px-4">
+                    
+                    <!-- Alertas -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show rounded-pill px-4 mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-pill px-4 mb-4" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i> <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Lista de Colaboradores -->
+                    <div class="card border-0 shadow-sm rounded-xl overflow-hidden">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4">ID</th>
+                                            <th>Nome Completo</th>
+                                            <th>NIF</th>
+                                            <th>Cargo / Departamento</th>
+                                            <th>Contrato / Dependentes</th>
+                                            <th class="text-end">Salário Base</th>
+                                            <th class="text-end pe-4">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="col : ${colaboradores}">
+                                            <td class="ps-4 text-muted fw-medium" th:text="${col.id}">1</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar bg-primary-subtle text-primary rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-user"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-dark" th:text="${col.nome}">João Silva</div>
+                                                        <small class="text-muted" th:text="${col.email}">joao@empresa.com</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="fw-semibold text-muted" th:text="${col.nif}">5001234567</td>
+                                            <td>
+                                                <div class="fw-medium text-dark" th:text="${col.cargo}">Contabilista</div>
+                                                <small class="text-primary fw-medium" th:text="${col.departamento}">Financeiro</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary rounded-pill px-2 py-1" th:text="${col.tipoContrato}">EFECTIVO</span>
+                                                <small class="d-block text-muted mt-1" th:text="${col.dependentes + ' dependente(s)'}">0 dependentes</small>
+                                            </td>
+                                            <td class="text-end fw-bold text-dark" th:text="${'Kz ' + #numbers.formatDecimal(col.salarioBase, 1, 'POINT', 2, 'COMMA')}">Kz 150.000,00</td>
+                                            <td class="text-end pe-4">
+                                                <a th:href="@{/rh/colaboradores/editar/{id}(id=${col.id})}" class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a th:href="@{/rh/colaboradores/eliminar/{id}(id=${col.id})}" 
+                                                   class="btn btn-sm btn-outline-danger rounded-circle" 
+                                                   onclick="return confirm('Deseja realmente remover este colaborador?');" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <tr th:if="${#lists.isEmpty(colaboradores)}">
+                                            <td colspan="7" class="text-center py-5 text-muted">
+                                                <i class="fas fa-users fa-3x mb-3 text-light"></i>
+                                                <p class="mb-0 fw-medium">Nenhum colaborador registado.</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+
+</body>
+</html>

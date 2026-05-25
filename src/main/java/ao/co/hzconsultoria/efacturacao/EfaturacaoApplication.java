@@ -202,7 +202,7 @@ public class EfaturacaoApplication {
 
                 // Adicionar permissões básicas
                 admin.setPermissoes(new HashSet<>(Arrays.asList(
-                        "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO")));
+                        "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "RH")));
 
                 userRepository.save(admin);
             }
@@ -218,7 +218,8 @@ public class EfaturacaoApplication {
                 superAdmin.setRole("SUPERADMIN");
                 superAdmin.setAtivo(true);
                 superAdmin.setPermissoes(new HashSet<>(Arrays.asList(
-                        "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "PAINEL_GLOBAL")));
+                        "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "PAINEL_GLOBAL",
+                        "RH")));
                 userRepository.save(superAdmin);
             } else {
                 // Forçar reset de senha

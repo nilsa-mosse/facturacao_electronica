@@ -24,6 +24,7 @@ public class ModuloItens {
         labels.put("FINANCEIRO", "FINANCEIRO");
         labels.put("ADMINISTRACAO", "ADMINISTRAÇÃO");
         labels.put("PAINEL_GLOBAL", "PAINEL GLOBAL (SaaS)");
+        labels.put("RH", "RECURSOS HUMANOS (RH)");
         MODULO_LABELS = Collections.unmodifiableMap(labels);
 
         Map<String, List<ItemDef>> m = new LinkedHashMap<>();
@@ -83,6 +84,12 @@ public class ModuloItens {
                 new ItemDef("PLANOS",            "Planos e Subscrições",  "fas fa-credit-card"),
                 new ItemDef("LOGS_SISTEMA",       "Logs do Sistema",       "fas fa-file-medical-alt"),
                 new ItemDef("RECURSOS_SRV",      "Recursos do Servidor",  "fas fa-microchip")
+        ));
+
+        m.put("RH", Arrays.asList(
+                new ItemDef("COLABORADORES",     "Colaboradores",         "fas fa-user-tie"),
+                new ItemDef("PROCESSAMENTO",     "Folha de Vencimento",   "fas fa-calculator"),
+                new ItemDef("SUBMISSOES",        "Submissões & Guias",    "fas fa-file-export")
         ));
 
         ITENS_POR_MODULO = Collections.unmodifiableMap(m);

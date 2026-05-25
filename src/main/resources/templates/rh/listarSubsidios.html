@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+  <nav th:replace="menu :: topbar"></nav>
+  <aside th:replace="menu :: sidebar"></aside>
+
+  <div class="content-wrapper px-4 py-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h1 class="h4 fw-bold mb-0"><i class="fas fa-hand-holding-usd text-success me-2"></i>Tipos de Subsídio</h1>
+        <small class="text-muted">Configurar os subsídios e respectivos limites de isenção fiscal</small>
+      </div>
+      <button class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSubsidio">
+        <i class="fas fa-plus me-1"></i> Novo Subsídio
+      </button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm">
+      <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm">
+      <i class="fas fa-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Info Card -->
+    <div class="alert alert-info border-0 rounded-3 mb-4 shadow-sm">
+      <i class="fas fa-info-circle me-2"></i>
+      <strong>Nota fiscal:</strong> Defina o <strong>Limite de Isenção INSS/IRT</strong> para subsídios com isenção parcial
+      (ex: Alimentação e Transporte = 30.000 Kz). Para subsídios totalmente sujeitos, deixe 0.
+      Desmarque as opções <em>Sujeito a INSS/IRT</em> para subsídios completamente isentos.
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+      <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th class="ps-4" style="width:60px">Cód.</th>
+              <th>Nome do Subsídio</th>
+              <th class="text-end">Isenção INSS (Kz)</th>
+              <th class="text-end">Isenção IRT (Kz)</th>
+              <th class="text-center">INSS</th>
+              <th class="text-center">IRT</th>
+              <th class="text-end pe-4">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${#lists.isEmpty(subsidios)}">
+              <td colspan="7" class="text-center py-5 text-muted">
+                <i class="fas fa-hand-holding-usd fa-2x mb-2 d-block"></i>
+                Nenhum subsídio cadastrado. Clique em "Novo Subsídio" para começar.
+              </td>
+            </tr>
+            <tr th:each="sub : ${subsidios}">
+              <td class="ps-4"><span class="badge bg-secondary" th:text="${sub.codigo}"></span></td>
+              <td class="fw-semibold" th:text="${sub.nome}"></td>
+              <td class="text-end" th:text="${sub.limiteIsencaoInss > 0 ? #numbers.formatDecimal(sub.limiteIsencaoInss, 1, 'POINT', 2, 'COMMA') : '-'}"></td>
+              <td class="text-end" th:text="${sub.limiteIsencaoIrt > 0 ? #numbers.formatDecimal(sub.limiteIsencaoIrt, 1, 'POINT', 2, 'COMMA') : '-'}"></td>
+              <td class="text-center">
+                <span th:if="${sub.sujeitoInss}" class="badge bg-warning text-dark">Sujeito</span>
+                <span th:unless="${sub.sujeitoInss}" class="badge bg-light text-secondary border">Isento</span>
+              </td>
+              <td class="text-center">
+                <span th:if="${sub.sujeitoIrt}" class="badge bg-danger">Sujeito</span>
+                <span th:unless="${sub.sujeitoIrt}" class="badge bg-light text-secondary border">Isento</span>
+              </td>
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Editar"
+                  th:data-id="${sub.id}"
+                  th:data-nome="${sub.nome}"
+                  th:data-codigo="${sub.codigo}"
+                  th:data-liminss="${sub.limiteIsencaoInss}"
+                  th:data-limirt="${sub.limiteIsencaoIrt}"
+                  th:data-sujinss="${sub.sujeitoInss}"
+                  th:data-sujirt="${sub.sujeitoIrt}"
+                  onclick="abrirEdicaoSub(this)">
+                  <i class="fas fa-pen"></i>
+                </button>
+                <a th:href="@{/rh/subsidios/eliminar/{id}(id=${sub.id})}"
+                   class="btn btn-sm btn-outline-danger rounded-circle"
+                   onclick="return confirm('Eliminar este subsídio? Esta acção afetará todos os colaboradores associados.')">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Subsídio -->
+  <div class="modal fade" id="modalSubsidio" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 shadow">
+        <form th:action="@{/rh/subsidios/salvar}" method="POST">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="modalSubTitle">
+              <i class="fas fa-hand-holding-usd text-success me-2"></i>Novo Tipo de Subsídio
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="id" id="subId">
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="form-label fw-semibold">Nome do Subsídio <span class="text-danger">*</span></label>
+                <input type="text" name="nome" id="subNome" class="form-control rounded-3" placeholder="ex: Subsídio de Alimentação" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold">Código Contabilístico</label>
+                <input type="text" name="codigo" id="subCodigo" class="form-control rounded-3" placeholder="ex: 101">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Limite de Isenção INSS (Kz)</label>
+                <input type="number" step="0.01" min="0" name="limiteIsencaoInss" id="subLimInss" class="form-control rounded-3" value="0" placeholder="0 = sem isenção">
+                <div class="form-text">Valor isento de contribuição à Segurança Social.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Limite de Isenção IRT (Kz)</label>
+                <input type="number" step="0.01" min="0" name="limiteIsencaoIrt" id="subLimIrt" class="form-control rounded-3" value="0" placeholder="0 = sem isenção">
+                <div class="form-text">Valor isento de Imposto de Rendimento de Trabalho.</div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch ps-0">
+                  <label class="form-check-label fw-semibold mb-2">Sujeito a INSS?</label>
+                  <div>
+                    <input class="form-check-input ms-0 me-2" type="checkbox" name="sujeitoInss" id="subSujeitoInss" value="true" checked>
+                    <label class="form-check-label text-muted" for="subSujeitoInss">Tributável para Segurança Social</label>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch ps-0">
+                  <label class="form-check-label fw-semibold mb-2">Sujeito a IRT?</label>
+                  <div>
+                    <input class="form-check-input ms-0 me-2" type="checkbox" name="sujeitoIrt" id="subSujeitoIrt" value="true" checked>
+                    <label class="form-check-label text-muted" for="subSujeitoIrt">Tributável para Imposto de Rendimento</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success rounded-pill px-4"><i class="fas fa-save me-1"></i>Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer th:replace="menu :: footer"></footer>
+</div>
+
+<script>
+function abrirEdicaoSub(btn) {
+  document.getElementById('subId').value = btn.getAttribute('data-id');
+  document.getElementById('subNome').value = btn.getAttribute('data-nome');
+  document.getElementById('subCodigo').value = btn.getAttribute('data-codigo');
+  document.getElementById('subLimInss').value = btn.getAttribute('data-liminss');
+  document.getElementById('subLimIrt').value = btn.getAttribute('data-limirt');
+  document.getElementById('subSujeitoInss').checked = btn.getAttribute('data-sujinss') === 'true';
+  document.getElementById('subSujeitoIrt').checked = btn.getAttribute('data-sujirt') === 'true';
+  document.getElementById('modalSubTitle').innerHTML = '<i class="fas fa-pen text-success me-2"></i>Editar Subsídio';
+  new bootstrap.Modal(document.getElementById('modalSubsidio')).show();
+}
+document.getElementById('modalSubsidio').addEventListener('hidden.bs.modal', function() {
+  document.getElementById('subId').value = '';
+  document.getElementById('subNome').value = '';
+  document.getElementById('subCodigo').value = '';
+  document.getElementById('subLimInss').value = '0';
+  document.getElementById('subLimIrt').value = '0';
+  document.getElementById('subSujeitoInss').checked = true;
+  document.getElementById('subSujeitoIrt').checked = true;
+  document.getElementById('modalSubTitle').innerHTML = '<i class="fas fa-hand-holding-usd text-success me-2"></i>Novo Tipo de Subsídio';
+});
+</script>
+</body>
+</html>

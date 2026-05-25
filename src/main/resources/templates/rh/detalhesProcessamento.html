@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid px-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                        <div>
+                            <h1 class="fw-bold text-dark">Lote de Vencimento <span class="text-primary" th:text="${(folha.mes < 10 ? '0' + folha.mes : folha.mes) + '/' + folha.ano}">05/2026</span></h1>
+                            <p class="text-muted">Estado: 
+                                <span class="badge rounded-pill px-3 py-1"
+                                      th:classappend="${folha.estado == 'RASCUNHO' ? 'bg-warning text-dark' : (folha.estado == 'PROCESSADO' ? 'bg-info text-white' : 'bg-success text-white')}"
+                                      th:text="${folha.estado}">RASCUNHO</span>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/rh/processamento}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </a>
+
+                            <!-- Ações baseadas no estado -->
+                            <form th:if="${folha.estado == 'RASCUNHO'}" th:action="@{/rh/processamento/detalhes/{id}/fechar(id=${folha.id})}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-info text-white rounded-pill px-4 shadow-sm" onclick="return confirm('Pretende fechar o processamento e calcular os descontos de forma definitiva?');">
+                                    <i class="fas fa-check-double me-2"></i> Fechar Processamento
+                                </button>
+                            </form>
+
+                            <form th:if="${folha.estado == 'PROCESSADO'}" th:action="@{/rh/processamento/detalhes/{id}/pagar(id=${folha.id})}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" onclick="return confirm('Confirmar pagamento dos salários aos colaboradores?');">
+                                    <i class="fas fa-money-check-alt me-2"></i> Confirmar Pagamento
+                                </button>
+                            </form>
+
+                            <div th:if="${folha.estado != 'RASCUNHO'}" class="dropdown">
+                                <button class="btn btn-dark rounded-pill px-4 shadow-sm dropdown-toggle" type="button" id="dropdownSubmissions" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-file-export me-2"></i> Submissões
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" style="border-radius: 12px;" aria-labelledby="dropdownSubmissions">
+                                    <li><a class="dropdown-item rounded-2 py-2" th:href="@{/rh/processamento/{id}/inss(id=${folha.id})}"><i class="fas fa-file-csv text-success me-2"></i> Folha INSS (CSV)</a></li>
+                                    <li><a class="dropdown-item rounded-2 py-2" th:href="@{/rh/processamento/{id}/irt(id=${folha.id})}"><i class="fas fa-file-pdf text-danger me-2"></i> Guia IRT (PDF)</a></li>
+                                </ul>
+                            </div>
+
+                            <form th:if="${folha.estado == 'RASCUNHO'}" th:action="@{/rh/processamento/detalhes/{id}/eliminar(id=${folha.id})}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm" onclick="return confirm('Deseja realmente eliminar esta folha de processamento em rascunho?');">
+                                    <i class="fas fa-trash-alt me-2"></i> Eliminar Rascunho
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid px-4">
+
+                    <!-- Alertas -->
+                    <div th:if="${success}" class="alert alert-success alert-dismissible fade show rounded-pill px-4 mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> <span th:text="${success}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-pill px-4 mb-4" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i> <span th:text="${error}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Resumo Financeiro Consolidade -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl bg-primary text-white">
+                                <div class="card-body p-4">
+                                    <h6 class="text-white-50 fw-bold mb-1">Rendimento Ilíquido</h6>
+                                    <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalIliquido, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
+                                    <small class="text-white-50" th:text="'Salários Base: Kz ' + ${#numbers.formatDecimal(totalBase, 1, 'POINT', 2, 'COMMA')}">Salários Base: Kz 0,00</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl bg-info text-white">
+                                <div class="card-body p-4">
+                                    <h6 class="text-white-50 fw-bold mb-1">Descontos INSS (Colaborador)</h6>
+                                    <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalInssCol, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
+                                    <small class="text-white-50" th:text="'Encargo Empresa: Kz ' + ${#numbers.formatDecimal(totalInssPat, 1, 'POINT', 2, 'COMMA')}">Encargo Empresa: Kz 0,00</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl bg-danger text-white">
+                                <div class="card-body p-4">
+                                    <h6 class="text-white-50 fw-bold mb-1">Retenção de IRT</h6>
+                                    <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalIrt, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
+                                    <small class="text-white-50">Guias consolidadas AGT</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-0 shadow-sm rounded-xl bg-success text-white">
+                                <div class="card-body p-4">
+                                    <h6 class="text-white-50 fw-bold mb-1">Salário Líquido Total</h6>
+                                    <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalLiquido, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
+                                    <small class="text-white-50">Total a desembolsar</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Salários -->
+                    <div class="card border-0 shadow-sm rounded-xl overflow-hidden mb-5">
+                        <div class="card-header bg-white py-3 border-0">
+                            <h5 class="fw-bold text-dark mb-0"><i class="fas fa-users-cog me-2"></i> Distribuição Salarial Individual</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-4">Colaborador</th>
+                                            <th class="text-end">Salário Base</th>
+                                            <th class="text-end">Subsídios</th>
+                                            <th class="text-end">INSS Colaborador</th>
+                                            <th class="text-end">IRT Retido</th>
+                                            <th class="text-end">Salário Líquido</th>
+                                            <th class="text-end pe-4">Recibo / Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="sp : ${salarios}">
+                                            <td class="ps-4">
+                                                <div class="fw-bold text-dark" th:text="${sp.colaborador.nome}">João Silva</div>
+                                                <small class="text-muted" th:text="${sp.colaborador.cargo}">Motorista</small>
+                                            </td>
+                                            <td class="text-end fw-semibold text-dark" th:text="${'Kz ' + #numbers.formatDecimal(sp.salarioBase, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</td>
+                                            <td class="text-end text-muted">
+                                                <div th:if="${sp.subsidioFerias > 0}">
+                                                    <small class="text-primary d-block font-xs" th:text="${'Férias: Kz ' + #numbers.formatDecimal(sp.subsidioFerias, 1, 'POINT', 2, 'COMMA')}"></small>
+                                                </div>
+                                                <div th:if="${sp.subsidioNatal > 0}">
+                                                    <small class="text-primary d-block font-xs" th:text="${'Natal: Kz ' + #numbers.formatDecimal(sp.subsidioNatal, 1, 'POINT', 2, 'COMMA')}"></small>
+                                                </div>
+                                                <div th:each="sps : ${sp.subsidios}" th:if="${sps.valor > 0}">
+                                                    <small class="text-muted d-block font-xs" th:text="${sps.subsidio.nome + ': Kz ' + #numbers.formatDecimal(sps.valor, 1, 'POINT', 2, 'COMMA')}"></small>
+                                                </div>
+                                                <span th:if="${sp.subsidioFerias == 0 and sp.subsidioNatal == 0 and #sets.isEmpty(sp.subsidios)}" class="text-muted">—</span>
+                                            </td>
+                                            <td class="text-end text-danger fw-semibold" th:text="${'Kz ' + #numbers.formatDecimal(sp.descontoSegurancaSocial, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</td>
+                                            <td class="text-end text-danger fw-semibold" th:text="${'Kz ' + #numbers.formatDecimal(sp.descontoIrt, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</td>
+                                            <td class="text-end text-success fw-bold" th:text="${'Kz ' + #numbers.formatDecimal(sp.salarioLiquido, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</td>
+                                            <td class="text-end pe-4">
+                                                <!-- Lançamentos Editáveis se RASCUNHO -->
+                                                <button th:if="${folha.estado == 'RASCUNHO'}" class="btn btn-sm btn-outline-warning rounded-circle me-1" 
+                                                        data-bs-toggle="modal" th:data-bs-target="'#modalEditarSalario' + ${sp.id}" title="Alterar Subsídios / Lançar Extras">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <!-- Descarregar Recibo se PROCESSADO ou PAGO -->
+                                                <a th:if="${folha.estado != 'RASCUNHO'}" th:href="@{/rh/recibo/{id}(id=${sp.id})}" class="btn btn-sm btn-outline-primary rounded-circle" title="Descarregar Recibo PDF">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modais para Lançamentos/Edição de Subsídios no Rascunho -->
+    <div th:each="sp : ${salarios}" th:if="${folha.estado == 'RASCUNHO'}" class="modal fade" th:id="'modalEditarSalario' + ${sp.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-xl border-0 shadow">
+                <div class="modal-header bg-warning text-dark py-3" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title fw-bold mb-0"><i class="fas fa-user-edit me-2"></i> Lançar Extras / Subsídios</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/rh/processamento/detalhes/{id}/recalcular(id=${folha.id})}" method="POST">
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="salarioId" th:value="${sp.id}" />
+                        
+                        <p class="text-muted mb-4">Ajuste os valores dos subsídios mensais ou extraordinários para o colaborador <strong th:text="${sp.colaborador.nome}">João Silva</strong>.</p>
+                        
+                        <div class="row">
+                            <!-- Subsídios Dinâmicos -->
+                            <div th:each="sps : ${sp.subsidios}" class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted font-xs" th:text="${sps.subsidio.nome + ' (Kz)'}"></label>
+                                <input type="number" step="0.01" th:name="'subsidioVal_' + ${sps.subsidio.id}" class="form-control rounded-pill shadow-none" th:value="${sps.valor}" required>
+                            </div>
+                            <!-- Subsídios Fixos Especializados -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted font-xs">Subsídio de Férias (Fórmula/Extra) (Kz)</label>
+                                <input type="number" step="0.01" name="subsidioFerias" class="form-control rounded-pill shadow-none" th:value="${sp.subsidioFerias}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold text-muted font-xs">Subsídio de Natal (Fórmula/Extra) (Kz)</label>
+                                <input type="number" step="0.01" name="subsidioNatal" class="form-control rounded-pill shadow-none" th:value="${sp.subsidioNatal}" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-warning rounded-pill px-5 shadow-sm">
+                            <i class="fas fa-calculator me-1"></i> Recalcular & Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .font-xs {
+            font-size: 11px !important;
+            margin-bottom: 2px !important;
+        }
+    </style>
+</body>
+</html>

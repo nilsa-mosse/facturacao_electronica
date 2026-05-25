@@ -40,9 +40,55 @@ public class InventarioController {
     private EstabelecimentoRepository estabelecimentoRepository;
 
     @GetMapping
-    public String listar(Model model) {
+    public String listar(Model model,
+                         @RequestParam(value = "busca", required = false) String busca,
+                         @RequestParam(value = "tipo", required = false) String tipo,
+                         @RequestParam(value = "estado", required = false) String estado,
+                         @RequestParam(value = "data", required = false) String data) {
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
-        model.addAttribute("inventarios", inventarioRepository.findByEmpresa_IdOrderByCreatedAtDesc(empresaId));
+        java.util.List<Inventario> inventarios = inventarioRepository.findByEmpresa_IdOrderByCreatedAtDesc(empresaId);
+
+        if (busca != null && !busca.trim().isEmpty()) {
+            String b = busca.toLowerCase();
+            inventarios = inventarios.stream()
+                    .filter(inv -> (inv.getCodigo() != null && inv.getCodigo().toLowerCase().contains(b))
+                            || (inv.getNome() != null && inv.getNome().toLowerCase().contains(b))
+                            || (inv.getResponsavel() != null && inv.getResponsavel().toLowerCase().contains(b)))
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
+        if (tipo != null && !tipo.trim().isEmpty()) {
+            try {
+                Inventario.TipoInventario tipoEnum = Inventario.TipoInventario.valueOf(tipo.toUpperCase());
+                inventarios = inventarios.stream()
+                        .filter(inv -> tipoEnum.equals(inv.getTipo()))
+                        .collect(java.util.stream.Collectors.toList());
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        if (estado != null && !estado.trim().isEmpty()) {
+            try {
+                Inventario.EstadoInventario estadoEnum = Inventario.EstadoInventario.valueOf(estado.toUpperCase());
+                inventarios = inventarios.stream()
+                        .filter(inv -> estadoEnum.equals(inv.getEstado()))
+                        .collect(java.util.stream.Collectors.toList());
+            } catch (IllegalArgumentException ignored) {}
+        }
+
+        if (data != null && !data.trim().isEmpty()) {
+            try {
+                java.time.LocalDate localDate = java.time.LocalDate.parse(data);
+                inventarios = inventarios.stream()
+                        .filter(inv -> inv.getDataAbertura() != null && inv.getDataAbertura().equals(localDate))
+                        .collect(java.util.stream.Collectors.toList());
+            } catch (Exception ignored) {}
+        }
+
+        model.addAttribute("inventarios", inventarios);
+        model.addAttribute("busca", busca);
+        model.addAttribute("tipoSelecionado", tipo);
+        model.addAttribute("estadoSelecionado", estado);
+        model.addAttribute("dataSelecionada", data);
         return "listarInventarios";
     }
 

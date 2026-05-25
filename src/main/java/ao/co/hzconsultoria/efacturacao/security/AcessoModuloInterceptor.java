@@ -81,6 +81,7 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
         if (uri.startsWith("/clientes") || uri.startsWith("/fornecedores")) return "ENTIDADES";
         if (uri.startsWith("/guias") || uri.startsWith("/notas") || uri.startsWith("/factura-eletronica") || uri.startsWith("/configuracoes/saft")) return "FACTURACAO";
         if (uri.startsWith("/despesas") || uri.startsWith("/financeiro")) return "FINANCEIRO";
+        if (uri.startsWith("/rh")) return "RH";
         if (uri.startsWith("/superadmin")) return "PAINEL_GLOBAL";
         
         // Controlo de Acesso é permitido a qualquer utilizador administrativo

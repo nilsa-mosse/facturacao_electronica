@@ -344,6 +344,41 @@
             </li>
           </th:block>
 
+          <!-- RECURSOS HUMANOS (RH) MODULE -->
+          <th:block th:if="${modulo_RH}">
+            <li class="nav-header">RECURSOS HUMANOS (RH)</li>
+            <li class="nav-item">
+              <a th:href="@{/rh/colaboradores}" class="nav-link">
+                <i class="nav-icon fas fa-user-tie"></i>
+                <p>Colaboradores</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/rh/processamento}" class="nav-link">
+                <i class="nav-icon fas fa-calculator"></i>
+                <p>Folhas de Vencimento</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/rh/departamentos}" class="nav-link">
+                <i class="nav-icon fas fa-sitemap"></i>
+                <p>Departamentos</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/rh/subsidios}" class="nav-link">
+                <i class="nav-icon fas fa-hand-holding-usd"></i>
+                <p>Tipos de Subsídio</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a th:href="@{/rh/parametros}" class="nav-link">
+                <i class="nav-icon fas fa-sliders-h"></i>
+                <p>Parâmetros</p>
+              </a>
+            </li>
+          </th:block>
+
           <!-- CONFIGURATIONS MODULE -->
           <th:block th:if="${modulo_ADMINISTRACAO}">
             <li class="nav-header">ADMINISTRAÇÃO</li>

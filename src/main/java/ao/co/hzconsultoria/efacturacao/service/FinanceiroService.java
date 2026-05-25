@@ -24,8 +24,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
+import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
+
 @Service
 public class FinanceiroService {
+
+    @Autowired
+    private EmpresaRepository empresaRepository;
 
     @Autowired
     private DespesaRepository despesaRepository;
@@ -96,79 +103,225 @@ public class FinanceiroService {
     }
 
     public void gerarPdfFluxoCaixa(List<MovimentacaoDTO> movs, LocalDate inicio, LocalDate fim, String filePath) throws Exception {
-        Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
+        Document doc = new Document(PageSize.A4, 36, 36, 36, 36);
         PdfWriter.getInstance(doc, new FileOutputStream(filePath));
         doc.open();
 
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, java.awt.Color.BLACK);
-        Font fontSubtitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, java.awt.Color.GRAY);
-        Font fontBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, java.awt.Color.BLACK);
-        Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 10, java.awt.Color.BLACK);
-        Font fontHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, java.awt.Color.WHITE);
+        // Fetch company details
+        Long empresaId = 1L;
+        try {
+            Long curId = SecurityUtils.getCurrentEmpresaId();
+            if (curId != null) empresaId = curId;
+        } catch (Exception e) {}
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        String nomeEmpresa = empresa != null ? empresa.getNome() : "Empresa Desconhecida";
+        String nifEmpresa = empresa != null ? empresa.getNif() : "N/D";
+        String enderecoEmpresa = empresa != null ? empresa.getEndereco() : "N/D";
+
+        // Font definitions
+        Font brandFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, new java.awt.Color(67, 97, 238));
+        Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new java.awt.Color(30, 41, 59));
+        Font infoFont = FontFactory.getFont(FontFactory.HELVETICA, 9, new java.awt.Color(100, 116, 139));
+        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, java.awt.Color.WHITE);
+        Font cellFont = FontFactory.getFont(FontFactory.HELVETICA, 9, new java.awt.Color(51, 65, 85));
+        Font cellFontBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, new java.awt.Color(51, 65, 85));
+        Font totalFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, new java.awt.Color(71, 85, 105));
 
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        // Header
-        Paragraph pTitle = new Paragraph("RELATÓRIO DE FLUXO DE CAIXA", fontTitle);
-        pTitle.setAlignment(Element.ALIGN_CENTER);
-        doc.add(pTitle);
+        // Header Section (2-columns)
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100f);
+        headerTable.setWidths(new float[]{6f, 4f});
 
-        Paragraph pPeriodo = new Paragraph("Período: " + inicio.format(dtf) + " até " + fim.format(dtf), fontSubtitle);
-        pPeriodo.setAlignment(Element.ALIGN_CENTER);
-        pPeriodo.setSpacingAfter(20f);
-        doc.add(pPeriodo);
+        // Brand & title
+        PdfPCell leftCell = new PdfPCell();
+        leftCell.setBorder(Rectangle.NO_BORDER);
+        leftCell.addElement(new Paragraph("KWANZA ERP", brandFont));
+        leftCell.addElement(new Paragraph("Relatório de Fluxo de Caixa", titleFont));
+        headerTable.addCell(leftCell);
 
-        // Resumo Table
+        // Period info
+        PdfPCell rightCell = new PdfPCell();
+        rightCell.setBorder(Rectangle.NO_BORDER);
+        rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        Paragraph p1 = new Paragraph("Período: " + inicio.format(dtf) + " até " + fim.format(dtf), infoFont);
+        p1.setAlignment(Element.ALIGN_RIGHT);
+        Paragraph p2 = new Paragraph("Emitido em: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), infoFont);
+        p2.setAlignment(Element.ALIGN_RIGHT);
+        rightCell.addElement(p1);
+        rightCell.addElement(p2);
+        headerTable.addCell(rightCell);
+
+        doc.add(headerTable);
+
+        // Spacer Line
+        Paragraph spacer = new Paragraph(" ");
+        spacer.setSpacingAfter(10);
+        doc.add(spacer);
+
+        // Summary Cards
         PdfPTable resumoTable = new PdfPTable(3);
         resumoTable.setWidthPercentage(100);
-        
+        resumoTable.setSpacingAfter(15f);
+
         double totalIn = getTotalEntradas(movs);
         double totalOut = getTotalSaidas(movs);
+        double saldo = totalIn - totalOut;
+
+        resumoTable.addCell(createSummaryCell("ENTRADAS (VENDAS)", "Kz " + String.format("%.2f", totalIn), new java.awt.Color(16, 185, 129))); // Success green
+        resumoTable.addCell(createSummaryCell("SAÍDAS (DESPESAS)", "Kz " + String.format("%.2f", totalOut), new java.awt.Color(239, 68, 68))); // Danger red
+        resumoTable.addCell(createSummaryCell("SALDO LÍQUIDO", "Kz " + String.format("%.2f", saldo), saldo >= 0 ? new java.awt.Color(67, 97, 238) : new java.awt.Color(239, 68, 68)));
         
-        resumoTable.addCell(createSummaryCell("ENTRADAS", "Kz " + String.format("%.2f", totalIn), new java.awt.Color(40, 167, 69)));
-        resumoTable.addCell(createSummaryCell("SAÍDAS", "Kz " + String.format("%.2f", totalOut), new java.awt.Color(220, 53, 69)));
-        resumoTable.addCell(createSummaryCell("SALDO", "Kz " + String.format("%.2f", totalIn - totalOut), new java.awt.Color(23, 162, 184)));
-        resumoTable.setSpacingAfter(20f);
         doc.add(resumoTable);
 
-        // Movement Table
+        // Movements Table
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
-        table.setWidths(new float[] { 2f, 3f, 2f, 1.5f, 2f });
+        table.setWidths(new float[] { 2.2f, 3.5f, 2f, 1.3f, 2f });
 
         String[] headers = { "DATA", "DESCRIÇÃO", "CATEGORIA", "TIPO", "VALOR" };
         for (String h : headers) {
-            PdfPCell c = new PdfPCell(new Phrase(h, fontHeader));
-            c.setBackgroundColor(new java.awt.Color(52, 58, 64));
-            c.setPadding(8);
+            PdfPCell c = new PdfPCell(new Phrase(h, headerFont));
+            c.setBackgroundColor(new java.awt.Color(67, 97, 238));
+            c.setPadding(8f);
+            c.setBorderColor(new java.awt.Color(67, 97, 238));
             table.addCell(c);
         }
 
+        boolean alt = false;
+        java.awt.Color altColor = new java.awt.Color(248, 250, 252);
+        java.awt.Color borderColor = new java.awt.Color(226, 232, 240);
+
         for (MovimentacaoDTO m : movs) {
-            table.addCell(new PdfPCell(new Phrase(m.getData().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm")), fontNormal)));
-            table.addCell(new PdfPCell(new Phrase(m.getDescricao(), fontNormal)));
-            table.addCell(new PdfPCell(new Phrase(m.getCategoria(), fontNormal)));
-            table.addCell(new PdfPCell(new Phrase(m.getTipo(), fontNormal)));
-            
-            PdfPCell vCell = new PdfPCell(new Phrase((m.getTipo().equals("SAIDA") ? "- " : "+ ") + String.format("%.2f", m.getValor()), fontBold));
+            // Data
+            PdfPCell dateCell = new PdfPCell(new Phrase(m.getData().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm")), cellFont));
+            dateCell.setPadding(7f);
+            dateCell.setBorderColor(borderColor);
+            if (alt) dateCell.setBackgroundColor(altColor);
+            table.addCell(dateCell);
+
+            // Descrição
+            PdfPCell descCell = new PdfPCell(new Phrase(m.getDescricao(), cellFont));
+            descCell.setPadding(7f);
+            descCell.setBorderColor(borderColor);
+            if (alt) descCell.setBackgroundColor(altColor);
+            table.addCell(descCell);
+
+            // Categoria
+            PdfPCell catCell = new PdfPCell(new Phrase(m.getCategoria(), cellFont));
+            catCell.setPadding(7f);
+            catCell.setBorderColor(borderColor);
+            if (alt) catCell.setBackgroundColor(altColor);
+            table.addCell(catCell);
+
+            // Tipo
+            String tipoText = "ENTRADA".equals(m.getTipo()) ? "ENTRADA" : "SAÍDA";
+            PdfPCell tipoCell = new PdfPCell(new Phrase(tipoText, cellFontBold));
+            tipoCell.setPadding(7f);
+            tipoCell.setBorderColor(borderColor);
+            if (alt) tipoCell.setBackgroundColor(altColor);
+            if ("ENTRADA".equals(m.getTipo())) {
+                tipoCell.getPhrase().getFont().setColor(new java.awt.Color(16, 185, 129));
+            } else {
+                tipoCell.getPhrase().getFont().setColor(new java.awt.Color(239, 68, 68));
+            }
+            table.addCell(tipoCell);
+
+            // Valor
+            String valStr = ("ENTRADA".equals(m.getTipo()) ? "+ " : "- ") + String.format("%.2f Kz", m.getValor());
+            PdfPCell vCell = new PdfPCell(new Phrase(valStr, cellFontBold));
             vCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            if (m.getTipo().equals("SAIDA")) vCell.getPhrase().getFont().setColor(java.awt.Color.RED);
-            else vCell.getPhrase().getFont().setColor(new java.awt.Color(40, 167, 69));
+            vCell.setPadding(7f);
+            vCell.setBorderColor(borderColor);
+            if (alt) vCell.setBackgroundColor(altColor);
+            if ("ENTRADA".equals(m.getTipo())) {
+                vCell.getPhrase().getFont().setColor(new java.awt.Color(16, 185, 129));
+            } else {
+                vCell.getPhrase().getFont().setColor(new java.awt.Color(239, 68, 68));
+            }
             table.addCell(vCell);
+
+            alt = !alt;
         }
 
         doc.add(table);
-        doc.add(new Paragraph("\n\nGerado em: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")), fontNormal));
+
+        // Fiscal Compliance Section
+        String formattedDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String hashOriginal = "Financeiro-" + nifEmpresa + "-" + formattedDate;
+        String hashHex = Integer.toHexString(hashOriginal.hashCode()).toUpperCase();
+        if (hashHex.length() < 4) hashHex = "ABCD";
+        else hashHex = hashHex.substring(0, 4);
+        String hashFiscal = hashHex + "-Processado por programa validado nº 382/AGT/2026";
+
+        String qrContent = "Empresa: " + nomeEmpresa + "\nNIF: " + nifEmpresa + "\nDoc: Fluxo de Caixa\nData: " + formattedDate + "\nHash: " + hashFiscal;
+        Image qrCodeImage = gerarQrCode(qrContent);
+
+        // Spacer before footer
+        Paragraph spacer2 = new Paragraph(" ");
+        spacer2.setSpacingBefore(15);
+        doc.add(spacer2);
+
+        // Footer table for compliance details
+        PdfPTable footerTable = new PdfPTable(2);
+        footerTable.setWidthPercentage(100f);
+        footerTable.setWidths(new float[]{8f, 2f});
+
+        PdfPCell fLeft = new PdfPCell();
+        fLeft.setBorder(Rectangle.NO_BORDER);
+        Paragraph empPar = new Paragraph(nomeEmpresa + " | NIF: " + nifEmpresa, totalFont);
+        Paragraph endPar = new Paragraph("Endereço: " + enderecoEmpresa, infoFont);
+        Paragraph hashPar = new Paragraph("Hash: " + hashFiscal, cellFontBold);
+        hashPar.setSpacingBefore(5f);
+        fLeft.addElement(empPar);
+        fLeft.addElement(endPar);
+        fLeft.addElement(hashPar);
+        footerTable.addCell(fLeft);
+
+        PdfPCell fRight = new PdfPCell();
+        fRight.setBorder(Rectangle.NO_BORDER);
+        fRight.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        qrCodeImage.scaleAbsolute(60f, 60f);
+        qrCodeImage.setAlignment(Element.ALIGN_RIGHT);
+        fRight.addElement(qrCodeImage);
+        footerTable.addCell(fRight);
+
+        doc.add(footerTable);
+
         doc.close();
     }
 
     private PdfPCell createSummaryCell(String title, String val, java.awt.Color color) {
         PdfPCell cell = new PdfPCell();
-        cell.setPadding(10);
-        cell.setBorderWidth(1);
-        cell.setBorderColor(new java.awt.Color(230, 230, 230));
-        cell.addElement(new Phrase(title, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, java.awt.Color.GRAY)));
-        cell.addElement(new Phrase(val, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, color)));
+        cell.setPadding(10f);
+        cell.setBorderWidth(1f);
+        cell.setBorderColor(new java.awt.Color(226, 232, 240));
+        cell.setBackgroundColor(new java.awt.Color(248, 250, 252));
+        
+        Paragraph titleP = new Paragraph(title, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, new java.awt.Color(100, 116, 139)));
+        titleP.setSpacingAfter(4f);
+        cell.addElement(titleP);
+        
+        Paragraph valP = new Paragraph(val, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, color));
+        cell.addElement(valP);
+        
         return cell;
+    }
+
+    private Image gerarQrCode(String text) throws Exception {
+        com.google.zxing.qrcode.QRCodeWriter qrCodeWriter = new com.google.zxing.qrcode.QRCodeWriter();
+        com.google.zxing.common.BitMatrix bitMatrix = qrCodeWriter.encode(text, com.google.zxing.BarcodeFormat.QR_CODE, 100, 100);
+        int width = bitMatrix.getWidth();
+        int height = bitMatrix.getHeight();
+        java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                image.setRGB(x, y, bitMatrix.get(x, y) ? java.awt.Color.BLACK.getRGB() : java.awt.Color.WHITE.getRGB());
+            }
+        }
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(image, "png", baos);
+        return Image.getInstance(baos.toByteArray());
     }
 }

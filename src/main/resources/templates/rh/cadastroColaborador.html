@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+  <nav th:replace="menu :: topbar"></nav>
+  <aside th:replace="menu :: sidebar"></aside>
+
+  <div class="content-wrapper px-4 py-3">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h1 class="h4 fw-bold mb-0">
+          <i class="fas fa-user-tie text-primary me-2"></i>
+          <span th:text="${colaborador.id != null ? 'Editar Colaborador' : 'Novo Colaborador'}">Novo Colaborador</span>
+        </h1>
+        <small class="text-muted">Preencha os dados do colaborador e os subsídios aplicáveis</small>
+      </div>
+      <a th:href="@{/rh/colaboradores}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+        <i class="fas fa-arrow-left me-1"></i> Voltar
+      </a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm">
+      <i class="fas fa-exclamation-triangle me-2"></i><span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <form th:action="@{/rh/colaboradores/salvar}" th:object="${colaborador}" method="POST">
+      <!-- Garantir que o id é enviado no formulário para que o servidor atualize em vez de criar novo -->
+      <input type="hidden" th:field="*{id}" />
+
+      <!-- Dados Pessoais -->
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+          <h6 class="fw-bold text-uppercase text-muted mb-0">
+            <i class="fas fa-id-card me-2 text-primary"></i>Dados Pessoais
+          </h6>
+        </div>
+        <div class="card-body px-4 pb-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Nome Completo <span class="text-danger">*</span></label>
+              <input type="text" th:field="*{nome}" class="form-control rounded-3" placeholder="Nome completo do colaborador" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">NIF <span class="text-danger">*</span></label>
+              <input type="text" th:field="*{nif}" class="form-control rounded-3" placeholder="Número de Identificação Fiscal" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Telefone</label>
+              <input type="text" th:field="*{telefone}" class="form-control rounded-3" placeholder="ex: 923 000 000">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Email</label>
+              <input type="email" th:field="*{email}" class="form-control rounded-3" placeholder="email@empresa.ao">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Endereço</label>
+              <input type="text" th:field="*{endereco}" class="form-control rounded-3" placeholder="Rua, número, cidade">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">IBAN (para Transferência)</label>
+              <input type="text" th:field="*{iban}" class="form-control rounded-3" placeholder="AO06 0040 0000 0000 0000 0000 0">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Nº de Dependentes</label>
+              <input type="number" min="0" th:field="*{dependentes}" class="form-control rounded-3" value="0">
+              <div class="form-text">Reduz o IRT em 10%</div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Habilitações</label>
+              <input type="text" th:field="*{habilitacoes}" class="form-control rounded-3" placeholder="ex: Licenciatura">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados Laborais -->
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+          <h6 class="fw-bold text-uppercase text-muted mb-0">
+            <i class="fas fa-briefcase me-2 text-success"></i>Dados Laborais
+          </h6>
+        </div>
+        <div class="card-body px-4 pb-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Cargo / Função <span class="text-danger">*</span></label>
+              <input type="text" th:field="*{cargo}" class="form-control rounded-3" placeholder="ex: Técnico de TI" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Departamento</label>
+              <select name="departamentoId" class="form-select rounded-3">
+                <option value="">-- Seleccionar Departamento --</option>
+                <option th:each="dep : ${departamentos}"
+                        th:value="${dep.id}"
+                        th:text="${dep.nome}"
+                        th:selected="${colaborador.departamento != null and colaborador.departamento.id == dep.id}">
+                </option>
+              </select>
+              <div class="form-text">
+                <a th:href="@{/rh/departamentos}" target="_blank" class="text-decoration-none">
+                  <i class="fas fa-plus-circle me-1"></i>Gerir Departamentos
+                </a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Tipo de Contrato</label>
+              <select th:field="*{tipoContrato}" class="form-select rounded-3">
+                <option value="">-- Seleccionar --</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Prazo Certo">Prazo Certo</option>
+                <option value="Prestação de Serviços">Prestação de Serviços</option>
+                <option value="Experiência">Período de Experiência</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Data de Admissão <span class="text-danger">*</span></label>
+              <input type="date" th:field="*{dataAdmissao}" class="form-control rounded-3" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remuneração -->
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
+          <h6 class="fw-bold text-uppercase text-muted mb-0">
+            <i class="fas fa-money-bill-wave me-2 text-warning"></i>Remuneração
+          </h6>
+        </div>
+        <div class="card-body px-4 pb-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Vencimento Base (Kz) <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text rounded-start-3 bg-light">Kz</span>
+                <input type="number" step="0.01" min="0" th:field="*{salarioBase}" class="form-control rounded-end-3" placeholder="0.00" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subsídios Dinâmicos -->
+          <div th:if="${not #lists.isEmpty(todosSubsidios)}" class="mt-4">
+            <p class="fw-semibold mb-3 text-muted">
+              <i class="fas fa-hand-holding-usd me-2 text-success"></i>Subsídios Aplicáveis
+              <span class="badge bg-success ms-2" th:text="${#lists.size(todosSubsidios)}"></span>
+            </p>
+            <div class="row g-3">
+              <div th:each="sub : ${todosSubsidios}" class="col-md-4">
+                <label class="form-label fw-semibold">
+                  <span th:if="${sub.codigo}" class="badge bg-secondary me-1" th:text="${sub.codigo}"></span>
+                  <span th:text="${sub.nome}"></span>
+                  <small class="text-muted ms-1">
+                    <span th:if="${sub.limiteIsencaoInss > 0}" th:text="'(Isenção SS: ' + ${#numbers.formatDecimal(sub.limiteIsencaoInss,1,'POINT',0,'COMMA')} + ' Kz)'"></span>
+                  </small>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text rounded-start-3 bg-light">Kz</span>
+                  <input type="number" step="0.01" min="0"
+                         th:name="'subsidioVal_' + ${sub.id}"
+                         class="form-control rounded-end-3"
+                         placeholder="0.00"
+                         th:value="${colaborador.subsidios != null ? colaborador.subsidios.?[subsidio.id == __${sub.id}__] != null and not #lists.isEmpty(colaborador.subsidios.?[subsidio.id == __${sub.id}__]) ? colaborador.subsidios.?[subsidio.id == __${sub.id}__][0].valor : '' : ''}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div th:if="${#lists.isEmpty(todosSubsidios)}" class="mt-4">
+            <div class="alert alert-warning border-0 rounded-3">
+              <i class="fas fa-exclamation-circle me-2"></i>
+              Nenhum subsídio configurado.
+              <a th:href="@{/rh/subsidios}" class="alert-link">Clique aqui para adicionar tipos de subsídio</a>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botões -->
+      <div class="d-flex gap-3 justify-content-end">
+        <a th:href="@{/rh/colaboradores}" class="btn btn-outline-secondary rounded-pill px-4 btn-lg">Cancelar</a>
+        <button type="submit" class="btn btn-primary rounded-pill px-5 btn-lg shadow-sm">
+          <i class="fas fa-save me-2"></i>
+          <span th:text="${colaborador.id != null ? 'Actualizar' : 'Guardar Colaborador'}">Guardar</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+  <footer th:replace="menu :: footer"></footer>
+</div>
+</body>
+</html>
