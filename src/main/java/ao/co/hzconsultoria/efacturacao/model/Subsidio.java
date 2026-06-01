@@ -18,11 +18,11 @@ public class Subsidio {
 
     // Limite de isenção de INSS (0 = totalmente sujeito, ex: 30000 para alimentação/transporte)
     @Column(name = "limite_isencao_inss")
-    private double limiteIsencaoInss;
+    private Double limiteIsencaoInss = 0.0;
 
     // Limite de isenção de IRT (0 = totalmente sujeito)
     @Column(name = "limite_isencao_irt")
-    private double limiteIsencaoIrt;
+    private Double limiteIsencaoIrt = 0.0;
 
     // Indica se o subsídio é tributável no total para IRT
     @Column(name = "sujeito_irt")
@@ -47,11 +47,11 @@ public class Subsidio {
     public String getCodigo() { return codigo; }
     public void setCodigo(String codigo) { this.codigo = codigo; }
 
-    public double getLimiteIsencaoInss() { return limiteIsencaoInss; }
-    public void setLimiteIsencaoInss(double limiteIsencaoInss) { this.limiteIsencaoInss = limiteIsencaoInss; }
+    public Double getLimiteIsencaoInss() { return limiteIsencaoInss; }
+    public void setLimiteIsencaoInss(Double limiteIsencaoInss) { this.limiteIsencaoInss = limiteIsencaoInss; }
 
-    public double getLimiteIsencaoIrt() { return limiteIsencaoIrt; }
-    public void setLimiteIsencaoIrt(double limiteIsencaoIrt) { this.limiteIsencaoIrt = limiteIsencaoIrt; }
+    public Double getLimiteIsencaoIrt() { return limiteIsencaoIrt; }
+    public void setLimiteIsencaoIrt(Double limiteIsencaoIrt) { this.limiteIsencaoIrt = limiteIsencaoIrt; }
 
     public boolean isSujeitoIrt() { return sujeitoIrt; }
     public void setSujeitoIrt(boolean sujeitoIrt) { this.sujeitoIrt = sujeitoIrt; }

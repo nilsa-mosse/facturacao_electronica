@@ -20,6 +20,13 @@ public class SiteController {
     @Autowired
     private ConfiguracaoSistemaRepository configRepo;
 
+    @GetMapping("/welcome")
+    public String welcome(Model model) {
+        model.addAttribute("title", "Bem‑vindo ao Sistema de Facturação");
+        model.addAttribute("message", "Licença ativada com sucesso! Explore as funcionalidades e comece a emitir faturas.");
+        return "welcome";
+    }
+
     @GetMapping("/licenca-expirada")
     public String licencaExpirada(Model model) {
         model.addAttribute("machineId", licencaService.getMachineId());
@@ -34,7 +41,7 @@ public class SiteController {
             configRepo.save(config);
             
             redirectAttributes.addFlashAttribute("mensagem", "Sistema ativado com sucesso!");
-            return "redirect:/login";
+            return "redirect:/welcome";
         } else {
             redirectAttributes.addFlashAttribute("erro", "Chave de ativação inválida ou expirada para esta máquina.");
             return "redirect:/licenca-expirada";

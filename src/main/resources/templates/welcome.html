@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="layout :: head"></head>
+<body>
+    <div th:replace="layout :: content">
+        <div class="container" style="text-align:center; padding:3rem;">
+            <h1 th:text="${title}">Bem‑vindo</h1>
+            <p th:text="${message}">Licença ativada com sucesso! Explore as funcionalidades.</p>
+            <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" style="max-width:300px; margin-top:1.5rem;"/>
+        </div>
+    </div>
+</body>
+</html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${title}">Welcome</title>
+    <!-- Modern Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .container.fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+        }
+        h1 { margin-bottom: 0.5rem; font-size: 2.5rem; font-weight: 600; }
+        p { margin-top: 0; font-size: 1.2rem; }
+        .illustration {
+            max-width: 280px;
+            margin-top: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="welcomeContainer">
+        <h1 th:text="${title}">Bem‑vindo</h1>
+        <p th:text="${message}">Licença ativada com sucesso!</p>
+        <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" />
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('welcomeContainer');
+            // Fade in
+            requestAnimationFrame(() => container.classList.add('visible'));
+            // After 5 seconds start fade out then redirect to home page
+            setTimeout(() => {
+                container.classList.add('fade-out');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 650);
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${title}">Welcome</title>
+    <!-- Modern Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .container.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .container.fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+        }
+        h1 { margin-bottom: 0.5rem; font-size: 2.5rem; font-weight: 600; }
+        p { margin-top: 0; font-size: 1.2rem; }
+        .illustration {
+            max-width: 280px;
+            margin-top: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="welcomeContainer">
+        <h1 th:text="${title}">Bem‑vindo</h1>
+        <p th:text="${message}">Licença ativada com sucesso!</p>
+        <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" />
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('welcomeContainer');
+            // Fade in
+            requestAnimationFrame(() => container.classList.add('visible'));
+            // After 5 seconds start fade out then redirect
+            setTimeout(() => {
+                container.classList.add('fade-out');
+                // Wait for fade-out transition then navigate
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 650);
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${title}">Welcome</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4e54c8, #8f94fb);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+        }
+        h1 {
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+        p {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+        .illustration {
+            max-width: 300px;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 th:text="${title}">Bem‑vindo</h1>
+        <p th:text="${message}">Licença ativada com sucesso!</p>
+        <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" />
+    </div>
+</body>
+</html>
