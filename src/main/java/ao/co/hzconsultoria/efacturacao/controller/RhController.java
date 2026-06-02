@@ -4,6 +4,7 @@ import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.*;
 import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
 import ao.co.hzconsultoria.efacturacao.service.FolhaSalarioService;
+import ao.co.hzconsultoria.efacturacao.service.IrtImportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.charset.StandardCharsets;
@@ -35,6 +37,7 @@ public class RhController {
     @Autowired private FolhaSalarioService folhaService;
     @Autowired private ParametroPayrollRepository parametroPayrollRepo;
     @Autowired private EscalaoIrtRepository escalaoIrtRepo;
+    @Autowired private IrtImportService irtImportService;
 
     // ==========================================
     // COLABORADORES
@@ -190,16 +193,62 @@ public class RhController {
     }
 
     @PostMapping("/subsidios/salvar")
-    public String salvarSubsidio(@ModelAttribute Subsidio subsidio,
+    public String salvarSubsidio(
             @RequestParam(value = "id", required = false) Long id,
+            @RequestParam(value = "nome", required = false) String nome,
+            @RequestParam(value = "codigo", required = false) String codigo,
+            @RequestParam(value = "limiteIsencaoInss", required = false) String limiteIsencaoInssStr,
+            @RequestParam(value = "limiteIsencaoIrt", required = false) String limiteIsencaoIrtStr,
+            @RequestParam(value = "sujeitoInss", required = false) String sujeitoInssStr,
+            @RequestParam(value = "sujeitoIrt", required = false) String sujeitoIrtStr,
             RedirectAttributes redirectAttrs) {
         try {
             Long empresaId = SecurityUtils.getCurrentEmpresaId();
             Empresa empresa = empresaRepo.findById(empresaId)
                     .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada"));
+
+            Subsidio subsidio;
             if (id != null) {
+                subsidio = subsidioRepo.findById(id).orElse(new Subsidio());
                 subsidio.setId(id);
+            } else {
+                subsidio = new Subsidio();
             }
+
+            // Nome e código
+            subsidio.setNome(nome != null ? nome.trim() : null);
+            subsidio.setCodigo(codigo != null ? codigo.trim() : null);
+
+            // Limites: aceitar strings com vírgula ou ponto; vazio -> 0.0
+            double limInss = 0.0;
+            if (limiteIsencaoInssStr != null) {
+                String s = limiteIsencaoInssStr.trim().replace(',', '.');
+                if (!s.isEmpty()) {
+                    try { limInss = Double.parseDouble(s); } catch (NumberFormatException ex) { limInss = 0.0; }
+                }
+            }
+            double limIrt = 0.0;
+            if (limiteIsencaoIrtStr != null) {
+                String s = limiteIsencaoIrtStr.trim().replace(',', '.');
+                if (!s.isEmpty()) {
+                    try { limIrt = Double.parseDouble(s); } catch (NumberFormatException ex) { limIrt = 0.0; }
+                }
+            }
+            subsidio.setLimiteIsencaoInss(limInss);
+            subsidio.setLimiteIsencaoIrt(limIrt);
+
+            // Flags: checkbox sends 'true' when checked, otherwise hidden 'false' is present
+            // Only overwrite existing values when parameter is present; this preserves
+            // existing DB values if the param is missing for any reason.
+            if (sujeitoInssStr != null) {
+                boolean sujeitoInss = sujeitoInssStr.contains("true") || sujeitoInssStr.contains("on");
+                subsidio.setSujeitoInss(sujeitoInss);
+            }
+            if (sujeitoIrtStr != null) {
+                boolean sujeitoIrt = sujeitoIrtStr.contains("true") || sujeitoIrtStr.contains("on");
+                subsidio.setSujeitoIrt(sujeitoIrt);
+            }
+
             subsidio.setEmpresa(empresa);
             subsidioRepo.save(subsidio);
             redirectAttrs.addFlashAttribute("success", "Subsídio guardado com sucesso.");
@@ -458,7 +507,7 @@ public class RhController {
     public String salvarParametrosGerais(
             @RequestParam("taxaInssTrabalhador") double taxaInssTrab,
             @RequestParam("taxaInssEmpresa") double taxaInssEmp,
-            @RequestParam("descontoIrtDependente") double descDependente,
+            @RequestParam(value = "descontoIrtDependente", required = false) Double descDependente,
             @RequestParam("diasPadraoProcessamento") int diasPadrao,
             RedirectAttributes redirectAttrs) {
         try {
@@ -467,7 +516,9 @@ public class RhController {
             
             params.setTaxaInssTrabalhador(taxaInssTrab);
             params.setTaxaInssEmpresa(taxaInssEmp);
-            params.setDescontoIrtDependente(descDependente);
+            if (descDependente != null) {
+                params.setDescontoIrtDependente(descDependente);
+            }
             params.setDiasPadraoProcessamento(diasPadrao);
             
             parametroPayrollRepo.save(params);
@@ -529,5 +580,29 @@ public class RhController {
             redirectAttrs.addFlashAttribute("error", "Erro ao redefinir tabela: " + e.getMessage());
         }
         return "redirect:/rh/parametros";
+    }
+
+    @PostMapping("/parametros/irt/importar")
+    @ResponseBody
+    public ResponseEntity<?> importarIrt(@RequestParam("file") MultipartFile file) {
+        try {
+            Long empresaId = SecurityUtils.getCurrentEmpresaId();
+            Empresa empresa = empresaRepo.findById(empresaId)
+                    .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada"));
+            List<EscalaoIrt> escaloes = irtImportService.parseFile(file, empresa);
+            
+            List<Map<String, Object>> response = new ArrayList<>();
+            for (EscalaoIrt esc : escaloes) {
+                Map<String, Object> map = new java.util.HashMap<>();
+                map.put("limiteInferior", esc.getLimiteInferior());
+                map.put("limiteSuperior", esc.getLimiteSuperior() != null ? esc.getLimiteSuperior() : 0.0);
+                map.put("parcelaFixa", esc.getParcelaFixa());
+                map.put("taxaExcesso", esc.getTaxaExcesso());
+                response.add(map);
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(java.util.Collections.singletonMap("error", e.getMessage()));
+        }
     }
 }

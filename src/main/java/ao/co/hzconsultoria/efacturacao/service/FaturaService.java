@@ -646,7 +646,37 @@ public class FaturaService {
                 ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L).orElse(new ConfiguracaoSistemaEntity());
                 String certNo = (configSistema != null && configSistema.getAgtCertificadoNumero() != null) ? configSistema.getAgtCertificadoNumero() : "0000";
                 
+                String nomeOperador = null;
+                if (fatura.getCompra() != null && fatura.getCompra().getUsuario() != null) {
+                    nomeOperador = fatura.getCompra().getUsuario().getNome();
+                    if (nomeOperador == null || nomeOperador.trim().isEmpty()) {
+                        nomeOperador = fatura.getCompra().getUsuario().getLogin();
+                    }
+                }
+                if (nomeOperador == null) {
+                    Devolucao dev = devolucaoRepository.findByNotaCredito(fatura);
+                    if (dev != null && dev.getUsuario() != null) {
+                        nomeOperador = dev.getUsuario().getNome();
+                        if (nomeOperador == null || nomeOperador.trim().isEmpty()) {
+                            nomeOperador = dev.getUsuario().getLogin();
+                        }
+                    }
+                }
+                if (nomeOperador == null) {
+                    ao.co.hzconsultoria.efacturacao.security.CustomUserDetails currentUser = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentUser();
+                    if (currentUser != null) {
+                        nomeOperador = currentUser.getNome();
+                        if (nomeOperador == null || nomeOperador.trim().isEmpty()) {
+                            nomeOperador = currentUser.getUsername();
+                        }
+                    }
+                }
+                if (nomeOperador == null) {
+                    nomeOperador = "N/A";
+                }
+
                 qrCell.addElement(new Paragraph("Hash AGT: " + hash, smallFont));
+                qrCell.addElement(new Paragraph("Operador: " + nomeOperador, smallFont));
                 qrCell.addElement(new Paragraph(complianceHash + "-Processado por programa validado n.º " + certNo + "/AGT", smallFont));
                 footerTable.addCell(qrCell);
 

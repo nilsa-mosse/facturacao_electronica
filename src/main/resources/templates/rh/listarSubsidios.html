@@ -96,14 +96,22 @@
               </div>
               <div class="col-md-6">
                 <div class="form-check form-switch ps-0">
+                  <input type="hidden" name="sujeitoInss" value="false"/>
                   <label class="form-check-label fw-semibold mb-2">Sujeito a INSS?</label>
-                  <div><input class="form-check-input ms-0 me-2" type="checkbox" name="sujeitoInss" id="subSujeitoInss" value="true" checked><label class="form-check-label text-muted" for="subSujeitoInss">Tributável para Segurança Social</label></div>
+                  <div>
+                    <input class="form-check-input ms-0 me-2" type="checkbox" name="sujeitoInss" id="subSujeitoInss" value="true" checked>
+                    <label class="form-check-label text-muted" for="subSujeitoInss">Tributável para Segurança Social</label>
+                  </div>
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-check form-switch ps-0">
+                  <input type="hidden" name="sujeitoIrt" value="false"/>
                   <label class="form-check-label fw-semibold mb-2">Sujeito a IRT?</label>
-                  <div><input class="form-check-input ms-0 me-2" type="checkbox" name="sujeitoIrt" id="subSujeitoIrt" value="true" checked><label class="form-check-label text-muted" for="subSujeitoIrt">Tributável para Imposto de Rendimento</label></div>
+                  <div>
+                    <input class="form-check-input ms-0 me-2" type="checkbox" name="sujeitoIrt" id="subSujeitoIrt" value="true" checked>
+                    <label class="form-check-label text-muted" for="subSujeitoIrt">Tributável para Imposto de Rendimento</label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -119,17 +127,57 @@
 </div>
 <footer th:replace="menu :: footer"></footer>
 <script>
+function atualizarEstadoLimites() {
+  const inssChk = document.getElementById('subSujeitoInss');
+  const irtChk = document.getElementById('subSujeitoIrt');
+  const inssInp = document.getElementById('subLimInss');
+  const irtInp = document.getElementById('subLimIrt');
+
+  if (inssChk && inssInp) {
+    if (inssChk.checked) {
+      inssInp.removeAttribute('disabled');
+      // keep value as-is when enabling
+    } else {
+      // When not subject to INSS, set limit to 0 and disable input to indicate not applicable
+      inssInp.value = '0';
+      inssInp.setAttribute('disabled', 'disabled');
+    }
+  }
+
+  if (irtChk && irtInp) {
+    if (irtChk.checked) {
+      irtInp.removeAttribute('disabled');
+    } else {
+      irtInp.value = '0';
+      irtInp.setAttribute('disabled', 'disabled');
+    }
+  }
+}
+
 function abrirEdicaoSub(btn) {
   document.getElementById('subId').value = btn.getAttribute('data-id');
   document.getElementById('subNome').value = btn.getAttribute('data-nome');
   document.getElementById('subCodigo').value = btn.getAttribute('data-codigo');
-  document.getElementById('subLimInss').value = btn.getAttribute('data-liminss');
-  document.getElementById('subLimIrt').value = btn.getAttribute('data-limirt');
+  // Use empty string fallback to avoid 'null' text
+  document.getElementById('subLimInss').value = btn.getAttribute('data-liminss') || '0';
+  document.getElementById('subLimIrt').value = btn.getAttribute('data-limirt') || '0';
   document.getElementById('subSujeitoInss').checked = btn.getAttribute('data-sujinss') === 'true';
   document.getElementById('subSujeitoIrt').checked = btn.getAttribute('data-sujirt') === 'true';
   document.getElementById('modalSubTitle').innerHTML = '<i class="fas fa-pen text-success me-2"></i>Editar Subsídio';
+  // Atualiza estados dos inputs antes de mostrar modal
+  atualizarEstadoLimites();
   new bootstrap.Modal(document.getElementById('modalSubsidio')).show();
 }
+
+// Attach change listeners to toggle inputs when user clicks the checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+  const inssChk = document.getElementById('subSujeitoInss');
+  const irtChk = document.getElementById('subSujeitoIrt');
+  if (inssChk) inssChk.addEventListener('change', atualizarEstadoLimites);
+  if (irtChk) irtChk.addEventListener('change', atualizarEstadoLimites);
+  // Set initial state on load
+  atualizarEstadoLimites();
+});
 
 document.getElementById('modalSubsidio').addEventListener('hidden.bs.modal', function() {
   document.getElementById('subId').value = '';
@@ -140,6 +188,8 @@ document.getElementById('modalSubsidio').addEventListener('hidden.bs.modal', fun
   document.getElementById('subSujeitoInss').checked = true;
   document.getElementById('subSujeitoIrt').checked = true;
   document.getElementById('modalSubTitle').innerHTML = '<i class="fas fa-hand-holding-usd text-success me-2"></i> Novo Tipo de Subsídio';
+  // Atualiza estado dos inputs após reset
+  atualizarEstadoLimites();
 });
 </script>
 </body>

@@ -52,15 +52,6 @@
                 <div class="form-text">Padrão em Angola: 8.00%</div>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Desconto IRT por Dependentes (%)</label>
-                <div class="input-group">
-                  <input type="number" step="0.01" min="0" max="100" name="descontoIrtDependente" th:value="${parametros.descontoIrtDependente}" class="form-control rounded-start-3" required>
-                  <span class="input-group-text rounded-end-3 bg-light">%</span>
-                </div>
-                <div class="form-text">Redução do IRT se tiver dependentes (Padrão: 10.00%)</div>
-              </div>
-
               <div class="mb-4">
                 <label class="form-label fw-semibold">Dias Padrão de Processamento</label>
                 <div class="input-group">
@@ -87,6 +78,10 @@
               <small class="text-muted">Definição oficial de escalões fiscais e parcelas de imposto</small>
             </div>
             <div class="d-flex gap-2">
+              <button type="button" onclick="document.getElementById('importFile').click()" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="fas fa-file-import me-1"></i> Importar PDF / Excel
+              </button>
+              <input type="file" id="importFile" accept=".pdf,.xls,.xlsx" style="display: none;" onchange="importarTabela(this)">
               <form th:action="@{/rh/parametros/irt/redefinir}" method="POST" onsubmit="return confirm('Tem a certeza que deseja redefinir a tabela de IRT para as configurações padrão oficiais da AGT de Angola?')">
                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                   <i class="fas fa-undo me-1"></i> Redefinir AGT
@@ -190,6 +185,94 @@ function adicionarLinhaEscalao() {
 function removerLinha(btn) {
   const tr = btn.closest('tr');
   tr.remove();
+}
+
+function importarTabela(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+  const headers = {};
+  if (csrfHeader && csrfToken) {
+    headers[csrfHeader] = csrfToken;
+  }
+
+  // Remove any old alerts
+  document.querySelectorAll('.temp-alert').forEach(el => el.remove());
+
+  // Show a loading feedback
+  const alertContainer = document.querySelector('.content-wrapper');
+  const alertDiv = document.createElement('div');
+  alertDiv.className = 'alert alert-info alert-dismissible fade show rounded-3 shadow-sm temp-alert';
+  alertDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>A processar o ficheiro, aguarde...';
+  alertContainer.insertBefore(alertDiv, alertContainer.firstChild);
+
+  fetch("/rh/parametros/irt/importar", {
+    method: "POST",
+    headers: headers,
+    body: formData
+  })
+  .then(response => {
+    document.querySelectorAll('.temp-alert').forEach(el => el.remove());
+    if (!response.ok) {
+      return response.json().then(err => { throw new Error(err.error || "Erro ao ler o ficheiro."); });
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (!data || data.length === 0) {
+      alert("Nenhum escalão de IRT foi encontrado ou interpretado no ficheiro.");
+      return;
+    }
+    
+    const tbody = document.querySelector('#tabelaIrt tbody');
+    tbody.innerHTML = '';
+    
+    data.forEach(esc => {
+      const tr = document.createElement('tr');
+      const limSupVal = esc.limiteSuperior > 0 ? esc.limiteSuperior : '';
+      tr.innerHTML = `
+        <td>
+          <input type="number" step="0.01" min="0" name="limiteInferior" value="${esc.limiteInferior}" class="form-control rounded-3 form-control-sm" required>
+        </td>
+        <td>
+          <input type="number" step="0.01" min="0" name="limiteSuperior" value="${limSupVal}" class="form-control rounded-3 form-control-sm" placeholder="Sem limite (0)">
+        </td>
+        <td>
+          <input type="number" step="0.01" min="0" name="parcelaFixa" value="${esc.parcelaFixa}" class="form-control rounded-3 form-control-sm" required>
+        </td>
+        <td>
+          <div class="input-group input-group-sm">
+            <input type="number" step="0.01" min="0" max="100" name="taxaExcesso" value="${esc.taxaExcesso}" class="form-control rounded-start-3" required>
+            <span class="input-group-text rounded-end-3 bg-light">%</span>
+          </div>
+        </td>
+        <td>
+          <button type="button" onclick="removerLinha(this)" class="btn btn-sm btn-outline-danger rounded-circle">
+            <i class="fas fa-times"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const successDiv = document.createElement('div');
+    successDiv.className = 'alert alert-success alert-dismissible fade show rounded-3 shadow-sm temp-alert';
+    successDiv.innerHTML = `<i class="fas fa-check-circle me-2"></i>Tabela importada com sucesso (${data.length} escalões carregados). Por favor, verifique e clique em "Guardar Tabela de IRT" para persistir as alterações.`;
+    alertContainer.insertBefore(successDiv, alertContainer.firstChild);
+    
+    input.value = '';
+  })
+  .catch(error => {
+    document.querySelectorAll('.temp-alert').forEach(el => el.remove());
+    alert("Erro: " + error.message);
+    input.value = '';
+  });
 }
 </script>
 </body>

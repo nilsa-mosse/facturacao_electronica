@@ -50,9 +50,24 @@ public class GlobalControllerAdvice {
 
         String sistemaLogotipo = "/img/logo.png";
         try {
-            ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
-            if (sistemaConfig != null && sistemaConfig.getLogotipo() != null) {
-                sistemaLogotipo = sistemaConfig.getLogotipo();
+            // Priority 1: use the current company logo
+            org.springframework.security.core.Authentication authLogo = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (authLogo != null && authLogo.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
+                ao.co.hzconsultoria.efacturacao.security.CustomUserDetails ud = (ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) authLogo.getPrincipal();
+                Long empId = ud.getEmpresaId();
+                if (empId != null) {
+                    ao.co.hzconsultoria.efacturacao.model.Empresa empresa = empresaRepository.findById(empId).orElse(null);
+                    if (empresa != null && empresa.getLogotipo() != null && !empresa.getLogotipo().isEmpty()) {
+                        sistemaLogotipo = empresa.getLogotipo();
+                    }
+                }
+            }
+            // Priority 2: fallback to global system logo if company logo is not set
+            if ("/img/logo.png".equals(sistemaLogotipo)) {
+                ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
+                if (sistemaConfig != null && sistemaConfig.getLogotipo() != null) {
+                    sistemaLogotipo = sistemaConfig.getLogotipo();
+                }
             }
         } catch (Exception ignored) {}
         model.addAttribute("globalSistemaLogotipo", sistemaLogotipo);
