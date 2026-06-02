@@ -77,12 +77,20 @@
                                         </div>
 
                                         <div class="col-md-4">
-                                            <label class="form-label text-muted small fw-700">TIPO DE LOCAL</label>
+                                            <label class="form-label text-muted small fw-700">TIPO ESTABELECIMENTO</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-light border-0"><i class="fas fa-tags text-muted"></i></span>
                                                 <select class="form-select border-0 bg-light" th:field="*{tipo}">
-                                                    <option value="LOJA">LOJA</option>
-                                                    <option value="ARMAZEM">ARMAZÉM</option>
+                                                    <option value="SEDE">Sede (Estabelecimento principal)</option>
+                                                    <option value="FILIAL">Filial</option>
+                                                    <option value="AGENCIA">Agência</option>
+                                                    <option value="SUCURSAL">Sucursal</option>
+                                                    <option value="ESCRITORIO">Escritório</option>
+                                                    <option value="LOJA">Loja / Ponto de venda</option>
+                                                    <option value="ARMAZEM">Armazém / Depósito</option>
+                                                    <option value="FABRICA">Unidade fabril / Industrial</option>
+                                                    <option value="ESTALEIRO">Estaleiro / Obra (temporário)</option>
+                                                    <option value="REPRESENTACAO">Representação comercial</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -142,9 +150,9 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge rounded-pill px-3 py-2 fw-600" 
-                                                      th:classappend="${e.tipo == 'LOJA' ? 'bg-soft-primary' : 'bg-soft-warning'}" 
-                                                      th:text="${e.tipo}"></span>
+                                                <span class="badge rounded-pill px-3 py-2 fw-600"
+                                                      th:classappend="${e.tipo == 'SEDE'      ? 'bg-soft-danger'    : e.tipo == 'FILIAL'     ? 'bg-soft-primary'   : e.tipo == 'AGENCIA'    ? 'bg-soft-info'      : e.tipo == 'SUCURSAL'   ? 'bg-soft-success'   : e.tipo == 'ESCRITORIO' ? 'bg-soft-secondary' : e.tipo == 'LOJA'       ? 'bg-soft-primary'   : e.tipo == 'ARMAZEM'    ? 'bg-soft-warning'   : e.tipo == 'FABRICA'    ? 'bg-soft-dark'      : e.tipo == 'ESTALEIRO'  ? 'bg-soft-warning'   : 'bg-soft-secondary'}"
+                                                      th:text="${e.tipo == 'SEDE'      ? 'Sede (Principal)'            : e.tipo == 'FILIAL'     ? 'Filial'                      : e.tipo == 'AGENCIA'    ? 'Agência'                   : e.tipo == 'SUCURSAL'   ? 'Sucursal'                    : e.tipo == 'ESCRITORIO' ? 'Escritório'                 : e.tipo == 'LOJA'       ? 'Loja / Ponto de Venda'      : e.tipo == 'ARMAZEM'    ? 'Armazém / Depósito'         : e.tipo == 'FABRICA'    ? 'Unidade Fabril / Industrial' : e.tipo == 'ESTALEIRO'  ? 'Estaleiro / Obra'           : e.tipo == 'REPRESENTACAO' ? 'Representação Comercial' : e.tipo}"></span>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center text-muted small">

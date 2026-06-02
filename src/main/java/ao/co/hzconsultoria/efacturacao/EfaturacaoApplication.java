@@ -173,38 +173,7 @@ public class EfaturacaoApplication {
 
             // 3. Criar ambiente inicial se não houver utilizadores
             if (userRepository.count() == 0) {
-                System.out.println("Iniciando criação de utilizador padrão para sistema novo...");
-
-                // Criar Empresa Padrão
-                Empresa empresa = new Empresa();
-                empresa.setNome("HZ Consultoria");
-                empresa.setNif("5000000000");
-                empresa.setEndereco("Luanda, Angola");
-                empresa.setRegimeFiscal("GERAL");
-                empresa = empresaRepository.save(empresa);
-
-                // Criar Estabelecimento Padrão
-                Estabelecimento sede = new Estabelecimento();
-                sede.setNome("Sede");
-                sede.setEndereco("Luanda, Angola");
-                sede.setEmpresa(empresa);
-                sede = estabRepository.save(sede);
-
-                // Criar Usuário Admin
-                User admin = new User();
-                admin.setLogin("admin");
-                admin.setSenha(passwordEncoder.encode("admin123"));
-                admin.setNome("Administrador do Sistema");
-                admin.setRole("ADMIN");
-                admin.setAtivo(true);
-                admin.setEmpresa(empresa);
-                admin.getEstabelecimentos().add(sede);
-
-                // Adicionar permissões básicas
-                admin.setPermissoes(new HashSet<>(Arrays.asList(
-                        "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "RH")));
-
-                userRepository.save(admin);
+                System.out.println("Iniciando instalação limpa: nenhuma empresa cadastrada por padrão.");
             }
 
             // 3.1 Criar ou Resetar SuperAdmin de Sistema

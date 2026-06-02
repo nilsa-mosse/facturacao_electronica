@@ -140,10 +140,13 @@
 .grad-dark { background: linear-gradient(135deg, #343a40 0%, #212529 100%); }
 .grad-indigo { background: linear-gradient(135deg, #6610f2 0%, #4b0082 100%); }
 /* Soft Badges */
-.bg-soft-success { background-color: rgba(40, 167, 69, 0.1); color: #28a745; }
-.bg-soft-primary { background-color: rgba(0, 123, 255, 0.1); color: #007bff; }
-.bg-soft-danger  { background-color: rgba(220, 53, 69, 0.1); color: #dc3545; }
-.bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); color: #ffc107; }
+.bg-soft-success { background-color: rgba(40, 167, 69, 0.1) !important; color: #28a745 !important; }
+.bg-soft-primary { background-color: rgba(0, 123, 255, 0.1) !important; color: #007bff !important; }
+.bg-soft-danger  { background-color: rgba(220, 53, 69, 0.1) !important; color: #dc3545 !important; }
+.bg-soft-warning { background-color: rgba(255, 193, 7, 0.1) !important; color: #ffc107 !important; }
+.bg-soft-info    { background-color: rgba(23, 162, 184, 0.1) !important; color: #17a2b8 !important; }
+.bg-soft-secondary { background-color: rgba(108, 117, 125, 0.1) !important; color: #6c757d !important; }
+.bg-soft-dark    { background-color: rgba(52, 58, 64, 0.1) !important; color: #343a40 !important; }
 
 /* Dark Mode Extensions */
 .dark-mode .bg-light { background-color: #2c3136 !important; color: #adb5bd !important; }

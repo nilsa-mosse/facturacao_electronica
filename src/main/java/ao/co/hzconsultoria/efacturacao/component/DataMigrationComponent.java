@@ -53,19 +53,33 @@ public class DataMigrationComponent implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println(">>> Iniciando Migração e Seed de Dados Multi-Empresa...");
 
-        // 1. Garantir Empresa Padrão
+        // Se não houver nenhuma empresa no sistema, não criamos nenhuma empresa por padrão.
+        if (empresaRepository.count() == 0) {
+            System.out.println(">>> Instalação limpa detectada: nenhuma empresa cadastrada.");
+            // Garantir apenas que o superadmin existe
+            if (!userRepository.findByLogin("superadmin").isPresent()) {
+                User superAdmin = new User();
+                superAdmin.setLogin("superadmin");
+                superAdmin.setNome("Super Administrador");
+                superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
+                superAdmin.setRole("ROLE_SUPERADMIN");
+                userRepository.save(superAdmin);
+                System.out.println(">>> Utilizador 'superadmin' criado com sucesso.");
+            }
+            return;
+        }
+
+        // 1. Garantir Empresa Padrão (caso já existam empresas mas queiramos verificar/migrar dados)
         Empresa empresaPadrao = empresaRepository.findByNif("5000000000");
         if (empresaPadrao == null) {
-            empresaPadrao = new Empresa();
-            empresaPadrao.setNome("HZ Consultoria Lda");
-            empresaPadrao.setNif("5000000000");
-            empresaPadrao.setRegimeFiscal("GERAL");
-            empresaPadrao.setEndereco("Luanda, Angola");
-            empresaPadrao = empresaRepository.save(empresaPadrao);
-            System.out.println(">>> Empresa padrão (HZ Consultoria) criada.");
+            // Fallback para a primeira empresa cadastrada no sistema
+            empresaPadrao = empresaRepository.findAll().stream().findFirst().orElse(null);
         }
 
         final Empresa target = empresaPadrao;
+        if (target == null) {
+            return;
+        }
 
         // 2. Garantir Estabelecimento Padrão
         Estabelecimento sede = null;
@@ -100,7 +114,6 @@ public class DataMigrationComponent implements CommandLineRunner {
             superAdmin.setNome("Super Administrador");
             superAdmin.setSenha(passwordEncoder.encode("super123"));
             superAdmin.setRole("ROLE_SUPERADMIN");
-            // SuperAdmin não pertence a nenhuma empresa
             userRepository.save(superAdmin);
             System.out.println(">>> Utilizador 'superadmin' criado (senha: super123).");
         }
