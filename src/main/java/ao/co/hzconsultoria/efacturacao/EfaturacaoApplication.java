@@ -2,7 +2,6 @@ package ao.co.hzconsultoria.efacturacao;
 
 import ao.co.hzconsultoria.efacturacao.model.User;
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
-import ao.co.hzconsultoria.efacturacao.model.Estabelecimento;
 import ao.co.hzconsultoria.efacturacao.repository.UserRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EstabelecimentoRepository;
@@ -83,55 +82,49 @@ public class EfaturacaoApplication {
                 System.err.println(">>> Erro ao migrar tabela licencas_geradas: " + e.getMessage());
             }
 
-            // RESET TRIAL (Comentado para não reiniciar o tempo sempre que o servidor
-            // arranca)
-            /*
-             * configRepo.findById(1L
-             * ).ifPresent(c -> {
-             * c.setLicencaDataAtivac
-             * ao(null);
-             * configRepo.save(c);
-             * ss
-             * System.out.println(">>> TRIAL RESETADO COM SUCESSO!");
-             * });
-             */
+            // Migração: Garantir integridade referencial mínima na venda_suspensa
+            // (corrige valores orphan antes de adicionar a constraint que pode falhar)
+            try {
+                // Nulificar operador_id que não existe na tabela usuario
+                jdbcTemplate.execute("UPDATE venda_suspensa SET operador_id = NULL WHERE operador_id IS NOT NULL AND operador_id NOT IN (SELECT id FROM usuario)");
+                // Tentar adicionar a constraint caso não exista (pode lançar se já criada)
+                try {
+                    jdbcTemplate.execute("ALTER TABLE venda_suspensa ADD CONSTRAINT FKk9vklxihqrcl137jwnwmledu6 FOREIGN KEY (operador_id) REFERENCES usuario (id)");
+                    System.out.println(">>> Migração: Constraint FKk9vklxihqrcl137jwnwmledu6 adicionada com sucesso.");
+                } catch (Exception e) {
+                    // Constraint pode já existir ou o banco pode não permitir ADD sem checagem; ignorar com log
+                    System.out.println(">>> Migração: não foi possível adicionar constraint FKk9vklxihqrcl137jwnwmledu6 (provavelmente já existe): " + e.getMessage());
+                }
+            } catch (Exception e) {
+                System.err.println(">>> Migração: falha ao preparar venda_suspensa para constraint: " + e.getMessage());
+            }
 
-            // RESET DE DADOS TRANSACIONAIS (Comentado para não limpar sempre que iniciar a
-            // aplicação)
-            /*
-             * try {
-             * System.out.println(">>> Iniciando limpeza total de dados transacionais...");
-             * jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
-             * 
-             * String[] tables = {
-             * "item_factura", "fatura", "item_nota_credito", "nota_credito",
-             * "item_guia_remessa", "guia_remessa", "item_devolucao", "devolucao",
-             * "item_compra", "compra", "venda_suspensa", "movimento_stock", "caixa"
-             * };
-             * 
-             * for (String table : tables) {
-             * try {
-             * jdbcTemplate.execute("TRUNCATE TABLE " + table);
-             * System.out.println(">>> Tabela '" + table + "' limpa com sucesso.");
-             * } catch (Exception e) {
-             * System.err.println(">>> Erro ao limpar tabela '" + table + "': " +
-             * e.getMessage());
-             * }
-             * }
-             * 
-             * jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
-             * System.out.println(">>> Limpeza de dados concluída!");
-             * } catch (Exception e) {
-             * System.err.println(">>> Erro crítico durante a limpeza de dados: " +
-             * e.getMessage());
-             * }
-             */
-
-            // 1. Ativar utilizadores existentes (migração)
+            // 1. Garantir que, após instalação, apenas exista o SuperAdmin ativo.
+            // Outros utilizadores serão desactivados/limpos para deixar o sistema limpo
+            // para receber novos dados. Isto evita problemas com FK ao apagar.
             userRepository.findAll().forEach(user -> {
-                if (!user.isAtivo()) {
+                if ("superadmin".equalsIgnoreCase(user.getLogin())) {
+                    // Garantir que o SuperAdmin está activo e com senha resetada
                     user.setAtivo(true);
+                    user.setTentativasLogin(0);
+                    user.setBloqueadoAte(null);
+                    user.setSenha(passwordEncoder.encode("superadmin@2026"));
                     userRepository.save(user);
+                } else {
+                    // Desactivar e limpar dados sensíveis/relacionamentos para um sistema limpo
+                    try {
+                        user.setAtivo(false);
+                        user.setTentativasLogin(0);
+                        user.setBloqueadoAte(null);
+                        user.setPermissoes(new HashSet<>());
+                        user.setEstabelecimentos(new HashSet<>());
+                        user.setEmpresa(null);
+                        // opcional: remover password para forçar reset ao criar um novo
+                        user.setSenha(null);
+                        userRepository.save(user);
+                    } catch (Exception ex) {
+                        System.err.println(">>> Aviso: não foi possível limpar/activar utilizador " + user.getLogin() + ": " + ex.getMessage());
+                    }
                 }
             });
 

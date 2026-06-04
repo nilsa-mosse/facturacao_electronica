@@ -69,6 +69,12 @@ public class ConfiguracaoController {
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(new Empresa()) : new Empresa();
         model.addAttribute("empresa", empresa);
         model.addAttribute("regimes", regimeFiscalRepository.findAll());
+        // Listar estabelecimentos associados à empresa atual (se existir)
+        if (empresaId != null) {
+            model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
+        } else {
+            model.addAttribute("estabelecimentos", java.util.Collections.emptyList());
+        }
         return "configuracoes/empresa";
     }
 
@@ -558,6 +564,37 @@ public class ConfiguracaoController {
         
         model.addAttribute("novoEstabelecimento", new Estabelecimento());
         model.addAttribute("isSuperAdmin", isSuperAdmin);
+        return "configuracoes/estabelecimentos";
+    }
+
+    @GetMapping("/estabelecimentos/editar/{id}")
+    public String editarEstabelecimento(@PathVariable Long id, Model model) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
+
+        Estabelecimento est = estabelecimentoRepository.findById(id).orElse(null);
+        if (est == null) {
+            return "redirect:/configuracoes/estabelecimentos";
+        }
+
+        // Verificar permissões: superadmin ou estabelecimento pertence à empresa atual
+        if (!isSuperAdmin) {
+            if (est.getEmpresa() == null || !est.getEmpresa().getId().equals(empresaId)) {
+                return "redirect:/configuracoes/estabelecimentos";
+            }
+        }
+
+        // Preparar dados do modelo para reutilizar a mesma página
+        if (isSuperAdmin) {
+            model.addAttribute("estabelecimentos", estabelecimentoRepository.findAll());
+            model.addAttribute("empresas", empresaRepository.findAll());
+        } else {
+            model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
+        }
+        model.addAttribute("novoEstabelecimento", est);
+        model.addAttribute("isSuperAdmin", isSuperAdmin);
+        model.addAttribute("showForm", true);
         return "configuracoes/estabelecimentos";
     }
 

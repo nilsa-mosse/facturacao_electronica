@@ -98,7 +98,8 @@ public class ConfiguracaoSistemaEntity {
     private String storageCloudRegion = "";
 
     // ─── Segurança ──────────────────────────────────────────────────────
-    private int segTempoExpiracaoSessao = 5;
+    // Por padrão o sistema usa 30 minutos de inatividade como tempo máximo
+    private int segTempoExpiracaoSessao = 30;
 
     @Column(length = 10)
     private String segTempoExpiracaoUnidade = "MINUTOS"; // MINUTOS ou HORAS

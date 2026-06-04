@@ -382,30 +382,45 @@
           <!-- CONFIGURATIONS MODULE -->
           <th:block th:if="${modulo_ADMINISTRACAO}">
             <li class="nav-header module-administracao-header">ADMINISTRAÇÃO</li>
+
+            <!-- Group: Definições do Sistema -->
             <li class="nav-item has-treeview module-administracao-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-cogs"></i>
                 <p>
-                  Definições do Sistema
+                  Definições Sistema
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
               <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/geral}" class="nav-link">
+                    <i class="fas fa-sliders-h nav-icon"></i>
+                    <p>Parâmetros Avançados</p>
+                  </a>
+                </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/empresa}" class="nav-link">
                     <i class="fas fa-id-card nav-icon"></i>
                     <p>Dados da Empresa</p>
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link">
-                    <i class="fas fa-gavel nav-icon text-warning"></i>
-                    <p>Regime Fiscal</p>
-                  </a>
-                </li>
+              </ul>
+            </li>
+
+            <!-- Group: Gestão de Utilizadores -->
+            <li class="nav-item has-treeview module-administracao-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-users-cog"></i>
+                <p>
+                  Gestão Utilizadores
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/utilizadores}" class="nav-link">
-                    <i class="fas fa-users-cog nav-icon"></i>
+                    <i class="fas fa-users nav-icon"></i>
                     <p>Utilizadores e Perfis</p>
                   </a>
                 </li>
@@ -415,82 +430,84 @@
                     <p>Controlo de Acesso</p>
                   </a>
                 </li>
+              </ul>
+            </li>
+
+            <!-- Group: Gestão Tributária (AGT) with fiscal/config items -->
+            <li class="nav-item has-treeview module-administracao-item" th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' menu-open' : ''">
+              <a href="#" class="nav-link" th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' active' : ''">
+                <i class="nav-icon fas fa-landmark"></i>
+                <p>
+                  Gestão Tributária
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/estabelecimentos}" class="nav-link">
-                    <i class="fas fa-store nav-icon"></i>
-                    <p>Estabelecimentos</p>
+                  <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
+                    <i class="fas fa-shield-alt nav-icon"></i>
+                    <p>Configurações AGT</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/impostos}" class="nav-link">
+                  <a th:href="@{/configuracoes/impostos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/impostos')} ? ' active' : ''">
                     <i class="fas fa-percent nav-icon"></i>
                     <p>Impostos (IVA/Selo)</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link">
+                  <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
                     <i class="fas fa-hand-holding-usd nav-icon"></i>
                     <p>Taxas Adicionais</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/moedas}" class="nav-link">
+                  <a th:href="@{/configuracoes/moedas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
                     <i class="fas fa-coins nav-icon"></i>
-                    <p>Moedas & Câmbios</p>
+                    <p>Moedas e Câmbio</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/series}" class="nav-link">
+                  <a th:href="@{/configuracoes/series}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
                     <i class="fas fa-list-ol nav-icon"></i>
                     <p>Séries de Faturação</p>
                   </a>
                 </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link">
-                    <i class="fas fa-network-wired nav-icon"></i>
-                    <p>Configurar AGT</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/geral}" class="nav-link">
-                    <i class="fas fa-sliders-h nav-icon"></i>
-                    <p>Parâmetros Avançados</p>
-                  </a>
-                </li>
-                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SERVIDOR}">
-                  <a th:href="@{/configuracoes/servidor}" class="nav-link">
-                    <i class="fas fa-server nav-icon"></i>
-                    <p>Servidor e Rede</p>
-                  </a>
-                </li>
-                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_EMAIL}">
-                  <a th:href="@{/configuracoes/email}" class="nav-link">
-                    <i class="fas fa-envelope-open-text nav-icon"></i>
-                    <p>Configuração de Email</p>
-                  </a>
-                </li>
-                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_BANCO_DADOS}">
-                  <a th:href="@{/configuracoes/banco-dados}" class="nav-link">
-                    <i class="fas fa-database nav-icon"></i>
-                    <p>Base de Dados</p>
-                  </a>
-                </li>
-                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_STORAGE}">
-                  <a th:href="@{/configuracoes/storage}" class="nav-link">
-                    <i class="fas fa-hdd nav-icon"></i>
-                    <p>Armazenamento (Storage)</p>
-                  </a>
-                </li>
-                <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SEGURANCA}">
-                  <a th:href="@{/configuracoes/seguranca}" class="nav-link">
-                    <i class="fas fa-lock nav-icon"></i>
-                    <p>Segurança e Logs</p>
-                  </a>
-                </li>
               </ul>
             </li>
-          </th:block>
 
+            <!-- Optional advanced items preserved with conditional flags -->
+            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SERVIDOR}">
+              <a th:href="@{/configuracoes/servidor}" class="nav-link">
+                <i class="fas fa-server nav-icon"></i>
+                <p>Servidor e Rede</p>
+              </a>
+            </li>
+            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_EMAIL}">
+              <a th:href="@{/configuracoes/email}" class="nav-link">
+                <i class="fas fa-envelope-open-text nav-icon"></i>
+                <p>Configuração de Email</p>
+              </a>
+            </li>
+            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_BANCO_DADOS}">
+              <a th:href="@{/configuracoes/banco-dados}" class="nav-link">
+                <i class="fas fa-database nav-icon"></i>
+                <p>Base de Dados</p>
+              </a>
+            </li>
+            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_STORAGE}">
+              <a th:href="@{/configuracoes/storage}" class="nav-link">
+                <i class="fas fa-hdd nav-icon"></i>
+                <p>Armazenamento (Storage)</p>
+              </a>
+            </li>
+            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SEGURANCA}">
+              <a th:href="@{/configuracoes/seguranca}" class="nav-link">
+                <i class="fas fa-lock nav-icon"></i>
+                <p>Segurança e Logs</p>
+              </a>
+            </li>
+          </th:block>
           <!-- CONTROLO DE ACESSO (Visível para ADMIN, fora do módulo ADMINISTRACAO) -->
           <th:block th:if="${isAdmin and !isSuperAdmin}">
             <li class="nav-header module-administracao-header">GESTÃO DE ACESSOS</li>
