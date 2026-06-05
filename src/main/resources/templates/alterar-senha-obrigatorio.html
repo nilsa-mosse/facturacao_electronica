@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${globalSistemaNome != null ? 'Alterar Senha - ' + globalSistemaNome : 'Alterar Senha Opcional'}">Alterar Senha Obrigatória</title>
+    <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #06b6d4;
+            --accent: #f43f5e;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { font-family: 'Outfit', sans-serif; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-gradient);
+            overflow-x: hidden;
+        }
+
+        .bg-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+            filter: blur(60px);
+            z-index: -1;
+            border-radius: 50%;
+            animation: float 20s infinite alternate;
+        }
+        .blob-1 { top: -10%; left: -10%; }
+        .blob-2 { bottom: -10%; right: -10%; animation-delay: -5s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(100px, 50px) scale(1.2); }
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+        }
+
+        .card-glass {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 50px 45px;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .page-title {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 35px;
+            line-height: 1.5;
+        }
+
+        .form-group-custom {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group-custom label {
+            display: block;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i.prefix-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            pointer-events: none;
+            transition: color 0.3s;
+        }
+
+        .input-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px 50px 16px 55px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-control:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            outline: none;
+        }
+
+        .input-control:focus + i.prefix-icon {
+            color: var(--primary);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: var(--text-main);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .alert-custom {
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            color: #fda4af;
+        }
+
+        .alert-success-custom {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
+    <div class="card-container">
+        <div class="card-glass">
+            <div class="brand-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            
+            <h1 class="page-title">Alterar Senha</h1>
+            <p class="page-subtitle" th:text="${'Olá ' + (nomeUsuario != null ? nomeUsuario : 'utilizador') + ', este é o seu primeiro acesso. Por favor, defina uma nova palavra-passe para garantir a segurança da sua conta.'}">
+                Este é o seu primeiro acesso. Por favor, defina uma nova palavra-passe para garantir a segurança da sua conta.
+            </p>
+
+            <!-- Alertas -->
+            <div th:if="${erro}" class="alert-custom">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${erro}">Erro ao redefinir a senha.</span>
+            </div>
+
+            <div th:if="${mensagem}" class="alert-custom alert-success-custom">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${mensagem}">Senha atualizada com sucesso!</span>
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/alterar-senha-obrigatorio}" method="post" id="resetForm" th:if="${sucesso == null}">
+                
+                <div class="form-group-custom">
+                    <label for="novaSenha">Nova Palavra-passe</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="novaSenha" name="novaSenha" class="input-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+                        <i class="fas fa-lock prefix-icon"></i>
+                        <button type="button" class="toggle-password" onclick="togglePass('novaSenha', 'icon1')">
+                            <i class="fas fa-eye" id="icon1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group-custom">
+                    <label for="confirmarSenha">Confirmar Nova Palavra-passe</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="confirmarSenha" name="confirmarSenha" class="input-control" placeholder="Repita a palavra-passe" required minlength="6">
+                        <i class="fas fa-lock prefix-icon"></i>
+                        <button type="button" class="toggle-password" onclick="togglePass('confirmarSenha', 'icon2')">
+                            <i class="fas fa-eye" id="icon2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Definir Palavra-passe <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function togglePass(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        /* Redirect to root after success */
+        /*[ThymeLeaf inline block if sucesso is true]*/
+        const sucesso = [[${sucesso}]];
+        if (sucesso) {
+            setTimeout(function() {
+                window.location.href = '/';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

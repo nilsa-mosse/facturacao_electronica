@@ -87,6 +87,9 @@ public class SuperAdminController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.UserRegistrationService userRegistrationService;
+
     @GetMapping("/usuarios")
     public String usuarios(Model model) {
         java.util.List<User> admins = userRepository.findAll().stream()
@@ -113,22 +116,34 @@ public class SuperAdminController {
         }
         
         User userToSave;
-        if (user.getId() != null) {
+        boolean isNew = (user.getId() == null);
+        String senhaAleatoria = null;
+        if (!isNew) {
             userToSave = userRepository.findById(user.getId()).orElse(user);
             userToSave.setNome(user.getNome());
+            userToSave.setEmail(user.getEmail());
             userToSave.setLogin(user.getLogin());
             userToSave.setRole(user.getRole());
             userToSave.setAtivo(user.isAtivo());
+            userToSave.setForcarAlteracaoSenha(user.isForcarAlteracaoSenha());
             if (user.getSenha() != null && !user.getSenha().isEmpty() && !user.getSenha().startsWith("$2a$")) {
                 userToSave.setSenha(passwordEncoder.encode(user.getSenha()));
             }
         } else {
-            userToSave = user;
-            if (userToSave.getSenha() == null || userToSave.getSenha().isEmpty()) {
-                userToSave.setSenha(passwordEncoder.encode("123456"));
-            } else {
-                userToSave.setSenha(passwordEncoder.encode(userToSave.getSenha()));
+            // Novo utilizador — verificar se o login já existe
+            if (user.getLogin() != null && !user.getLogin().isEmpty()) {
+                boolean loginExiste = userRepository.findByLogin(user.getLogin()).isPresent();
+                if (loginExiste) {
+                    ra.addFlashAttribute("mensagem_erro",
+                            "Erro: O login '" + user.getLogin() + "' já está em uso. Escolha um login diferente.");
+                    return "redirect:/superadmin/usuarios";
+                }
             }
+            userToSave = user;
+            senhaAleatoria = userRegistrationService.gerarSenhaAleatoria();
+            userToSave.setSenha(passwordEncoder.encode(senhaAleatoria));
+            // Novo utilizador: força alteração de senha por padrão
+            userToSave.setForcarAlteracaoSenha(true);
         }
 
         // Lógica de desassociação: se empresaId for nulo, limpamos a empresa
@@ -142,6 +157,12 @@ public class SuperAdminController {
         }
 
         userRepository.save(userToSave);
+
+        // Enviar credenciais por email se for novo utilizador
+        if (isNew && senhaAleatoria != null) {
+            userRegistrationService.enviarCredenciaisPorEmail(userToSave, senhaAleatoria);
+        }
+
         ra.addFlashAttribute("mensagem", "Utilizador atualizado com sucesso!");
         return "redirect:/superadmin/usuarios";
     }

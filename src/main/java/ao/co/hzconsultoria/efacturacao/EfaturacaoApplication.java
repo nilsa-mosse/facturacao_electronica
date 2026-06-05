@@ -40,6 +40,19 @@ public class EfaturacaoApplication {
             PasswordEncoder passwordEncoder,
             JdbcTemplate jdbcTemplate) {
         return args -> {
+            // Migração de Emergência: Adicionar colunas email e forcar_alteracao_senha a
+            // usuario
+            try {
+                jdbcTemplate.execute(
+                        "ALTER TABLE usuario ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE usuario ADD COLUMN IF NOT EXISTS forcar_alteracao_senha BOOLEAN DEFAULT FALSE");
+                System.out.println(
+                        ">>> Migração: Colunas 'email' e 'forcar_alteracao_senha' em 'usuario' verificadas/adicionadas com sucesso.");
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao tentar migrar tabela usuario: " + e.getMessage());
+            }
+
             // Migração de Emergência: Adicionar coluna 'exibir_datas_validade' se não
             // existir
             try {
@@ -86,14 +99,19 @@ public class EfaturacaoApplication {
             // (corrige valores orphan antes de adicionar a constraint que pode falhar)
             try {
                 // Nulificar operador_id que não existe na tabela usuario
-                jdbcTemplate.execute("UPDATE venda_suspensa SET operador_id = NULL WHERE operador_id IS NOT NULL AND operador_id NOT IN (SELECT id FROM usuario)");
+                jdbcTemplate.execute(
+                        "UPDATE venda_suspensa SET operador_id = NULL WHERE operador_id IS NOT NULL AND operador_id NOT IN (SELECT id FROM usuario)");
                 // Tentar adicionar a constraint caso não exista (pode lançar se já criada)
                 try {
-                    jdbcTemplate.execute("ALTER TABLE venda_suspensa ADD CONSTRAINT FKk9vklxihqrcl137jwnwmledu6 FOREIGN KEY (operador_id) REFERENCES usuario (id)");
+                    jdbcTemplate.execute(
+                            "ALTER TABLE venda_suspensa ADD CONSTRAINT FKk9vklxihqrcl137jwnwmledu6 FOREIGN KEY (operador_id) REFERENCES usuario (id)");
                     System.out.println(">>> Migração: Constraint FKk9vklxihqrcl137jwnwmledu6 adicionada com sucesso.");
                 } catch (Exception e) {
-                    // Constraint pode já existir ou o banco pode não permitir ADD sem checagem; ignorar com log
-                    System.out.println(">>> Migração: não foi possível adicionar constraint FKk9vklxihqrcl137jwnwmledu6 (provavelmente já existe): " + e.getMessage());
+                    // Constraint pode já existir ou o banco pode não permitir ADD sem checagem;
+                    // ignorar com log
+                    System.out.println(
+                            ">>> Migração: não foi possível adicionar constraint FKk9vklxihqrcl137jwnwmledu6 (provavelmente já existe): "
+                                    + e.getMessage());
                 }
             } catch (Exception e) {
                 System.err.println(">>> Migração: falha ao preparar venda_suspensa para constraint: " + e.getMessage());
@@ -123,7 +141,8 @@ public class EfaturacaoApplication {
                         user.setSenha(null);
                         userRepository.save(user);
                     } catch (Exception ex) {
-                        System.err.println(">>> Aviso: não foi possível limpar/activar utilizador " + user.getLogin() + ": " + ex.getMessage());
+                        System.err.println(">>> Aviso: não foi possível limpar/activar utilizador " + user.getLogin()
+                                + ": " + ex.getMessage());
                     }
                 }
             });

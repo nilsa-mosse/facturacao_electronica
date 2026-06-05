@@ -48,7 +48,19 @@ public class User implements Serializable {
 
     private boolean ativo = true;
 
+    @Column
+    private String email;
+
+    @Column(name = "forcar_alteracao_senha")
+    private boolean forcarAlteracaoSenha = false;
+
     // Getters e Setters
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public boolean isForcarAlteracaoSenha() { return forcarAlteracaoSenha; }
+    public void setForcarAlteracaoSenha(boolean forcarAlteracaoSenha) { this.forcarAlteracaoSenha = forcarAlteracaoSenha; }
+
     public Set<String> getPermissoes() { return permissoes; }
     public void setPermissoes(Set<String> permissoes) { this.permissoes = permissoes; }
 

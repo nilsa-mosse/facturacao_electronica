@@ -39,6 +39,7 @@
                                 <thead>
                                     <tr>
                                         <th>Nome</th>
+                                        <th>Email</th>
                                         <th>Login</th>
                                         <th>Perfil</th>
                                         <th>Estado</th>
@@ -49,6 +50,7 @@
                                 <tbody>
                                     <tr th:each="u : ${usuarios}">
                                         <td th:text="${u.nome}" class="fw-bold text-dark"></td>
+                                        <td th:text="${u.email}" class="text-muted"></td>
                                         <td th:text="${u.login}" class="text-muted"></td>
                                         <td>
                                             <span th:classappend="${u.role == 'SUPERADMIN' ? 'bg-danger' : 'bg-primary'}"
@@ -77,6 +79,7 @@
                                                 <button class="btn btn-sm btn-outline-info rounded-pill px-3 btn-editar shadow-sm"
                                                         th:data-id="${u.id}"
                                                         th:data-nome="${u.nome}"
+                                                        th:data-email="${u.email}"
                                                         th:data-login="${u.login}"
                                                         th:data-role="${u.role}"
                                                         th:data-empresa="${u.empresa?.id}"
@@ -125,12 +128,23 @@
                                 <input type="text" id="formNome" name="nome" class="form-control" required>
                             </div>
                             <div class="form-group">
+                                <label>Email (para recuperação de senha)</label>
+                                <input type="email" id="formEmail" name="email" class="form-control" placeholder="Ex: admin@empresa.ao" required>
+                            </div>
+                            <div class="form-group">
                                 <label>Login (Username)</label>
                                 <input type="text" id="formLogin" name="login" class="form-control" required>
                             </div>
                             <div class="form-group">
                                 <label>Palavra-passe</label>
-                                <input type="password" name="senha" class="form-control" placeholder="Deixar vazio se não quiser alterar">
+                                <input type="password" id="formSenha" name="senha" class="form-control" placeholder="••••••••" disabled>
+                                <small class="text-muted d-block mt-1" id="formSenhaHelp">A palavra-passe será gerada aleatoriamente e enviada por email.</small>
+                            </div>
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="formForcarSenha" name="forcarAlteracaoSenha">
+                                    <label class="custom-control-label" for="formForcarSenha">Forçar alteração de senha no próximo login</label>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="form-group col-md-8">
@@ -177,10 +191,15 @@
                 const btn = $(this);
                 document.getElementById('usuarioId').value = btn.data('id');
                 document.getElementById('formNome').value = btn.data('nome');
+                document.getElementById('formEmail').value = btn.data('email') || "";
                 document.getElementById('formLogin').value = btn.data('login');
                 document.getElementById('formRole').value = btn.data('role');
                 document.getElementById('formEmpresa').value = btn.data('empresa') || "";
                 document.getElementById('formAtivo').checked = btn.data('ativo');
+                document.getElementById('formForcarSenha').checked = false;
+                document.getElementById('formSenha').disabled = false;
+                document.getElementById('formSenha').value = "";
+                document.getElementById('formSenhaHelp').innerText = "Deixe vazio para manter a senha actual.";
                 
                 userModal.show();
             });
@@ -190,11 +209,16 @@
                 if (!$(this).hasClass('btn-editar')) {
                     document.getElementById('usuarioId').value = "";
                     document.getElementById('formNome').value = "";
+                    document.getElementById('formEmail').value = "";
                     document.getElementById('formLogin').value = "";
                     document.getElementById('formRole').value = "ADMIN";
                     document.getElementById('formEmpresa').value = "";
                     document.getElementById('formEmpresa').disabled = false;
                     document.getElementById('formAtivo').checked = true;
+                    document.getElementById('formForcarSenha').checked = true;
+                    document.getElementById('formSenha').value = "";
+                    document.getElementById('formSenha').disabled = true;
+                    document.getElementById('formSenhaHelp').innerText = "A palavra-passe será gerada aleatoriamente e enviada por email.";
                 }
             });
 

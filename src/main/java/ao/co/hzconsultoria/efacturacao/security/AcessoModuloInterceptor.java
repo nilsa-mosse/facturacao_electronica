@@ -24,7 +24,8 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
         
         // Ignorar recursos estáticos e login/logout
         if (uri.startsWith("/assets/") || uri.startsWith("/plugins/") || uri.startsWith("/css/") || 
-            uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/login") || uri.equals("/logout") || uri.equals("/error")) {
+            uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/login") || 
+            uri.equals("/logout") || uri.equals("/error") || uri.equals("/alterar-senha-obrigatorio")) {
             return true;
         }
 

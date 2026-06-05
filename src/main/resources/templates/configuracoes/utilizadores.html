@@ -27,6 +27,12 @@
                         <span th:text="${mensagem}">Operação realizada correctamente.</span>
                     </div>
 
+                    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <span th:text="${erro}">Erro na operação.</span>
+                    </div>
+
                     <!-- Tabela de Utilizadores -->
                     <div class="card border-0 shadow-soft overflow-hidden animate__animated animate__fadeIn">
                          <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
@@ -45,6 +51,7 @@
                                  <thead class="bg-light">
                                     <tr>
                                         <th class="ps-4" th:text="#{config.utilizadores.nome}">Nome</th>
+                                        <th>Email</th>
                                         <th th:text="#{config.utilizadores.login}">Login</th>
                                         <th>Empresa</th>
                                         <th>Estabelecimentos e Moradas</th>
@@ -62,6 +69,7 @@
                                                 <span th:text="${u.nome}" class="fw-700 text-dark"></span>
                                             </div>
                                         </td>
+                                        <td th:text="${u.email}" class="text-muted"></td>
                                         <td th:text="${u.login}" class="text-muted"></td>
                                         <td>
                                             <span class="badge bg-light text-dark border fw-normal" th:text="${u.empresa != null ? u.empresa.nome : 'N/A'}"></span>
@@ -84,7 +92,7 @@
                                         </td>
                                          <td class="text-end pe-4">
                                              <div class="btn-group btn-group-sm">
-                                                 <button class="btn btn-outline-info rounded-circle me-2 btn-editar-local"
+                                                 <button class="btn btn-outline-info rounded-circle me-2 btn-editar-local" th:data-email="${u.email}"
                                                          th:data-id="${u.id}"
                                                          th:data-nome="${u.nome}"
                                                          th:data-login="${u.login}"
@@ -135,6 +143,13 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
+                                                <label class="form-label text-muted small fw-700">EMAIL</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light border-0"><i class="fas fa-envelope text-muted"></i></span>
+                                                    <input type="email" class="form-control bg-light border-0" id="uEmail" name="email" placeholder="Ex: joao.silva@empresa.ao" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
                                                 <label class="form-label text-muted small fw-700">LOGIN DE ACESSO</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light border-0"><i class="fas fa-at text-muted"></i></span>
@@ -145,9 +160,9 @@
                                                 <label class="form-label text-muted small fw-700">PALAVRA-PASSE</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-light border-0"><i class="fas fa-lock text-muted"></i></span>
-                                                    <input type="password" class="form-control bg-light border-0" id="uSenha" name="senha" placeholder="••••••••">
+                                                    <input type="password" class="form-control bg-light border-0" id="uSenha" name="senha" placeholder="••••••••" disabled>
                                                 </div>
-                                                <small class="text-muted mt-1 d-block" id="senhaHelp" style="font-size: 0.7rem;">Obrigatório para novos utilizadores.</small>
+                                                <small class="text-muted mt-1 d-block" id="senhaHelp" style="font-size: 0.7rem;">A palavra-passe será gerada aleatoriamente e enviada por email.</small>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label text-muted small fw-700">PERFIL (ROLE)</label>
@@ -269,10 +284,12 @@
                 limpar();
                 document.getElementById('userId').value = btn.data('id');
                 document.getElementById('uNome').value = btn.data('nome');
+                document.getElementById('uEmail').value = btn.data('email') || "";
                 document.getElementById('uLogin').value = btn.data('login');
                 document.getElementById('uRole').value = btn.data('role');
                 document.getElementById('formHeader').innerText = "Editar Utilizador";
                 document.getElementById('uSenha').required = false;
+                document.getElementById('uSenha').disabled = false;
                 document.getElementById('senhaHelp').innerText = "Deixe vazio para manter a senha actual.";
                 
                 // Pré-selecionar estabelecimentos (Checkboxes)
@@ -304,12 +321,14 @@
         function limpar() {
             document.getElementById('userId').value = "";
             document.getElementById('uNome').value = "";
+            document.getElementById('uEmail').value = "";
             document.getElementById('uLogin').value = "";
             document.getElementById('uRole').selectedIndex = 0;
             document.getElementById('uSenha').value = "";
+            document.getElementById('uSenha').disabled = true;
             document.getElementById('formHeader').innerText = "Novo Utilizador";
-            document.getElementById('uSenha').required = true;
-            document.getElementById('senhaHelp').innerText = "Obrigatório para novos utilizadores.";
+            document.getElementById('uSenha').required = false;
+            document.getElementById('senhaHelp').innerText = "A palavra-passe será gerada aleatoriamente e enviada por email.";
             
             // Limpar estabelecimentos
             $('.est-check').prop('checked', false).closest('.selection-card').css({'border-color': '#dee2e6', 'background-color': '#fff'});

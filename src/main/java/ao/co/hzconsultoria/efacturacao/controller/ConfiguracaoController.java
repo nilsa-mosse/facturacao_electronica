@@ -4,6 +4,7 @@ import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.*;
 import ao.co.hzconsultoria.efacturacao.service.ConfiguracaoSistemaService;
 import ao.co.hzconsultoria.efacturacao.service.ConfiguracaoEmpresaService;
+import ao.co.hzconsultoria.efacturacao.service.DynamicMailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -58,6 +59,8 @@ public class ConfiguracaoController {
     private ConfiguracaoSistemaService cfgService;
     @Autowired
     private ConfiguracaoEmpresaService configuracaoEmpresaService;
+    @Autowired
+    private DynamicMailService dynamicMailService;
 
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
@@ -125,6 +128,9 @@ public class ConfiguracaoController {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.UserRegistrationService userRegistrationService;
+
     // ─── Utilizadores e Perfis ───────────────────────────────────────────────
     @GetMapping("/utilizadores")
     public String utilizadores(Model model) {
@@ -151,29 +157,58 @@ public class ConfiguracaoController {
                                RedirectAttributes redirectAttributes) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
-        user.setEmpresa(empresa);
-        
+
         // Proteção: Admin não pode criar SuperAdmin
         if ("SUPERADMIN".equals(user.getRole())) {
-             user.setRole("OPERADOR"); 
+            user.setRole("OPERADOR");
         }
 
-        // Criptografar senha se for novo usuário ou senha alterada
-        if (user.getId() == null || (user.getSenha() != null && !user.getSenha().startsWith("$2a$"))) {
-            if (user.getSenha() == null || user.getSenha().isEmpty()) {
-                if (user.getId() == null) user.setSenha(passwordEncoder.encode("123456")); 
-            } else {
-                user.setSenha(passwordEncoder.encode(user.getSenha()));
+        boolean isNew = (user.getId() == null);
+
+        if (!isNew) {
+            // Edição: merge seguro dos campos
+            User existing = userRepository.findById(user.getId()).orElse(null);
+            if (existing != null) {
+                existing.setNome(user.getNome());
+                existing.setEmail(user.getEmail());
+                existing.setLogin(user.getLogin());
+                existing.setRole(user.getRole());
+                existing.setAtivo(user.isAtivo());
+                existing.setEmpresa(empresa);
+                if (user.getSenha() != null && !user.getSenha().isEmpty() && !user.getSenha().startsWith("$2a$")) {
+                    existing.setSenha(passwordEncoder.encode(user.getSenha()));
+                }
+                if (estabelecimentoIds != null && !estabelecimentoIds.isEmpty()) {
+                    java.util.Set<Estabelecimento> ests = new java.util.HashSet<>(estabelecimentoRepository.findAllById(estabelecimentoIds));
+                    existing.setEstabelecimentos(ests);
+                }
+                userRepository.save(existing);
             }
+        } else {
+            // Novo utilizador — verificar se o login já existe
+            if (user.getLogin() != null && !user.getLogin().isEmpty()) {
+                boolean loginExiste = userRepository.findByLogin(user.getLogin()).isPresent();
+                if (loginExiste) {
+                    redirectAttributes.addFlashAttribute("erro",
+                            "Erro: O login '" + user.getLogin() + "' já está em uso. Escolha um login diferente.");
+                    return "redirect:/configuracoes/utilizadores";
+                }
+            }
+            user.setEmpresa(empresa);
+            String senhaAleatoria = userRegistrationService.gerarSenhaAleatoria();
+            user.setSenha(passwordEncoder.encode(senhaAleatoria));
+            // Forçar alteração de senha no primeiro login
+            user.setForcarAlteracaoSenha(true);
+            if (estabelecimentoIds != null && !estabelecimentoIds.isEmpty()) {
+                java.util.Set<Estabelecimento> ests = new java.util.HashSet<>(estabelecimentoRepository.findAllById(estabelecimentoIds));
+                user.setEstabelecimentos(ests);
+            }
+            userRepository.save(user);
+
+            // Enviar credenciais por email
+            userRegistrationService.enviarCredenciaisPorEmail(user, senhaAleatoria);
         }
 
-        // Associar estabelecimentos
-        if (estabelecimentoIds != null && !estabelecimentoIds.isEmpty()) {
-            java.util.Set<Estabelecimento> ests = new java.util.HashSet<>(estabelecimentoRepository.findAllById(estabelecimentoIds));
-            user.setEstabelecimentos(ests);
-        }
-
-        userRepository.save(user);
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/utilizadores";
@@ -370,7 +405,14 @@ public class ConfiguracaoController {
             return ResponseEntity.badRequest().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(result);
         }
         result.put("sucesso", true);
-        result.put("mensagem", "Email de teste enviado para " + dest + " (simulação).");
+        try {
+            dynamicMailService.enviarEmail(dest, "Teste de Configuração de Email - Kwanza ERP", 
+                "Se recebeu este email, significa que a configuração de email do seu sistema de facturação está correcta e funcional.");
+            result.put("mensagem", "Email de teste enviado com sucesso para " + dest);
+        } catch (Exception e) {
+            result.put("sucesso", false);
+            result.put("mensagem", "Falha ao enviar email de teste: " + e.getMessage());
+        }
         return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(result);
     }
 

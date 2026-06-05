@@ -51,6 +51,8 @@ public class SecurityConfig {
                 // === Recursos Públicos (Sem Autenticação) ===
                 .antMatchers(
                     "/login",
+                    "/forgot-password", "/reset-password",
+                    "/alterar-senha-obrigatorio",
                     "/licenca-expirada", "/ativar-licenca",
                     "/manifest.json", "/sw.js",
                     "/img/**", "/uploads/**", "/assets/**", "/plugins/**",

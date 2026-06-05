@@ -23,7 +23,9 @@ public class LicencaInterceptor implements HandlerInterceptor {
         if (uri.startsWith("/assets/") || uri.startsWith("/plugins/") || uri.startsWith("/css/") || 
             uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/error") || 
             uri.equals("/login") || uri.equals("/licenca-expirada") || uri.equals("/ativar-licenca") ||
-            uri.equals("/manifest.json") || uri.equals("/sw.js")) {
+            uri.equals("/manifest.json") || uri.equals("/sw.js") ||
+            uri.equals("/alterar-senha-obrigatorio") ||
+            uri.equals("/forgot-password") || uri.equals("/reset-password")) {
             return true;
         }
 

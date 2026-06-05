@@ -2,6 +2,7 @@ package ao.co.hzconsultoria.efacturacao.config;
 
 import ao.co.hzconsultoria.efacturacao.security.AcessoModuloInterceptor;
 import ao.co.hzconsultoria.efacturacao.security.LicencaInterceptor;
+import ao.co.hzconsultoria.efacturacao.security.ForcePasswordChangeInterceptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private LicencaInterceptor licencaInterceptor;
 
+    @Autowired
+    private ForcePasswordChangeInterceptor forcePasswordChangeInterceptor;
+
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
 
@@ -30,6 +34,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(licencaInterceptor);
         registry.addInterceptor(acessoModuloInterceptor);
+        registry.addInterceptor(forcePasswordChangeInterceptor);
     }
 
     @Override

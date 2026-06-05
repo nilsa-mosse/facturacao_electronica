@@ -16,6 +16,14 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         
+        if (authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails ud = (CustomUserDetails) authentication.getPrincipal();
+            if (ud.getUser() != null && ud.getUser().isForcarAlteracaoSenha()) {
+                response.sendRedirect("/alterar-senha-obrigatorio");
+                return;
+            }
+        }
+
         boolean isSuperAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
         
