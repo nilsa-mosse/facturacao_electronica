@@ -85,13 +85,17 @@ public class PasswordResetService {
         
         String absoluteUrl = baseUrl + resetUrl;
 
-        if (!dynamicMailService.isEmailConfigurado()) {
+        Optional<User> userOpt = findUserByEmail(toEmail);
+        Long empresaId = userOpt.map(u -> u.getEmpresa() != null ? u.getEmpresa().getId() : null).orElse(null);
+
+        if (!dynamicMailService.isEmailConfigurado(empresaId)) {
             // Mail not configured; just log the reset url to console
             System.out.println(">>> [DynamicMail] Email não configurado. URL para " + toEmail + ": " + absoluteUrl);
             return;
         }
         try {
             dynamicMailService.enviarEmail(
+                empresaId,
                 toEmail,
                 "Recuperação de Palavra-passe",
                 "Use o link abaixo para redefinir a sua palavra-passe:\n" + absoluteUrl + "\nSe não solicitou, ignore este email."

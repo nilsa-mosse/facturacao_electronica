@@ -1,4 +1,4 @@
-package ao.co.hzconsultoria.efacturacao.controller;
+﻿package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.*;
@@ -75,8 +75,11 @@ public class ConfiguracaoController {
         // Listar estabelecimentos associados à empresa atual (se existir)
         if (empresaId != null) {
             model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
+            // Carregar configurações específicas da empresa
+            model.addAttribute("configEmpresa", configuracaoEmpresaService.obterConfiguracao(empresaId));
         } else {
             model.addAttribute("estabelecimentos", java.util.Collections.emptyList());
+            model.addAttribute("configEmpresa", new ConfiguracaoEmpresa());
         }
         return "configuracoes/empresa";
     }
@@ -131,6 +134,35 @@ public class ConfiguracaoController {
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.UserRegistrationService userRegistrationService;
 
+
+    @PostMapping("/empresa/salvar-config")
+    public String salvarConfigEmpresa(
+            @RequestParam(defaultValue = "false") boolean usarLogotipoEmDocumentos,
+            @RequestParam(defaultValue = "false") boolean usarCabecalhoPersonalizadoEmDocumentos,
+            @RequestParam(defaultValue = "false") boolean usarRodapePersonalizadoEmDocumentos,
+            @RequestParam(required = false, defaultValue = "") String rodapePersonalizado,
+            @RequestParam(defaultValue = "30") int segTempoExpiracaoSessao,
+            @RequestParam(defaultValue = "false") boolean segTwoFactorAtivo,
+            @RequestParam(defaultValue = "false") boolean notificacaoEmailHabilitada,
+            @RequestParam(defaultValue = "false") boolean notificacaoSmsHabilitada,
+            RedirectAttributes ra) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa cfg = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            cfg.setUsarLogotipoEmDocumentos(usarLogotipoEmDocumentos);
+            cfg.setUsarCabecalhoPersonalizadoEmDocumentos(usarCabecalhoPersonalizadoEmDocumentos);
+            cfg.setUsarRodapePersonalizadoEmDocumentos(usarRodapePersonalizadoEmDocumentos);
+            cfg.setRodapePersonalizado(rodapePersonalizado);
+            cfg.setSegTempoExpiracaoSessao(segTempoExpiracaoSessao);
+            cfg.setSegTwoFactorAtivo(segTwoFactorAtivo);
+            cfg.setNotificacaoEmailHabilitada(notificacaoEmailHabilitada);
+            cfg.setNotificacaoSmsHabilitada(notificacaoSmsHabilitada);
+            configuracaoEmpresaService.salvarConfiguracao(cfg);
+        }
+        ra.addFlashAttribute("mensagem",
+                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
+        return "redirect:/configuracoes/empresa";
+    }
     // ─── Utilizadores e Perfis ───────────────────────────────────────────────
     @GetMapping("/utilizadores")
     public String utilizadores(Model model) {
@@ -382,13 +414,41 @@ public class ConfiguracaoController {
     // ─── Email / SMTP ─────────────────────────────────────────────────────
     @GetMapping("/email")
     public String email(Model model) {
-        model.addAttribute("cfg", cfgService.getEmail());
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            ConfiguracaoEmail cfg = new ConfiguracaoEmail();
+            cfg.setSmtpHost(config.getEmailSmtpHost());
+            cfg.setSmtpPorta(config.getEmailSmtpPorta());
+            cfg.setSmtpUsername(config.getEmailSmtpUsername());
+            cfg.setSmtpPassword(config.getEmailSmtpPassword());
+            cfg.setSegurancaTipo(config.getEmailSegurancaTipo());
+            cfg.setEmailRemetente(config.getEmailRemetente());
+            cfg.setNomeRemetente(config.getEmailNomeRemetente());
+            model.addAttribute("cfg", cfg);
+        } else {
+            model.addAttribute("cfg", cfgService.getEmail());
+        }
         return "configuracoes/email";
     }
 
     @PostMapping("/email/salvar")
     public String salvarEmail(@ModelAttribute ConfiguracaoEmail cfg, RedirectAttributes ra) {
-        cfgService.saveEmail(cfg);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            configuracaoEmpresaService.atualizarConfiguracaoEmail(
+                empresaId,
+                cfg.getSmtpHost(),
+                cfg.getSmtpPorta(),
+                cfg.getSmtpUsername(),
+                cfg.getSmtpPassword(),
+                cfg.getSegurancaTipo(),
+                cfg.getEmailRemetente(),
+                cfg.getNomeRemetente()
+            );
+        } else {
+            cfgService.saveEmail(cfg);
+        }
         ra.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/email";
@@ -406,7 +466,8 @@ public class ConfiguracaoController {
         }
         result.put("sucesso", true);
         try {
-            dynamicMailService.enviarEmail(dest, "Teste de Configuração de Email - Kwanza ERP", 
+            Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+            dynamicMailService.enviarEmail(empresaId, dest, "Teste de Configuração de Email - Kwanza ERP", 
                 "Se recebeu este email, significa que a configuração de email do seu sistema de facturação está correcta e funcional.");
             result.put("mensagem", "Email de teste enviado com sucesso para " + dest);
         } catch (Exception e) {

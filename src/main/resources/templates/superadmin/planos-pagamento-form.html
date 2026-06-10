@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head">
+    <title>Plano de Pagamento | Formulário</title>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <div class="content-wrapper" style="background:#f4f6f9;">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row align-items-center mb-3">
+                    <div class="col">
+                        <h1 class="fw-bold">
+                            <i class="fas fa-crown text-warning me-2"></i>
+                            <span th:text="${plano.id != null} ? 'Editar Plano' : 'Novo Plano de Pagamento'"></span>
+                        </h1>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/superadmin/planos-pagamento}">Planos de Pagamento</a></li>
+                                <li class="breadcrumb-item active" th:text="${plano.id != null} ? 'Editar' : 'Novo'"></li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <form th:action="@{/superadmin/planos-pagamento/salvar}" th:object="${plano}" method="post">
+                    <input type="hidden" th:field="*{id}">
+                    <div class="row g-4">
+
+                        <!-- Coluna Principal -->
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle text-primary me-2"></i>Informações do Plano</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-8">
+                                            <label class="form-label fw-bold">Nome do Plano <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control rounded-3" th:field="*{nome}" placeholder="Ex: Starter, Pro, Enterprise..." required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Período <span class="text-danger">*</span></label>
+                                            <select class="form-select rounded-3" th:field="*{periodo}" required>
+                                                <option value="">Seleccionar...</option>
+                                                <option th:each="p : ${periodos}" th:value="${p}" th:text="${p.name()}" th:selected="${plano.periodo == p}"></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label fw-bold">Descrição</label>
+                                            <textarea class="form-control rounded-3" th:field="*{descricao}" rows="3" placeholder="Descreva o que inclui este plano..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preços -->
+                            <div class="card border-0 shadow-sm rounded-4 mt-4">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-tag text-success me-2"></i>Preço e Desconto</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Preço <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">AOA</span>
+                                                <input type="number" step="0.01" min="0" class="form-control rounded-end-3" th:field="*{preco}" placeholder="0.00" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Preço Original <small class="text-muted">(sem desconto)</small></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">AOA</span>
+                                                <input type="number" step="0.01" min="0" class="form-control rounded-end-3" th:field="*{precoOriginal}" placeholder="0.00">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Desconto (%)</label>
+                                            <div class="input-group">
+                                                <input type="number" min="0" max="100" class="form-control rounded-start-3" th:field="*{percentagemDesconto}" placeholder="0">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Moeda</label>
+                                            <select class="form-select rounded-3" th:field="*{moeda}">
+                                                <option value="AOA">AOA - Kwanza</option>
+                                                <option value="USD">USD - Dólar</option>
+                                                <option value="EUR">EUR - Euro</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Limites -->
+                            <div class="card border-0 shadow-sm rounded-4 mt-4">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-sliders-h text-info me-2"></i>Limites de Utilização</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-3 col-6">
+                                            <label class="form-label fw-bold">Utilizadores</label>
+                                            <input type="number" min="1" class="form-control rounded-3" th:field="*{maxUtilizadores}" placeholder="Ilimitado">
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <label class="form-label fw-bold">Empresas</label>
+                                            <input type="number" min="1" class="form-control rounded-3" th:field="*{maxEmpresas}" placeholder="1">
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <label class="form-label fw-bold">Produtos</label>
+                                            <input type="number" min="1" class="form-control rounded-3" th:field="*{maxProdutos}" placeholder="Ilimitado">
+                                        </div>
+                                        <div class="col-md-3 col-6">
+                                            <label class="form-label fw-bold">Faturas/Mês</label>
+                                            <input type="number" min="1" class="form-control rounded-3" th:field="*{maxFaturasMes}" placeholder="Ilimitado">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coluna Lateral -->
+                        <div class="col-lg-4">
+                            <!-- Estado e Visibilidade -->
+                            <div class="card border-0 shadow-sm rounded-4">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-toggle-on text-warning me-2"></i>Estado</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Status</label>
+                                        <select class="form-select rounded-3" th:field="*{status}">
+                                            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.name()}" th:selected="${plano.status == s}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" th:field="*{destaque}" id="destaque">
+                                        <label class="form-check-label fw-bold" for="destaque">
+                                            <i class="fas fa-star text-warning me-1"></i>Plano em Destaque
+                                        </label>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <label class="form-label fw-bold">Ícone FontAwesome</label>
+                                        <input type="text" class="form-control rounded-3" th:field="*{icone}" placeholder="fas fa-rocket">
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label fw-bold">Cor Badge (hex)</label>
+                                        <input type="text" class="form-control rounded-3" th:field="*{corBadge}" placeholder="#4e73df">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Funcionalidades -->
+                            <div class="card border-0 shadow-sm rounded-4 mt-4">
+                                <div class="card-header bg-white border-bottom py-3 px-4">
+                                    <h5 class="mb-0 fw-bold"><i class="fas fa-check-double text-success me-2"></i>Funcionalidades</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" th:field="*{incluiSuporte}" id="incluiSuporte">
+                                        <label class="form-check-label" for="incluiSuporte"><i class="fas fa-headset text-success me-1"></i>Suporte Técnico</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" th:field="*{incluiBackup}" id="incluiBackup">
+                                        <label class="form-check-label" for="incluiBackup"><i class="fas fa-cloud text-primary me-1"></i>Backup Automático</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" th:field="*{incluiApi}" id="incluiApi">
+                                        <label class="form-check-label" for="incluiApi"><i class="fas fa-code text-info me-1"></i>Acesso à API</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" th:field="*{incluiRelatorios}" id="incluiRelatorios">
+                                        <label class="form-check-label" for="incluiRelatorios"><i class="fas fa-chart-bar text-warning me-1"></i>Relatórios Avançados</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" th:field="*{incluiAgt}" id="incluiAgt">
+                                        <label class="form-check-label" for="incluiAgt"><i class="fas fa-shield-alt text-danger me-1"></i>Integração AGT</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" th:field="*{incluiRh}" id="incluiRh">
+                                        <label class="form-check-label" for="incluiRh"><i class="fas fa-user-tie text-secondary me-1"></i>Módulo RH</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" th:field="*{incluiMultiempresa}" id="incluiMultiempresa">
+                                        <label class="form-check-label" for="incluiMultiempresa"><i class="fas fa-sitemap text-dark me-1"></i>Multi-Empresa</label>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label fw-bold small">Funcionalidades Extra <small class="text-muted">(separadas por vírgula)</small></label>
+                                        <textarea class="form-control rounded-3" th:field="*{funcionalidadesExtra}" rows="2" placeholder="Ex: Whatsapp, SMS Alerts, ..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botões -->
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-warning fw-bold py-2 rounded-pill shadow">
+                                    <i class="fas fa-save me-2"></i>Guardar Plano
+                                </button>
+                                <a th:href="@{/superadmin/planos-pagamento}" class="btn btn-outline-secondary rounded-pill">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="menu :: footer"></footer>
+</div>
+</body>
+</html>

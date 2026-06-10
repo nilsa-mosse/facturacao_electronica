@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head">
+    <title>Planos de Pagamento | SuperAdmin</title>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper" style="background:#f4f6f9;">
+
+            <!-- Header -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-3 align-items-center">
+                        <div class="col-sm-7">
+                            <h1 class="fw-bold" style="letter-spacing:-1px;">
+                                <i class="fas fa-crown text-warning me-2"></i>Planos de Pagamento
+                            </h1>
+                            <p class="text-muted mb-0">Gerencie os planos de subscrição do sistema SaaS.</p>
+                        </div>
+                        <div class="col-sm-5 text-end">
+                            <a th:href="@{/superadmin/planos-pagamento/novo}"
+                                class="btn btn-warning shadow px-4 rounded-pill fw-bold">
+                                <i class="fas fa-plus me-2"></i>Novo Plano
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+
+                    <!-- Alertas -->
+                    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-3"
+                        role="alert">
+                        <i class="fas fa-check-circle me-2"></i><span th:text="${mensagem}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="card shadow-sm border-0 rounded-4">
+                        <div class="card-header bg-white border-bottom pt-4 pb-0 px-4">
+                            <ul class="nav nav-tabs border-0" id="tabsPlanos" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active fw-bold px-4" id="trimestral-tab"
+                                        data-bs-toggle="tab" data-bs-target="#trimestral" type="button">
+                                        <i class="fas fa-calendar-week me-2 text-warning"></i>Trimestral
+                                        <span class="badge bg-warning text-dark ms-1"
+                                            th:text="${planosTrimestrais.size()}">0</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-bold px-4" id="semestral-tab" data-bs-toggle="tab"
+                                        data-bs-target="#semestral" type="button">
+                                        <i class="fas fa-calendar-alt me-2 text-info"></i>Semestral
+                                        <span class="badge bg-info ms-1" th:text="${planosSemestrais.size()}">0</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-bold px-4" id="anual-tab" data-bs-toggle="tab"
+                                        data-bs-target="#anual" type="button">
+                                        <i class="fas fa-calendar-check me-2 text-success"></i>Anual
+                                        <span class="badge bg-success ms-1" th:text="${planosAnuais.size()}">0</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="tab-content" id="tabsPlanosContent">
+
+                                <!-- TAB: TRIMESTRAIS -->
+                                <div class="tab-pane fade show active p-4" id="trimestral" role="tabpanel">
+                                    <div th:if="${planosTrimestrais.isEmpty()}" class="text-center py-5 text-muted">
+                                        <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i>
+                                        <p>Nenhum plano trimestral registado.<br>
+                                            <a th:href="@{/superadmin/planos-pagamento/novo}"
+                                                class="btn btn-sm btn-warning mt-2 rounded-pill">
+                                                <i class="fas fa-plus me-1"></i>Criar Primeiro Plano
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div class="row g-4" th:if="${!planosTrimestrais.isEmpty()}">
+                                        <div class="col-lg-4 col-md-6" th:each="p : ${planosTrimestrais}">
+                                            <div th:replace="superadmin/planos-pagamento-card :: planCard(plano=${p})">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TAB: SEMESTRAIS -->
+                                <div class="tab-pane fade p-4" id="semestral" role="tabpanel">
+                                    <div th:if="${planosSemestrais.isEmpty()}" class="text-center py-5 text-muted">
+                                        <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i>
+                                        <p>Nenhum plano semestral registado.<br>
+                                            <a th:href="@{/superadmin/planos-pagamento/novo}"
+                                                class="btn btn-sm btn-info mt-2 rounded-pill text-white">
+                                                <i class="fas fa-plus me-1"></i>Criar Primeiro Plano
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div class="row g-4" th:if="${!planosSemestrais.isEmpty()}">
+                                        <div class="col-lg-4 col-md-6" th:each="p : ${planosSemestrais}">
+                                            <div th:replace="superadmin/planos-pagamento-card :: planCard(plano=${p})">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TAB: ANUAIS -->
+                                <div class="tab-pane fade p-4" id="anual" role="tabpanel">
+                                    <div th:if="${planosAnuais.isEmpty()}" class="text-center py-5 text-muted">
+                                        <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i>
+                                        <p>Nenhum plano anual registado.<br>
+                                            <a th:href="@{/superadmin/planos-pagamento/novo}"
+                                                class="btn btn-sm btn-success mt-2 rounded-pill">
+                                                <i class="fas fa-plus me-1"></i>Criar Primeiro Plano
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div class="row g-4" th:if="${!planosAnuais.isEmpty()}">
+                                        <div class="col-lg-4 col-md-6" th:each="p : ${planosAnuais}">
+                                            <div th:replace="superadmin/planos-pagamento-card :: planCard(plano=${p})">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="menu :: footer"></footer>
+    </div>
+</body>
+
+</html>

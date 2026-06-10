@@ -63,14 +63,15 @@ public class UserRegistrationService {
             user.getNome(), nomeSistema, user.getLogin(), senhaPlana, baseUrl
         );
 
-        if (!dynamicMailService.isEmailConfigurado()) {
+        Long empresaId = (user.getEmpresa() != null) ? user.getEmpresa().getId() : null;
+        if (!dynamicMailService.isEmailConfigurado(empresaId)) {
             System.out.println(">>> [UserRegistrationService] Email não configurado nas definições de sistema.");
             System.out.println(">>> [UserRegistrationService] Credenciais para " + user.getLogin() + " (" + user.getEmail() + "): " + senhaPlana);
             return;
         }
 
         try {
-            dynamicMailService.enviarEmail(user.getEmail(), assunto, mensagem);
+            dynamicMailService.enviarEmail(empresaId, user.getEmail(), assunto, mensagem);
             System.out.println(">>> [UserRegistrationService] Email com credenciais enviado com sucesso para: " + user.getEmail());
         } catch (Exception e) {
             System.err.println(">>> [UserRegistrationService] Erro ao enviar email com credenciais para " + user.getEmail() + ": " + e.getMessage());

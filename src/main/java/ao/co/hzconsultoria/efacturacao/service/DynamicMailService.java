@@ -1,7 +1,9 @@
 package ao.co.hzconsultoria.efacturacao.service;
 
 import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
+import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoEmpresa;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoEmpresaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,14 +14,11 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
+import java.util.Optional;
 
 /**
  * Serviço de email dinâmico que constrói o JavaMailSender em tempo de execução
- * a partir das configurações SMTP gravadas na tabela configuracao_sistema.
- *
- * Desta forma o administrador pode alterar as configs SMTP em
- * /configuracoes/email e os emails são enviados imediatamente com os novos
- * valores — sem necessidade de reiniciar a aplicação.
+ * a partir das configurações SMTP gravadas na tabela configuracao_sistema ou nas configurações específicas da empresa.
  */
 @Service
 public class DynamicMailService {
@@ -28,6 +27,9 @@ public class DynamicMailService {
 
     @Autowired
     private ConfiguracaoSistemaRepository configuracaoSistemaRepository;
+
+    @Autowired
+    private ConfiguracaoEmpresaRepository configuracaoEmpresaRepository;
 
     // ─── Auxiliar para validar strings vazias (Java 1.8 compatível) ───
 
@@ -38,11 +40,65 @@ public class DynamicMailService {
     // ─── Construção dinâmica do sender ────────────────────────────────
 
     /**
-     * Cria e devolve um JavaMailSender configurado com os valores actuais
-     * da base de dados. Lança IllegalStateException se o email não estiver
-     * configurado (host ou username vazio).
+     * Versão retrocompatível de buildSender()
      */
     public JavaMailSenderImpl buildSender() {
+        return buildSender(null);
+    }
+
+    /**
+     * Cria e devolve um JavaMailSender configurado com os valores actuais
+     * da base de dados (da empresa especificada ou global). Lança IllegalStateException se o email não estiver
+     * configurado.
+     */
+    public JavaMailSenderImpl buildSender(Long empresaId) {
+        if (empresaId != null) {
+            Optional<ConfiguracaoEmpresa> opt = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
+            if (opt.isPresent()) {
+                ConfiguracaoEmpresa cfg = opt.get();
+                String host = cfg.getEmailSmtpHost();
+                String username = cfg.getEmailSmtpUsername();
+                if (!isEmpty(host) && !isEmpty(username)) {
+                    JavaMailSenderImpl sender = new JavaMailSenderImpl();
+                    sender.setHost(host);
+                    sender.setPort(cfg.getEmailSmtpPorta());
+                    sender.setUsername(username);
+                    sender.setPassword(cfg.getEmailSmtpPassword());
+                    sender.setDefaultEncoding("UTF-8");
+
+                    Properties props = sender.getJavaMailProperties();
+                    props.put("mail.transport.protocol", "smtp");
+                    props.put("mail.smtp.auth", "true");
+
+                    String seguranca = cfg.getEmailSegurancaTipo() != null ? cfg.getEmailSegurancaTipo().toUpperCase() : "TLS";
+
+                    switch (seguranca) {
+                        case "SSL":
+                            props.put("mail.smtp.ssl.enable", "true");
+                            props.put("mail.smtp.starttls.enable", "false");
+                            break;
+                        case "NONE":
+                            props.put("mail.smtp.ssl.enable", "false");
+                            props.put("mail.smtp.starttls.enable", "false");
+                            props.put("mail.smtp.auth", "false");
+                            break;
+                        default: // TLS (STARTTLS)
+                            props.put("mail.smtp.starttls.enable", "true");
+                            props.put("mail.smtp.starttls.required", "true");
+                            props.put("mail.smtp.ssl.enable", "false");
+                            break;
+                    }
+
+                    props.put("mail.smtp.connectiontimeout", "5000");
+                    props.put("mail.smtp.timeout", "5000");
+                    props.put("mail.smtp.writetimeout", "5000");
+
+                    return sender;
+                }
+            }
+        }
+
+        // Fallback global
         ConfiguracaoSistemaEntity cfg = configuracaoSistemaRepository
                 .findById(1L)
                 .orElseThrow(() -> new IllegalStateException("Configuração do sistema não encontrada."));
@@ -80,7 +136,7 @@ public class DynamicMailService {
                 props.put("mail.smtp.starttls.enable", "false");
                 props.put("mail.smtp.auth", "false");
                 break;
-            default: // TLS (STARTTLS) — padrão
+            default: // TLS (STARTTLS)
                 props.put("mail.smtp.starttls.enable", "true");
                 props.put("mail.smtp.starttls.required", "true");
                 props.put("mail.smtp.ssl.enable", "false");
@@ -96,30 +152,48 @@ public class DynamicMailService {
 
     // ─── Verificar se o email está configurado ────────────────────────
 
+    /**
+     * Versão retrocompatível de isEmailConfigurado()
+     */
     public boolean isEmailConfigurado() {
+        return isEmailConfigurado(null);
+    }
+
+    public boolean isEmailConfigurado(Long empresaId) {
+        if (empresaId != null) {
+            Optional<ConfiguracaoEmpresa> opt = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
+            if (opt.isPresent()) {
+                ConfiguracaoEmpresa cfg = opt.get();
+                if (cfg.isEmailHabilitado() 
+                    && !isEmpty(cfg.getEmailSmtpHost()) 
+                    && !isEmpty(cfg.getEmailSmtpUsername()) 
+                    && !isEmpty(cfg.getEmailSmtpPassword())) {
+                    return true;
+                }
+            }
+        }
+
         return configuracaoSistemaRepository.findById(1L)
-                .map(cfg -> cfg.getEmailSmtpHost() != null && !cfg.getEmailSmtpHost().trim().isEmpty()
-                         && cfg.getEmailSmtpUsername() != null && !cfg.getEmailSmtpUsername().trim().isEmpty()
-                         && cfg.getEmailSmtpPassword() != null && !cfg.getEmailSmtpPassword().trim().isEmpty())
+                .map(cfg -> !isEmpty(cfg.getEmailSmtpHost())
+                         && !isEmpty(cfg.getEmailSmtpUsername())
+                         && !isEmpty(cfg.getEmailSmtpPassword()))
                 .orElse(false);
     }
 
     // ─── Envio de email simples (texto) ──────────────────────────────
 
     /**
-     * Envia um email de texto simples.
-     *
-     * @param para       endereço destinatário
-     * @param assunto    assunto do email
-     * @param mensagem   corpo do email
-     * @throws Exception se o envio falhar ou o email não estiver configurado
+     * Versão retrocompatível de enviarEmail()
      */
     public void enviarEmail(String para, String assunto, String mensagem) throws Exception {
-        ConfiguracaoSistemaEntity cfg = configuracaoSistemaRepository
-                .findById(1L)
-                .orElseThrow(() -> new IllegalStateException("Configuração do sistema não encontrada."));
+        enviarEmail(null, para, assunto, mensagem);
+    }
 
-        JavaMailSenderImpl sender = buildSender();
+    /**
+     * Envia um email de texto simples com base no ID de empresa especificado.
+     */
+    public void enviarEmail(Long empresaId, String para, String assunto, String mensagem) throws Exception {
+        JavaMailSenderImpl sender = buildSender(empresaId);
 
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(para);
@@ -127,8 +201,28 @@ public class DynamicMailService {
         msg.setText(mensagem);
 
         // Remetente configurável
-        String remetente = cfg.getEmailRemetente();
-        String nomeRemetente = cfg.getEmailNomeRemetente();
+        String remetente = null;
+        String nomeRemetente = null;
+
+        if (empresaId != null) {
+            Optional<ConfiguracaoEmpresa> opt = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
+            if (opt.isPresent()) {
+                ConfiguracaoEmpresa cfg = opt.get();
+                if (!isEmpty(cfg.getEmailRemetente())) {
+                    remetente = cfg.getEmailRemetente();
+                    nomeRemetente = cfg.getEmailNomeRemetente();
+                }
+            }
+        }
+
+        if (isEmpty(remetente)) {
+            ConfiguracaoSistemaEntity cfgGlobal = configuracaoSistemaRepository
+                    .findById(1L)
+                    .orElseThrow(() -> new IllegalStateException("Configuração do sistema não encontrada."));
+            remetente = cfgGlobal.getEmailRemetente();
+            nomeRemetente = cfgGlobal.getEmailNomeRemetente();
+        }
+
         if (!isEmpty(remetente)) {
             if (!isEmpty(nomeRemetente)) {
                 msg.setFrom(nomeRemetente + " <" + remetente + ">");
@@ -144,19 +238,17 @@ public class DynamicMailService {
     // ─── Envio de email HTML ──────────────────────────────────────────
 
     /**
-     * Envia um email com conteúdo HTML.
-     *
-     * @param para       endereço destinatário
-     * @param assunto    assunto do email
-     * @param htmlBody   corpo HTML do email
-     * @throws Exception se o envio falhar ou o email não estiver configurado
+     * Versão retrocompatível de enviarEmailHtml()
      */
     public void enviarEmailHtml(String para, String assunto, String htmlBody) throws Exception {
-        ConfiguracaoSistemaEntity cfg = configuracaoSistemaRepository
-                .findById(1L)
-                .orElseThrow(() -> new IllegalStateException("Configuração do sistema não encontrada."));
+        enviarEmailHtml(null, para, assunto, htmlBody);
+    }
 
-        JavaMailSenderImpl sender = buildSender();
+    /**
+     * Envia um email com conteúdo HTML com base no ID de empresa especificado.
+     */
+    public void enviarEmailHtml(Long empresaId, String para, String assunto, String htmlBody) throws Exception {
+        JavaMailSenderImpl sender = buildSender(empresaId);
         MimeMessage mimeMsg = sender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMsg, true, "UTF-8");
 
@@ -164,8 +256,28 @@ public class DynamicMailService {
         helper.setSubject(assunto);
         helper.setText(htmlBody, true);
 
-        String remetente = cfg.getEmailRemetente();
-        String nomeRemetente = cfg.getEmailNomeRemetente();
+        String remetente = null;
+        String nomeRemetente = null;
+
+        if (empresaId != null) {
+            Optional<ConfiguracaoEmpresa> opt = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
+            if (opt.isPresent()) {
+                ConfiguracaoEmpresa cfg = opt.get();
+                if (!isEmpty(cfg.getEmailRemetente())) {
+                    remetente = cfg.getEmailRemetente();
+                    nomeRemetente = cfg.getEmailNomeRemetente();
+                }
+            }
+        }
+
+        if (isEmpty(remetente)) {
+            ConfiguracaoSistemaEntity cfgGlobal = configuracaoSistemaRepository
+                    .findById(1L)
+                    .orElseThrow(() -> new IllegalStateException("Configuração do sistema não encontrada."));
+            remetente = cfgGlobal.getEmailRemetente();
+            nomeRemetente = cfgGlobal.getEmailNomeRemetente();
+        }
+
         if (!isEmpty(remetente)) {
             helper.setFrom(remetente, nomeRemetente != null ? nomeRemetente : "Sistema de Facturação");
         }
@@ -177,13 +289,18 @@ public class DynamicMailService {
     // ─── Teste de conexão SMTP ────────────────────────────────────────
 
     /**
-     * Testa a ligação SMTP com as configs actuais.
-     *
-     * @return true se a ligação for bem sucedida, false caso contrário
+     * Versão retrocompatível de testarConexao()
      */
     public boolean testarConexao() {
+        return testarConexao(null);
+    }
+
+    /**
+     * Testa a ligação SMTP com as configs actuais.
+     */
+    public boolean testarConexao(Long empresaId) {
         try {
-            JavaMailSenderImpl sender = buildSender();
+            JavaMailSenderImpl sender = buildSender(empresaId);
             sender.testConnection();
             log.info("Teste de conexão SMTP bem sucedido.");
             return true;

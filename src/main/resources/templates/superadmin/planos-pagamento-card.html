@@ -1,0 +1,111 @@
+<th:block th:fragment="planCard(plano)">
+    <div class="card h-100 border-0 shadow-sm rounded-4 position-relative overflow-hidden"
+        th:classappend="${plano.destaque} ? 'border border-warning border-2' : ''">
+
+        <!-- Destaque ribbon -->
+        <div th:if="${plano.destaque}"
+            style="position:absolute;top:14px;right:-22px;background:#f6a821;color:#fff;font-size:.7rem;font-weight:700;padding:3px 32px;transform:rotate(45deg);z-index:2;">
+            POPULAR
+        </div>
+
+        <!-- Period badge header -->
+        <div class="card-header border-0 py-3 px-4" th:style="${plano.periodo.name() == 'TRIMESTRAL'} ? 'background:linear-gradient(135deg,#f6a821,#c77f00);color:#fff;'
+                  : (${plano.periodo.name() == 'SEMESTRAL'} ? 'background:linear-gradient(135deg,#36b9cc,#1a7a8a);color:#fff;'
+                  : 'background:linear-gradient(135deg,#1cc88a,#13855c);color:#fff;')">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="fw-bold small text-uppercase opacity-75"
+                    th:text="${plano.getPeriodoLabel()}">Período</span>
+                <span class="badge bg-white bg-opacity-25 rounded-pill small" th:text="${plano.status.name()}"
+                    th:classappend="${plano.status.name() == 'ATIVO'} ? 'text-white' : 'text-danger'">ATIVO</span>
+            </div>
+            <h4 class="fw-bold mb-0 mt-1" th:text="${plano.nome}">Nome do Plano</h4>
+        </div>
+
+        <div class="card-body px-4 pt-3 pb-2">
+            <!-- Preço -->
+            <div class="mb-3">
+                <div th:if="${plano.precoOriginal != null and plano.precoOriginal.compareTo(plano.preco) > 0}"
+                    class="text-muted text-decoration-line-through small">
+                    <span
+                        th:text="${#numbers.formatDecimal(plano.precoOriginal,1,'COMMA',2,'POINT')}">0,00</span>
+                    <span th:text="${plano.moeda ?: 'AOA'}"></span>
+                </div>
+                <div class="d-flex align-items-baseline gap-2">
+                    <span class="display-6 fw-bold text-dark"
+                        th:text="${#numbers.formatDecimal(plano.preco,1,'COMMA',2,'POINT')}">0,00</span>
+                    <span class="text-muted small" th:text="${plano.moeda ?: 'AOA'}"></span>
+                </div>
+                <div th:if="${plano.percentagemDesconto != null and plano.percentagemDesconto > 0}"
+                    class="mt-1">
+                    <span class="badge bg-danger rounded-pill"
+                        th:text="'-' + ${plano.percentagemDesconto} + '% desconto'"></span>
+                </div>
+            </div>
+
+            <!-- Limites -->
+            <ul class="list-unstyled small text-muted mb-3">
+                <li class="mb-1" th:if="${plano.maxUtilizadores != null}">
+                    <i class="fas fa-users text-primary me-2"></i>
+                    Até <strong th:text="${plano.maxUtilizadores}"></strong> utilizadores
+                </li>
+                <li class="mb-1" th:if="${plano.maxEmpresas != null}">
+                    <i class="fas fa-building text-secondary me-2"></i>
+                    Até <strong th:text="${plano.maxEmpresas}"></strong> empresa(s)
+                </li>
+                <li class="mb-1" th:if="${plano.maxProdutos != null}">
+                    <i class="fas fa-boxes text-info me-2"></i>
+                    Até <strong th:text="${plano.maxProdutos}"></strong> produtos
+                </li>
+                <li class="mb-1" th:if="${plano.maxFaturasMes != null}">
+                    <i class="fas fa-file-invoice text-warning me-2"></i>
+                    <strong th:text="${plano.maxFaturasMes}"></strong> faturas/mês
+                </li>
+            </ul>
+
+            <!-- Funcionalidades incluídas -->
+            <div class="d-flex flex-wrap gap-1 mb-3">
+                <span th:if="${plano.incluiSuporte}"
+                    class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill small"><i
+                        class="fas fa-headset me-1"></i>Suporte</span>
+                <span th:if="${plano.incluiBackup}"
+                    class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill small"><i
+                        class="fas fa-cloud me-1"></i>Backup</span>
+                <span th:if="${plano.incluiApi}"
+                    class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill small"><i
+                        class="fas fa-code me-1"></i>API</span>
+                <span th:if="${plano.incluiRelatorios}"
+                    class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill small"><i
+                        class="fas fa-chart-bar me-1"></i>Relatórios</span>
+                <span th:if="${plano.incluiAgt}"
+                    class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill small"><i
+                        class="fas fa-shield-alt me-1"></i>AGT</span>
+                <span th:if="${plano.incluiRh}"
+                    class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill small"><i
+                        class="fas fa-user-tie me-1"></i>RH</span>
+                <span th:if="${plano.incluiMultiempresa}"
+                    class="badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25 rounded-pill small"><i
+                        class="fas fa-sitemap me-1"></i>Multi-empresa</span>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white border-0 px-4 pb-3 pt-1 d-flex gap-2">
+            <a th:href="@{/superadmin/planos-pagamento/editar/{id}(id=${plano.id})}"
+                class="btn btn-sm btn-outline-primary rounded-pill flex-fill">
+                <i class="fas fa-pen me-1"></i>Editar
+            </a>
+            <a th:href="@{/superadmin/planos-pagamento/toggle/{id}(id=${plano.id})}"
+                th:title="${plano.status.name() == 'ATIVO'} ? 'Desativar' : 'Ativar'"
+                class="btn btn-sm rounded-pill flex-fill"
+                th:classappend="${plano.status.name() == 'ATIVO'} ? 'btn-outline-warning' : 'btn-outline-success'">
+                <i
+                    th:class="${plano.status.name() == 'ATIVO'} ? 'fas fa-toggle-on me-1' : 'fas fa-toggle-off me-1'"></i>
+                <span th:text="${plano.status.name() == 'ATIVO'} ? 'Desativar' : 'Ativar'"></span>
+            </a>
+            <a th:href="@{/superadmin/planos-pagamento/eliminar/{id}(id=${plano.id})}"
+                class="btn btn-sm btn-outline-danger rounded-pill"
+                onclick="return confirm('Eliminar este plano de pagamento?')">
+                <i class="fas fa-trash"></i>
+            </a>
+        </div>
+    </div>
+</th:block>

@@ -2,9 +2,13 @@ package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.model.User;
+import ao.co.hzconsultoria.efacturacao.model.PlanoPagamento;
+import ao.co.hzconsultoria.efacturacao.model.PlanoPagamento.TipoPeriodo;
+import ao.co.hzconsultoria.efacturacao.model.PlanoPagamento.StatusPlano;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.UserRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
+import ao.co.hzconsultoria.efacturacao.repository.PlanoPagamentoRepository;
 import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -323,5 +327,65 @@ public class SuperAdminController {
         configuracaoSistemaRepository.save(config);
         ra.addFlashAttribute("mensagem", "Configurações de Armazenamento atualizadas!");
         return "redirect:/superadmin/configuracoes";
+    }
+
+    // ─── Planos de Pagamento ──────────────────────────────────────────────────
+    @Autowired
+    private PlanoPagamentoRepository planoPagamentoRepository;
+
+    @GetMapping("/planos-pagamento")
+    public String planosPagamento(Model model) {
+        model.addAttribute("planosTrimestrais",
+            planoPagamentoRepository.findByPeriodoOrderByPrecoAsc(TipoPeriodo.TRIMESTRAL));
+        model.addAttribute("planosSemestrais",
+            planoPagamentoRepository.findByPeriodoOrderByPrecoAsc(TipoPeriodo.SEMESTRAL));
+        model.addAttribute("planosAnuais",
+            planoPagamentoRepository.findByPeriodoOrderByPrecoAsc(TipoPeriodo.ANUAL));
+        model.addAttribute("totalPlanos", planoPagamentoRepository.count());
+        model.addAttribute("totalAtivos", planoPagamentoRepository.countByStatus(StatusPlano.ATIVO));
+        model.addAttribute("novoPlan", new PlanoPagamento());
+        return "superadmin/planos-pagamento";
+    }
+
+    @GetMapping("/planos-pagamento/novo")
+    public String novoPlanoForm(Model model) {
+        model.addAttribute("plano", new PlanoPagamento());
+        model.addAttribute("periodos", TipoPeriodo.values());
+        model.addAttribute("statuses", StatusPlano.values());
+        return "superadmin/planos-pagamento-form";
+    }
+
+    @GetMapping("/planos-pagamento/editar/{id}")
+    public String editarPlanoForm(@PathVariable Long id, Model model) {
+        PlanoPagamento plano = planoPagamentoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Plano não encontrado: " + id));
+        model.addAttribute("plano", plano);
+        model.addAttribute("periodos", TipoPeriodo.values());
+        model.addAttribute("statuses", StatusPlano.values());
+        return "superadmin/planos-pagamento-form";
+    }
+
+    @PostMapping("/planos-pagamento/salvar")
+    public String salvarPlano(@ModelAttribute PlanoPagamento plano, RedirectAttributes ra) {
+        planoPagamentoRepository.save(plano);
+        ra.addFlashAttribute("mensagem", "Plano de pagamento guardado com sucesso!");
+        return "redirect:/superadmin/planos-pagamento";
+    }
+
+    @GetMapping("/planos-pagamento/eliminar/{id}")
+    public String eliminarPlano(@PathVariable Long id, RedirectAttributes ra) {
+        planoPagamentoRepository.deleteById(id);
+        ra.addFlashAttribute("mensagem", "Plano eliminado com sucesso!");
+        return "redirect:/superadmin/planos-pagamento";
+    }
+
+    @GetMapping("/planos-pagamento/toggle/{id}")
+    public String togglePlano(@PathVariable Long id, RedirectAttributes ra) {
+        planoPagamentoRepository.findById(id).ifPresent(p -> {
+            p.setStatus(p.getStatus() == StatusPlano.ATIVO ? StatusPlano.INATIVO : StatusPlano.ATIVO);
+            planoPagamentoRepository.save(p);
+        });
+        ra.addFlashAttribute("mensagem", "Estado do plano atualizado!");
+        return "redirect:/superadmin/planos-pagamento";
     }
 }

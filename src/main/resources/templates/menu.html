@@ -116,7 +116,10 @@
       <!-- Logo do Sistema -->
       <div class="text-center py-4 border-bottom mb-2" style="border-color: rgba(120, 120, 120, 0.15) !important;">
         <a th:href="@{/dashboard}" class="d-inline-block">
-          <img th:src="@{${globalSistemaLogotipo != null ? globalSistemaLogotipo : '/img/logo.png'}}" alt="Logo" class="img-fluid" style="max-height: 85px; transition: transform 0.3s ease; filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.08));" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+          <img th:src="@{${globalSistemaLogotipo != null ? globalSistemaLogotipo : '/img/logo.png'}}" alt="Logo"
+            class="img-fluid"
+            style="max-height: 85px; transition: transform 0.3s ease; filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.08));"
+            onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
         </a>
       </div>
       <nav class="mt-2">
@@ -434,8 +437,10 @@
             </li>
 
             <!-- Group: Gestão Tributária (AGT) with fiscal/config items -->
-            <li class="nav-item has-treeview module-administracao-item" th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' menu-open' : ''">
-              <a href="#" class="nav-link" th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' active' : ''">
+            <li class="nav-item has-treeview module-administracao-item"
+              th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' menu-open' : ''">
+              <a href="#" class="nav-link"
+                th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' active' : ''">
                 <i class="nav-icon fas fa-landmark"></i>
                 <p>
                   Gestão Tributária
@@ -444,31 +449,36 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
+                  <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
                     <i class="fas fa-shield-alt nav-icon"></i>
                     <p>Configurações AGT</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/impostos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/impostos')} ? ' active' : ''">
+                  <a th:href="@{/configuracoes/impostos}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/configuracoes/impostos')} ? ' active' : ''">
                     <i class="fas fa-percent nav-icon"></i>
                     <p>Impostos (IVA/Selo)</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
+                  <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
                     <i class="fas fa-hand-holding-usd nav-icon"></i>
                     <p>Taxas Adicionais</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/moedas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
+                  <a th:href="@{/configuracoes/moedas}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
                     <i class="fas fa-coins nav-icon"></i>
                     <p>Moedas e Câmbio</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/series}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
+                  <a th:href="@{/configuracoes/series}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
                     <i class="fas fa-list-ol nav-icon"></i>
                     <p>Séries de Faturação</p>
                   </a>
@@ -544,6 +554,13 @@
               <a th:href="@{/superadmin/licenca/gerador}" class="nav-link bg-dark text-warning mt-1">
                 <i class="nav-icon fas fa-key"></i>
                 <p>Gerador de Licenças</p>
+              </a>
+            </li>
+            <li class="nav-item module-saas-item">
+              <a th:href="@{/superadmin/planos-pagamento}" class="nav-link bg-dark text-warning mt-1"
+                 th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
+                <i class="nav-icon fas fa-crown"></i>
+                <p>Planos de Pagamento</p>
               </a>
             </li>
           </th:block>
