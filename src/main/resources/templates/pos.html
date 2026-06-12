@@ -1650,7 +1650,7 @@
           var totalStr = $('#modalTotal').text().replace(' Kz', '').replace(',', '');
           var totalGeral = parseFloat(totalStr) || 0;
 
-          var itensCompra = [];
+           var itensCompra = [];
           for (var j = 0; j < cart.length; j++) {
             var it = cart[j];
             itensCompra.push({
@@ -1675,14 +1675,18 @@
             }
           }
 
-          var compra = {
+           // Detectar tipo de documento ativo (FR/FT/FP/GR)
+           var selectedDoc = $('.doc-type-card.active');
+           var docType = selectedDoc && selectedDoc.data('type') ? selectedDoc.data('type') : (url.indexOf('proforma') !== -1 ? 'FP' : 'FT');
+
+           var compra = {
             itens: itensCompra,
             total: totalGeral,
             formaPagamento: getFormaPagamento(),
             nomeCliente: obterNomeCliente(),
             nifCliente: obterNifCliente(),
             cliente: obterClienteId(),
-
+            tipoDocumento: docType,
             // Detalhes MULTICAIXA
             valorPagoMulticaixa: vMulticaixa,
             valorPagoCash: vCash,
@@ -2560,6 +2564,71 @@
         // Initial style
         slider.style.cursor = 'grab';
       });
+        // ─── Editar Pro-forma ───────────────────────────────────────────────
+        (function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var editarId = urlParams.get('editar');
+            if (!editarId) return;
+
+            fetch('/api/compras/proforma/' + editarId)
+                .then(function(res) {
+                    if (!res.ok) throw new Error('Pro-forma não encontrada');
+                    return res.json();
+                })
+                .then(function(data) {
+                    // Guardar o ID da pro-forma em edição
+                    window._editingProformaId = data.id;
+
+                    // Carregar itens no carrinho
+                    if (data.itens && data.itens.length > 0) {
+                        data.itens.forEach(function(item) {
+                            // Simular clique no produto ou adicionar diretamente ao array do carrinho
+                            var cartItem = {
+                                produtoId: item.produtoId,
+                                nomeProduto: item.nomeProduto,
+                                preco: item.preco,
+                                quantidade: item.quantidade,
+                                ivaPercentual: item.ivaPercentual || 0,
+                                subtotal: item.preco * item.quantidade,
+                                stockMax: item.stockMax || 9999
+                            };
+                            if (typeof addToCartDirect === 'function') {
+                                addToCartDirect(cartItem);
+                            } else if (typeof cartItems !== 'undefined') {
+                                cartItems.push(cartItem);
+                                if (typeof renderCart === 'function') renderCart();
+                            }
+                        });
+                    }
+
+                    // Pré-preencher dados do cliente na ficha de checkout
+                    if (data.nomeCliente) {
+                        var nomeEl = document.getElementById('nomeClienteCheckout') || document.getElementById('nomeCliente');
+                        if (nomeEl) nomeEl.value = data.nomeCliente;
+                    }
+                    if (data.nifCliente) {
+                        var nifEl = document.getElementById('nifClienteCheckout') || document.getElementById('nifCliente');
+                        if (nifEl) nifEl.value = data.nifCliente;
+                    }
+                    if (data.clienteId) {
+                        var clienteSelectEl = document.getElementById('clienteId');
+                        if (clienteSelectEl) clienteSelectEl.value = data.clienteId;
+                    }
+
+                    // Mostrar banner de edição
+                    var banner = document.createElement('div');
+                    banner.className = 'alert alert-warning alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3 shadow z-3';
+                    banner.style.zIndex = '9999';
+                    banner.innerHTML = '<i class="fas fa-edit me-2"></i><strong>Modo Edição:</strong> A editar Pro-forma #' + data.id + '. Ajuste os itens e cliente e emita novamente como Pro-forma.' +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                    document.body.prepend(banner);
+                })
+                .catch(function(err) {
+                    console.warn('Erro ao carregar pro-forma para edição:', err);
+                    alert('Não foi possível carregar a Pro-forma para edição: ' + err.message);
+                });
+        })();
     </script>
+
 </body>
 </html>

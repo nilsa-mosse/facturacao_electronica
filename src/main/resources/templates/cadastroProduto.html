@@ -342,16 +342,16 @@
                     <label class="form-label">Preço de Compra (Kz)</label>
                     <div class="input-group-premium">
                       <i class="fas fa-shopping-basket"></i>
-                      <input type="number" step="0.01" name="precoCompra" class="form-control input-premium"
-                        placeholder="0.00">
+                      <input type="text" id="precoCompra" name="precoCompra" class="form-control input-premium preco-mask"
+                        placeholder="0,00" data-type="currency">
                     </div>
                   </div>
                   <div class="col-sm-4">
                     <label class="form-label">Preço de Venda (Kz)</label>
                     <div class="input-group-premium">
                       <i class="fas fa-wallet"></i>
-                      <input type="number" step="0.01" name="preco" class="form-control input-premium"
-                        placeholder="0.00" required>
+                      <input type="text" id="preco" name="preco" class="form-control input-premium preco-mask"
+                        placeholder="0,00" data-type="currency" required>
                     </div>
                   </div>
                   <div class="col-sm-4">
@@ -361,13 +361,10 @@
                       <i class="fas fa-percent"></i>
                       <select name="ivaPercentual" class="form-select input-premium">
                         <option value="0">Isento / Não Aplicável</option>
-                        <!-- Regime Geral -->
-                        <th:block th:if="${regimeFiscal == 'GERAL'}">
-                          <option th:each="imp : ${impostos}"
-                            th:if="${imp.percentagem != null and (imp.percentagem.floatValue() == 14.0 or imp.percentagem.floatValue() == 1.0)}"
-                            th:value="${imp.percentagem}" th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'">
-                          </option>
-                        </th:block>
+                        <option th:each="imp : ${impostos}"
+                                th:value="${imp.percentagem}" 
+                                th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'">
+                        </option>
 
 
 
@@ -384,21 +381,9 @@
 
 
 
-                        <!-- Regime Simplificado -->
-                        <th:block th:if="${regimeFiscal == 'SIMPLIFICADO'}">
-                          <option th:each="imp : ${impostos}"
-                            th:if="${imp.percentagem != null and (imp.percentagem.floatValue() == 7.0 or imp.percentagem.floatValue() == 1.0)}"
-                            th:value="${imp.percentagem}" th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'">
-                          </option>
-                        </th:block>
 
-                        <!-- Regime de Exclusão -->
-                        <th:block th:if="${regimeFiscal == 'EXCLUSAO' or regimeFiscal == 'Regime de Exclusão'}">
-                          <option th:each="imp : ${impostos}"
-                            th:if="${imp.percentagem != null and (imp.percentagem.doubleValue() == 1.0)}"
-                            th:value="${imp.percentagem}" th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'">
-                          </option>
-                        </th:block>
+
+
                       </select>
                     </div>
                   </div>
@@ -482,6 +467,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/imask@7.1.1/dist/imask.min.js"></script>
   <script>
     function toggleDatasValidade(enabled) {
       const seccao = document.getElementById('seccaoDatasValidade');
@@ -507,6 +493,40 @@
         fileNameDiv.style.setProperty('display', 'inline-block', 'important');
       }
     }
+
+    // Aplicar máscaras de moeda nos campos de preço
+    document.addEventListener('DOMContentLoaded', function() {
+      const precoMasks = document.querySelectorAll('.preco-mask');
+      
+      precoMasks.forEach(function(element) {
+        // Máscara para moeda: 1.234.567,89 (até 15 dígitos inteiros, 2 casas decimais)
+        const maskOptions = {
+          mask: 'num',
+          blocks: {
+            num: {
+              mask: Number,
+              scale: 2,
+              signed: false,
+              thousandsSeparator: '.',
+              padFractionalZeros: true,
+              normalizeZeros: true,
+              radix: ','
+            }
+          },
+          lazy: false,
+          autoUnmask: true
+        };
+        
+        const imask = IMask(element, maskOptions);
+        
+        // Antes de enviar o formulário, converter para formato numérico
+        element.form.addEventListener('submit', function(e) {
+          // Converter valor mascarado para número
+          const valor = imask.unmaskedValue || '0';
+          element.value = valor || '0';
+        });
+      });
+    });
   </script>
 </body>
 

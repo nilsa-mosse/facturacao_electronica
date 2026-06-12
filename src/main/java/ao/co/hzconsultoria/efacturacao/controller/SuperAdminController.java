@@ -10,6 +10,7 @@ import ao.co.hzconsultoria.efacturacao.repository.UserRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.PlanoPagamentoRepository;
 import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
+import ao.co.hzconsultoria.efacturacao.config.ModuloItens;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -344,6 +345,7 @@ public class SuperAdminController {
         model.addAttribute("totalPlanos", planoPagamentoRepository.count());
         model.addAttribute("totalAtivos", planoPagamentoRepository.countByStatus(StatusPlano.ATIVO));
         model.addAttribute("novoPlan", new PlanoPagamento());
+        model.addAttribute("modulosDisponiveis", ModuloItens.MODULO_LABELS);
         return "superadmin/planos-pagamento";
     }
 
@@ -352,6 +354,7 @@ public class SuperAdminController {
         model.addAttribute("plano", new PlanoPagamento());
         model.addAttribute("periodos", TipoPeriodo.values());
         model.addAttribute("statuses", StatusPlano.values());
+        model.addAttribute("modulosDisponiveis", ModuloItens.MODULO_LABELS);
         return "superadmin/planos-pagamento-form";
     }
 
@@ -362,6 +365,7 @@ public class SuperAdminController {
         model.addAttribute("plano", plano);
         model.addAttribute("periodos", TipoPeriodo.values());
         model.addAttribute("statuses", StatusPlano.values());
+        model.addAttribute("modulosDisponiveis", ModuloItens.MODULO_LABELS);
         return "superadmin/planos-pagamento-form";
     }
 

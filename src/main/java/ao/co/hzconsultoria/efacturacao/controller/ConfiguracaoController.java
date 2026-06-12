@@ -1,4 +1,4 @@
-﻿package ao.co.hzconsultoria.efacturacao.controller;
+package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.model.*;
 import ao.co.hzconsultoria.efacturacao.repository.*;
@@ -52,6 +52,8 @@ public class ConfiguracaoController {
     @Autowired
     private PermissaoModuloRepository permissaoModuloRepository;
     @Autowired
+    private EstabelecimentoRepository estabelecimentoRepository;
+    @Autowired
     private MessageSource messageSource;
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.AgtService agtService;
@@ -61,21 +63,23 @@ public class ConfiguracaoController {
     private ConfiguracaoEmpresaService configuracaoEmpresaService;
     @Autowired
     private DynamicMailService dynamicMailService;
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.UserRegistrationService userRegistrationService;
 
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
 
-    // ─── Dados da Empresa ────────────────────────────────────────────────────
     @GetMapping("/empresa")
     public String empresa(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(new Empresa()) : new Empresa();
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(new Empresa())
+                : new Empresa();
         model.addAttribute("empresa", empresa);
         model.addAttribute("regimes", regimeFiscalRepository.findAll());
-        // Listar estabelecimentos associados à empresa atual (se existir)
         if (empresaId != null) {
             model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
-            // Carregar configurações específicas da empresa
             model.addAttribute("configEmpresa", configuracaoEmpresaService.obterConfiguracao(empresaId));
         } else {
             model.addAttribute("estabelecimentos", java.util.Collections.emptyList());
@@ -85,91 +89,41 @@ public class ConfiguracaoController {
     }
 
     @PostMapping("/empresa/salvar")
-    public String salvarEmpresa(@ModelAttribute Empresa empresa, 
-                               @RequestParam(value = "logoFile", required = false) MultipartFile logoFile,
-                               RedirectAttributes redirectAttributes) {
-        
+    public String salvarEmpresa(@ModelAttribute Empresa empresa,
+            @RequestParam(value = "logoFile", required = false) MultipartFile logoFile,
+            RedirectAttributes redirectAttributes) {
         Long currentEmpresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        
-        // Segurança: verificar se o usuário está tentando salvar sua própria empresa
         if (empresa.getId() != null && !empresa.getId().equals(currentEmpresaId)) {
             return "redirect:/dashboard";
         }
-
         if (logoFile != null && !logoFile.isEmpty()) {
             try {
                 Path uploadPath = Paths.get(logoUploadDir).toAbsolutePath().normalize();
-                
-                if (!Files.exists(uploadPath)) {
+                if (!Files.exists(uploadPath))
                     Files.createDirectories(uploadPath);
-                }
-                
-                // Sanitizar nome do ficheiro para evitar path traversal
-                String originalName = logoFile.getOriginalFilename();
-                String safeName = (originalName != null) ? originalName.replaceAll("[^a-zA-Z0-9._-]", "_") : "logo";
+                String safeName = (logoFile.getOriginalFilename() != null)
+                        ? logoFile.getOriginalFilename().replaceAll("[^a-zA-Z0-9._-]", "_")
+                        : "logo";
                 String fileName = "logo_empresa_" + currentEmpresaId + "_" + safeName;
                 Path filePath = uploadPath.resolve(fileName);
                 Files.copy(logoFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                
-                // URL relativa servida pelo WebConfig via /uploads/**
                 empresa.setLogotipo("/uploads/logo/" + fileName);
             } catch (IOException e) {
-                e.printStackTrace();
-                redirectAttributes.addFlashAttribute("erro", "Erro ao carregar o logotipo: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("erro", "Erro ao carregar logotipo: " + e.getMessage());
             }
         }
-        
         empresaRepository.save(empresa);
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/empresa";
     }
 
-    @Autowired
-    private EstabelecimentoRepository estabelecimentoRepository;
-
-    @Autowired
-    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private ao.co.hzconsultoria.efacturacao.service.UserRegistrationService userRegistrationService;
-
-
-    @PostMapping("/empresa/salvar-config")
-    public String salvarConfigEmpresa(
-            @RequestParam(defaultValue = "false") boolean usarLogotipoEmDocumentos,
-            @RequestParam(defaultValue = "false") boolean usarCabecalhoPersonalizadoEmDocumentos,
-            @RequestParam(defaultValue = "false") boolean usarRodapePersonalizadoEmDocumentos,
-            @RequestParam(required = false, defaultValue = "") String rodapePersonalizado,
-            @RequestParam(defaultValue = "30") int segTempoExpiracaoSessao,
-            @RequestParam(defaultValue = "false") boolean segTwoFactorAtivo,
-            @RequestParam(defaultValue = "false") boolean notificacaoEmailHabilitada,
-            @RequestParam(defaultValue = "false") boolean notificacaoSmsHabilitada,
-            RedirectAttributes ra) {
-        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        if (empresaId != null) {
-            ConfiguracaoEmpresa cfg = configuracaoEmpresaService.obterConfiguracao(empresaId);
-            cfg.setUsarLogotipoEmDocumentos(usarLogotipoEmDocumentos);
-            cfg.setUsarCabecalhoPersonalizadoEmDocumentos(usarCabecalhoPersonalizadoEmDocumentos);
-            cfg.setUsarRodapePersonalizadoEmDocumentos(usarRodapePersonalizadoEmDocumentos);
-            cfg.setRodapePersonalizado(rodapePersonalizado);
-            cfg.setSegTempoExpiracaoSessao(segTempoExpiracaoSessao);
-            cfg.setSegTwoFactorAtivo(segTwoFactorAtivo);
-            cfg.setNotificacaoEmailHabilitada(notificacaoEmailHabilitada);
-            cfg.setNotificacaoSmsHabilitada(notificacaoSmsHabilitada);
-            configuracaoEmpresaService.salvarConfiguracao(cfg);
-        }
-        ra.addFlashAttribute("mensagem",
-                messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/empresa";
-    }
-    // ─── Utilizadores e Perfis ───────────────────────────────────────────────
     @GetMapping("/utilizadores")
     public String utilizadores(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
         boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
-
         if (isSuperAdmin) {
             model.addAttribute("utilizadores", userRepository.findAll());
             model.addAttribute("estabelecimentos", estabelecimentoRepository.findAll());
@@ -177,28 +131,21 @@ public class ConfiguracaoController {
             model.addAttribute("utilizadores", userRepository.findByEmpresa_Id(empresaId));
             model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
         }
-        
         model.addAttribute("novoUsuario", new User());
         model.addAttribute("isSuperAdmin", isSuperAdmin);
         return "configuracoes/utilizadores";
     }
 
     @PostMapping("/utilizadores/salvar")
-    public String salvarUsuario(@ModelAttribute User user, 
-                               @RequestParam(value = "estabelecimentoIds", required = false) List<Long> estabelecimentoIds,
-                               RedirectAttributes redirectAttributes) {
+    public String salvarUsuario(@ModelAttribute User user,
+            @RequestParam(value = "estabelecimentoIds", required = false) List<Long> estabelecimentoIds,
+            RedirectAttributes redirectAttributes) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
-
-        // Proteção: Admin não pode criar SuperAdmin
-        if ("SUPERADMIN".equals(user.getRole())) {
+        if ("SUPERADMIN".equals(user.getRole()))
             user.setRole("OPERADOR");
-        }
-
         boolean isNew = (user.getId() == null);
-
         if (!isNew) {
-            // Edição: merge seguro dos campos
             User existing = userRepository.findById(user.getId()).orElse(null);
             if (existing != null) {
                 existing.setNome(user.getNome());
@@ -207,40 +154,31 @@ public class ConfiguracaoController {
                 existing.setRole(user.getRole());
                 existing.setAtivo(user.isAtivo());
                 existing.setEmpresa(empresa);
-                if (user.getSenha() != null && !user.getSenha().isEmpty() && !user.getSenha().startsWith("$2a$")) {
+                if (user.getSenha() != null && !user.getSenha().isEmpty() && !user.getSenha().startsWith("$2a$"))
                     existing.setSenha(passwordEncoder.encode(user.getSenha()));
-                }
-                if (estabelecimentoIds != null && !estabelecimentoIds.isEmpty()) {
-                    java.util.Set<Estabelecimento> ests = new java.util.HashSet<>(estabelecimentoRepository.findAllById(estabelecimentoIds));
-                    existing.setEstabelecimentos(ests);
-                }
+                if (estabelecimentoIds != null && !estabelecimentoIds.isEmpty())
+                    existing.setEstabelecimentos(
+                            new java.util.HashSet<>(estabelecimentoRepository.findAllById(estabelecimentoIds)));
                 userRepository.save(existing);
             }
         } else {
-            // Novo utilizador — verificar se o login já existe
             if (user.getLogin() != null && !user.getLogin().isEmpty()) {
-                boolean loginExiste = userRepository.findByLogin(user.getLogin()).isPresent();
-                if (loginExiste) {
+                if (userRepository.findByLogin(user.getLogin()).isPresent()) {
                     redirectAttributes.addFlashAttribute("erro",
-                            "Erro: O login '" + user.getLogin() + "' já está em uso. Escolha um login diferente.");
+                            "Erro: O login '" + user.getLogin() + "' já está em uso.");
                     return "redirect:/configuracoes/utilizadores";
                 }
             }
             user.setEmpresa(empresa);
             String senhaAleatoria = userRegistrationService.gerarSenhaAleatoria();
             user.setSenha(passwordEncoder.encode(senhaAleatoria));
-            // Forçar alteração de senha no primeiro login
             user.setForcarAlteracaoSenha(true);
-            if (estabelecimentoIds != null && !estabelecimentoIds.isEmpty()) {
-                java.util.Set<Estabelecimento> ests = new java.util.HashSet<>(estabelecimentoRepository.findAllById(estabelecimentoIds));
-                user.setEstabelecimentos(ests);
-            }
+            if (estabelecimentoIds != null && !estabelecimentoIds.isEmpty())
+                user.setEstabelecimentos(
+                        new java.util.HashSet<>(estabelecimentoRepository.findAllById(estabelecimentoIds)));
             userRepository.save(user);
-
-            // Enviar credenciais por email
             userRegistrationService.enviarCredenciaisPorEmail(user, senhaAleatoria);
         }
-
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/utilizadores";
@@ -258,12 +196,9 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/utilizadores";
     }
 
-    // ─── Impostos e Taxas ────────────────────────────────────────────────────
     @GetMapping("/impostos")
     public String impostos(Model model) {
-        model.addAttribute("impostos", impostoRepository.findAll());
-        model.addAttribute("novoImposto", new Imposto());
-        return "configuracoes/impostos";
+        return "redirect:/configuracoes/fiscais/impostos";
     }
 
     @PostMapping("/impostos/salvar")
@@ -271,7 +206,7 @@ public class ConfiguracaoController {
         impostoRepository.save(imposto);
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/impostos";
+        return "redirect:/configuracoes/fiscais/impostos";
     }
 
     @GetMapping("/impostos/eliminar/{id}")
@@ -279,10 +214,9 @@ public class ConfiguracaoController {
         impostoRepository.deleteById(id);
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/impostos";
+        return "redirect:/configuracoes/fiscais/impostos";
     }
 
-    // ─── Séries de Facturação ────────────────────────────────────────────────
     @GetMapping("/series")
     public String series(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
@@ -314,7 +248,6 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/series";
     }
 
-    // ─── Moedas e Câmbios ────────────────────────────────────────────────────
     @GetMapping("/moedas")
     public String moedas(Model model) {
         model.addAttribute("moedas", moedaRepository.findAll());
@@ -338,7 +271,6 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/moedas";
     }
 
-    // ─── Métodos de Pagamento ────────────────────────────────────────────────
     @GetMapping("/pagamentos")
     public String pagamentos(Model model) {
         model.addAttribute("metodos", metodoPagamentoRepository.findAll());
@@ -362,7 +294,6 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/pagamentos";
     }
 
-    // ─── Comunicação AGT ─────────────────────────────────────────────────────
     @GetMapping("/comunicacao-agt")
     public String comunicacaoAgt(Model model) {
         List<ConfiguracaoAGT> cfgs = configuracaoAGTRepository.findAll();
@@ -383,20 +314,18 @@ public class ConfiguracaoController {
     public ResponseEntity<Map<String, Object>> testarConexaoAgt(@RequestBody Map<String, String> payload) {
         String urlApi = payload.get("urlApi");
         String token = payload.get("token");
-
         if (urlApi == null || urlApi.trim().isEmpty()) {
             Map<String, Object> err = new HashMap<>();
             err.put("sucesso", false);
             err.put("mensagem",
                     messageSource.getMessage("config.agt.teste.falha_url", null, LocaleContextHolder.getLocale()));
-            return ResponseEntity.badRequest().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(err);
+            return ResponseEntity.badRequest().contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(err);
         }
-
         Map<String, Object> resultado = agtService.pingAgt(urlApi, token);
         return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(resultado);
     }
 
-    // ─── Servidor e Rede ─────────────────────────────────────────────────
     @GetMapping("/servidor")
     public String servidor(Model model) {
         model.addAttribute("cfg", cfgService.getServidor());
@@ -411,7 +340,6 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/servidor";
     }
 
-    // ─── Email / SMTP ─────────────────────────────────────────────────────
     @GetMapping("/email")
     public String email(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
@@ -436,16 +364,9 @@ public class ConfiguracaoController {
     public String salvarEmail(@ModelAttribute ConfiguracaoEmail cfg, RedirectAttributes ra) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         if (empresaId != null) {
-            configuracaoEmpresaService.atualizarConfiguracaoEmail(
-                empresaId,
-                cfg.getSmtpHost(),
-                cfg.getSmtpPorta(),
-                cfg.getSmtpUsername(),
-                cfg.getSmtpPassword(),
-                cfg.getSegurancaTipo(),
-                cfg.getEmailRemetente(),
-                cfg.getNomeRemetente()
-            );
+            configuracaoEmpresaService.atualizarConfiguracaoEmail(empresaId, cfg.getSmtpHost(), cfg.getSmtpPorta(),
+                    cfg.getSmtpUsername(), cfg.getSmtpPassword(), cfg.getSegurancaTipo(), cfg.getEmailRemetente(),
+                    cfg.getNomeRemetente());
         } else {
             cfgService.saveEmail(cfg);
         }
@@ -461,23 +382,22 @@ public class ConfiguracaoController {
         String dest = payload.get("emailDestino");
         if (dest == null || dest.isEmpty()) {
             result.put("sucesso", false);
-            result.put("mensagem", "Endereço de email de destino não informado.");
-            return ResponseEntity.badRequest().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(result);
+            result.put("mensagem", "Email não informado.");
+            return ResponseEntity.badRequest().contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(result);
         }
-        result.put("sucesso", true);
         try {
             Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-            dynamicMailService.enviarEmail(empresaId, dest, "Teste de Configuração de Email - Kwanza ERP", 
-                "Se recebeu este email, significa que a configuração de email do seu sistema de facturação está correcta e funcional.");
-            result.put("mensagem", "Email de teste enviado com sucesso para " + dest);
+            dynamicMailService.enviarEmail(empresaId, dest, "Teste - Kwanza ERP", "Configuração de email OK.");
+            result.put("sucesso", true);
+            result.put("mensagem", "Email enviado para " + dest);
         } catch (Exception e) {
             result.put("sucesso", false);
-            result.put("mensagem", "Falha ao enviar email de teste: " + e.getMessage());
+            result.put("mensagem", "Erro: " + e.getMessage());
         }
         return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(result);
     }
 
-    // ─── Base de Dados ────────────────────────────────────────────────────
     @GetMapping("/banco-dados")
     public String bancoDados(Model model) {
         model.addAttribute("cfg", cfgService.getDatabase());
@@ -492,7 +412,6 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/banco-dados";
     }
 
-    // ─── Storage ──────────────────────────────────────────────────────────
     @GetMapping("/storage")
     public String storage(Model model) {
         model.addAttribute("cfg", cfgService.getStorage());
@@ -507,7 +426,6 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/storage";
     }
 
-    // ─── Segurança ────────────────────────────────────────────────────────
     @GetMapping("/seguranca")
     public String seguranca(Model model) {
         model.addAttribute("cfg", cfgService.getSeguranca());
@@ -522,7 +440,6 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/seguranca";
     }
 
-    // ─── Parâmetros Gerais ───────────────────────────────────────────────────
     @GetMapping("/geral")
     public String geral(Model model) {
         model.addAttribute("sistema", cfgService.getSistema());
@@ -537,14 +454,13 @@ public class ConfiguracaoController {
         return "redirect:/configuracoes/geral";
     }
 
-    // ─── Configurações Fiscais ───────────────────────────────────────────────
     @GetMapping("/fiscais/impostos")
     public String fiscaisImpostos(Model model) {
         model.addAttribute("impostos", impostoRepository.findAll());
         model.addAttribute("novoImposto", new Imposto());
         return "configuracoes/fiscais/impostos";
     }
- 
+
     @PostMapping("/fiscais/impostos/salvar")
     public String salvarImpostoFiscal(@ModelAttribute Imposto imposto, RedirectAttributes redirectAttributes) {
         impostoRepository.save(imposto);
@@ -552,7 +468,7 @@ public class ConfiguracaoController {
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/fiscais/impostos";
     }
- 
+
     @GetMapping("/fiscais/impostos/eliminar/{id}")
     public String eliminarImpostoFiscal(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         impostoRepository.deleteById(id);
@@ -586,21 +502,21 @@ public class ConfiguracaoController {
 
     @GetMapping("/fiscais/regime-fiscal")
     public String fiscaisRegime(Model model) {
-        // Semente inicial se a tabela estiver vazia
         if (regimeFiscalRepository.count() == 0) {
             regimeFiscalRepository.save(new RegimeFiscal("Regime Geral", "GERAL",
-                    "Para empresas com facturação superior a 250 Milhões de Kz.", "fas fa-balance-scale"));
+                    "Para empresas com faturação superior a 350 Milhões de Kwanzas.", "fas fa-balance-scale"));
             regimeFiscalRepository.save(new RegimeFiscal("Regime Simplificado", "SIMPLIFICADO",
-                    "Para empresas com facturação entre 7.5 e 250 Milhões de Kz.", "fas fa-shield-alt"));
+                    "Para PMEs com faturação entre 10 e 350 milhões de Kwanzas", "fas fa-shield-alt"));
             regimeFiscalRepository.save(new RegimeFiscal("Regime de Exclusão", "EXCLUSAO",
-                    "Para empresas com facturação inferior a 7.5 Milhões de Kz.", "fas fa-ban"));
+                    "Para negócios menores, com faturação inferior a 10 milhões de Kwanzas", "fas fa-ban"));
         }
-
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(new Empresa()) : new Empresa();
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(new Empresa())
+                : new Empresa();
         model.addAttribute("empresa", empresa);
         model.addAttribute("regimes", regimeFiscalRepository.findAll());
         model.addAttribute("novoRegime", new RegimeFiscal());
+        model.addAttribute("todosImpostos", impostoRepository.findAll());
         return "configuracoes/fiscais/regime_fiscal";
     }
 
@@ -612,12 +528,8 @@ public class ConfiguracaoController {
             if (e != null) {
                 e.setRegimeFiscal(regime);
                 empresaRepository.save(e);
-                redirectAttributes.addFlashAttribute("mensagem", "Regime Fiscal actualizado com sucesso!");
-            } else {
-                redirectAttributes.addFlashAttribute("erro", "Empresa não encontrada.");
+                redirectAttributes.addFlashAttribute("mensagem", "Regime Fiscal atualizado!");
             }
-        } else {
-            redirectAttributes.addFlashAttribute("erro", "Não foi possível identificar a empresa do utilizador.");
         }
         return "redirect:/configuracoes/fiscais/regime-fiscal";
     }
@@ -625,7 +537,26 @@ public class ConfiguracaoController {
     @PostMapping("/fiscais/regime-fiscal/adicionar")
     public String salvarNovoRegime(@ModelAttribute RegimeFiscal regimeFiscal, RedirectAttributes redirectAttributes) {
         regimeFiscalRepository.save(regimeFiscal);
-        redirectAttributes.addFlashAttribute("mensagem", "Novo regime fiscal adicionado com sucesso!");
+        redirectAttributes.addFlashAttribute("mensagem", "Regime adicionado!");
+        return "redirect:/configuracoes/fiscais/regime-fiscal";
+    }
+
+    @PostMapping("/fiscais/regime-fiscal/associar-impostos")
+    public String associarImpostosRegime(@RequestParam Long regimeId,
+            @RequestParam(value = "impostoIds", required = false) List<Long> impostoIds,
+            RedirectAttributes redirectAttributes) {
+        RegimeFiscal regime = regimeFiscalRepository.findById(regimeId).orElse(null);
+        if (regime != null) {
+            regime.getImpostos().clear();
+            if (impostoIds != null && !impostoIds.isEmpty()) {
+                List<Imposto> impostosSelecionados = impostoRepository.findAllById(impostoIds);
+                regime.getImpostos().addAll(impostosSelecionados);
+            }
+            regimeFiscalRepository.save(regime);
+            redirectAttributes.addFlashAttribute("mensagem", "Impostos associados com sucesso ao regime " + regime.getNome() + "!");
+        } else {
+            redirectAttributes.addFlashAttribute("erro", "Regime fiscal não encontrado.");
+        }
         return "redirect:/configuracoes/fiscais/regime-fiscal";
     }
 
@@ -651,75 +582,40 @@ public class ConfiguracaoController {
                 messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/fiscais/retencoes";
     }
-    // ─── Estabelecimentos ────────────────────────────────────────────────────
+
     @GetMapping("/estabelecimentos")
     public String estabelecimentos(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
         boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
-
         if (isSuperAdmin) {
             model.addAttribute("estabelecimentos", estabelecimentoRepository.findAll());
             model.addAttribute("empresas", empresaRepository.findAll());
         } else {
             model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
         }
-        
         model.addAttribute("novoEstabelecimento", new Estabelecimento());
         model.addAttribute("isSuperAdmin", isSuperAdmin);
         return "configuracoes/estabelecimentos";
     }
 
-    @GetMapping("/estabelecimentos/editar/{id}")
-    public String editarEstabelecimento(@PathVariable Long id, Model model) {
-        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
-
-        Estabelecimento est = estabelecimentoRepository.findById(id).orElse(null);
-        if (est == null) {
-            return "redirect:/configuracoes/estabelecimentos";
-        }
-
-        // Verificar permissões: superadmin ou estabelecimento pertence à empresa atual
-        if (!isSuperAdmin) {
-            if (est.getEmpresa() == null || !est.getEmpresa().getId().equals(empresaId)) {
-                return "redirect:/configuracoes/estabelecimentos";
-            }
-        }
-
-        // Preparar dados do modelo para reutilizar a mesma página
-        if (isSuperAdmin) {
-            model.addAttribute("estabelecimentos", estabelecimentoRepository.findAll());
-            model.addAttribute("empresas", empresaRepository.findAll());
-        } else {
-            model.addAttribute("estabelecimentos", estabelecimentoRepository.findByEmpresa_Id(empresaId));
-        }
-        model.addAttribute("novoEstabelecimento", est);
-        model.addAttribute("isSuperAdmin", isSuperAdmin);
-        model.addAttribute("showForm", true);
-        return "configuracoes/estabelecimentos";
-    }
-
     @PostMapping("/estabelecimentos/salvar")
-    public String salvarEstabelecimento(@ModelAttribute Estabelecimento estabelecimento, 
-                                       @RequestParam(value = "empresaSelecionadaId", required = false) Long empresaSelecionadaId,
-                                       RedirectAttributes redirectAttributes) {
-        
+    public String salvarEstabelecimento(@ModelAttribute Estabelecimento estabelecimento,
+            @RequestParam(value = "empresaSelecionadaId", required = false) Long empresaSelecionadaId,
+            RedirectAttributes redirectAttributes) {
         Long currentEmpresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
         boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
-
         Empresa empresa;
         if (isSuperAdmin && empresaSelecionadaId != null) {
             empresa = empresaRepository.findById(empresaSelecionadaId).orElse(null);
         } else {
             empresa = empresaRepository.findById(currentEmpresaId).orElse(null);
         }
-
         estabelecimento.setEmpresa(empresa);
         estabelecimentoRepository.save(estabelecimento);
-        
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
         return "redirect:/configuracoes/estabelecimentos";
@@ -728,80 +624,54 @@ public class ConfiguracaoController {
     @GetMapping("/estabelecimentos/eliminar/{id}")
     public String eliminarEstabelecimento(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         Long currentEmpresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
         boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
-
         Estabelecimento est = estabelecimentoRepository.findById(id).orElse(null);
-        if (est != null) {
-            if (isSuperAdmin || (est.getEmpresa() != null && est.getEmpresa().getId().equals(currentEmpresaId))) {
-                estabelecimentoRepository.deleteById(id);
-                redirectAttributes.addFlashAttribute("mensagem",
-                        messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
-            }
+        if (est != null
+                && (isSuperAdmin || (est.getEmpresa() != null && est.getEmpresa().getId().equals(currentEmpresaId)))) {
+            estabelecimentoRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("mensagem",
+                    messageSource.getMessage("msg.sucesso.removido", null, LocaleContextHolder.getLocale()));
         }
         return "redirect:/configuracoes/estabelecimentos";
     }
 
-    // ─── Controlo de Acesso ──────────────────────────────────────────────────
     @GetMapping("/controlo-acesso")
     public String controloAcesso(@RequestParam(value = "usuarioId", required = false) Long usuarioId, Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
         boolean isSuperAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
-
-        List<User> usuarios;
-        if (isSuperAdmin) {
-            usuarios = userRepository.findAll();
-        } else {
-            usuarios = userRepository.findByEmpresa_Id(empresaId);
-        }
+        List<User> usuarios = isSuperAdmin ? userRepository.findAll() : userRepository.findByEmpresa_Id(empresaId);
         model.addAttribute("usuarios", usuarios);
-
-        // Utilizar as chaves dos módulos definidas centralmente
-        List<String> modulos = new java.util.ArrayList<>(ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.keySet());
+        List<String> modulos = new java.util.ArrayList<>(
+                ao.co.hzconsultoria.efacturacao.config.ModuloItens.ITENS_POR_MODULO.keySet());
         model.addAttribute("modulosList", modulos);
         model.addAttribute("modulosLabels", ao.co.hzconsultoria.efacturacao.config.ModuloItens.MODULO_LABELS);
-
         if (usuarioId != null) {
             User user = userRepository.findById(usuarioId).orElse(null);
             if (user != null) {
-                // Garantir que todas as permissões base existam para este usuário
                 for (String modulo : modulos) {
-                    Optional<PermissaoModulo> opt = permissaoModuloRepository.findByModuloAndUsuario_Id(modulo, usuarioId);
-                    
-                    // Lógica de ativação por default baseada no Role (conforme solicitado)
+                    Optional<PermissaoModulo> opt = permissaoModuloRepository.findByModuloAndUsuario_Id(modulo,
+                            usuarioId);
                     boolean isAdmin = "ADMIN".equals(user.getRole());
                     boolean isSuperAdminUser = "SUPERADMIN".equals(user.getRole());
-                    
-                    boolean deveEstarAtivo = false;
-                    if (isSuperAdminUser) {
-                        deveEstarAtivo = true;
-                    } else if (isAdmin) {
-                        // Admin tem acesso a tudo EXCEPTO Painel Global
-                        deveEstarAtivo = !modulo.equals("PAINEL_GLOBAL");
-                    } else if ("GESTOR".equals(user.getRole())) {
-                        deveEstarAtivo = modulo.equals("DASHBOARD") || modulo.equals("VENDAS") || 
-                                         modulo.equals("STOCK") || modulo.equals("ENTIDADES") || 
-                                         modulo.equals("FACTURACAO") || modulo.equals("FINANCEIRO");
-                    } else {
-                        // Operador/User tem acesso APENAS a Vendas
-                        deveEstarAtivo = modulo.equals("VENDAS");
-                    }
-                    
-                    if (!opt.isPresent()) {
+                    boolean deveEstarAtivo = isSuperAdminUser ? true
+                            : (isAdmin ? !modulo.equals("PAINEL_GLOBAL")
+                                    : ("GESTOR".equals(user.getRole())
+                                            ? modulo.matches("DASHBOARD|VENDAS|STOCK|ENTIDADES|FACTURACAO|FINANCEIRO")
+                                            : modulo.equals("VENDAS")));
+                    if (!opt.isPresent())
                         permissaoModuloRepository.save(new PermissaoModulo(modulo, user, deveEstarAtivo));
-                    }
                 }
-                
                 model.addAttribute("usuarioSelecionado", user);
                 Map<String, Boolean> permsMap = new HashMap<>();
-                permissaoModuloRepository.findByUsuario_Id(usuarioId).forEach(p -> {
-                    permsMap.put(p.getModulo(), p.isAtivo());
-                });
+                permissaoModuloRepository.findByUsuario_Id(usuarioId)
+                        .forEach(p -> permsMap.put(p.getModulo(), p.isAtivo()));
                 model.addAttribute("permsMap", permsMap);
             }
         }
-        
         return "configuracoes/controlo-acesso";
     }
 
@@ -810,13 +680,11 @@ public class ConfiguracaoController {
     public ResponseEntity<Map<String, Object>> salvarControloAcesso(@RequestBody Map<String, Object> payload) {
         Long usuarioId = Long.valueOf(payload.get("usuarioId").toString());
         List<Map<String, Object>> permissoes = (List<Map<String, Object>>) payload.get("permissoes");
-        
         User user = userRepository.findById(usuarioId).orElse(null);
         if (user != null) {
             for (Map<String, Object> p : permissoes) {
                 String modulo = (String) p.get("modulo");
                 boolean ativo = (boolean) p.get("ativo");
-                
                 permissaoModuloRepository.findByModuloAndUsuario_Id(modulo, usuarioId).ifPresent(perm -> {
                     perm.setAtivo(ativo);
                     permissaoModuloRepository.save(perm);
@@ -828,51 +696,32 @@ public class ConfiguracaoController {
         return ResponseEntity.ok(res);
     }
 
-    // ─── Configurações Específicas da Empresa ──────────────────────────────
-    /**
-     * Obtém as configurações da empresa do utilizador autenticado
-     */
     @GetMapping("/empresa/configuracoes")
     public String configuracoeEmpresa(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        
-        if (empresaId == null) {
+        if (empresaId == null)
             return "redirect:/dashboard";
-        }
-
         ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
         model.addAttribute("configuracao", config);
-        
         return "configuracoes/empresa-config";
     }
 
-    /**
-     * Salva as configurações de email da empresa
-     */
     @PostMapping("/empresa/salvar-email")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> salvarConfiguracaoEmail(
-            @RequestParam String smtpHost,
-            @RequestParam int smtpPorta,
-            @RequestParam String smtpUsername,
-            @RequestParam String smtpPassword,
-            @RequestParam String segurancaTipo,
-            @RequestParam String remetente,
-            @RequestParam String nomeRemetente) {
-
+    public ResponseEntity<Map<String, Object>> salvarConfiguracaoEmail(@RequestParam String smtpHost,
+            @RequestParam int smtpPorta, @RequestParam String smtpUsername, @RequestParam String smtpPassword,
+            @RequestParam String segurancaTipo, @RequestParam String remetente, @RequestParam String nomeRemetente) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(res);
         }
-
         try {
-            configuracaoEmpresaService.atualizarConfiguracaoEmail(empresaId, smtpHost, smtpPorta,
-                    smtpUsername, smtpPassword, segurancaTipo, remetente, nomeRemetente);
-            
+            configuracaoEmpresaService.atualizarConfiguracaoEmail(empresaId, smtpHost, smtpPorta, smtpUsername,
+                    smtpPassword, segurancaTipo, remetente, nomeRemetente);
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", true);
             res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
@@ -880,35 +729,27 @@ public class ConfiguracaoController {
         } catch (Exception e) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
-            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            res.put("mensagem", "Erro: " + e.getMessage());
             return ResponseEntity.ok(res);
         }
     }
 
-    /**
-     * Salva as configurações de storage da empresa
-     */
     @PostMapping("/empresa/salvar-storage")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> salvarConfiguracaoStorage(
-            @RequestParam String storageTipo,
-            @RequestParam String caminhoBase,
-            @RequestParam int tamanhoMaxFicheiro,
+    public ResponseEntity<Map<String, Object>> salvarConfiguracaoStorage(@RequestParam String storageTipo,
+            @RequestParam String caminhoBase, @RequestParam int tamanhoMaxFicheiro,
             @RequestParam int tamanhoMaxRequest) {
-
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(res);
         }
-
         try {
             configuracaoEmpresaService.atualizarConfiguracaoStorage(empresaId, storageTipo, caminhoBase,
                     tamanhoMaxFicheiro, tamanhoMaxRequest);
-            
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", true);
             res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
@@ -916,37 +757,30 @@ public class ConfiguracaoController {
         } catch (Exception e) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
-            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            res.put("mensagem", "Erro: " + e.getMessage());
             return ResponseEntity.ok(res);
         }
     }
 
-    /**
-     * Salva a política de segurança da empresa
-     */
     @PostMapping("/empresa/salvar-seguranca")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> salvarPoliticaSeguranca(
-            @RequestParam int tempoExpiracaoSessao,
+    public ResponseEntity<Map<String, Object>> salvarPoliticaSeguranca(@RequestParam int tempoExpiracaoSessao,
             @RequestParam(defaultValue = "false") boolean twoFactorAtivo,
             @RequestParam(defaultValue = "true") boolean requireUppercase,
             @RequestParam(defaultValue = "true") boolean requireNumbers,
             @RequestParam(defaultValue = "false") boolean requireSpecialChars,
             @RequestParam int comprimentoMinPassword) {
-
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(res);
         }
-
         try {
-            configuracaoEmpresaService.atualizarPoliticaSeguranca(empresaId, tempoExpiracaoSessao,
-                    twoFactorAtivo, requireUppercase, requireNumbers, requireSpecialChars, comprimentoMinPassword);
-            
+            configuracaoEmpresaService.atualizarPoliticaSeguranca(empresaId, tempoExpiracaoSessao, twoFactorAtivo,
+                    requireUppercase, requireNumbers, requireSpecialChars, comprimentoMinPassword);
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", true);
             res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
@@ -954,36 +788,28 @@ public class ConfiguracaoController {
         } catch (Exception e) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
-            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            res.put("mensagem", "Erro: " + e.getMessage());
             return ResponseEntity.ok(res);
         }
     }
 
-    /**
-     * Salva a configuração de integração com AGT
-     */
     @PostMapping("/empresa/salvar-agt")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> salvarConfiguracaoAGT(
-            @RequestParam(defaultValue = "false") boolean habilitada,
-            @RequestParam String urlServico,
-            @RequestParam String usuario,
-            @RequestParam String senha,
+            @RequestParam(defaultValue = "false") boolean habilitada, @RequestParam String urlServico,
+            @RequestParam String usuario, @RequestParam String senha,
             @RequestParam(required = false) String certificado) {
-
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        
         if (empresaId == null || !ao.co.hzconsultoria.efacturacao.security.SecurityUtils.temAcessoEmpresa(empresaId)) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
             res.put("mensagem", "Acesso negado");
-            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(res);
+            return ResponseEntity.status(403).contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body(res);
         }
-
         try {
-            configuracaoEmpresaService.atualizarConfiguracaoAGT(empresaId, habilitada, urlServico,
-                    usuario, senha, certificado != null ? certificado : "");
-            
+            configuracaoEmpresaService.atualizarConfiguracaoAGT(empresaId, habilitada, urlServico, usuario, senha,
+                    certificado != null ? certificado : "");
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", true);
             res.put("mensagem", messageSource.getMessage("msg.sucesso.salvo", null, LocaleContextHolder.getLocale()));
@@ -991,7 +817,7 @@ public class ConfiguracaoController {
         } catch (Exception e) {
             Map<String, Object> res = new HashMap<>();
             res.put("sucesso", false);
-            res.put("mensagem", "Erro ao salvar: " + e.getMessage());
+            res.put("mensagem", "Erro: " + e.getMessage());
             return ResponseEntity.ok(res);
         }
     }

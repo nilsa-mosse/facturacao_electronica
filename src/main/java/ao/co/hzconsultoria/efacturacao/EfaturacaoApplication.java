@@ -77,6 +77,55 @@ public class EfaturacaoApplication {
                 System.err.println(">>> Erro ao migrar tabela configuracao_agt: " + e.getMessage());
             }
 
+            // Migração: Garantir que a tabela compra tem as colunas de dados do cliente
+            // (nomeCliente, nifCliente, moradaCliente, telefoneCliente, emailCliente)
+            // Estas colunas são essenciais para a propagação dos dados do cliente no POS
+            // para o PDF
+            try {
+                jdbcTemplate.execute(
+                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS nome_cliente VARCHAR(255) NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS nif_cliente VARCHAR(50) NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS morada_cliente VARCHAR(500) NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS telefone_cliente VARCHAR(50) NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS email_cliente VARCHAR(255) NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS tipo_documento VARCHAR(10) NULL");
+                System.out.println(
+                        ">>> Migração: Colunas de dados do cliente na tabela 'compra' verificadas/adicionadas com sucesso.");
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao migrar tabela compra (dados cliente): " + e.getMessage());
+            }
+
+            // Migração: Adicionar colunas de operações para Facturas FT
+            try {
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_vencimento DATETIME NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS valor_pago DECIMAL(19, 2) DEFAULT 0.00");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS valor_em_aberto DECIMAL(19, 2) DEFAULT 0.00");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS validada_agt BOOLEAN DEFAULT FALSE");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS impresso BOOLEAN DEFAULT FALSE");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_impressao DATETIME NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_email DATETIME NULL");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS email_enviado BOOLEAN DEFAULT FALSE");
+                jdbcTemplate.execute(
+                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS fatura_referencia_id BIGINT NULL");
+                System.out.println(
+                        ">>> Migração: Colunas de operações de facturas (FT) verificadas/adicionadas com sucesso.");
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao migrar tabela fatura: " + e.getMessage());
+            }
+
             // Migração: Criar tabela para gestão de licenças
             try {
                 jdbcTemplate.execute(
@@ -98,6 +147,7 @@ public class EfaturacaoApplication {
             // Migração: Garantir integridade referencial mínima na venda_suspensa
             // (corrige valores orphan antes de adicionar a constraint que pode falhar)
             try {
+
                 // Nulificar operador_id que não existe na tabela usuario
                 jdbcTemplate.execute(
                         "UPDATE venda_suspensa SET operador_id = NULL WHERE operador_id IS NOT NULL AND operador_id NOT IN (SELECT id FROM usuario)");
@@ -215,7 +265,6 @@ public class EfaturacaoApplication {
             // 4. Inicializar Impostos Padrão (se necessário)
             if (impostoRepository.count() == 0) {
                 System.out.println("Iniciando criação de impostos padrão...");
-
                 Imposto iva14 = new Imposto();
                 iva14.setNome("IVA - Taxa Normal");
                 iva14.setPercentagem(new BigDecimal("14.0"));
@@ -228,7 +277,6 @@ public class EfaturacaoApplication {
                 iva7.setTipo("IVA");
                 iva7.setCodigoAgt("SIM");
                 impostoRepository.save(iva7);
-
                 Imposto isento = new Imposto();
                 isento.setNome("Isento");
                 isento.setPercentagem(BigDecimal.ZERO);
@@ -238,7 +286,6 @@ public class EfaturacaoApplication {
                 impostoRepository.save(isento);
                 System.out.println(">>> Impostos padrão criados com sucesso!");
             }
-
             // 5. Inicializar Dados Padrão (Clientes) para novas instalações
             if (clienteRepository.count() == 0) {
                 System.out.println("Populando sistema com dados padrão...");

@@ -212,8 +212,8 @@ public class VendaService {
             compra.setMotivoAnulacao(motivo);
             compraRepository.save(compra);
             
-            // Se já tinha sido emitida, gera Nota de Crédito fiscal automaticamente
-            if (wasEmitida) {
+            // Se já tinha sido emitida e não for Pro-forma, gera Nota de Crédito fiscal automaticamente
+            if (wasEmitida && !"FP".equals(compra.getTipoDocumento())) {
                 notaCreditoService.gerarNotaCreditoAutomatica(compra, motivo);
             }
             return true;

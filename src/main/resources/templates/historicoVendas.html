@@ -96,7 +96,7 @@
                     </div>
 
                     <!-- Tabela de Facturas -->
-                    <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: hidden;">
+                    <div class="card border-0 shadow-sm" style="border-radius: 15px; overflow: visible;">
                         <div class="card-body p-0">
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-white border-bottom small fw-bold text-muted uppercase">
@@ -123,7 +123,7 @@
                                             <div class="small text-muted" th:text="${#temporals.format(compra.dataCompra, 'dd/MM/yyyy HH:mm')}"></div>
                                         </td>
                                         <td>
-                                            <span class="badge bg-primary text-white" th:text="${compra.tipoDocumento != null ? (compra.tipoDocumento == 'FT' ? 'FT - Fatura' : (compra.tipoDocumento == 'FR' ? 'FR - Rectificativa' : (compra.tipoDocumento == 'FP' ? 'FP - Pro-forma' : compra.tipoDocumento))) : '-'}"></span>
+                                            <span class="badge bg-primary text-white" th:text="${compra.tipoDocumento != null ? (compra.tipoDocumento == 'FT' ? 'FT - Fatura' : (compra.tipoDocumento == 'FR' ? 'FR - Recibo' : (compra.tipoDocumento == 'FP' ? 'FP - Pro-forma' : compra.tipoDocumento))) : '-'}"></span>
                                         </td>
                                         <td>
                                             <div class="fw-bold" th:text="${compra.nomeCliente ?: 'Consumidor Final'}"></div>
@@ -145,49 +145,260 @@
                                                 </div>
                                             </div>
                                             <span th:unless="${compra.formaPagamento != null}" class="badge bg-secondary">CASH</span>
-                                                                                <td class="text-center">
-                                            <span th:if="${compra.status == 'EMITIDA'}" class="badge bg-soft-success text-success border border-success px-3 py-2 rounded-pill">
-                                                <i class="fas fa-check-circle me-1"></i> Emitida
-                                            </span>
-                                            <div th:if="${compra.status == 'CANCELADA'}" class="d-flex flex-column align-items-center">
-                                                <span class="badge bg-soft-danger text-danger border border-danger px-3 py-2 rounded-pill mb-1"
-                                                       th:title="${compra.motivoAnulacao}">
-                                                    <i class="fas fa-times-circle me-1"></i> Anulada
-                                                </span>
-                                                <small class="text-danger font-italic" style="font-size: 0.7rem;" th:text="${compra.motivoAnulacao}"></small>
-                                            </div>
-                                            <span th:if="${compra.status == 'SUBSTITUIDA'}" class="badge bg-soft-warning text-warning border border-warning px-3 py-2 rounded-pill">
-                                                <i class="fas fa-sync me-1"></i> Substituída
-                                            </span>
-                                            <div th:if="${comprasEnviadasAgt != null and #lists.contains(comprasEnviadasAgt, compra.id)}" class="mt-1">
-                                                <span class="badge bg-soft-primary text-primary border border-primary px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
-                                                    <i class="fas fa-lock me-1"></i> Enviada AGT
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td class="text-center pe-4">
-                                            <div class="btn-group shadow-sm border rounded">
-                                                <a href="javascript:void(0)" 
-                                                   th:onclick="'visualizarFactura(' + ${compra.id} + ')'"
-                                                   class="btn btn-white btn-sm border-0" title="Ver Detalhes">
-                                                    <i class="fas fa-eye text-info"></i>
-                                                </a>
-                                                <!-- Restaurar (Só Admin) -->
-                                                <a th:if="${isAdmin and compra.status == 'CANCELADA' and (comprasEnviadasAgt == null or not #lists.contains(comprasEnviadasAgt, compra.id))}" 
-                                                   th:href="@{'/historico-vendas/restaurar/' + ${compra.id}}" 
-                                                   class="btn btn-white btn-sm border-0 border-start" 
-                                                   title="Restaurar Factura"
-                                                   onclick="return confirm('Confirmar restauração da factura?')">
-                                                    <i class="fas fa-undo-alt text-success"></i>
-                                                </a>
-                                                <span th:if="${isAdmin and compra.status == 'CANCELADA' and comprasEnviadasAgt != null and #lists.contains(comprasEnviadasAgt, compra.id)}" 
-                                                      class="btn btn-white btn-sm border-0 border-start disabled" 
-                                                      title="Restauração Bloqueada: Factura enviada para a AGT" 
-                                                      style="cursor: not-allowed; opacity: 0.5;">
-                                                    <i class="fas fa-lock text-muted"></i>
-                                                </span>
-                                            </div>
-                                        </td>
+                                                <td class="text-center">
+                                                    <!-- Status para Pro-forma (FP) -->
+                                                    <th:block th:if="${compra.tipoDocumento == 'FP'}">
+                                                        <span th:if="${compra.status == 'EMITIDA'}" class="badge bg-soft-primary text-primary border border-primary px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-file-alt me-1"></i> Emitida
+                                                        </span>
+                                                        <span th:if="${compra.status == 'RASCUNHO'}" class="badge bg-soft-secondary text-secondary border border-secondary px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-pencil-alt me-1"></i> Rascunho
+                                                        </span>
+                                                        <span th:if="${compra.status == 'APROVADA'}" class="badge bg-soft-success text-success border border-success px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-thumbs-up me-1"></i> Aprovada
+                                                        </span>
+                                                        <span th:if="${compra.status == 'REJEITADA'}" class="badge bg-soft-danger text-danger border border-danger px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-thumbs-down me-1"></i> Rejeitada
+                                                        </span>
+                                                        <span th:if="${compra.status == 'CONVERTIDA'}" class="badge bg-soft-warning text-warning border border-warning px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-exchange-alt me-1"></i> Convertida
+                                                        </span>
+                                                        <div th:if="${compra.status == 'CANCELADA' or compra.status == 'ANULADA'}" class="d-flex flex-column align-items-center">
+                                                            <span class="badge bg-soft-danger text-danger border border-danger px-3 py-2 rounded-pill mb-1" th:title="${compra.motivoAnulacao}">
+                                                                <i class="fas fa-ban me-1"></i> Anulada
+                                                            </span>
+                                                            <small class="text-danger font-italic" style="font-size:0.7rem;" th:text="${compra.motivoAnulacao}"></small>
+                                                        </div>
+                                                    </th:block>
+                                                    <!-- Status para documentos FT -->
+                                                    <th:block th:if="${compra.tipoDocumento == 'FT'}">
+                                                        <!-- Rascunho -->
+                                                        <span th:if="${compra.status == 'RASCUNHO'}" class="badge bg-soft-secondary text-secondary border border-secondary px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-pencil-alt me-1"></i> Rascunho
+                                                        </span>
+                                                        <!-- Emitida -->
+                                                        <span th:if="${compra.status == 'EMITIDA'}" class="badge bg-soft-success text-success border border-success px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-check-circle me-1"></i> Emitida
+                                                        </span>
+                                                        <!-- Validada AGT -->
+                                                        <span th:if="${compra.status == 'VALIDADA_AGT'}" class="badge bg-soft-primary text-primary border border-primary px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-shield-alt me-1"></i> Validada AGT
+                                                        </span>
+                                                        <!-- Parcialmente Paga -->
+                                                        <div th:if="${compra.status == 'PARCIALMENTE_PAGA'}" class="d-flex flex-column align-items-center">
+                                                            <span class="badge bg-soft-warning text-warning border border-warning px-3 py-2 rounded-pill mb-1">
+                                                                <i class="fas fa-money-bill-wave me-1"></i> Parc. Paga
+                                                            </span>
+                                                            <small class="text-muted" style="font-size:0.7rem;"
+                                                                   th:text="${compra.valorPago != null ? #numbers.formatDecimal(compra.valorPago,1,'POINT',2,'COMMA') + ' Kz pago' : ''}"></small>
+                                                        </div>
+                                                        <!-- Paga -->
+                                                        <span th:if="${compra.status == 'PAGA'}" class="badge px-3 py-2 rounded-pill" style="background:#2ec4b6;color:#fff;border:1px solid #2ec4b6;">
+                                                            <i class="fas fa-check-double me-1"></i> Paga
+                                                        </span>
+                                                        <!-- Vencida -->
+                                                        <span th:if="${compra.status == 'VENCIDA'}" class="badge bg-soft-danger text-danger border border-danger px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-clock me-1"></i> Vencida
+                                                        </span>
+                                                        <!-- Substituida -->
+                                                        <span th:if="${compra.status == 'SUBSTITUIDA'}" class="badge bg-soft-warning text-warning border border-warning px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-sync me-1"></i> Substituída
+                                                        </span>
+                                                        <!-- Anulada / Cancelada -->
+                                                        <div th:if="${compra.status == 'CANCELADA' or compra.status == 'ANULADA'}" class="d-flex flex-column align-items-center">
+                                                            <span class="badge bg-soft-danger text-danger border border-danger px-3 py-2 rounded-pill mb-1" th:title="${compra.motivoAnulacao}">
+                                                                <i class="fas fa-times-circle me-1"></i> Anulada
+                                                            </span>
+                                                            <small class="text-danger font-italic" style="font-size:0.7rem;" th:text="${compra.motivoAnulacao}"></small>
+                                                        </div>
+                                                        <!-- Badge AGT (enviada para AGT) -->
+                                                        <div th:if="${comprasEnviadasAgt != null and #lists.contains(comprasEnviadasAgt, compra.id)}" class="mt-1">
+                                                            <span class="badge bg-soft-primary text-primary border border-primary px-2 py-1 rounded-pill" style="font-size:0.75rem;">
+                                                                <i class="fas fa-lock me-1"></i> Enviada AGT
+                                                            </span>
+                                                        </div>
+                                                    </th:block>
+
+                                                    <!-- Status para documentos FR (Recibo) -->
+                                                    <th:block th:if="${compra.tipoDocumento == 'FR'}">
+                                                        <!-- Rascunho -->
+                                                        <span th:if="${compra.status == 'RASCUNHO'}" class="badge bg-soft-secondary text-secondary border border-secondary px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-pencil-alt me-1"></i> Rascunho
+                                                        </span>
+                                                        <!-- Emitida -->
+                                                        <span th:if="${compra.status == 'EMITIDA'}" class="badge bg-soft-success text-success border border-success px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-check-circle me-1"></i> Emitida
+                                                        </span>
+                                                        <!-- Validada AGT -->
+                                                        <span th:if="${compra.status == 'VALIDADA_AGT'}" class="badge bg-soft-primary text-primary border border-primary px-3 py-2 rounded-pill">
+                                                            <i class="fas fa-shield-alt me-1"></i> Validada AGT
+                                                        </span>
+                                                        <!-- Anulada / Cancelada -->
+                                                        <div th:if="${compra.status == 'CANCELADA' or compra.status == 'ANULADA'}" class="d-flex flex-column align-items-center">
+                                                            <span class="badge bg-soft-danger text-danger border border-danger px-3 py-2 rounded-pill mb-1" th:title="${compra.motivoAnulacao}">
+                                                                <i class="fas fa-times-circle me-1"></i> Anulada
+                                                            </span>
+                                                            <small class="text-danger font-italic" style="font-size:0.7rem;" th:text="${compra.motivoAnulacao}"></small>
+                                                        </div>
+                                                        <!-- Badge AGT (enviada para AGT) -->
+                                                        <div th:if="${comprasEnviadasAgt != null and #lists.contains(comprasEnviadasAgt, compra.id)}" class="mt-1">
+                                                            <span class="badge bg-soft-primary text-primary border border-primary px-2 py-1 rounded-pill" style="font-size:0.75rem;">
+                                                                <i class="fas fa-lock me-1"></i> Enviada AGT
+                                                            </span>
+                                                        </div>
+                                                    </th:block>
+                                                </td>
+                                                <td class="text-center pe-4 row-actions">
+                                                    <!-- Botão Primário: Ver / Imprimir -->
+                                                    <a href="javascript:void(0)"
+                                                       th:onclick="'visualizarFactura(' + ${compra.id} + ')'"
+                                                       class="btn btn-sm btn-light-primary rounded-pill me-1" 
+                                                       title="Ver / Imprimir">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+
+                                                    <!-- Dropdown para Restantes Acções -->
+                                                    <div class="dropdown d-inline-block">
+                                                        <button class="btn btn-sm btn-light-secondary rounded-pill dropdown-toggle px-3" 
+                                                                type="button" 
+                                                                data-bs-toggle="dropdown" 
+                                                                aria-expanded="false"
+                                                                style="font-size: 0.75rem;">
+                                                            Opções
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" 
+                                                            style="border-radius: 12px; min-width: 210px; z-index: 1050;">
+                                                            
+                                                            <!-- ACÇÕES PARA PRO-FORMA (FP) -->
+                                                            <th:block th:if="${compra.tipoDocumento == 'FP'}">
+                                                                <li th:if="${compra.status != 'CONVERTIDA' and compra.status != 'CANCELADA' and compra.status != 'ANULADA'}">
+                                                                    <a th:href="@{'/pos?editar=' + ${compra.id}}" class="dropdown-item">
+                                                                        <i class="fas fa-edit text-warning"></i> Editar Pro-forma
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a th:href="@{'/historico-vendas/proforma/duplicar/' + ${compra.id}}" class="dropdown-item">
+                                                                        <i class="fas fa-copy text-secondary"></i> Duplicar Documento
+                                                                    </a>
+                                                                </li>
+                                                                <li th:if="${compra.status != 'CONVERTIDA' and compra.status != 'CANCELADA' and compra.status != 'ANULADA'}">
+                                                                    <a th:href="@{'/historico-vendas/proforma/converter/' + ${compra.id}}" 
+                                                                       class="dropdown-item" 
+                                                                       onclick="return confirm('Converter esta Pro-forma em Factura (FT)?')">
+                                                                        <i class="fas fa-exchange-alt text-success"></i> Converter em FT
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'abrirModalEnviar(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fas fa-envelope text-primary"></i> Enviar por Email
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'enviarWhatsApp(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fab fa-whatsapp text-success"></i> Enviar por WhatsApp
+                                                                    </a>
+                                                                </li>
+                                                                <th:block th:if="${isAdmin and compra.status != 'CANCELADA' and compra.status != 'ANULADA' and compra.status != 'CONVERTIDA'}">
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <a href="javascript:void(0)" th:onclick="'abrirModalAnular(' + ${compra.id} + ')'" class="dropdown-item text-danger">
+                                                                            <i class="fas fa-ban"></i> Anular Pro-forma
+                                                                        </a>
+                                                                    </li>
+                                                                </th:block>
+                                                            </th:block>
+
+                                                            <!-- ACÇÕES PARA FT -->
+                                                            <th:block th:if="${compra.tipoDocumento == 'FT'}">
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'gerarPDF(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fas fa-file-pdf text-danger"></i> Descarregar PDF
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'abrirModalEmailFT(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fas fa-envelope text-primary"></i> Enviar por Email
+                                                                    </a>
+                                                                </li>
+                                                                <li th:if="${compra.status != 'PAGA' and compra.status != 'ANULADA' and compra.status != 'CANCELADA'}">
+                                                                    <a href="javascript:void(0)" 
+                                                                       th:onclick="'abrirModalPagamento(' + ${compra.id} + ', ' + ${compra.total} + ', ' + (${compra.valorPago} != null ? ${compra.valorPago} : 0) + ', false)'" 
+                                                                       class="dropdown-item">
+                                                                        <i class="fas fa-coins text-warning"></i> Pagamento Parcial
+                                                                    </a>
+                                                                </li>
+                                                                <li th:if="${compra.status != 'PAGA' and compra.status != 'ANULADA' and compra.status != 'CANCELADA'}">
+                                                                    <a href="javascript:void(0)" 
+                                                                       th:onclick="'abrirModalPagamento(' + ${compra.id} + ', ' + ${compra.total} + ', ' + (${compra.valorPago} != null ? ${compra.valorPago} : 0) + ', true)'" 
+                                                                       class="dropdown-item">
+                                                                        <i class="fas fa-check-double text-success"></i> Pagamento Total
+                                                                    </a>
+                                                                </li>
+                                                                <li th:if="${compra.status == 'EMITIDA'}">
+                                                                    <a th:href="@{'/historico-vendas/converter-fr/' + ${compra.id}}" 
+                                                                       class="dropdown-item" 
+                                                                       onclick="return confirm('Converter esta Factura em Factura-Recibo (FR)?')">
+                                                                        <i class="fas fa-receipt text-secondary"></i> Converter para FR
+                                                                    </a>
+                                                                </li>
+                                                                <li th:if="${compra.status != 'ANULADA' and compra.status != 'CANCELADA'}">
+                                                                    <a th:href="@{'/historico-vendas/nota-credito/' + ${compra.id}}" class="dropdown-item">
+                                                                        <i class="fas fa-minus-circle" style="color:#6f42c1;"></i> Emitir Nota de Crédito
+                                                                    </a>
+                                                                </li>
+                                                                <li th:if="${compra.status != 'ANULADA' and compra.status != 'CANCELADA'}">
+                                                                    <a th:href="@{'/historico-vendas/nota-debito/' + ${compra.id}}" class="dropdown-item">
+                                                                        <i class="fas fa-plus-circle text-danger"></i> Emitir Nota de Débito
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'consultarAGT(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fas fa-satellite-dish text-info"></i> Consultar Estado AGT
+                                                                    </a>
+                                                                </li>
+                                                                <li th:if="${isAdmin and (compra.status == 'CANCELADA' or compra.status == 'ANULADA') and (comprasEnviadasAgt == null or not #lists.contains(comprasEnviadasAgt, compra.id))}">
+                                                                    <a th:href="@{'/historico-vendas/restaurar/' + ${compra.id}}" 
+                                                                       class="dropdown-item text-success" 
+                                                                       onclick="return confirm('Confirmar restauração da factura?')">
+                                                                        <i class="fas fa-undo-alt"></i> Restaurar Factura
+                                                                    </a>
+                                                                </li>
+                                                                <th:block th:if="${isAdmin and compra.status != 'VALIDADA_AGT' and compra.status != 'CANCELADA' and compra.status != 'ANULADA' and (comprasEnviadasAgt == null or not #lists.contains(comprasEnviadasAgt, compra.id))}">
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <a href="javascript:void(0)" th:onclick="'abrirModalAnular(' + ${compra.id} + ')'" class="dropdown-item text-danger">
+                                                                            <i class="fas fa-ban"></i> Anular Documento
+                                                                        </a>
+                                                                    </li>
+                                                                </th:block>
+                                                            </th:block>
+
+                                                            <!-- ACÇÕES PARA FR (Recibo) -->
+                                                            <th:block th:if="${compra.tipoDocumento == 'FR'}">
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'gerarPDF(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fas fa-print text-primary"></i> Imprimir Documento
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'abrirModalEmailFT(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fas fa-envelope text-info"></i> Enviar por Email (PDF)
+                                                                    </a>
+                                                                </li>
+                                                                 <li th:if="${compra.status != 'ANULADA' and compra.status != 'CANCELADA'}">
+                                                                    <a th:href="@{'/historico-vendas/nota-credito/' + ${compra.id}}" class="dropdown-item">
+                                                                        <i class="fas fa-minus-circle" style="color:#6f42c1;"></i> Emitir Nota de Crédito
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="javascript:void(0)" th:onclick="'consultarAGT(' + ${compra.id} + ')'" class="dropdown-item">
+                                                                        <i class="fas fa-satellite-dish text-success"></i> Consultar Estado AGT
+                                                                    </a>
+                                                                </li>
+                                                            </th:block>
+                                                        </ul>
+                                                    </div>
+                                                </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(compras)}">
                                         <td colspan="6" class="text-center py-5 text-muted bg-white">
@@ -248,6 +459,131 @@
             </div>
         </div>
 
+        <!-- Modal Enviar por Email (Genérico para FP e FT) -->
+        <div class="modal fade" id="modalEnviarEmail" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title fw-bold" id="enviarEmailTitle"><i class="fas fa-envelope me-2"></i>Enviar por Email</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="enviarEmailDocId">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Endereço de Email</label>
+                            <input type="email" id="enviarEmailAddress" class="form-control" placeholder="cliente@empresa.com" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-2">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" id="btnConfirmarEmail" onclick="confirmarEnvioEmail()">
+                            <i class="fas fa-paper-plane me-1"></i> Enviar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Registar Pagamento -->
+        <div class="modal fade" id="modalPagamento" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <form th:action="@{/historico-vendas/registar-pagamento}" method="post" class="modal-content border-0 shadow-lg">
+                    <input type="hidden" name="id" id="pagamentoFacturaId">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-coins me-2"></i>Registar Pagamento</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Total do Documento</label>
+                            <div class="input-group">
+                                <input type="text" id="pagamentoTotalDoc" class="form-control bg-light" readonly>
+                                <span class="input-group-text">Kz</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Valor já Pago</label>
+                            <div class="input-group">
+                                <input type="text" id="pagamentoValorJaPago" class="form-control bg-light" readonly>
+                                <span class="input-group-text">Kz</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" id="labelValorAPagar">Valor a Pagar</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" min="0.01" name="valorPago" id="pagamentoValorAPagar" class="form-control" placeholder="0.00" required>
+                                <span class="input-group-text">Kz</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Método de Pagamento</label>
+                            <select name="metodoPagamento" class="form-select" required>
+                                <option value="NUMERARIO">Numerário</option>
+                                <option value="MULTICAIXA" selected>Multicaixa</option>
+                                <option value="TRANSFERENCIA">Transferência Bancária</option>
+                                <option value="DEPOSITO">Depósito</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="campoDataVencimento">
+                            <label class="form-label fw-semibold">Data de Vencimento (para saldo restante)</label>
+                            <input type="date" name="dataVencimento" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-2">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4">Confirmar Pagamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Estado AGT -->
+        <div class="modal fade" id="modalEstadoAgt" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-satellite-dish me-2"></i>Estado de Comunicação AGT</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="text-center mb-4">
+                            <i id="agtIcon" class="fas fa-check-circle text-success" style="font-size: 3.5rem;"></i>
+                            <h4 class="fw-bold mt-2" id="agtStatusText">Validada pela AGT</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-semibold bg-light" style="width: 40%;">Nº Fatura</td>
+                                        <td id="agtNumeroFatura">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light">Comunicação AGT</td>
+                                        <td id="agtComunicadaText">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light">Código AGT</td>
+                                        <td id="agtCodigo">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light">Assinatura / Hash</td>
+                                        <td id="agtHash">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light">Data de Emissão</td>
+                                        <td id="agtDataEmissao">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light p-2">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal de Pré-visualização -->
         <div class="modal fade" id="modalPreview" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
@@ -287,7 +623,152 @@
             $('#modalAnular').modal('show');
         }
 
+        let emailDocId = null;
+        let emailTargetUrl = '';
+
+        function abrirModalEnviar(id) {
+            emailDocId = id;
+            emailTargetUrl = '/historico-vendas/proforma/enviar-email';
+            $('#enviarEmailTitle').html('<i class="fas fa-envelope me-2"></i>Enviar Pro-forma por Email');
+            $('#enviarEmailAddress').val('');
+            $('#modalEnviarEmail').modal('show');
+        }
+
+        function abrirModalEmailFT(id) {
+            emailDocId = id;
+            emailTargetUrl = '/historico-vendas/enviar-email-ft';
+            $('#enviarEmailTitle').html('<i class="fas fa-envelope me-2"></i>Enviar Factura por Email');
+            $('#enviarEmailAddress').val('');
+            $('#modalEnviarEmail').modal('show');
+        }
+
+        function confirmarEnvioEmail() {
+            var email = $('#enviarEmailAddress').val();
+            if (!email || !email.includes('@')) {
+                alert('Por favor, insira um endereço de email válido.');
+                return;
+            }
+            
+            // Feedback visual no botão
+            const $btn = $('#btnConfirmarEmail');
+            const originalText = $btn.html();
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Enviando...');
+
+            $.post(emailTargetUrl, { id: emailDocId, email: email })
+                .done(function(msg) {
+                    $('#modalEnviarEmail').modal('hide');
+                    $(document).Toasts('create', { class: 'bg-success', title: 'Sucesso', autohide: true, delay: 5000, body: 'Email enviado com sucesso para ' + email });
+                })
+                .fail(function(xhr) {
+                    alert('Erro ao enviar email: ' + xhr.responseText);
+                })
+                .always(function() {
+                    $btn.prop('disabled', false).html(originalText);
+                });
+        }
+
+        function gerarPDF(id) {
+            fetch('/api/compras/fatura-url/' + id)
+                .then(res => {
+                    if (!res.ok) throw new Error('Não foi possível obter o PDF do documento.');
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.url) {
+                        window.open(data.url, '_blank');
+                    } else {
+                        alert('Arquivo PDF não encontrado.');
+                    }
+                })
+                .catch(err => {
+                    alert(err.message);
+                });
+        }
+
+        function abrirModalPagamento(id, total, valorPago, isTotal) {
+            $('#pagamentoFacturaId').val(id);
+            $('#pagamentoTotalDoc').val(total.toFixed(2));
+            $('#pagamentoValorJaPago').val(valorPago.toFixed(2));
+            
+            var restante = total - valorPago;
+            if (restante < 0) restante = 0;
+            
+            if (isTotal) {
+                $('#pagamentoValorAPagar').val(restante.toFixed(2)).prop('readonly', true);
+                $('#labelValorAPagar').text('Valor a Pagar (Total restante)');
+                $('#campoDataVencimento').hide();
+            } else {
+                $('#pagamentoValorAPagar').val('').prop('readonly', false).attr('max', restante.toFixed(2));
+                $('#labelValorAPagar').text('Valor a Pagar (Parcial)');
+                $('#campoDataVencimento').show();
+            }
+            
+            $('#modalPagamento').modal('show');
+        }
+
+        function consultarAGT(id) {
+            $(document).Toasts('create', { class: 'bg-info', title: 'AGT', autohide: true, delay: 2000, body: 'Consultando estado do documento na AGT...' });
+
+            fetch('/api/compras/estado-agt/' + id)
+                .then(res => {
+                    if (!res.ok) throw new Error('Não foi possível consultar o estado AGT.');
+                    return res.json();
+                })
+                .then(data => {
+                    $('#agtNumeroFatura').text(data.numeroFatura || '-');
+                    
+                    if (data.enviadaAGT) {
+                        $('#agtIcon').removeClass().addClass('fas fa-check-circle text-success');
+                        $('#agtStatusText').text('VALIDADA PELA AGT');
+                        $('#agtComunicadaText').html('<span class="badge bg-success">Enviada com Sucesso</span>');
+                        $('#agtCodigo').text(data.codigoAGT || '-');
+                        $('#agtHash').text(data.hash || '-');
+                    } else {
+                        $('#agtIcon').removeClass().addClass('fas fa-clock text-warning');
+                        $('#agtStatusText').text('PENDENTE DE COMUNICAÇÃO');
+                        $('#agtComunicadaText').html('<span class="badge bg-warning text-dark">Pendente / Não enviada</span>');
+                        $('#agtCodigo').text('-');
+                        $('#agtHash').text('-');
+                    }
+                    
+                    if (data.dataEmissao) {
+                        var dataFormatada = new Date(data.dataEmissao).toLocaleString();
+                        $('#agtDataEmissao').text(dataFormatada);
+                    } else {
+                        $('#agtDataEmissao').text('-');
+                    }
+                    
+                    $('#modalEstadoAgt').modal('show');
+                })
+                .catch(err => {
+                    alert('Erro ao consultar estado: ' + err.message);
+                });
+        }
+
+        function enviarWhatsApp(id) {
+            fetch('/api/compras/fatura-url/' + id)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.url) {
+                        var link = window.location.origin + data.url;
+                        var msg = 'Segue o seu documento: ' + link;
+                        window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+                    } else {
+                        alert('Documento PDF não encontrado.');
+                    }
+                });
+        }
+
         $(document).ready(function() {
+            // Configurar jQuery Ajax para enviar o token CSRF em todas as requisições POST automaticamente
+            var token = $("meta[name='_csrf']").attr("content");
+            var header = $("meta[name='_csrf_header']").attr("content");
+            if (token && header) {
+                $(document).ajaxSend(function(e, xhr, options) {
+                    xhr.setRequestHeader(header, token);
+                });
+            }
+
             var msgSucesso = /*[[${mensagemSucesso}]]*/ null;
             var msgErro = /*[[${mensagemErro}]]*/ null;
             if(msgSucesso) {
@@ -316,6 +797,70 @@
         .bg-soft-primary { background: rgba(67,97,238,0.1); }
         .rounded-pill-start { border-top-left-radius: 50px !important; border-bottom-left-radius: 50px !important; }
         .rounded-pill-end { border-top-right-radius: 50px !important; border-bottom-right-radius: 50px !important; }
+
+        /* Botões de acção premium */
+        .btn-light-primary {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: #4361ee;
+            border: none;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-light-primary:hover {
+            background-color: #4361ee;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-light-secondary {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: none;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-light-secondary:hover {
+            background-color: #6c757d;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(108, 117, 125, 0.2);
+        }
+
+        /* Custom Dropdown Items */
+        .dropdown-menu .dropdown-item {
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        /* Consistência e alinhamento dos ícones no dropdown */
+        .dropdown-menu .dropdown-item i {
+            display: inline-block;
+            width: 20px;
+            margin-right: 8px;
+            text-align: center;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        /* Efeitos Hover adaptados para temas Claro e Escuro */
+        .dropdown-menu .dropdown-item:hover {
+            background-color: rgba(67, 97, 238, 0.1) !important;
+            color: #4361ee !important;
+        }
+        .dropdown-menu .dropdown-item.text-danger:hover {
+            background-color: rgba(231, 29, 54, 0.1) !important;
+            color: #e71d36 !important;
+        }
+
+        /* Botões de acção sempre visíveis */
+        tbody tr .row-actions .btn,
+        tbody tr .row-actions .dropdown,
+        tbody tr .row-actions a,
+        tbody tr .row-actions span {
+            display: inline-block;
+        }
     </style>
 </body>
 </html>

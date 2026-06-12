@@ -1,6 +1,8 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -75,6 +77,12 @@ public class PlanoPagamento implements Serializable {
 
     @Column(name = "inclui_multiempresa")
     private boolean incluiMultiempresa;
+
+    /** Módulos do sistema incluídos neste plano (ex: DASHBOARD, VENDAS, STOCK, ... ) */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "plano_modulos", joinColumns = @JoinColumn(name = "plano_id"))
+    @Column(name = "modulo")
+    private Set<String> modulos = new HashSet<>();
 
     /** Funcionalidades adicionais (lista separada por vírgula) */
     @Column(name = "funcionalidades_extra", length = 2000)
@@ -264,6 +272,20 @@ public class PlanoPagamento implements Serializable {
 
     public void setIncluiMultiempresa(boolean incluiMultiempresa) {
         this.incluiMultiempresa = incluiMultiempresa;
+    }
+
+    public Set<String> getModulos() {
+        return modulos;
+    }
+
+    public void setModulos(Set<String> modulos) {
+        this.modulos = modulos;
+    }
+
+    /** Conveniência para templates: verificar se um módulo está incluído */
+    public boolean hasModulo(String modulo) {
+        if (modulos == null) return false;
+        return modulos.contains(modulo);
     }
 
     public String getFuncionalidadesExtra() {

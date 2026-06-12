@@ -286,6 +286,48 @@ public class DynamicMailService {
         log.info("Email HTML enviado com sucesso para: {}", para);
     }
 
+    public void enviarEmailComAnexo(Long empresaId, String para, String assunto, String htmlBody, String nomeAnexo, java.io.File anexo) throws Exception {
+        JavaMailSenderImpl sender = buildSender(empresaId);
+        MimeMessage mimeMsg = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMsg, true, "UTF-8");
+
+        helper.setTo(para);
+        helper.setSubject(assunto);
+        helper.setText(htmlBody, true);
+        if (anexo != null && anexo.exists()) {
+            helper.addAttachment(nomeAnexo, anexo);
+        }
+
+        String remetente = null;
+        String nomeRemetente = null;
+
+        if (empresaId != null) {
+            Optional<ConfiguracaoEmpresa> opt = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
+            if (opt.isPresent()) {
+                ConfiguracaoEmpresa cfg = opt.get();
+                if (!isEmpty(cfg.getEmailRemetente())) {
+                    remetente = cfg.getEmailRemetente();
+                    nomeRemetente = cfg.getEmailNomeRemetente();
+                }
+            }
+        }
+
+        if (isEmpty(remetente)) {
+            ConfiguracaoSistemaEntity cfgGlobal = configuracaoSistemaRepository
+                    .findById(1L)
+                    .orElseThrow(() -> new IllegalStateException("Configuração do sistema não encontrada."));
+            remetente = cfgGlobal.getEmailRemetente();
+            nomeRemetente = cfgGlobal.getEmailNomeRemetente();
+        }
+
+        if (!isEmpty(remetente)) {
+            helper.setFrom(remetente, nomeRemetente != null ? nomeRemetente : "Sistema de Facturação");
+        }
+
+        sender.send(mimeMsg);
+        log.info("Email com anexo enviado com sucesso para: {}", para);
+    }
+
     // ─── Teste de conexão SMTP ────────────────────────────────────────
 
     /**

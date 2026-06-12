@@ -3,8 +3,6 @@ package ao.co.hzconsultoria.efacturacao.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,19 +15,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Fatura;
+import ao.co.hzconsultoria.efacturacao.model.ItemCompra;
 import ao.co.hzconsultoria.efacturacao.model.Produto;
-import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ClienteRepository;
+import ao.co.hzconsultoria.efacturacao.repository.CompraRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 import ao.co.hzconsultoria.efacturacao.service.FaturaService;
 import ao.co.hzconsultoria.efacturacao.service.GuiaRemessaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
 import ao.co.hzconsultoria.efacturacao.service.ProdutoService;
-import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa; 
-import ao.co.hzconsultoria.efacturacao.service.StockService; // added import for StockService
-import ao.co.hzconsultoria.efacturacao.security.SecurityUtils; // added import for SecurityUtils
+import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa;
+import ao.co.hzconsultoria.efacturacao.service.StockService;
+import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
 
 
 @Controller
@@ -37,13 +36,13 @@ public class CompraController {
 
     @Autowired
     private ProdutoRepository produtoRepository;
-    
+
     @Autowired
     private CategoriaRepository categoriaRepository;
-    
+
     @Autowired
     private VendaService vendaService;
-    
+
     @Autowired
     private FaturaService faturaService;
 
@@ -52,6 +51,9 @@ public class CompraController {
 
     @Autowired
     private ClienteRepository clienteRepository;
+
+    @Autowired
+    private CompraRepository compraRepository;
 
     @Autowired
     private ProdutoService produtoService;
@@ -63,7 +65,7 @@ public class CompraController {
     private ao.co.hzconsultoria.efacturacao.service.CaixaService caixaService;
 
     @Autowired
-    private StockService stockService; // added field for stockService
+    private StockService stockService;
 
     @GetMapping("/pos")
     public String abrirPDV(Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
@@ -91,51 +93,42 @@ public class CompraController {
 
         model.addAttribute("produtos", produtos);
         model.addAttribute("categorias", categorias);
-        // Passa lista de clientes para o modal de identificacao
         model.addAttribute("clientes", clienteRepository.findAll());
-
-        // Passa a instância do caixa aberto para exibir saldo ou número do caixa
         model.addAttribute("caixaAberto", caixaService.getCaixaAbertoAtual());
-        // Produtos bloqueados por inventário parcial (ids)
         java.util.Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();
         model.addAttribute("produtosBloqueados", bloqueados);
         return "pos";
     }
 
-
     @PostMapping("/finalizar")
     public String finalizarVenda(@RequestParam("itens") String itensJson) {
-        // Aqui você converte JSON -> lista de objetos
         System.out.println(itensJson);
-
-        // TODO: salvar venda no banco
-
         return "redirect:/pos";
     }
-    
+
     @ResponseBody
     @PostMapping("/api/compras/single")
     public ResponseEntity<?> finalizarCompraSingle(@RequestBody Compra compra) {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
             return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
         }
-        // Validate that no produto is locked by an active parcial inventory
         java.util.Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();
-        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra it : compra.getItens()) {
+        for (ItemCompra it : compra.getItens()) {
             if (it.getProdutoId() != null && bloqueados.contains(it.getProdutoId())) {
                 return ResponseEntity.badRequest().body("Produto em inventário parcial: venda bloqueada. ProdutoId=" + it.getProdutoId());
             }
         }
         compra.getItens().forEach(item -> item.setCompra(compra));
         resolverCliente(compra);
-        Compra compraSalva = vendaService.finalizarVenda(compra);
-        // vendaService.finalizarVenda já chama faturaService.emitirDocumento internamente (visto no VendaService.java:156)
-        // Por isso, não chamamos faturaService.emitirFatura(compraSalva) aqui para evitar duplicados.
-        
-        // Tentar obter a fatura gerada para retornar o número correto
+        String tipoDocumento = compra.getTipoDocumento();
+        if (tipoDocumento == null || tipoDocumento.trim().isEmpty()) {
+            tipoDocumento = "FT";
+        }
+        Compra compraSalva = vendaService.finalizarVenda(compra, tipoDocumento);
+
         java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
         String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "DOC-" + compraSalva.getId();
-        
+
         String pdfFile = "/uploads/faturas/" + numeroDoc + ".pdf";
         java.util.Map<String, String> response = new java.util.HashMap<>();
         response.put("pdfPath", pdfFile);
@@ -149,18 +142,64 @@ public class CompraController {
         if (compra == null || compra.getItens() == null || compra.getItens().isEmpty()) {
             return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
         }
-        // Proformas podem seguir mesmo com inventário bloqueado, but we keep same restriction for consistency
         java.util.Set<Long> bloqueados2 = stockService.listarProdutosEmInventarioParcial();
-        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra it : compra.getItens()) {
+        for (ItemCompra it : compra.getItens()) {
             if (it.getProdutoId() != null && bloqueados2.contains(it.getProdutoId())) {
                 return ResponseEntity.badRequest().body("Produto em inventário parcial: proforma bloqueada. ProdutoId=" + it.getProdutoId());
             }
         }
-        compra.getItens().forEach(item -> item.setCompra(compra));
-        resolverCliente(compra);
-        Compra compraSalva = vendaService.finalizarVenda(compra, "FP");
-        // Assim como FT, FP já gera documento no VendaService
-        
+
+        // Suporte a edição: se a compra tem ID, actualiza a pró-forma existente
+        Compra compraParaFinalizar = compra; // por defeito, processamos a compra recebida
+        if (compra.getId() != null) {
+            java.util.Optional<Compra> existingOpt = compraRepository.findById(compra.getId());
+            if (existingOpt.isPresent()) {
+                Compra existing = existingOpt.get();
+                String st = existing.getStatus();
+                if ("CONVERTIDA".equals(st) || "ANULADA".equals(st) || "CANCELADA".equals(st)) {
+                    return ResponseEntity.badRequest().body("Não é possível editar uma pró-forma " + st.toLowerCase() + ".");
+                }
+                // Apagar faturas e PDFs antigos
+                java.util.List<Fatura> oldFaturas = faturaRepository.findByCompra(existing);
+                for (Fatura f : oldFaturas) {
+                    java.io.File pdf = new java.io.File("./uploads/faturas/" + f.getNumeroFatura() + ".pdf");
+                    if (!pdf.exists()) {
+                        pdf = new java.io.File("src/main/resources/static/uploads/faturas/" + f.getNumeroFatura() + ".pdf");
+                    }
+                    if (!pdf.exists()) {
+                        pdf = new java.io.File("target/classes/static/uploads/faturas/" + f.getNumeroFatura() + ".pdf");
+                    }
+                    if (pdf.exists()) { pdf.delete(); }
+                    faturaRepository.delete(f);
+                }
+                faturaRepository.flush();
+                existing.getItens().clear();
+                compraRepository.saveAndFlush(existing);
+                // Actualizar dados do cliente com base na compra enviada
+                resolverCliente(compra);
+                existing.setCliente(compra.getCliente());
+                existing.setNomeCliente(compra.getNomeCliente());
+                existing.setNifCliente(compra.getNifCliente());
+                existing.setMoradaCliente(compra.getMoradaCliente());
+                existing.setTelefoneCliente(compra.getTelefoneCliente());
+                existing.setEmailCliente(compra.getEmailCliente());
+                existing.setFormaPagamento(compra.getFormaPagamento());
+                existing.setStatus("EMITIDA");
+                for (ItemCompra it : compra.getItens()) {
+                    it.setCompra(existing);
+                    existing.getItens().add(it);
+                }
+                // Não reatribuir a variável 'compra' (evita problemas com capturas em lambdas);
+                // em vez disso processamos a entidade existente
+                compraParaFinalizar = existing;
+            }
+        } else {
+            compra.getItens().forEach(item -> item.setCompra(compra));
+            resolverCliente(compra);
+        }
+
+        Compra compraSalva = vendaService.finalizarVenda(compraParaFinalizar, "FP");
+
         java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
         String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "FP-" + compraSalva.getId();
 
@@ -178,30 +217,30 @@ public class CompraController {
             return ResponseEntity.badRequest().body("Compra ou itens não podem ser nulos ou vazios");
         }
         java.util.Set<Long> bloqueados3 = stockService.listarProdutosEmInventarioParcial();
-        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra it : compra.getItens()) {
+        for (ItemCompra it : compra.getItens()) {
             if (it.getProdutoId() != null && bloqueados3.contains(it.getProdutoId())) {
                 return ResponseEntity.badRequest().body("Produto em inventário parcial: guia bloqueada. ProdutoId=" + it.getProdutoId());
             }
         }
         compra.getItens().forEach(item -> item.setCompra(compra));
         resolverCliente(compra);
-        
+
         // 1. Finalizar a venda como uma FR/FT padrão para garantir stock e fatura base
         Compra compraSalva = vendaService.finalizarVenda(compra);
         faturaService.emitirFatura(compraSalva);
-        
+
         // 2. Gerar a Guia de Remessa a partir da venda salva
         GuiaRemessa guia = guiaRemessaService.gerarGuiaAPartirDeFatura(compraSalva.getId());
-        
-        // 4. Preencher dados de transporte vindos do POS
+
+        // 3. Preencher dados de transporte vindos do POS
         if (compra.getMotorista() != null) guia.setMotorista(compra.getMotorista());
         if (compra.getMatriculaViatura() != null) guia.setMatriculaViatura(compra.getMatriculaViatura());
         if (compra.getLocalCarga() != null) guia.setLocalCarga(compra.getLocalCarga());
         if (compra.getLocalDescarga() != null) guia.setLocalDescarga(compra.getLocalDescarga());
 
-        // 3. Salvar para disparar geração de PDF e registo AGT
+        // 4. Salvar para disparar geração de PDF e registo AGT
         guiaRemessaService.salvar(guia);
-        
+
         String pdfFile = "/uploads/guias/" + guia.getNumeroGuia() + ".pdf";
         java.util.Map<String, String> response = new java.util.HashMap<>();
         response.put("pdfPath", pdfFile);
@@ -230,27 +269,24 @@ public class CompraController {
                 compra.setNifCliente("999999999");
                 compra.setCliente(null);
             } else {
-                // É um novo cliente registado no POS
                 ao.co.hzconsultoria.efacturacao.model.Cliente novoCliente = new ao.co.hzconsultoria.efacturacao.model.Cliente();
                 novoCliente.setNome(compra.getNomeCliente());
                 novoCliente.setNif(compra.getNifCliente() != null ? compra.getNifCliente() : "999999999");
                 novoCliente.setEndereco(compra.getMoradaCliente());
                 novoCliente.setTelefone(compra.getTelefoneCliente());
                 novoCliente.setEmail(compra.getEmailCliente());
-                
-                // Associar empresa ao novo cliente
-                Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+
+                Long empresaId = SecurityUtils.getCurrentEmpresaId();
                 if (empresaId != null) {
                     ao.co.hzconsultoria.efacturacao.model.Empresa empresa = new ao.co.hzconsultoria.efacturacao.model.Empresa();
                     empresa.setId(empresaId);
                     novoCliente.setEmpresa(empresa);
                 }
-                
+
                 try {
                     ao.co.hzconsultoria.efacturacao.model.Cliente salvo = clienteRepository.save(novoCliente);
                     compra.setCliente(salvo);
                 } catch (Exception e) {
-                    // Se falhar ao salvar (ex: NIF duplicado), apenas mantemos os dados na compra
                     compra.setCliente(null);
                 }
             }
@@ -278,7 +314,6 @@ public class CompraController {
             if (!file.exists()) {
                 return ResponseEntity.notFound().build();
             }
-
             org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(file.toURI());
             return ResponseEntity.ok()
                     .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")

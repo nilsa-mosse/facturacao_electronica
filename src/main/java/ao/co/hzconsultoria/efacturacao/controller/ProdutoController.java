@@ -72,19 +72,25 @@ public class ProdutoController {
     @Autowired
     private ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository configuracaoSistemaRepository;
 
-    @GetMapping({ "/cadastroProduto", "/produtos/novo" })
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.RegimeFiscalRepository regimeFiscalRepository;
 
+    @GetMapping({ "/cadastroProduto", "/produtos/novo" })
     public String cadastroProduto(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         Pageable pageable = PageRequest.of(0, 20);
         model.addAttribute("produto", new Produto());
         model.addAttribute("categorias", (empresaId != null) ? categoriaRepository.findByEmpresa_Id(empresaId) : java.util.Collections.emptyList());
 
-        model.addAttribute("impostos", impostoRepository.findAll());
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
-        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
-                : "GERAL";
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal() : "GERAL";
 
+        java.util.Set<ao.co.hzconsultoria.efacturacao.model.Imposto> impostosDoRegime = new java.util.HashSet<>();
+        java.util.Optional<ao.co.hzconsultoria.efacturacao.model.RegimeFiscal> optRegime = regimeFiscalRepository.findByCodigo(regimeFiscal);
+        if (optRegime.isPresent()) {
+            impostosDoRegime = optRegime.get().getImpostos();
+        }
+        model.addAttribute("impostos", impostosDoRegime);
         model.addAttribute("regimeFiscal", regimeFiscal);
         return "cadastroProduto";
     }
@@ -192,11 +198,15 @@ public class ProdutoController {
         model.addAttribute("produto", produto);
         model.addAttribute("categorias", categoriaRepository.findAll());
 
-        model.addAttribute("impostos", impostoRepository.findAll());
-
         Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
-        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal()
-                : "GERAL";
+        String regimeFiscal = (empresa != null && empresa.getRegimeFiscal() != null) ? empresa.getRegimeFiscal() : "GERAL";
+
+        java.util.Set<ao.co.hzconsultoria.efacturacao.model.Imposto> impostosDoRegime = new java.util.HashSet<>();
+        java.util.Optional<ao.co.hzconsultoria.efacturacao.model.RegimeFiscal> optRegime = regimeFiscalRepository.findByCodigo(regimeFiscal);
+        if (optRegime.isPresent()) {
+            impostosDoRegime = optRegime.get().getImpostos();
+        }
+        model.addAttribute("impostos", impostosDoRegime);
 
         System.out.println("DETALHES DO PRODUTO: " + regimeFiscal);
         model.addAttribute("regimeFiscal", regimeFiscal);

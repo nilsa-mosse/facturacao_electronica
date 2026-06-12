@@ -16,6 +16,7 @@ import ao.co.hzconsultoria.efacturacao.model.Devolucao;
 import ao.co.hzconsultoria.efacturacao.model.ItemDevolucao;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoAGTRepository;
 import ao.co.hzconsultoria.efacturacao.repository.DevolucaoRepository;
+import ao.co.hzconsultoria.efacturacao.repository.CompraRepository;
 
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
@@ -44,6 +45,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.Map;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -79,6 +81,12 @@ public class FaturaService {
 
     @Autowired
     private DevolucaoRepository devolucaoRepository;
+
+    @Autowired
+    private CompraRepository compraRepository;
+
+    @Autowired
+    private DynamicMailService dynamicMailService;
 
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
@@ -133,6 +141,57 @@ public class FaturaService {
         Fatura faturaSalva = faturaRepository.save(fatura);
         faturaSalva = processarEnvioAGT(faturaSalva);
 
+        return faturaSalva;
+    }
+
+    /**
+     * Emite um recibo (Factura-Recibo - FR) representando um pagamento.
+     * Este método gera uma fatura do tipo FR com o montante fornecido (sem recalcular itens)
+     * e executa a assinatura/ envio AGT e geração de PDF.
+     */
+    public Fatura emitirReciboPagamento(Compra compra, double montantePago) {
+        Fatura fatura = new Fatura();
+        fatura.setCompra(compra);
+        if (compra != null && compra.getEmpresa() != null) {
+            fatura.setEmpresa(compra.getEmpresa());
+        }
+        fatura.setTipoDocumento("FR");
+
+        // Numeração sequencial
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int ano = cal.get(java.util.Calendar.YEAR);
+        long count = faturaRepository.countByTypeAndYear("FR", ano, fatura.getEmpresa().getId()) + 1;
+        String numeroFatura = "FR " + ano + "/" + count;
+        fatura.setNumeroFatura(numeroFatura);
+
+        fatura.setDataEmissao(new java.util.Date());
+        fatura.setSystemEntryDate(new java.util.Date());
+        fatura.setInvoiceStatus("N");
+
+        // Totais: tratamos o recibo como pagamento sem IVA (valor recebido)
+        fatura.setTotal(montantePago);
+        fatura.setIva(0.0);
+
+        // Assinatura RSA
+        ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        Fatura ultimaFatura = faturaRepository.findLastByType("FR", fatura.getEmpresa().getId());
+        String hashAnterior = (ultimaFatura != null) ? ultimaFatura.getHash() : "";
+        fatura.setPreviousHash(hashAnterior);
+        fatura.setHashControl(String.valueOf(configSistema.getAgtChaveVersao()));
+
+        String dadosAssinar = montarStringAssinatura(fatura);
+        String assinatura = assinarRSA(dadosAssinar, configSistema.getAgtPrivateKey());
+        fatura.setHash(assinatura);
+
+        fatura.setEnviadaAGT(false);
+        fatura.setStatus("PENDENTE");
+
+        Fatura faturaSalva = faturaRepository.save(fatura);
+        // Enviar a AGT (FR deve ser comunicado)
+        faturaSalva = processarEnvioAGT(faturaSalva);
+        faturaSalva = faturaRepository.save(faturaSalva);
+        gerarPdfFatura(faturaSalva);
         return faturaSalva;
     }
 
@@ -440,6 +499,10 @@ public class FaturaService {
                     tituloDocumento = "NOTA DE DÉBITO";
                 }
 
+                if ("ANULADA".equalsIgnoreCase(fatura.getStatus()) || "CANCELADA".equalsIgnoreCase(fatura.getStatus()) || "A".equalsIgnoreCase(fatura.getInvoiceStatus())) {
+                    tituloDocumento += " (ANULADA)";
+                }
+
                 PdfPCell titleCell = new PdfPCell();
                 titleCell.setBorder(0);
                 titleCell.addElement(new Phrase(tituloDocumento, fontFactura));
@@ -523,7 +586,7 @@ public class FaturaService {
                 doc.add(new Paragraph(" "));
 
                 // Metadata Table (Horizontal bar style)
-                PdfPTable metaBar = new PdfPTable(4);
+                PdfPTable metaBar = new PdfPTable(5);
                 metaBar.setWidthPercentage(100);
                 metaBar.setSpacingBefore(10);
                 metaBar.setSpacingAfter(10);
@@ -548,6 +611,35 @@ public class FaturaService {
                             : "#" + fatura.getCompra().getFaturaReferencia().getId();
                 }
                 addMetaCell(metaBar, "DOC. REFERÊNCIA", refDoc, smallFont, bold, lightGrayBg);
+
+                String estadoDoc = "NORMAL";
+                if (fatura.getStatus() != null) {
+                    switch (fatura.getStatus().toUpperCase()) {
+                        case "VALIDADA":
+                            estadoDoc = "VALIDADA";
+                            break;
+                        case "ANULADA":
+                        case "CANCELADA":
+                            estadoDoc = "ANULADA";
+                            break;
+                        case "PAGA":
+                            estadoDoc = "PAGA";
+                            break;
+                        case "PARCIALMENTE_PAGA":
+                            estadoDoc = "PAGA PARCIAL";
+                            break;
+                        case "EMITIDA_OFFLINE":
+                            estadoDoc = "OFFLINE";
+                            break;
+                        case "FALHA_ENVIO":
+                            estadoDoc = "FALHA ENVIO";
+                            break;
+                        default:
+                            estadoDoc = fatura.getStatus().toUpperCase();
+                            break;
+                    }
+                }
+                addMetaCell(metaBar, "ESTADO", estadoDoc, smallFont, bold, lightGrayBg);
 
                 doc.add(metaBar);
                 doc.add(new Paragraph(" "));
@@ -894,4 +986,339 @@ public class FaturaService {
         fatura.append("Total: ").append(compra.getTotal()).append("\n");
         return fatura.toString();
     }
+
+    // ─── NOVAS OPERAÇÕES PARA FACTURAS FT ───
+
+    /**
+     * Verifica se uma factura pode ser modificada (não foi validada pela AGT)
+     */
+    public void verificarMutabilidade(Fatura fatura) throws IllegalStateException {
+        if (fatura.getValidadaAgt() != null && fatura.getValidadaAgt()) {
+            throw new IllegalStateException(
+                    "Factura " + fatura.getNumeroFatura() + " foi validada pela AGT e não pode ser alterada ou eliminada.");
+        }
+    }
+
+    /**
+     * Imprime uma factura e regista o evento
+     */
+    public void imprimirFatura(Long id) throws Exception {
+        Fatura fatura = faturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
+        
+        verificarMutabilidade(fatura);
+        
+        fatura.setImpresso(true);
+        fatura.setDataImpressao(new Date());
+        faturaRepository.save(fatura);
+        
+        log.info("Factura {} marcada como impressa em {}", fatura.getNumeroFatura(), fatura.getDataImpressao());
+    }
+
+    /**
+     * Envia uma factura por email com o PDF em anexo
+     */
+    public void enviarPorEmail(Long id, String emailDestino) throws Exception {
+        Fatura fatura = faturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
+        
+        if (emailDestino == null || emailDestino.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email de destino não fornecido");
+        }
+        
+        // Gerar PDF se não existir
+        String filePath = "./uploads/faturas/" + fatura.getNumeroFatura() + ".pdf";
+        File pdfFile = new File(filePath);
+        
+        if (!pdfFile.exists()) {
+            gerarPdfFatura(fatura);
+        }
+        
+        // Preparar conteúdo do email
+        String assunto = "Factura " + fatura.getNumeroFatura();
+        String corpo = gerarCorpoEmailFactura(fatura);
+        
+        // Enviar email com anexo
+        try {
+            dynamicMailService.enviarEmailComAnexo(
+                    fatura.getEmpresa() != null ? fatura.getEmpresa().getId() : null,
+                    emailDestino,
+                    assunto,
+                    corpo,
+                    fatura.getNumeroFatura() + ".pdf",
+                    pdfFile
+            );
+            
+            fatura.setEmailEnviado(true);
+            fatura.setDataEmail(new Date());
+            faturaRepository.save(fatura);
+            
+            log.info("Factura {} enviada por email para {}", fatura.getNumeroFatura(), emailDestino);
+        } catch (Exception e) {
+            log.error("Erro ao enviar factura por email: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Registar pagamento total de uma factura
+     */
+    public Fatura registarPagamentoTotal(Long id, String metodo, String referencia) throws Exception {
+        Fatura fatura = faturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
+        
+        verificarMutabilidade(fatura);
+        
+        Double total = fatura.getTotal() != null ? fatura.getTotal() : 0.0;
+        
+        fatura.setValorPago(total);
+        fatura.setValorEmAberto(0.0);
+        fatura.setStatus("PAGA");
+        
+        Fatura faturaAtualizada = faturaRepository.save(fatura);
+        
+        // Atualizar status da compra associada
+        if (faturaAtualizada.getCompra() != null) {
+            faturaAtualizada.getCompra().setStatus("PAGA");
+            faturaAtualizada.getCompra().setValorPago(total);
+            faturaAtualizada.getCompra().setDataPagamento(java.time.LocalDateTime.now());
+            compraRepository.save(faturaAtualizada.getCompra());
+        }
+
+        // Regenerar o PDF com o estado atualizado
+        gerarPdfFatura(faturaAtualizada);
+
+        // Gerar Factura-Recibo
+        try {
+            emitirReciboPagamento(fatura.getCompra(), total);
+        } catch (Exception e) {
+            log.warn("Pagamento registado mas falha ao gerar recibo: {}", e.getMessage());
+        }
+        
+        return faturaAtualizada;
+    }
+
+    /**
+     * Registar pagamento parcial de uma factura
+     */
+    public Fatura registarPagamentoParcial(Long id, Double valor, String metodo, String referencia) throws Exception {
+        Fatura fatura = faturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
+        
+        verificarMutabilidade(fatura);
+        
+        if (valor == null || valor <= 0) {
+            throw new IllegalArgumentException("Valor de pagamento inválido");
+        }
+        
+        Double total = fatura.getTotal() != null ? fatura.getTotal() : 0.0;
+        Double valorAtionalmentePago = fatura.getValorPago() != null ? fatura.getValorPago() : 0.0;
+        Double novoValorPago = valorAtionalmentePago + valor;
+        
+        if (novoValorPago > total) {
+            throw new IllegalArgumentException("Valor de pagamento excede o total da factura");
+        }
+        
+        fatura.setValorPago(novoValorPago);
+        fatura.setValorEmAberto(total - novoValorPago);
+        
+        if (novoValorPago.equals(total)) {
+            fatura.setStatus("PAGA");
+        } else {
+            fatura.setStatus("PARCIALMENTE_PAGA");
+        }
+        
+        Fatura faturaAtualizada = faturaRepository.save(fatura);
+        
+        // Atualizar status da compra associada
+        if (faturaAtualizada.getCompra() != null) {
+            faturaAtualizada.getCompra().setStatus(faturaAtualizada.getStatus());
+            faturaAtualizada.getCompra().setValorPago(novoValorPago);
+            compraRepository.save(faturaAtualizada.getCompra());
+        }
+
+        // Regenerar o PDF com o estado atualizado
+        gerarPdfFatura(faturaAtualizada);
+
+        // Gerar Factura-Recibo para o pagamento parcial
+        try {
+            emitirReciboPagamento(fatura.getCompra(), valor);
+        } catch (Exception e) {
+            log.warn("Pagamento parcial registado mas falha ao gerar recibo: {}", e.getMessage());
+        }
+        
+        return faturaAtualizada;
+    }
+
+    /**
+     * Converter uma Factura (FT) em Factura-Recibo (FR) após pagamento.
+     * Marca a FT original e a Compra associada como PAGA.
+     */
+    public Fatura converterParaFaturaRecibo(Long faturaId) throws Exception {
+        Fatura fatura = faturaRepository.findById(faturaId)
+                .orElseThrow(() -> new RuntimeException("Factura não encontrada com ID: " + faturaId));
+        
+        if (!"FT".equals(fatura.getTipoDocumento())) {
+            throw new IllegalArgumentException("Apenas facturas do tipo FT podem ser convertidas para Factura-Recibo");
+        }
+        
+        Compra compra = fatura.getCompra();
+        if (compra == null) {
+            throw new IllegalStateException("Compra associada à factura não encontrada");
+        }
+        
+        Double total = fatura.getTotal() != null ? fatura.getTotal() : 0.0;
+        
+        // 1. Marcar a Fatura FT original como PAGA
+        fatura.setStatus("PAGA");
+        fatura.setValorPago(total);
+        fatura.setValorEmAberto(0.0);
+        faturaRepository.save(fatura);
+        
+        // 2. Marcar a Compra original como PAGA
+        compra.setStatus("PAGA");
+        compra.setValorPago(total);
+        compra.setDataPagamento(java.time.LocalDateTime.now());
+        compraRepository.save(compra);
+        
+        // Regenerar o PDF da fatura FT com o estado PAGA
+        gerarPdfFatura(fatura);
+
+        // 3. Emitir a nova Fatura do tipo FR
+        return emitirReciboPagamento(compra, total);
+    }
+
+    /**
+     * Emitir Nota de Débito (ND) - Incremento de débito após emissão de FT
+     */
+    public Fatura emitirNotaDebito(Long faturaReferenciaId, Double valorAdicional, String motivo) throws Exception {
+        Fatura faturaReferencia = faturaRepository.findById(faturaReferenciaId)
+                .orElseThrow(() -> new RuntimeException("Factura de referência não encontrada"));
+        
+        if (!"FT".equals(faturaReferencia.getTipoDocumento())) {
+            throw new IllegalArgumentException("Nota de Débito só pode ser emitida contra uma Factura (FT)");
+        }
+        
+        Devolucao devolucaoFicticia = new Devolucao();
+        devolucaoFicticia.setEmpresa(faturaReferencia.getEmpresa());
+        devolucaoFicticia.setTotal(valorAdicional);
+        devolucaoFicticia.setIva(0.0); // Será definido no método
+        devolucaoFicticia.setMotivo(motivo != null ? motivo : "Nota de Débito");
+        
+        Fatura nota = emitirNota(devolucaoFicticia, "ND");
+        nota.setFaturaReferencia(faturaReferencia);
+        
+        return faturaRepository.save(nota);
+    }
+
+    /**
+     * Consultar estado AGT de uma factura
+     */
+    public Map<String, Object> consultarEstadoAgt(Long id) throws Exception {
+        Fatura fatura = faturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
+        
+        Map<String, Object> resultado = new java.util.HashMap<>();
+        resultado.put("numeroFatura", fatura.getNumeroFatura());
+        resultado.put("tipoDocumento", fatura.getTipoDocumento());
+        resultado.put("dataEmissao", fatura.getDataEmissao());
+        resultado.put("enviadaAgt", fatura.isEnviadaAGT());
+        resultado.put("validadaAgt", fatura.getValidadaAgt());
+        resultado.put("status", fatura.getStatus());
+        resultado.put("codigoAgt", fatura.getCodigoAgt());
+        resultado.put("hash", fatura.getHash());
+        
+        // Se ainda não foi validada, tentar validar
+        if (!fatura.isEnviadaAGT()) {
+            try {
+                AgtResponse response = agtService.enviarFatura(fatura);
+                resultado.put("mensagemAgt", response.getMensagem());
+                resultado.put("sucessoAgt", response.isSucesso());
+            } catch (Exception e) {
+                resultado.put("mensagemAgt", "Erro ao validar na AGT: " + e.getMessage());
+                resultado.put("sucessoAgt", false);
+            }
+        } else {
+            resultado.put("mensagemAgt", "Factura já foi validada na AGT");
+            resultado.put("sucessoAgt", true);
+        }
+        
+        return resultado;
+    }
+
+    /**
+     * Anular uma factura (marca como anulada)
+     */
+    public Fatura anularFatura(Long id, String motivo) throws Exception {
+        Fatura fatura = faturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
+        
+        verificarMutabilidade(fatura);
+        
+        if (!"RASCUNHO".equals(fatura.getStatus()) && !"EMITIDA".equals(fatura.getStatus())) {
+            throw new IllegalStateException(
+                    "Apenas facturas em Rascunho ou Emitida podem ser anuladas");
+        }
+        
+        fatura.setStatus("ANULADA");
+        fatura.setInvoiceStatus("A"); // Status A = Anulada
+        
+        Fatura faturaAnulada = faturaRepository.save(fatura);
+        
+        // Atualizar status da compra associada
+        if (faturaAnulada.getCompra() != null) {
+            faturaAnulada.getCompra().setStatus("CANCELADA");
+            faturaAnulada.getCompra().setMotivoAnulacao(motivo);
+            compraRepository.save(faturaAnulada.getCompra());
+        }
+
+        // Regenerar o PDF com o estado atualizado
+        gerarPdfFatura(faturaAnulada);
+
+        log.info("Factura {} anulada. Motivo: {}", fatura.getNumeroFatura(), motivo);
+        
+        return faturaAnulada;
+    }
+
+    // ─── MÉTODO AUXILIAR ───
+
+    /**
+     * Gera o corpo do email para uma factura
+     */
+    private String gerarCorpoEmailFactura(Fatura fatura) {
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body style='font-family: Arial, sans-serif;'>\n");
+        html.append("<h2>Factura ").append(fatura.getNumeroFatura()).append("</h2>\n");
+        html.append("<p>Prezado Cliente,</p>\n");
+        html.append("<p>Segue em anexo a factura referente à sua compra realizada em ")
+                .append(new SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao()))
+                .append(".</p>\n");
+        html.append("<table style='width: 100%; border-collapse: collapse;'>\n");
+        html.append("<tr><td><strong>Número:</strong></td><td>").append(fatura.getNumeroFatura()).append("</td></tr>\n");
+        html.append("<tr><td><strong>Data:</strong></td><td>")
+                .append(new SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao()))
+                .append("</td></tr>\n");
+        String estadoDoc = "Normal";
+        if (fatura.getStatus() != null) {
+            switch (fatura.getStatus().toUpperCase()) {
+                case "VALIDADA": estadoDoc = "Validada"; break;
+                case "ANULADA": case "CANCELADA": estadoDoc = "Anulada"; break;
+                case "PAGA": estadoDoc = "Paga"; break;
+                case "PARCIALMENTE_PAGA": estadoDoc = "Parcialmente Paga"; break;
+                case "EMITIDA_OFFLINE": estadoDoc = "Emitida Offline"; break;
+                case "FALHA_ENVIO": estadoDoc = "Falha no Envio"; break;
+                default: estadoDoc = fatura.getStatus(); break;
+            }
+        }
+        html.append("<tr><td><strong>Estado:</strong></td><td>").append(estadoDoc).append("</td></tr>\n");
+        html.append("<tr><td><strong>Total:</strong></td><td>")
+                .append(String.format("%.2f", fatura.getTotal()))
+                .append(" Kz</td></tr>\n");
+        html.append("</table>\n");
+        html.append("<p>Para qualquer dúvida, por favor contacte-nos.</p>\n");
+        html.append("<p>Obrigado pela preferência!</p>\n");
+        html.append("</body></html>\n");
+        return html.toString();
+    }
 }
+

@@ -1,6 +1,7 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,10 +19,13 @@ public class Compra {
     @ManyToOne
     private Cliente cliente;
 
-    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemCompra> itens;
 
-    private String status = "EMITIDA"; // EMITIDA, CANCELADA, SUBSTITUIDA
+    // Estados FT: RASCUNHO, EMITIDA, VALIDADA_AGT, PARCIALMENTE_PAGA, PAGA, VENCIDA, ANULADA
+    // Estados FP: EMITIDA, RASCUNHO, APROVADA, REJEITADA, CONVERTIDA, CANCELADA, ANULADA
+    // Estados FR: RASCUNHO, EMITIDA, VALIDADA_AGT, ANULADA
+    private String status = "EMITIDA";
     private String tipoDocumento; // FT, FR, FP
 
     // Dados do cliente para a factura (pode ser FK ou Consumidor Final)
@@ -51,6 +55,12 @@ public class Compra {
     private String localDescarga;
 
     private String motivoAnulacao;
+
+    // Campos de gestão de pagamento (FT)
+    private Double valorPago;           // Valor já pago (parcial ou total)
+    private LocalDate dataVencimento;   // Prazo máximo de pagamento
+    private LocalDateTime dataPagamento; // Data em que o pagamento foi concluído
+    private String metodoPagamentoRegistado; // Forma de pagamento do registo (CASH, TPA, etc.)
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Compra faturaReferencia;
@@ -237,6 +247,18 @@ public class Compra {
     public void setMotivoAnulacao(String motivoAnulacao) {
         this.motivoAnulacao = motivoAnulacao;
     }
+
+    public Double getValorPago() { return valorPago; }
+    public void setValorPago(Double valorPago) { this.valorPago = valorPago; }
+
+    public LocalDate getDataVencimento() { return dataVencimento; }
+    public void setDataVencimento(LocalDate dataVencimento) { this.dataVencimento = dataVencimento; }
+
+    public LocalDateTime getDataPagamento() { return dataPagamento; }
+    public void setDataPagamento(LocalDateTime dataPagamento) { this.dataPagamento = dataPagamento; }
+
+    public String getMetodoPagamentoRegistado() { return metodoPagamentoRegistado; }
+    public void setMetodoPagamentoRegistado(String metodoPagamentoRegistado) { this.metodoPagamentoRegistado = metodoPagamentoRegistado; }
 
     public Compra getFaturaReferencia() {
         return faturaReferencia;

@@ -1,72 +1,302 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="menu :: head"></head>
+<head>
+    <th:block th:replace="menu :: head"></th:block>
+    <style>
+        /* Custom Styling for Regime Fiscal */
+        .hero-regime {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border-radius: 20px;
+            color: #1e293b;
+            padding: 2.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.05);
+        }
+
+        .hero-regime::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .card-regime {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card-regime:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-regime.active {
+            border: 2px solid #4f46e5;
+            background: linear-gradient(to bottom, #f5f3ff, #ffffff);
+        }
+
+        .active-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #4f46e5;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            transition: all 0.3s ease;
+            font-size: 1.8rem;
+        }
+
+        .card-regime:hover .icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .bg-icon-active {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: #4f46e5;
+        }
+
+        .bg-icon-inactive {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .tax-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            gap: 0.25rem;
+            background: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+            transition: all 0.2s ease;
+        }
+
+        .tax-badge:hover {
+            background: #c7d2fe;
+            transform: scale(1.05);
+            text-decoration: none;
+        }
+
+        .btn-action {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white !important;
+            border: none;
+        }
+
+        .btn-action-primary:hover:not(:disabled) {
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+            filter: brightness(1.05);
+        }
+
+        .btn-action-secondary {
+            background: transparent;
+            color: #4f46e5 !important;
+            border: 2px solid #e0e7ff;
+        }
+
+        .btn-action-secondary:hover {
+            background: #f5f3ff;
+            border-color: #c7d2fe;
+        }
+
+        .bg-soft-info {
+            background-color: rgba(14, 165, 233, 0.1);
+        }
+
+        .transition-hover {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .transition-hover:hover {
+            background-color: rgba(243, 244, 246, 0.6) !important;
+            border-color: #cbd5e1 !important;
+        }
+    </style>
+</head>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
     <div class="wrapper">
         <nav th:replace="menu :: topbar"></nav>
         <aside th:replace="menu :: sidebar"></aside>
 
-        <div class="content-wrapper px-4 py-2">
-            <div class="content-header p-0 mb-4">
-                <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-sm-6">
-                            <h1 class="fw-bold"><i class="fas fa-gavel text-info me-2"></i><span
-                                    th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</span></h1>
-                            <p class="text-muted mb-0" th:text="#{config.fiscais.regime.subtitulo}">Defina o
-                                enquadramento fiscal da sua empresa junto da AGT.</p>
-                        </div>
-                        <div class="col-sm-6 text-end">
-                            <button type="button" class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal"
-                                data-bs-target="#modalNovoRegime">
-                                <i class="fas fa-plus me-2"></i> Novo Regime
-                            </button>
-                        </div>
+        <div class="content-wrapper px-4 py-3">
+            <!-- Top Hero Section -->
+            <div class="container-fluid mb-4">
+                <div class="hero-regime shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-4">
+                    <div>
+                        <h1 class="fw-extrabold mb-1 d-flex align-items-center gap-3">
+                            <i class="fas fa-gavel text-warning"></i>
+                            <span>Enquadramento e Regime Fiscal</span>
+                        </h1>
+                        <p class="mb-0 opacity-80" style="max-width: 600px;">
+                            Configure e faça a gestão do enquadramento tributário da sua empresa junto da AGT. Assegure
+                            a liquidação correta de impostos e a conformidade fiscal do SAF-T.
+                        </p>
+                    </div>
+                    <div>
+                        <button type="button"
+                            class="btn btn-warning fw-bold px-4 py-2 shadow-sm text-dark d-flex align-items-center gap-2"
+                            data-bs-toggle="modal" data-bs-target="#modalNovoRegime"
+                            style="border-radius: 12px; font-size: 0.95rem;">
+                            <i class="fas fa-plus-circle"></i> Novo Regime
+                        </button>
                     </div>
                 </div>
             </div>
 
+            <!-- Main Content -->
             <section class="content">
-                <div class="container-fluid text-center">
+                <div class="container-fluid">
+                    <!-- Notification Banners -->
                     <div th:if="${mensagem}"
-                        class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <span th:text="${mensagem}">Actualização realizada com sucesso.</span>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4 p-3" role="alert"
+                        style="border-radius: 12px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                            <span class="fw-bold" th:text="${mensagem}">Actualização realizada com sucesso.</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                            style="top: 50%; transform: translateY(-50%);"></button>
                     </div>
 
-                    <form th:action="@{/configuracoes/fiscais/regime-fiscal/salvar}" method="post">
-                        <div class="row g-4 justify-content-center">
-                            <!-- Loop Dinâmico de Regimes -->
-                            <div th:each="r : ${regimes}" class="col-md-3">
-                                <div class="card h-100 shadow-sm border-0 transition-hover p-4 cursor-pointer"
-                                    th:onclick="|document.getElementById('btn-select-' + ${r.id}).click()|"
-                                    th:classappend="${empresa.regimeFiscal == r.codigo ? 'bg-soft-primary border border-primary' : ''}">
-                                    <i
-                                        th:class="${r.icone + ' fa-3x mb-3 ' + (empresa.regimeFiscal == r.codigo ? 'text-primary' : 'text-muted opacity-50')}"></i>
-                                    <h4 class="fw-bold" th:text="${r.nome}">Regime</h4>
-                                    <p class="small text-muted mb-0" th:text="${r.descricao}">Descrição do regime.</p>
-                                    <button type="submit" name="regime" th:value="${r.codigo}"
-                                        th:id="|btn-select-${r.id}|" class="btn mt-3 w-100 fw-bold"
-                                        th:classappend="${empresa.regimeFiscal == r.codigo ? 'btn-primary' : 'btn-outline-secondary'}"
-                                        th:disabled="${empresa.regimeFiscal == r.codigo}">
-                                        <span
-                                            th:text="${empresa.regimeFiscal == r.codigo ? #messages.msg('config.fiscais.regime.btn.actual') : #messages.msg('config.fiscais.regime.btn.seleccionar')}">Seleccionar</span>
+                    <div th:if="${erro}"
+                        class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-4 p-3" role="alert"
+                        style="border-radius: 12px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-exclamation-circle fa-lg text-danger"></i>
+                            <span class="fw-bold" th:text="${erro}">Erro na operação.</span>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                            style="top: 50%; transform: translateY(-50%);"></button>
+                    </div>
+
+                    <!-- Regime Grid -->
+                    <div class="row g-4 mb-5">
+                        <div th:each="r : ${regimes}" class="col-lg-4 col-md-6">
+                            <div class="card-regime p-4"
+                                th:classappend="${empresa.regimeFiscal == r.codigo ? 'active' : ''}">
+                                <!-- Active Indicator -->
+                                <span th:if="${empresa.regimeFiscal == r.codigo}" class="active-badge">ATIVO</span>
+
+                                <!-- Icon Wrapper -->
+                                <div class="icon-wrapper"
+                                    th:classappend="${empresa.regimeFiscal == r.codigo ? 'bg-icon-active' : 'bg-icon-inactive'}">
+                                    <i th:class="${r.icone != null ? r.icone : 'fas fa-balance-scale'}"></i>
+                                </div>
+
+                                <!-- Title & Code -->
+                                <div class="text-center mb-3">
+                                    <h4 class="fw-extrabold text-dark mb-1" th:text="${r.nome}">Nome do Regime</h4>
+                                    <span class="badge bg-light text-muted border px-2 py-1 small fw-bold"
+                                        th:text="${r.codigo}">GERAL</span>
+                                </div>
+
+                                <!-- Description -->
+                                <p class="text-muted text-center small mb-4 flex-grow-1" th:text="${r.descricao}">
+                                    Descrição do regime e critérios de enquadramento.
+                                </p>
+
+                                <!-- Associated Taxes Display -->
+                                <div class="border-top pt-3 mb-4">
+                                    <h6 class="fw-bold text-secondary mb-2 d-flex align-items-center gap-2">
+                                        <i class="fas fa-percent text-info"></i>
+                                        <span>Impostos Associados</span>
+                                    </h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <th:block th:if="${r.impostos != null && !r.impostos.isEmpty()}">
+                                            <span th:each="imp : ${r.impostos}" class="tax-badge"
+                                                th:title="${imp.nome}">
+                                                <i class="fas fa-coins text-warning"></i>
+                                                <span th:text="${imp.codigoAgt + ' (' + imp.percentagem + '%)'}">IVA
+                                                    (14%)</span>
+                                            </span>
+                                        </th:block>
+                                        <th:block th:if="${r.impostos == null || r.impostos.isEmpty()}">
+                                            <span class="text-muted small italic">Sem impostos associados</span>
+                                        </th:block>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-action btn-action-secondary flex-grow-1"
+                                        data-bs-toggle="modal" th:data-bs-target="${'#modalImpostos-' + r.id}">
+                                        <i class="fas fa-tags me-1"></i> Impostos
                                     </button>
+
+                                    <form th:action="@{/configuracoes/fiscais/regime-fiscal/salvar}" method="post"
+                                        class="flex-grow-1">
+                                        <input type="hidden" name="regime" th:value="${r.codigo}">
+                                        <button type="submit" class="btn btn-action btn-action-primary w-100"
+                                            th:disabled="${empresa.regimeFiscal == r.codigo}">
+                                            <span
+                                                th:text="${empresa.regimeFiscal == r.codigo ? 'Enquadrado' : 'Selecionar'}">Selecionar</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
 
-                    <div class="card shadow-sm border-0 mt-5 p-4 border-start border-primary border-4 text-start">
-                        <h5 class="fw-bold"><i class="fas fa-info-circle me-2"></i><span
-                                th:text="#{config.fiscais.regime.info.titulo}">Informação Importante</span></h5>
-                        <p class="mb-0 text-muted small" th:text="#{config.fiscais.regime.info.desc}">A alteração do
-                            Regime Fiscal afecta directamente a obrigatoriedade de liquidação de IVA e a estrutura do
-                            ficheiro SAF-T AO exportado para a AGT. Certifique-se de que a sua empresa está qualificada
-                            para o regime seleccionado.</p>
+                    <!-- Bottom Info Card -->
+                    <div class="card shadow-sm border-0 p-4 border-start border-primary border-4 mb-5"
+                        style="border-radius: 12px; background: rgba(79, 70, 229, 0.02);">
+                        <div class="d-flex align-items-start gap-3">
+                            <div
+                                class="bg-soft-info p-3 rounded-circle text-info d-flex align-items-center justify-content-center">
+                                <i class="fas fa-info-circle fa-lg"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1">Informações Legais de Enquadramento</h5>
+                                <p class="mb-0 text-muted small" style="line-height: 1.6;">
+                                    A alteração do Regime Fiscal afeta diretamente as regras de faturamento, liquidação
+                                    de IVA e a emissão do arquivo fiscal SAF-T AO exportado para a AGT. Assegure-se de
+                                    que a alteração de regime está devidamente homologada e em consonância com a
+                                    contabilidade certificada da empresa.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -76,8 +306,8 @@
     <!-- Modal Novo Regime -->
     <div class="modal fade" id="modalNovoRegime" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-primary text-white">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                <div class="modal-header bg-gradient-primary text-white border-0 py-3">
                     <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2"></i> Adicionar Regime Fiscal</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
@@ -87,41 +317,103 @@
                     <div class="modal-body p-4">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nome do Regime</label>
-                            <input type="text" th:field="*{nome}" class="form-control"
+                            <input type="text" th:field="*{nome}" class="form-control" style="border-radius: 8px;"
                                 placeholder="Ex: Regime Transitório" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Código Identificador (Interno)</label>
                             <input type="text" th:field="*{codigo}" class="form-control text-uppercase"
-                                placeholder="Ex: TRANSITORIO" required>
+                                style="border-radius: 8px;" placeholder="Ex: TRANSITORIO" required>
                             <small class="text-muted">Utilize apenas letras maiúsculas sem espaços.</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Descrição</label>
-                            <textarea th:field="*{descricao}" class="form-control" rows="3"
-                                placeholder="Breve explicação sobre o enquadramento..."></textarea>
+                            <textarea th:field="*{descricao}" class="form-control" style="border-radius: 8px;" rows="3"
+                                placeholder="Breve explicação sobre o enquadramento..." required></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Ícone (FontAwesome)</label>
-                            <input type="text" th:field="*{icone}" class="form-control"
+                            <input type="text" th:field="*{icone}" class="form-control" style="border-radius: 8px;"
                                 placeholder="Ex: fas fa-landmark">
                             <small class="text-muted">Consulte o <a href="https://fontawesome.com/icons"
                                     target="_blank">FontAwesome</a> para exemplos.</small>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light border-0">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary px-4 fw-bold">Salvar Regime</button>
+                    <div class="modal-footer bg-light border-0 py-3">
+                        <button type="button" class="btn btn-secondary border-0" data-bs-dismiss="modal"
+                            style="border-radius: 10px; font-weight: 600;">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4"
+                            style="border-radius: 10px; font-weight: 600; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none;">Salvar
+                            Regime</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Scripts extra: AdminLTE 3 usually includes Bootstrap 4, but let's check menu.html for BS version -->
-    <!-- If it's pure AdminLTE/BS4, we might need a mix, but standardizing for current workspace pattern -->
+    <!-- Modal de Impostos para cada Regime -->
+    <div th:each="r : ${regimes}" class="modal fade" th:id="${'modalImpostos-' + r.id}" tabindex="-1"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                <div class="modal-header bg-gradient-primary text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-tags me-2"></i>
+                        Impostos - <span th:text="${r.nome}">Regime</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form th:action="@{/configuracoes/fiscais/regime-fiscal/associar-impostos}" method="post">
+                    <input type="hidden" name="regimeId" th:value="${r.id}">
+                    <div class="modal-body p-4">
+                        <p class="text-muted mb-3 small">Selecione os impostos válidos e aplicáveis a este regime
+                            fiscal:</p>
+
+                        <div class="d-flex flex-column gap-2" style="max-height: 400px; overflow-y: auto;">
+                            <div th:each="imp : ${todosImpostos}"
+                                class="p-3 border rounded transition-hover d-flex align-items-center justify-content-between"
+                                style="border-radius: 12px; background: #fafafa;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-soft-info p-2 rounded-circle text-info d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px;">
+                                        <i class="fas fa-percent"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-bold d-block text-dark small" th:text="${imp.nome}">IVA</span>
+                                        <small class="text-muted">
+                                            Taxa: <span class="fw-bold" th:text="${imp.percentagem + '%'}">14%</span> |
+                                            Cód. AGT: <span class="fw-bold" th:text="${imp.codigoAgt}">IVA</span>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" name="impostoIds"
+                                        th:value="${imp.id}" th:checked="${#lists.contains(r.impostos.![id], imp.id)}"
+                                        style="width: 2.2em; height: 1.2em; cursor: pointer;">
+                                </div>
+                            </div>
+                            <div th:if="${todosImpostos == null || todosImpostos.isEmpty()}" class="text-center py-4">
+                                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                                <p class="text-muted small mb-0">Nenhum imposto cadastrado no sistema.</p>
+                                <a href="/configuracoes/fiscais/impostos" class="btn btn-sm btn-outline-primary mt-2"
+                                    style="border-radius: 8px;">Cadastrar Impostos</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0 py-3">
+                        <button type="button" class="btn btn-secondary border-0" data-bs-dismiss="modal"
+                            style="border-radius: 10px; font-weight: 600;">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4"
+                            style="border-radius: 10px; font-weight: 600; background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); border: none;">Salvar
+                            Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    </div>
+
+    <div th:replace="menu :: footer"></div>
 </body>
 
 </html>

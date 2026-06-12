@@ -198,6 +198,18 @@
                                         <label class="form-label fw-bold small">Funcionalidades Extra <small class="text-muted">(separadas por vírgula)</small></label>
                                         <textarea class="form-control rounded-3" th:field="*{funcionalidadesExtra}" rows="2" placeholder="Ex: Whatsapp, SMS Alerts, ..."></textarea>
                                     </div>
+                                    
+                                    <!-- Módulos do Sistema (checkboxes dinâmicos) -->
+                                    <div class="mt-3">
+                                        <label class="form-label fw-bold small">Módulos do Sistema</label>
+                                        <div class="d-flex flex-column">
+                                            <div th:each="entry : ${modulosDisponiveis.entrySet()}" class="form-check">
+                                                <input class="form-check-input" type="checkbox" th:id="${'mod_' + entry.key}"
+                                                       th:field="*{modulos}" th:value="${entry.key}">
+                                                <label class="form-check-label" th:for="${'mod_' + entry.key}" th:text="${entry.value}"></label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

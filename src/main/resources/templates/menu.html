@@ -438,9 +438,9 @@
 
             <!-- Group: Gestão Tributária (AGT) with fiscal/config items -->
             <li class="nav-item has-treeview module-administracao-item"
-              th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' menu-open' : ''">
+              th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/fiscais/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal'))} ? ' menu-open' : ''">
               <a href="#" class="nav-link"
-                th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series'))} ? ' active' : ''">
+                th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/fiscais/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal'))} ? ' active' : ''">
                 <i class="nav-icon fas fa-landmark"></i>
                 <p>
                   Gestão Tributária
@@ -456,8 +456,8 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a th:href="@{/configuracoes/impostos}" class="nav-link"
-                    th:classappend="${#request.requestURI.startsWith('/configuracoes/impostos')} ? ' active' : ''">
+                  <a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/impostos')} ? ' active' : ''">
                     <i class="fas fa-percent nav-icon"></i>
                     <p>Impostos (IVA/Selo)</p>
                   </a>
@@ -481,6 +481,13 @@
                     th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
                     <i class="fas fa-list-ol nav-icon"></i>
                     <p>Séries de Faturação</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
+                    <i class="fas fa-gavel nav-icon"></i>
+                    <p>Regime Fiscal</p>
                   </a>
                 </li>
               </ul>
@@ -558,7 +565,7 @@
             </li>
             <li class="nav-item module-saas-item">
               <a th:href="@{/superadmin/planos-pagamento}" class="nav-link bg-dark text-warning mt-1"
-                 th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
+                th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
                 <i class="nav-icon fas fa-crown"></i>
                 <p>Planos de Pagamento</p>
               </a>
