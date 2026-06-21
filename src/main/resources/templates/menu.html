@@ -495,31 +495,31 @@
 
             <!-- Optional advanced items preserved with conditional flags -->
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SERVIDOR}">
-              <a th:href="@{/configuracoes/servidor}" class="nav-link">
+              <a th:href="@{/configuracoes/geral(tab='servidor')}" class="nav-link">
                 <i class="fas fa-server nav-icon"></i>
                 <p>Servidor e Rede</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_EMAIL}">
-              <a th:href="@{/configuracoes/email}" class="nav-link">
+              <a th:href="@{/configuracoes/geral(tab='email')}" class="nav-link">
                 <i class="fas fa-envelope-open-text nav-icon"></i>
                 <p>Configuração de Email</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_BANCO_DADOS}">
-              <a th:href="@{/configuracoes/banco-dados}" class="nav-link">
+              <a th:href="@{/configuracoes/geral(tab='banco-dados')}" class="nav-link">
                 <i class="fas fa-database nav-icon"></i>
                 <p>Base de Dados</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_STORAGE}">
-              <a th:href="@{/configuracoes/storage}" class="nav-link">
+              <a th:href="@{/configuracoes/geral(tab='storage')}" class="nav-link">
                 <i class="fas fa-hdd nav-icon"></i>
                 <p>Armazenamento (Storage)</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SEGURANCA}">
-              <a th:href="@{/configuracoes/seguranca}" class="nav-link">
+              <a th:href="@{/configuracoes/geral(tab='seguranca')}" class="nav-link">
                 <i class="fas fa-lock nav-icon"></i>
                 <p>Segurança e Logs</p>
               </a>
@@ -551,12 +551,13 @@
                 <p>Admins Globais</p>
               </a>
             </li>
+            <!--
             <li class="nav-item module-saas-item">
               <a th:href="@{/superadmin/configuracoes}" class="nav-link bg-warning text-dark mt-1">
                 <i class="nav-icon fas fa-cogs"></i>
                 <p>Configurações SaaS</p>
               </a>
-            </li>
+            </li>    -->
             <li class="nav-item module-saas-item">
               <a th:href="@{/superadmin/licenca/gerador}" class="nav-link bg-dark text-warning mt-1">
                 <i class="nav-icon fas fa-key"></i>

@@ -146,8 +146,15 @@ public class LicencaService {
         ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L).orElseGet(() -> {
             ConfiguracaoSistemaEntity e = new ConfiguracaoSistemaEntity();
             e.setId(1L);
+            e.setDataInstalacao(getCurrentNetworkTime());
             return configuracaoSistemaRepository.save(e);
         });
+
+        // Se dataInstalacao for nulo (caso de atualização de sistema), inicializá-lo
+        if (config.getDataInstalacao() == null) {
+            config.setDataInstalacao(getCurrentNetworkTime());
+            config = configuracaoSistemaRepository.save(config);
+        }
 
         // Primeiro verificar se existe uma licença profissional instalada
         String chave = config.getLicencaChaveAtivacao();
@@ -157,7 +164,9 @@ public class LicencaService {
             return validarChave(chave);
         }
 
-        // Sem período de trial. Exige licença imediatamente.
-        return false;
+        // Sem licença profissional: ativação padrão de 7 dias a partir da instalação
+        LocalDateTime agora = getCurrentNetworkTime();
+        LocalDateTime dataLimite = config.getDataInstalacao().plusDays(7);
+        return !agora.isAfter(dataLimite);
     }
 }

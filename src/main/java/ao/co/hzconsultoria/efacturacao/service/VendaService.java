@@ -122,7 +122,11 @@ public class VendaService {
 
         String numeroFatura = "FT-" + System.currentTimeMillis();
         // Gerar hash e simular envio AGT omitidos para brevidade se desejar, mas vamos manter o fluxo
-        Compra compraSalva = compraRepository.save(compra);
+        Compra compraSalva = compraRepository.saveAndFlush(compra);
+        System.out.println("[VendaService] Compra salva e flushed com ID=" + compraSalva.getId() + 
+                           ", nomeCliente=" + compraSalva.getNomeCliente() + 
+                           ", nifCliente=" + compraSalva.getNifCliente() + 
+                           ", moradaCliente=" + compraSalva.getMoradaCliente());
 
         for (ItemCompra item : compraSalva.getItens()) {
             Produto produto = null;

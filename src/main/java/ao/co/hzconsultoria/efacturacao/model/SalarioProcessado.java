@@ -1,8 +1,6 @@
 package ao.co.hzconsultoria.efacturacao.model;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.LinkedHashSet;
 
@@ -25,7 +23,8 @@ public class SalarioProcessado {
     @Column(name = "salario_base")
     private double salarioBase;
 
-    // Subsídio de Férias e Natal mantêm-se como campos de fórmula (calculados internamente)
+    // Subsídio de Férias e Natal mantêm-se como campos de fórmula (calculados
+    // internamente)
     @Column(name = "subsidio_ferias")
     private double subsidioFerias;
 
@@ -52,39 +51,99 @@ public class SalarioProcessado {
     private Set<SalarioProcessadoSubsidio> subsidios = new LinkedHashSet<>();
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public FolhaProcessamento getFolhaProcessamento() { return folhaProcessamento; }
-    public void setFolhaProcessamento(FolhaProcessamento folhaProcessamento) { this.folhaProcessamento = folhaProcessamento; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Colaborador getColaborador() { return colaborador; }
-    public void setColaborador(Colaborador colaborador) { this.colaborador = colaborador; }
+    public FolhaProcessamento getFolhaProcessamento() {
+        return folhaProcessamento;
+    }
 
-    public double getSalarioBase() { return salarioBase; }
-    public void setSalarioBase(double salarioBase) { this.salarioBase = salarioBase; }
+    public void setFolhaProcessamento(FolhaProcessamento folhaProcessamento) {
+        this.folhaProcessamento = folhaProcessamento;
+    }
 
-    public double getSubsidioFerias() { return subsidioFerias; }
-    public void setSubsidioFerias(double subsidioFerias) { this.subsidioFerias = subsidioFerias; }
+    public Colaborador getColaborador() {
+        return colaborador;
+    }
 
-    public double getSubsidioNatal() { return subsidioNatal; }
-    public void setSubsidioNatal(double subsidioNatal) { this.subsidioNatal = subsidioNatal; }
+    public void setColaborador(Colaborador colaborador) {
+        this.colaborador = colaborador;
+    }
 
-    public double getRendimentoIliquido() { return rendimentoIliquido; }
-    public void setRendimentoIliquido(double rendimentoIliquido) { this.rendimentoIliquido = rendimentoIliquido; }
+    public double getSalarioBase() {
+        return salarioBase;
+    }
 
-    public double getDescontoSegurancaSocial() { return descontoSegurancaSocial; }
-    public void setDescontoSegurancaSocial(double d) { this.descontoSegurancaSocial = d; }
+    public void setSalarioBase(double salarioBase) {
+        this.salarioBase = salarioBase;
+    }
 
-    public double getDescontoIrt() { return descontoIrt; }
-    public void setDescontoIrt(double descontoIrt) { this.descontoIrt = descontoIrt; }
+    public double getSubsidioFerias() {
+        return subsidioFerias;
+    }
 
-    public double getEncargoEmpresaSegurancaSocial() { return encargoEmpresaSegurancaSocial; }
-    public void setEncargoEmpresaSegurancaSocial(double v) { this.encargoEmpresaSegurancaSocial = v; }
+    public void setSubsidioFerias(double subsidioFerias) {
+        this.subsidioFerias = subsidioFerias;
+    }
 
-    public double getSalarioLiquido() { return salarioLiquido; }
-    public void setSalarioLiquido(double salarioLiquido) { this.salarioLiquido = salarioLiquido; }
+    public double getSubsidioNatal() {
+        return subsidioNatal;
+    }
 
-    public Set<SalarioProcessadoSubsidio> getSubsidios() { return subsidios; }
-    public void setSubsidios(Set<SalarioProcessadoSubsidio> subsidios) { this.subsidios = subsidios; }
+    public void setSubsidioNatal(double subsidioNatal) {
+        this.subsidioNatal = subsidioNatal;
+    }
+
+    public double getRendimentoIliquido() {
+        return rendimentoIliquido;
+    }
+
+    public void setRendimentoIliquido(double rendimentoIliquido) {
+        this.rendimentoIliquido = rendimentoIliquido;
+    }
+
+    public double getDescontoSegurancaSocial() {
+        return descontoSegurancaSocial;
+    }
+
+    public void setDescontoSegurancaSocial(double d) {
+        this.descontoSegurancaSocial = d;
+    }
+
+    public double getDescontoIrt() {
+        return descontoIrt;
+    }
+
+    public void setDescontoIrt(double descontoIrt) {
+        this.descontoIrt = descontoIrt;
+    }
+
+    public double getEncargoEmpresaSegurancaSocial() {
+        return encargoEmpresaSegurancaSocial;
+    }
+
+    public void setEncargoEmpresaSegurancaSocial(double v) {
+        this.encargoEmpresaSegurancaSocial = v;
+    }
+
+    public double getSalarioLiquido() {
+        return salarioLiquido;
+    }
+
+    public void setSalarioLiquido(double salarioLiquido) {
+        this.salarioLiquido = salarioLiquido;
+    }
+
+    public Set<SalarioProcessadoSubsidio> getSubsidios() {
+        return subsidios;
+    }
+
+    public void setSubsidios(Set<SalarioProcessadoSubsidio> subsidios) {
+        this.subsidios = subsidios;
+    }
 }

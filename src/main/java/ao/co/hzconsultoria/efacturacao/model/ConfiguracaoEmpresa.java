@@ -127,6 +127,43 @@ public class ConfiguracaoEmpresa implements Serializable {
     @Column(length = 1000)
     private String rodapePersonalizado = "";
 
+    // ─── Campos adicionais para compatibilidade geral (por empresa) ───
+    private String sistemaNome = "Kwanza ERP";
+    private String sistemaVersao = "1.0.0";
+    private String sistemaEmailSuporte = "suporte@facturacao.com";
+    private Boolean sistemaBackup = true;
+    private String sistemaTema = "light";
+    private String sistemaLogotipo = "/img/logo.png";
+    private Boolean exibirDatasValidade = true;
+
+    private Integer servidorPorta = 8080;
+    @Column(length = 255)
+    private String servidorHostname = "localhost";
+    @Column(length = 500)
+    private String servidorBaseUrl = "http://localhost:8080";
+    private Boolean servidorProxyHabilitado = false;
+    @Column(length = 255)
+    private String servidorProxyHost = "";
+    private Integer servidorProxyPorta = 80;
+    @Column(length = 1000)
+    private String servidorCorsOrigens = "*";
+
+    @Column(length = 50)
+    private String dbTipoBD = "MySQL";
+    private Integer dbConnectionTimeout = 30000;
+    private Integer dbQueryTimeout = 60000;
+    private Integer dbPoolMin = 5;
+    private Integer dbPoolMax = 20;
+    private Integer dbIdleTimeout = 30000;
+    private Integer dbMaxLifetime = 60000;
+    @Column(length = 100)
+    private String dbSchema = "efacturacao";
+
+    private Integer segTentativasLoginMax = 5;
+    private Integer segLockoutDuracao = 15;
+    @Column(length = 20)
+    private String segPoliticaPassword = "MEDIA";
+
     // ================================================================
     // Getters & Setters
     // ================================================================
@@ -456,4 +493,59 @@ public class ConfiguracaoEmpresa implements Serializable {
     public void setRodapePersonalizado(String v) {
         this.rodapePersonalizado = v;
     }
+
+    // Getters e Setters dos campos adicionados
+    public String getSistemaNome() { return sistemaNome; }
+    public void setSistemaNome(String v) { this.sistemaNome = v; }
+    public String getSistemaVersao() { return sistemaVersao; }
+    public void setSistemaVersao(String v) { this.sistemaVersao = v; }
+    public String getSistemaEmailSuporte() { return sistemaEmailSuporte; }
+    public void setSistemaEmailSuporte(String v) { this.sistemaEmailSuporte = v; }
+    public boolean isSistemaBackup() { return sistemaBackup != null ? sistemaBackup : true; }
+    public void setSistemaBackup(boolean v) { this.sistemaBackup = v; }
+    public String getSistemaTema() { return sistemaTema; }
+    public void setSistemaTema(String v) { this.sistemaTema = v; }
+    public String getSistemaLogotipo() { return sistemaLogotipo; }
+    public void setSistemaLogotipo(String v) { this.sistemaLogotipo = v; }
+    public boolean isExibirDatasValidade() { return exibirDatasValidade != null ? exibirDatasValidade : true; }
+    public void setExibirDatasValidade(boolean v) { this.exibirDatasValidade = v; }
+
+    public int getServidorPorta() { return servidorPorta != null ? servidorPorta : 8080; }
+    public void setServidorPorta(int v) { this.servidorPorta = v; }
+    public String getServidorHostname() { return servidorHostname; }
+    public void setServidorHostname(String v) { this.servidorHostname = v; }
+    public String getServidorBaseUrl() { return servidorBaseUrl; }
+    public void setServidorBaseUrl(String v) { this.servidorBaseUrl = v; }
+    public boolean isServidorProxyHabilitado() { return servidorProxyHabilitado != null ? servidorProxyHabilitado : false; }
+    public void setServidorProxyHabilitado(boolean v) { this.servidorProxyHabilitado = v; }
+    public String getServidorProxyHost() { return servidorProxyHost; }
+    public void setServidorProxyHost(String v) { this.servidorProxyHost = v; }
+    public int getServidorProxyPorta() { return servidorProxyPorta != null ? servidorProxyPorta : 80; }
+    public void setServidorProxyPorta(int v) { this.servidorProxyPorta = v; }
+    public String getServidorCorsOrigens() { return servidorCorsOrigens; }
+    public void setServidorCorsOrigens(String v) { this.servidorCorsOrigens = v; }
+
+    public String getDbTipoBD() { return dbTipoBD; }
+    public void setDbTipoBD(String v) { this.dbTipoBD = v; }
+    public int getDbConnectionTimeout() { return dbConnectionTimeout != null ? dbConnectionTimeout : 30000; }
+    public void setDbConnectionTimeout(int v) { this.dbConnectionTimeout = v; }
+    public int getDbQueryTimeout() { return dbQueryTimeout != null ? dbQueryTimeout : 60000; }
+    public void setDbQueryTimeout(int v) { this.dbQueryTimeout = v; }
+    public int getDbPoolMin() { return dbPoolMin != null ? dbPoolMin : 5; }
+    public void setDbPoolMin(int v) { this.dbPoolMin = v; }
+    public int getDbPoolMax() { return dbPoolMax != null ? dbPoolMax : 20; }
+    public void setDbPoolMax(int v) { this.dbPoolMax = v; }
+    public int getDbIdleTimeout() { return dbIdleTimeout != null ? dbIdleTimeout : 30000; }
+    public void setDbIdleTimeout(int v) { this.dbIdleTimeout = v; }
+    public int getDbMaxLifetime() { return dbMaxLifetime != null ? dbMaxLifetime : 60000; }
+    public void setDbMaxLifetime(int v) { this.dbMaxLifetime = v; }
+    public String getDbSchema() { return dbSchema; }
+    public void setDbSchema(String v) { this.dbSchema = v; }
+
+    public int getSegTentativasLoginMax() { return segTentativasLoginMax != null ? segTentativasLoginMax : 5; }
+    public void setSegTentativasLoginMax(int v) { this.segTentativasLoginMax = v; }
+    public int getSegLockoutDuracao() { return segLockoutDuracao != null ? segLockoutDuracao : 15; }
+    public void setSegLockoutDuracao(int v) { this.segLockoutDuracao = v; }
+    public String getSegPoliticaPassword() { return segPoliticaPassword; }
+    public void setSegPoliticaPassword(String v) { this.segPoliticaPassword = v; }
 }

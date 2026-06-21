@@ -328,36 +328,33 @@ public class ConfiguracaoController {
 
     @GetMapping("/servidor")
     public String servidor(Model model) {
-        model.addAttribute("cfg", cfgService.getServidor());
-        return "configuracoes/servidor";
+        return "redirect:/configuracoes/geral?tab=servidor";
     }
 
     @PostMapping("/servidor/salvar")
     public String salvarServidor(@ModelAttribute ConfiguracaoServidor cfg, RedirectAttributes ra) {
-        cfgService.saveServidor(cfg);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            config.setServidorPorta(cfg.getPorta());
+            config.setServidorHostname(cfg.getHostname());
+            config.setServidorBaseUrl(cfg.getBaseUrl());
+            config.setServidorProxyHabilitado(cfg.isProxyHabilitado());
+            config.setServidorProxyHost(cfg.getProxyHost());
+            config.setServidorProxyPorta(cfg.getProxyPorta());
+            config.setServidorCorsOrigens(cfg.getCorsOrigensPermitidas());
+            configuracaoEmpresaService.salvarConfiguracao(config);
+        } else {
+            cfgService.saveServidor(cfg);
+        }
         ra.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/servidor";
+        return "redirect:/configuracoes/geral?tab=servidor";
     }
 
     @GetMapping("/email")
     public String email(Model model) {
-        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        if (empresaId != null) {
-            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
-            ConfiguracaoEmail cfg = new ConfiguracaoEmail();
-            cfg.setSmtpHost(config.getEmailSmtpHost());
-            cfg.setSmtpPorta(config.getEmailSmtpPorta());
-            cfg.setSmtpUsername(config.getEmailSmtpUsername());
-            cfg.setSmtpPassword(config.getEmailSmtpPassword());
-            cfg.setSegurancaTipo(config.getEmailSegurancaTipo());
-            cfg.setEmailRemetente(config.getEmailRemetente());
-            cfg.setNomeRemetente(config.getEmailNomeRemetente());
-            model.addAttribute("cfg", cfg);
-        } else {
-            model.addAttribute("cfg", cfgService.getEmail());
-        }
-        return "configuracoes/email";
+        return "redirect:/configuracoes/geral?tab=email";
     }
 
     @PostMapping("/email/salvar")
@@ -372,7 +369,7 @@ public class ConfiguracaoController {
         }
         ra.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/email";
+        return "redirect:/configuracoes/geral?tab=email";
     }
 
     @PostMapping("/email/testar")
@@ -400,58 +397,213 @@ public class ConfiguracaoController {
 
     @GetMapping("/banco-dados")
     public String bancoDados(Model model) {
-        model.addAttribute("cfg", cfgService.getDatabase());
-        return "configuracoes/banco-dados";
+        return "redirect:/configuracoes/geral?tab=banco-dados";
     }
 
     @PostMapping("/banco-dados/salvar")
     public String salvarBancoDados(@ModelAttribute ConfiguracaoDatabase cfg, RedirectAttributes ra) {
-        cfgService.saveDatabase(cfg);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            config.setDbTipoBD(cfg.getTipoBD());
+            config.setDbConnectionTimeout(cfg.getConnectionTimeout());
+            config.setDbQueryTimeout(cfg.getQueryTimeout());
+            config.setDbPoolMin(cfg.getPoolMin());
+            config.setDbPoolMax(cfg.getPoolMax());
+            config.setDbIdleTimeout(cfg.getIdleTimeout());
+            config.setDbMaxLifetime(cfg.getMaxLifetime());
+            config.setDbSchema(cfg.getSchema());
+            configuracaoEmpresaService.salvarConfiguracao(config);
+        } else {
+            cfgService.saveDatabase(cfg);
+        }
         ra.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/banco-dados";
+        return "redirect:/configuracoes/geral?tab=banco-dados";
     }
 
     @GetMapping("/storage")
     public String storage(Model model) {
-        model.addAttribute("cfg", cfgService.getStorage());
-        return "configuracoes/storage";
+        return "redirect:/configuracoes/geral?tab=storage";
     }
 
     @PostMapping("/storage/salvar")
     public String salvarStorage(@ModelAttribute ConfiguracaoStorage cfg, RedirectAttributes ra) {
-        cfgService.saveStorage(cfg);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            config.setStorageTipo(cfg.getTipoStorage());
+            config.setStorageCaminhoBase(cfg.getCaminhoBase());
+            config.setStorageTamanhoMaxFicheiro(cfg.getTamanhoMaxFicheiro());
+            config.setStorageTamanhoMaxRequest(cfg.getTamanhoMaxRequest());
+            config.setStorageEstrategiaBackup(cfg.getEstrategiaBackup());
+            config.setStorageCloudProvider(cfg.getCloudProvider());
+            config.setStorageCloudBucket(cfg.getCloudBucket());
+            config.setStorageCloudRegion(cfg.getCloudRegion());
+            configuracaoEmpresaService.salvarConfiguracao(config);
+        } else {
+            cfgService.saveStorage(cfg);
+        }
         ra.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/storage";
+        return "redirect:/configuracoes/geral?tab=storage";
     }
 
     @GetMapping("/seguranca")
     public String seguranca(Model model) {
-        model.addAttribute("cfg", cfgService.getSeguranca());
-        return "configuracoes/seguranca";
+        return "redirect:/configuracoes/geral?tab=seguranca";
     }
 
     @PostMapping("/seguranca/salvar")
     public String salvarSeguranca(@ModelAttribute ConfiguracaoSeguranca cfg, RedirectAttributes ra) {
-        cfgService.saveSeguranca(cfg);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            config.setSegTempoExpiracaoSessao(cfg.getTempoExpiracaoSessao());
+            config.setSegTentativasLoginMax(cfg.getTentativasLoginMax());
+            config.setSegLockoutDuracao(cfg.getLockoutDuracao());
+            config.setSegPoliticaPassword(cfg.getPoliticaPassword());
+            config.setSegComprimentoMinPassword(cfg.getComprimentoMinPassword());
+            config.setSegTwoFactorAtivo(cfg.isTwoFactorAtivo());
+            config.setSegRequireUppercase(cfg.isRequireUppercase());
+            config.setSegRequireNumbers(cfg.isRequireNumbers());
+            config.setSegRequireSpecialChars(cfg.isRequireSpecialChars());
+            config.setSegIpWhitelist(cfg.getIpWhitelist());
+            config.setSegLogAcessosAtivo(cfg.isLogAcessosAtivo());
+            configuracaoEmpresaService.salvarConfiguracao(config);
+        } else {
+            cfgService.saveSeguranca(cfg);
+        }
         ra.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/seguranca";
+        return "redirect:/configuracoes/geral?tab=seguranca";
     }
 
     @GetMapping("/geral")
     public String geral(Model model) {
-        model.addAttribute("sistema", cfgService.getSistema());
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            Sistema s = new Sistema();
+            s.setNome(config.getSistemaNome());
+            s.setVersao(config.getSistemaVersao());
+            s.setEmailSuporte(config.getSistemaEmailSuporte());
+            s.setBackup(config.isSistemaBackup());
+            s.setTema(config.getSistemaTema());
+            s.setExibirDatasValidade(config.isExibirDatasValidade());
+            s.setLogotipo(config.getSistemaLogotipo() != null ? config.getSistemaLogotipo() : "/img/logo.png");
+            model.addAttribute("sistema", s);
+        } else {
+            model.addAttribute("sistema", cfgService.getSistema());
+        }
+
+        // Email Config
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            ConfiguracaoEmail cfg = new ConfiguracaoEmail();
+            cfg.setSmtpHost(config.getEmailSmtpHost());
+            cfg.setSmtpPorta(config.getEmailSmtpPorta());
+            cfg.setSmtpUsername(config.getEmailSmtpUsername());
+            cfg.setSmtpPassword(config.getEmailSmtpPassword());
+            cfg.setSegurancaTipo(config.getEmailSegurancaTipo());
+            cfg.setEmailRemetente(config.getEmailRemetente());
+            cfg.setNomeRemetente(config.getEmailNomeRemetente());
+            model.addAttribute("emailCfg", cfg);
+        } else {
+            model.addAttribute("emailCfg", cfgService.getEmail());
+        }
+
+        // Servidor Config
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            ConfiguracaoServidor s = new ConfiguracaoServidor();
+            s.setPorta(config.getServidorPorta());
+            s.setHostname(config.getServidorHostname());
+            s.setBaseUrl(config.getServidorBaseUrl());
+            s.setProxyHabilitado(config.isServidorProxyHabilitado());
+            s.setProxyHost(config.getServidorProxyHost());
+            s.setProxyPorta(config.getServidorProxyPorta());
+            s.setCorsOrigensPermitidas(config.getServidorCorsOrigens());
+            model.addAttribute("servidorCfg", s);
+        } else {
+            model.addAttribute("servidorCfg", cfgService.getServidor());
+        }
+
+        // Storage Config
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            ConfiguracaoStorage s = new ConfiguracaoStorage();
+            s.setTipoStorage(config.getStorageTipo());
+            s.setCaminhoBase(config.getStorageCaminhoBase());
+            s.setTamanhoMaxFicheiro(config.getStorageTamanhoMaxFicheiro());
+            s.setTamanhoMaxRequest(config.getStorageTamanhoMaxRequest());
+            s.setEstrategiaBackup(config.getStorageEstrategiaBackup());
+            s.setCloudProvider(config.getStorageCloudProvider());
+            s.setCloudBucket(config.getStorageCloudBucket());
+            s.setCloudRegion(config.getStorageCloudRegion());
+            model.addAttribute("storageCfg", s);
+        } else {
+            model.addAttribute("storageCfg", cfgService.getStorage());
+        }
+
+        // Database Config
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            ConfiguracaoDatabase d = new ConfiguracaoDatabase();
+            d.setTipoBD(config.getDbTipoBD());
+            d.setConnectionTimeout(config.getDbConnectionTimeout());
+            d.setQueryTimeout(config.getDbQueryTimeout());
+            d.setPoolMin(config.getDbPoolMin());
+            d.setPoolMax(config.getDbPoolMax());
+            d.setIdleTimeout(config.getDbIdleTimeout());
+            d.setMaxLifetime(config.getDbMaxLifetime());
+            d.setSchema(config.getDbSchema());
+            model.addAttribute("databaseCfg", d);
+        } else {
+            model.addAttribute("databaseCfg", cfgService.getDatabase());
+        }
+
+        // Seguranca Config
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            ConfiguracaoSeguranca s = new ConfiguracaoSeguranca();
+            s.setTempoExpiracaoSessao(config.getSegTempoExpiracaoSessao());
+            s.setTentativasLoginMax(config.getSegTentativasLoginMax());
+            s.setLockoutDuracao(config.getSegLockoutDuracao());
+            s.setPoliticaPassword(config.getSegPoliticaPassword());
+            s.setComprimentoMinPassword(config.getSegComprimentoMinPassword());
+            s.setTwoFactorAtivo(config.isSegTwoFactorAtivo());
+            s.setRequireUppercase(config.isSegRequireUppercase());
+            s.setRequireNumbers(config.isSegRequireNumbers());
+            s.setRequireSpecialChars(config.isSegRequireSpecialChars());
+            s.setIpWhitelist(config.getSegIpWhitelist());
+            s.setLogAcessosAtivo(config.isSegLogAcessosAtivo());
+            model.addAttribute("segurancaCfg", s);
+        } else {
+            model.addAttribute("segurancaCfg", cfgService.getSeguranca());
+        }
+
         return "configuracoes/geral";
     }
 
     @PostMapping("/geral/salvar")
     public String salvarSistema(@ModelAttribute Sistema sistema, RedirectAttributes redirectAttributes) {
-        cfgService.saveSistema(sistema);
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        if (empresaId != null) {
+            ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
+            config.setSistemaNome(sistema.getNome());
+            config.setSistemaVersao(sistema.getVersao());
+            config.setSistemaEmailSuporte(sistema.getEmailSuporte());
+            config.setSistemaBackup(sistema.isBackup());
+            config.setSistemaTema(sistema.getTema());
+            config.setExibirDatasValidade(sistema.isExibirDatasValidade());
+            configuracaoEmpresaService.salvarConfiguracao(config);
+        } else {
+            cfgService.saveSistema(sistema);
+        }
         redirectAttributes.addFlashAttribute("mensagem",
                 messageSource.getMessage("msg.sucesso.operacao", null, LocaleContextHolder.getLocale()));
-        return "redirect:/configuracoes/geral";
+        return "redirect:/configuracoes/geral?tab=geral";
     }
 
     @GetMapping("/fiscais/impostos")

@@ -135,6 +135,7 @@ public class ConfiguracaoSistemaEntity {
     // ─── Licença ────────────────────────────────────────────────────────
     private java.time.LocalDateTime licencaDataAtivacao;
     private boolean exibirDatasValidade = true;
+    private java.time.LocalDateTime dataInstalacao;
 
 
     // ================================================================
@@ -266,6 +267,9 @@ public class ConfiguracaoSistemaEntity {
 
     public boolean isExibirDatasValidade() { return exibirDatasValidade; }
     public void setExibirDatasValidade(boolean v) { this.exibirDatasValidade = v; }
+
+    public java.time.LocalDateTime getDataInstalacao() { return dataInstalacao; }
+    public void setDataInstalacao(java.time.LocalDateTime v) { this.dataInstalacao = v; }
 
     private String licencaChaveAtivacao;
     public String getLicencaChaveAtivacao() { return licencaChaveAtivacao; }

@@ -63,6 +63,16 @@ public class EfaturacaoApplication {
                 System.err.println(">>> Erro ao tentar migrar tabela configuracao_sistema: " + e.getMessage());
             }
 
+            // Migração de Emergência: Adicionar coluna 'data_instalacao' se não existir
+            try {
+                jdbcTemplate.execute(
+                        "ALTER TABLE configuracao_sistema ADD COLUMN IF NOT EXISTS data_instalacao DATETIME NULL");
+                System.out.println(">>> Migração: Coluna 'data_instalacao' verificada/adicionada com sucesso.");
+            } catch (Exception e) {
+                System.err.println(
+                        ">>> Erro ao tentar migrar tabela configuracao_sistema (data_instalacao): " + e.getMessage());
+            }
+
             // Migração: Adicionar colunas de controlo de envio AGT
             try {
                 jdbcTemplate.execute(
@@ -125,7 +135,6 @@ public class EfaturacaoApplication {
             } catch (Exception e) {
                 System.err.println(">>> Erro ao migrar tabela fatura: " + e.getMessage());
             }
-
             // Migração: Criar tabela para gestão de licenças
             try {
                 jdbcTemplate.execute(
@@ -292,7 +301,7 @@ public class EfaturacaoApplication {
 
                 Empresa empPadrao = empresaRepository.findAll().stream().findFirst().orElse(null);
                 if (empPadrao != null) {
-                    // Cliente*
+                    // Cliente*Z
                     ao.co.hzconsultoria.efacturacao.model.Cliente clienteFinal = new ao.co.hzconsultoria.efacturacao.model.Cliente();
                     clienteFinal.setNome("Consumidor Final");
                     clienteFinal.setNif("999999999");

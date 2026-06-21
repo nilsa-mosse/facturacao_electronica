@@ -14,6 +14,9 @@ public class GlobalControllerAdvice {
     private ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository empresaRepository;
 
     @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoEmpresaRepository configuracaoEmpresaRepository;
+
+    @Autowired
     private ConfiguracaoSistemaService cfgService;
 
     @Autowired
@@ -27,18 +30,40 @@ public class GlobalControllerAdvice {
             itens.forEach(item -> model.addAttribute("modulo_" + modulo + "_" + item.getChave(), false));
         });
 
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        Long empresaId = null;
+        if (auth != null && auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
+            ao.co.hzconsultoria.efacturacao.security.CustomUserDetails userDetails = (ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal();
+            empresaId = userDetails.getEmpresaId();
+        }
+
         String tema = "light";
         String nomeSistema = "Kwanza ERP";
         String versaoSistema = "1.0.0";
+        boolean exibirDatasValidade = true;
         try {
-            ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
-            if (sistemaConfig != null) {
-                if (sistemaConfig.getNome() != null) nomeSistema = sistemaConfig.getNome();
-                if (sistemaConfig.getVersao() != null) versaoSistema = sistemaConfig.getVersao();
-                
-                String temp = sistemaConfig.getTema();
-                if (temp != null && (temp.equalsIgnoreCase("escuro") || temp.equalsIgnoreCase("dark"))) {
-                    tema = "dark";
+            if (empresaId != null) {
+                java.util.Optional<ao.co.hzconsultoria.efacturacao.model.ConfiguracaoEmpresa> optConfig = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
+                if (optConfig.isPresent()) {
+                    ao.co.hzconsultoria.efacturacao.model.ConfiguracaoEmpresa config = optConfig.get();
+                    if (config.getSistemaNome() != null) nomeSistema = config.getSistemaNome();
+                    if (config.getSistemaVersao() != null) versaoSistema = config.getSistemaVersao();
+                    exibirDatasValidade = config.isExibirDatasValidade();
+                    String temp = config.getSistemaTema();
+                    if (temp != null && (temp.equalsIgnoreCase("escuro") || temp.equalsIgnoreCase("dark"))) {
+                        tema = "dark";
+                    }
+                }
+            } else {
+                ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
+                if (sistemaConfig != null) {
+                    if (sistemaConfig.getNome() != null) nomeSistema = sistemaConfig.getNome();
+                    if (sistemaConfig.getVersao() != null) versaoSistema = sistemaConfig.getVersao();
+                    exibirDatasValidade = sistemaConfig.isExibirDatasValidade();
+                    String temp = sistemaConfig.getTema();
+                    if (temp != null && (temp.equalsIgnoreCase("escuro") || temp.equalsIgnoreCase("dark"))) {
+                        tema = "dark";
+                    }
                 }
             }
         } catch (Exception ignored) {
@@ -51,38 +76,32 @@ public class GlobalControllerAdvice {
         String sistemaLogotipo = "/img/logo.png";
         try {
             // Priority 1: use the current company logo
-            org.springframework.security.core.Authentication authLogo = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-            if (authLogo != null && authLogo.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
-                ao.co.hzconsultoria.efacturacao.security.CustomUserDetails ud = (ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) authLogo.getPrincipal();
-                Long empId = ud.getEmpresaId();
-                if (empId != null) {
-                    ao.co.hzconsultoria.efacturacao.model.Empresa empresa = empresaRepository.findById(empId).orElse(null);
-                    if (empresa != null && empresa.getLogotipo() != null && !empresa.getLogotipo().isEmpty()) {
-                        sistemaLogotipo = empresa.getLogotipo();
-                    }
+            if (empresaId != null) {
+                ao.co.hzconsultoria.efacturacao.model.Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+                if (empresa != null && empresa.getLogotipo() != null && !empresa.getLogotipo().isEmpty()) {
+                    sistemaLogotipo = empresa.getLogotipo();
                 }
             }
-            // Priority 2: fallback to global system logo if company logo is not set
+            // Priority 2: fallback to company-specific system logo or global system logo if company logo is not set
             if ("/img/logo.png".equals(sistemaLogotipo)) {
-                ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
-                if (sistemaConfig != null && sistemaConfig.getLogotipo() != null) {
-                    sistemaLogotipo = sistemaConfig.getLogotipo();
+                if (empresaId != null) {
+                    java.util.Optional<ao.co.hzconsultoria.efacturacao.model.ConfiguracaoEmpresa> optConfig = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
+                    if (optConfig.isPresent() && optConfig.get().getSistemaLogotipo() != null) {
+                        sistemaLogotipo = optConfig.get().getSistemaLogotipo();
+                    }
+                }
+                if ("/img/logo.png".equals(sistemaLogotipo)) {
+                    ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
+                    if (sistemaConfig != null && sistemaConfig.getLogotipo() != null) {
+                        sistemaLogotipo = sistemaConfig.getLogotipo();
+                    }
                 }
             }
         } catch (Exception ignored) {}
         model.addAttribute("globalSistemaLogotipo", sistemaLogotipo);
-        
-        boolean exibirDatasValidade = true;
-        try {
-            ao.co.hzconsultoria.efacturacao.model.Sistema sistemaConfig = cfgService.getSistema();
-            if (sistemaConfig != null) {
-                exibirDatasValidade = sistemaConfig.isExibirDatasValidade();
-            }
-        } catch (Exception ignored) {}
         model.addAttribute("globalExibirDatasValidade", exibirDatasValidade);
 
         // Adicionar Empresa atual ao modelo
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
         boolean isSuperAdmin = false;
         
         if (auth != null) {
@@ -92,7 +111,7 @@ public class GlobalControllerAdvice {
             if (auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
                 ao.co.hzconsultoria.efacturacao.security.CustomUserDetails userDetails = (ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal();
                 model.addAttribute("usuario_NOME", userDetails.getNome());
-                Long empresaId = userDetails.getEmpresaId();
+                empresaId = userDetails.getEmpresaId();
                 if (empresaId != null) {
                     ao.co.hzconsultoria.efacturacao.model.Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
                     model.addAttribute("currentEmpresa", empresa);

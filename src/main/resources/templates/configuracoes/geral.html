@@ -23,71 +23,861 @@
                     <span th:text="${mensagem}">Configurações actualizadas com sucesso!</span>
                 </div>
 
-                <div class="card card-outline card-primary">
-                     <div class="card-header">
-                        <h3 class="card-title" th:text="#{config.geral.preferencias}">Preferências do Sistema</h3>
+                <div class="card card-primary card-outline card-tabs shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                    <div class="card-header p-0 pt-1 border-bottom-0 bg-light">
+                        <ul class="nav nav-tabs" id="configTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-bold py-3 px-4 border-0" id="geral-tab" data-bs-toggle="tab" data-bs-target="#geral-pane" type="button" role="tab" aria-controls="geral-pane" aria-selected="true">
+                                    <i class="fas fa-sliders-h me-2"></i>Parâmetros Gerais
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold py-3 px-4 border-0" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-pane" type="button" role="tab" aria-controls="email-pane" aria-selected="false">
+                                    <i class="fas fa-envelope-open-text me-2"></i>Email
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold py-3 px-4 border-0" id="servidor-tab" data-bs-toggle="tab" data-bs-target="#servidor-pane" type="button" role="tab" aria-controls="servidor-pane" aria-selected="false">
+                                    <i class="fas fa-server me-2"></i>Servidor
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold py-3 px-4 border-0" id="storage-tab" data-bs-toggle="tab" data-bs-target="#storage-pane" type="button" role="tab" aria-controls="storage-pane" aria-selected="false">
+                                    <i class="fas fa-hdd me-2"></i>Storage
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold py-3 px-4 border-0" id="banco-dados-tab" data-bs-toggle="tab" data-bs-target="#banco-dados-pane" type="button" role="tab" aria-controls="banco-dados-pane" aria-selected="false">
+                                    <i class="fas fa-database me-2"></i>Banco de dados
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold py-3 px-4 border-0" id="seguranca-tab" data-bs-toggle="tab" data-bs-target="#seguranca-pane" type="button" role="tab" aria-controls="seguranca-pane" aria-selected="false">
+                                    <i class="fas fa-lock me-2"></i>Segurança
+                                </button>
+                            </li>
+                        </ul>
                     </div>
-                    <form th:action="@{/configuracoes/geral/salvar}" th:object="${sistema}" method="post">
-                        <div class="card-body">
-                            <div class="row">
-                                 <div class="form-group col-md-6">
-                                    <label th:text="#{config.geral.nome_sistema}">Nome do Sistema</label>
-                                    <input type="text" class="form-control" th:field="*{nome}">
+                    <div class="card-body p-4">
+                        <div class="tab-content" id="configTabsContent">
+                            
+                            <!-- Tab: Geral -->
+                            <div class="tab-pane fade show active" id="geral-pane" role="tabpanel" aria-labelledby="geral-tab">
+                                <div class="mb-3">
+                                    <h4 class="fw-bold text-slate-800"><i class="fas fa-sliders-h me-2 text-primary"></i>Preferências do Sistema</h4>
+                                    <p class="text-muted small">Defina o nome do sistema, o tema global e opções de backup automático.</p>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label th:text="#{config.geral.tema}">Modo de Visualização (Tema)</label>
-                                    <select class="form-select" th:field="*{tema}" id="temaSelector">
-                                        <option value="light" th:text="#{config.geral.tema.light}">Modo Claro (Padrão)</option>
-                                        <option value="dark" th:text="#{config.geral.tema.dark}">Modo Escuro</option>
-                                    </select>
-                                    <small class="text-muted" th:text="#{config.geral.tema.hint}">A alteração será aplicada globalmente após salvar.</small>
+                                <form th:action="@{/configuracoes/geral/salvar}" th:object="${sistema}" method="post">
+                                    <div class="row">
+                                         <div class="form-group col-md-6">
+                                            <label th:text="#{config.geral.nome_sistema}">Nome do Sistema</label>
+                                            <input type="text" class="form-control" th:field="*{nome}">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label th:text="#{config.geral.tema}">Modo de Visualização (Tema)</label>
+                                            <select class="form-select" th:field="*{tema}" id="temaSelector">
+                                                <option value="light" th:text="#{config.geral.tema.light}">Modo Claro (Padrão)</option>
+                                                <option value="dark" th:text="#{config.geral.tema.dark}">Modo Escuro</option>
+                                            </select>
+                                            <small class="text-muted" th:text="#{config.geral.tema.hint}">A alteração será aplicada globalmente após salvar.</small>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                         <div class="form-group col-md-6">
+                                            <label th:text="#{config.geral.email_suporte}">Email de Suporte</label>
+                                            <input type="email" class="form-control" th:field="*{emailSuporte}">
+                                        </div>
+                                        <div class="form-group col-md-6 mt-4">
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="backup" th:field="*{backup}">
+                                                <label class="custom-control-label" for="backup" th:text="#{config.geral.backup}">Backup Automático Diário</label>
+                                            </div>
+                                            <div class="custom-control custom-switch mt-2">
+                                                <input type="checkbox" class="custom-control-input" id="exibirDatasValidade" th:field="*{exibirDatasValidade}">
+                                                <label class="custom-control-label" for="exibirDatasValidade">Exibir Datas de Fabrico e Expiração nos Produtos</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 pt-3 border-top">
+                                        <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill fw-bold">
+                                            <i class="fas fa-save me-2"></i><span th:text="#{config.geral.btn.aplicar}">Aplicar Alterações</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Tab: Email -->
+                            <div class="tab-pane fade" id="email-pane" role="tabpanel" aria-labelledby="email-tab">
+                                <div class="row">
+                                    <div class="col-lg-8">
+                                        <form th:action="@{/configuracoes/email/salvar}" th:object="${emailCfg}" method="post">
+                                            <!-- SMTP Server -->
+                                            <div class="card card-outline card-primary mb-4 shadow-none border">
+                                                <div class="card-header bg-light">
+                                                    <h3 class="card-title fw-bold"><i class="fas fa-mail-bulk me-2 text-primary"></i>Servidor SMTP</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="form-group col-md-8">
+                                                            <label><i class="fas fa-server me-1 text-muted"></i>Servidor SMTP</label>
+                                                            <input type="text" class="form-control" th:field="*{smtpHost}" placeholder="smtp.gmail.com">
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <label><i class="fas fa-plug me-1 text-muted"></i>Porta</label>
+                                                            <input type="number" class="form-control" th:field="*{smtpPorta}" placeholder="587">
+                                                            <small class="text-muted">TLS: 587 &nbsp;|&nbsp; SSL: 465</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mt-2">
+                                                        <div class="form-group col-md-6">
+                                                            <label><i class="fas fa-user me-1 text-muted"></i>Username</label>
+                                                            <input type="text" class="form-control" th:field="*{smtpUsername}" placeholder="utilizador@empresa.ao">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label><i class="fas fa-lock me-1 text-muted"></i>Password</label>
+                                                            <div class="input-group">
+                                                                <input type="password" class="form-control" th:field="*{smtpPassword}" id="smtpPass" placeholder="••••••••">
+                                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePass()">
+                                                                    <i class="fas fa-eye" id="passIcon"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group mt-2">
+                                                        <label><i class="fas fa-shield-alt me-1 text-muted"></i>Tipo de Segurança</label>
+                                                        <div class="d-flex gap-3 mt-1">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="segurancaTipo" id="secTLS" value="TLS" th:checked="${emailCfg.segurancaTipo == 'TLS'}">
+                                                                <label class="form-check-label" for="secTLS">
+                                                                    <span class="badge bg-success me-1">TLS</span> Recomendado (porta 587)
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="segurancaTipo" id="secSSL" value="SSL" th:checked="${emailCfg.segurancaTipo == 'SSL'}">
+                                                                <label class="form-check-label" for="secSSL">
+                                                                    <span class="badge bg-warning text-dark me-1">SSL</span> Legado (porta 465)
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="segurancaTipo" id="secNONE" value="NONE" th:checked="${emailCfg.segurancaTipo == 'NONE'}">
+                                                                <label class="form-check-label" for="secNONE">
+                                                                    <span class="badge bg-danger me-1">NONE</span> Sem encriptação
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Remetente -->
+                                            <div class="card card-outline card-info mb-4 shadow-none border">
+                                                <div class="card-header bg-light">
+                                                    <h3 class="card-title fw-bold"><i class="fas fa-paper-plane me-2 text-info"></i>Email Remetente</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="form-group col-md-6">
+                                                            <label><i class="fas fa-at me-1 text-muted"></i>Email Remetente</label>
+                                                            <input type="email" class="form-control" th:field="*{emailRemetente}" placeholder="noreply@empresa.ao">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label><i class="fas fa-id-badge me-1 text-muted"></i>Nome Remetente</label>
+                                                            <input type="text" class="form-control" th:field="*{nomeRemetente}" placeholder="Sistema de Facturação">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3 pt-3 border-top">
+                                                <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill fw-bold">
+                                                    <i class="fas fa-save me-2"></i>Guardar Email
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Test Panel -->
+                                    <div class="col-lg-4">
+                                        <div class="card card-outline card-success mb-4 shadow-none border">
+                                            <div class="card-header bg-light">
+                                                <h3 class="card-title fw-bold"><i class="fas fa-flask me-2 text-success"></i>Testar Ligação SMTP</h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <p class="text-muted small">Envie um email de teste para verificar se as configurações estão correctas.</p>
+                                                <div class="form-group">
+                                                    <label>Email de destino</label>
+                                                    <input type="email" class="form-control" id="emailDestino" placeholder="teste@empresa.ao">
+                                                </div>
+                                                <button class="btn btn-success w-100 mt-2 rounded-pill fw-bold" onclick="testarEmail()">
+                                                    <i class="fas fa-paper-plane me-1"></i>Enviar Email de Teste
+                                                </button>
+                                                <div id="testeResult" class="mt-3 d-none"></div>
+                                            </div>
+                                            <div class="card-footer bg-light text-muted small">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Guarde as configurações antes de testar.
+                                            </div>
+                                        </div>
+
+                                        <!-- Dicas -->
+                                        <div class="card card-outline card-warning shadow-none border">
+                                            <div class="card-header bg-light">
+                                                <h3 class="card-title fw-bold"><i class="fas fa-lightbulb me-2 text-warning"></i>Configurações Comuns</h3>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead class="table-light">
+                                                        <tr><th>Provedor</th><th>Servidor</th><th>Porta</th></tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr><td>Gmail</td><td>smtp.gmail.com</td><td>587</td></tr>
+                                                        <tr><td>Outlook</td><td>smtp.office365.com</td><td>587</td></tr>
+                                                        <tr><td>Yahoo</td><td>smtp.mail.yahoo.com</td><td>465</td></tr>
+                                                        <tr><td>Local</td><td>localhost</td><td>25</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row mt-3">
-                                 <div class="form-group col-md-6">
-                                    <label th:text="#{config.geral.email_suporte}">Email de Suporte</label>
-                                    <input type="email" class="form-control" th:field="*{emailSuporte}">
-                                </div>
-                                <div class="form-group col-md-6 mt-4">
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" id="backup"
-                                            th:field="*{backup}">
-                                        <label class="custom-control-label" for="backup" th:text="#{config.geral.backup}">Backup Automático
-                                            Diário</label>
+
+                            <!-- Tab: Servidor -->
+                            <div class="tab-pane fade" id="servidor-pane" role="tabpanel" aria-labelledby="servidor-tab">
+                                <form th:action="@{/configuracoes/servidor/salvar}" th:object="${servidorCfg}" method="post">
+                                    <!-- Porta e Hostname -->
+                                    <div class="card card-outline card-primary mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-network-wired me-2 text-primary"></i>Porta e Hostname</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="form-group col-md-3">
+                                                    <label><i class="fas fa-plug me-1 text-muted"></i>Porta da Aplicação</label>
+                                                    <input type="number" class="form-control" th:field="*{porta}" min="1" max="65535" placeholder="8080">
+                                                    <small class="text-muted">Porta HTTP usada pelo servidor embarcado.</small>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-globe me-1 text-muted"></i>Hostname / Domínio</label>
+                                                    <input type="text" class="form-control" th:field="*{hostname}" placeholder="localhost">
+                                                    <small class="text-muted">Nome do host ou domínio público (ex: facturacao.empresa.ao).</small>
+                                                </div>
+                                                <div class="form-group col-md-5">
+                                                    <label><i class="fas fa-link me-1 text-muted"></i>Base URL</label>
+                                                    <input type="text" class="form-control" th:field="*{baseUrl}" placeholder="http://localhost:8080">
+                                                    <small class="text-muted">Usada em emails e nas respostas da API (ex: https://facturacao.empresa.ao).</small>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="custom-control custom-switch mt-2">
-                                        <input type="checkbox" class="custom-control-input" id="exibirDatasValidade"
-                                            th:field="*{exibirDatasValidade}">
-                                        <label class="custom-control-label" for="exibirDatasValidade">Exibir Datas de Fabrico e Expiração nos Produtos</label>
+
+                                    <!-- Proxy / Reverse Proxy -->
+                                    <div class="card card-outline card-warning mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-random me-2 text-warning"></i>Proxy / Reverse Proxy</h3>
+                                            <div class="card-tools">
+                                                <div class="custom-control custom-switch mt-1">
+                                                    <input type="checkbox" class="custom-control-input" id="proxySwitch" th:field="*{proxyHabilitado}" onchange="toggleProxy(this.checked)">
+                                                    <label class="custom-control-label fw-bold text-dark" for="proxySwitch">Habilitar Proxy</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="proxyFields" th:style="${servidorCfg.proxyHabilitado} ? '' : 'opacity:0.4; pointer-events:none'">
+                                            <div class="row">
+                                                <div class="form-group col-md-8">
+                                                    <label><i class="fas fa-server me-1 text-muted"></i>Endereço do Proxy / Nginx</label>
+                                                    <input type="text" class="form-control" th:field="*{proxyHost}" placeholder="nginx.interno ou 192.168.1.1">
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-door-open me-1 text-muted"></i>Porta do Proxy</label>
+                                                    <input type="number" class="form-control" th:field="*{proxyPorta}" min="1" max="65535" placeholder="80">
+                                                </div>
+                                            </div>
+                                            <div class="callout callout-info mt-2 mb-0 border-start-3">
+                                                <i class="fas fa-info-circle me-1 text-info"></i>
+                                                Utilize esta secção para configurar o endereço do Nginx, Apache ou outro reverse proxy que encaminha pedidos para esta aplicação.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- CORS -->
+                                    <div class="card card-outline card-info mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-shield-alt me-2 text-info"></i>CORS – Origens Permitidas</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group mb-0">
+                                                <label><i class="fas fa-globe-africa me-1 text-muted"></i>Origens permitidas (CORS)</label>
+                                                <input type="text" class="form-control" th:field="*{corsOrigensPermitidas}" placeholder="* ou https://app.empresa.ao, https://admin.empresa.ao">
+                                                <small class="text-muted">
+                                                    Use <code>*</code> para permitir todas as origens, ou especifique URLs separadas por vírgula. Recomenda-se restringir em produção.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 pt-3 border-top">
+                                        <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill fw-bold">
+                                            <i class="fas fa-save me-2"></i>Guardar Servidor
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Tab: Storage -->
+                            <div class="tab-pane fade" id="storage-pane" role="tabpanel" aria-labelledby="storage-tab">
+                                <form th:action="@{/configuracoes/storage/salvar}" th:object="${storageCfg}" method="post">
+                                    <!-- Tipo de Storage -->
+                                    <div class="card card-outline card-primary mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-cloud me-2 text-primary"></i>Tipo de Storage</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="storage-card w-100 border rounded p-3 d-block position-relative"
+                                                           th:classappend="${storageCfg.tipoStorage == 'LOCAL'} ? 'border-primary bg-light' : ''"
+                                                           style="cursor:pointer;">
+                                                        <input type="radio" name="tipoStorage" value="LOCAL" class="form-check-input me-2" th:checked="${storageCfg.tipoStorage == 'LOCAL'}" onchange="toggleStoragePanel('LOCAL')">
+                                                        <i class="fas fa-server fa-2x text-primary float-end"></i>
+                                                        <strong class="d-block text-dark">Local</strong>
+                                                        <small class="text-muted">Ficheiros armazenados no servidor onde a aplicação está instalada.</small>
+                                                    </label>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="storage-card w-100 border rounded p-3 d-block position-relative"
+                                                           th:classappend="${storageCfg.tipoStorage == 'CLOUD'} ? 'border-success bg-light' : ''"
+                                                           style="cursor:pointer;">
+                                                        <input type="radio" name="tipoStorage" value="CLOUD" class="form-check-input me-2" th:checked="${storageCfg.tipoStorage == 'CLOUD'}" onchange="toggleStoragePanel('CLOUD')">
+                                                        <i class="fas fa-cloud fa-2x text-success float-end"></i>
+                                                        <strong class="d-block text-dark">Cloud</strong>
+                                                        <small class="text-muted">AWS S3, Google Cloud Storage ou Azure Blob Storage.</small>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Local Storage Settings -->
+                                    <div class="card card-outline card-info mb-4 shadow-none border" id="panelLocal" th:style="${storageCfg.tipoStorage == 'CLOUD'} ? 'display:none' : ''">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-folder-open me-2 text-info"></i>Configuração Local</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group mb-0">
+                                                <label><i class="fas fa-folder me-1 text-muted"></i>Caminho Base de Uploads</label>
+                                                <input type="text" class="form-control" th:field="*{caminhoBase}" placeholder="uploads/">
+                                                <small class="text-muted">
+                                                    Caminho relativo à raiz da aplicação ou caminho absoluto (ex: <code>/var/Kwanza ERP/uploads/</code>).
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Cloud Settings -->
+                                    <div class="card card-outline card-success mb-4 shadow-none border" id="panelCloud" th:style="${storageCfg.tipoStorage != 'CLOUD'} ? 'display:none' : ''">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-cloud-upload-alt me-2 text-success"></i>Configuração Cloud</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-cloud me-1 text-muted"></i>Provedor Cloud</label>
+                                                    <select class="form-select" th:field="*{cloudProvider}">
+                                                        <option value="">-- Seleccionar --</option>
+                                                        <option value="S3">AWS S3</option>
+                                                        <option value="GCS">Google Cloud Storage</option>
+                                                        <option value="AZURE">Azure Blob Storage</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-box me-1 text-muted"></i>Bucket / Container</label>
+                                                    <input type="text" class="form-control" th:field="*{cloudBucket}" placeholder="Kwanza ERP-docs">
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-map-marker-alt me-1 text-muted"></i>Região</label>
+                                                    <input type="text" class="form-control" th:field="*{cloudRegion}" placeholder="us-east-1 ou europe-west1">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Limites e Backup -->
+                                    <div class="card card-outline card-warning mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-sliders-h me-2 text-warning"></i>Limites e Backup</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-file me-1 text-muted"></i>Tamanho Máximo por Ficheiro (MB)</label>
+                                                    <input type="number" class="form-control" th:field="*{tamanhoMaxFicheiro}" min="1" max="500" placeholder="10">
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-file-archive me-1 text-muted"></i>Tamanho Máximo de Pedido (MB)</label>
+                                                    <input type="number" class="form-control" th:field="*{tamanhoMaxRequest}" min="1" max="1000" placeholder="20">
+                                                    <small class="text-muted">Total de todos os ficheiros num único upload.</small>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-shield-alt me-1 text-muted"></i>Estratégia de Backup</label>
+                                                    <select class="form-select" th:field="*{estrategiaBackup}">
+                                                        <option value="DESATIVADO">Desativado</option>
+                                                        <option value="DIARIO">Diário (meia-noite)</option>
+                                                        <option value="SEMANAL">Semanal (Domingo)</option>
+                                                        <option value="MENSAL">Mensal (dia 1)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 pt-3 border-top">
+                                        <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill fw-bold">
+                                            <i class="fas fa-save me-2"></i>Guardar Storage
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Tab: Banco de dados -->
+                            <div class="tab-pane fade" id="banco-dados-pane" role="tabpanel" aria-labelledby="banco-dados-tab">
+                                <!-- Info Banner -->
+                                <div class="callout callout-warning mb-4 border-start-3">
+                                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+                                    <strong>Atenção:</strong> Alterações ao pool de ligações e timeouts entram em vigor apenas após reiniciar o servidor. Alterações incorrectas podem causar falhas de ligação à base de dados.
+                                </div>
+
+                                <form th:action="@{/configuracoes/banco-dados/salvar}" th:object="${databaseCfg}" method="post">
+                                    <!-- Tipo de BD -->
+                                    <div class="card card-outline card-primary mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-hdd me-2 text-primary"></i>Motor de Base de Dados</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-database me-1 text-muted"></i>Tipo de BD</label>
+                                                    <select class="form-select" th:field="*{tipoBD}">
+                                                        <option value="MySQL">MySQL</option>
+                                                        <option value="PostgreSQL">PostgreSQL</option>
+                                                        <option value="MariaDB">MariaDB</option>
+                                                        <option value="H2">H2 (desenvolvimento)</option>
+                                                        <option value="Oracle">Oracle</option>
+                                                        <option value="SQLServer">SQL Server</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-folder me-1 text-muted"></i>Schema Padrão</label>
+                                                    <input type="text" class="form-control" th:field="*{schema}" placeholder="Kwanza ERP">
+                                                    <small class="text-muted">Nome do schema ou base de dados a utilizar.</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Timeouts -->
+                                    <div class="card card-outline card-warning mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-hourglass-half me-2 text-warning"></i>Timeouts</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-clock me-1 text-muted"></i>Timeout de Ligação (ms)</label>
+                                                    <input type="number" class="form-control" th:field="*{connectionTimeout}" min="1000" step="1000" placeholder="30000">
+                                                    <small class="text-muted">Tempo máximo para estabelecer ligação (padrão: 30 000 ms).</small>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-stopwatch me-1 text-muted"></i>Timeout de Query (ms)</label>
+                                                    <input type="number" class="form-control" th:field="*{queryTimeout}" min="1000" step="1000" placeholder="60000">
+                                                    <small class="text-muted">Tempo máximo de execução de uma query.</small>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-bed me-1 text-muted"></i>Idle Timeout (ms)</label>
+                                                    <input type="number" class="form-control" th:field="*{idleTimeout}" min="1000" step="1000" placeholder="30000">
+                                                    <small class="text-muted">Tempo em que uma ligação inactiva é fechada.</small>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-infinity me-1 text-muted"></i>Max Lifetime (ms)</label>
+                                                    <input type="number" class="form-control" th:field="*{maxLifetime}" min="1000" step="1000" placeholder="60000">
+                                                    <small class="text-muted">Tempo de vida máximo de uma ligação no pool.</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Connection Pool -->
+                                    <div class="card card-outline card-info mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-project-diagram me-2 text-info"></i>Pool de Ligações (HikariCP)</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-arrow-down me-1 text-muted"></i>Pool Mínimo (minimum-idle)</label>
+                                                    <input type="number" class="form-control" th:field="*{poolMin}" min="1" max="100" placeholder="5">
+                                                    <small class="text-muted">Número mínimo de ligações mantidas no pool.</small>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-arrow-up me-1 text-muted"></i>Pool Máximo (maximum-pool-size)</label>
+                                                    <input type="number" class="form-control" th:field="*{poolMax}" min="1" max="500" placeholder="20">
+                                                    <small class="text-muted">Número máximo de ligações no pool.</small>
+                                                </div>
+                                                <div class="col-md-4 d-flex align-items-center">
+                                                    <div class="callout callout-info mb-0 w-100 border-start-3">
+                                                        <strong>Recomendação:</strong><br>
+                                                        Produção: <code>min=5 / max=20</code><br>
+                                                        Alto tráfego: <code>min=10 / max=50</code>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 pt-3 border-top">
+                                        <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm rounded-pill fw-bold">
+                                            <i class="fas fa-save me-2"></i>Guardar Banco de Dados
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <!-- Manutenção -->
+                                <div class="card card-outline card-danger mt-5 mb-0 shadow-none border" th:if="${isAdmin or isSuperAdmin}">
+                                    <div class="card-header bg-light">
+                                        <h3 class="card-title text-danger fw-bold"><i class="fas fa-trash-alt me-2"></i>Manutenção e Limpeza</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h6 class="fw-bold mb-1">Limpar Dados Transacionais</h6>
+                                                <p class="text-muted mb-0">Esta acção irá eliminar todas as <strong>vendas, facturas, guias de remessa, notas de crédito, vendas suspensas e movimentos de stock</strong>. Os produtos e clientes serão mantidos.</p>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <button type="button" class="btn btn-outline-danger px-4 rounded-pill fw-bold" id="btnLimparDados">
+                                                    <i class="fas fa-eraser me-1"></i>Limpar Base de Dados
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-light py-2">
+                                        <small class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-1"></i> ATENÇÃO: Esta operação é irreversível e apagará todo o histórico financeiro e de vendas.</small>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Tab: Segurança -->
+                            <div class="tab-pane fade" id="seguranca-pane" role="tabpanel" aria-labelledby="seguranca-tab">
+                                <form th:action="@{/configuracoes/seguranca/salvar}" th:object="${segurancaCfg}" method="post">
+                                    <!-- Sessão -->
+                                    <div class="card card-outline card-primary mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-user-clock me-2 text-primary"></i>Sessão e Autenticação</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-hourglass-end me-1 text-muted"></i>Expiração de Sessão (minutos)</label>
+                                                    <input type="number" class="form-control" th:field="*{tempoExpiracaoSessao}" min="1" max="1440" placeholder="30">
+                                                    <small class="text-muted">Inactividade após a qual o utilizador é desligado automaticamente.</small>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-user-lock me-1 text-muted"></i>Tentativas de Login Máximas</label>
+                                                    <input type="number" class="form-control" th:field="*{tentativasLoginMax}" min="1" max="20" placeholder="5">
+                                                    <small class="text-muted">Conta bloqueada após este número de tentativas falhadas.</small>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label><i class="fas fa-ban me-1 text-muted"></i>Duração do Bloqueio (minutos)</label>
+                                                    <input type="number" class="form-control" th:field="*{lockoutDuracao}" min="1" max="1440" placeholder="15">
+                                                    <small class="text-muted">Tempo que a conta fica bloqueada após exceder tentativas.</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Política de Password -->
+                                    <div class="card card-outline card-warning mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-key me-2 text-warning"></i>Política de Password</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Nível de política -->
+                                            <div class="form-group mb-3">
+                                                <label class="fw-bold"><i class="fas fa-tachometer-alt me-1 text-muted"></i>Nível de Segurança</label>
+                                                <div class="row g-2 mt-1">
+                                                    <div class="col-md-4">
+                                                        <label class="border rounded p-3 w-100 text-center d-block" th:classappend="${segurancaCfg.politicaPassword == 'FRACA'} ? 'border-secondary bg-light' : ''" style="cursor:pointer;">
+                                                            <input type="radio" name="politicaPassword" value="FRACA" th:checked="${segurancaCfg.politicaPassword == 'FRACA'}" class="form-check-input me-1">
+                                                            <span class="badge bg-secondary mb-1">FRACA</span><br>
+                                                            <small class="text-muted">Só comprimento mínimo</small>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="border rounded p-3 w-100 text-center d-block" th:classappend="${segurancaCfg.politicaPassword == 'MEDIA'} ? 'border-warning bg-light' : ''" style="cursor:pointer;">
+                                                            <input type="radio" name="politicaPassword" value="MEDIA" th:checked="${segurancaCfg.politicaPassword == 'MEDIA'}" class="form-check-input me-1">
+                                                            <span class="badge bg-warning text-dark mb-1">MÉDIA</span><br>
+                                                            <small class="text-muted">Letras maiúsculas + números</small>
+                                                        </label>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="border rounded p-3 w-100 text-center d-block" th:classappend="${segurancaCfg.politicaPassword == 'FORTE'} ? 'border-success bg-light' : ''" style="cursor:pointer;">
+                                                            <input type="radio" name="politicaPassword" value="FORTE" th:checked="${segurancaCfg.politicaPassword == 'FORTE'}" class="form-check-input me-1">
+                                                            <span class="badge bg-success mb-1">FORTE</span><br>
+                                                            <small class="text-muted">Maiúsculas + números + especiais</small>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-3">
+                                                <div class="form-group col-md-3">
+                                                    <label><i class="fas fa-ruler me-1 text-muted"></i>Comprimento Mínimo</label>
+                                                    <input type="number" class="form-control" th:field="*{comprimentoMinPassword}" min="4" max="32" placeholder="8">
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <label class="fw-bold d-block mb-2">Requisitos adicionais</label>
+                                                    <div class="d-flex flex-wrap gap-4 mt-1">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" id="requireUppercase" th:field="*{requireUppercase}">
+                                                            <label class="form-check-label text-dark" for="requireUppercase">
+                                                                <i class="fas fa-font me-1 text-primary"></i>Letras Maiúsculas
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" id="requireNumbers" th:field="*{requireNumbers}">
+                                                            <label class="form-check-label text-dark" for="requireNumbers">
+                                                                <i class="fas fa-hashtag me-1 text-warning"></i>Números
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" id="requireSpecialChars" th:field="*{requireSpecialChars}">
+                                                            <label class="form-check-label text-dark" for="requireSpecialChars">
+                                                                <i class="fas fa-asterisk me-1 text-danger"></i>Caracteres Especiais (!@#$...)
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2FA e IP Whitelist -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card card-outline card-info mb-4 shadow-none border">
+                                                <div class="card-header bg-light">
+                                                    <h3 class="card-title fw-bold"><i class="fas fa-mobile-alt me-2 text-info"></i>Autenticação de 2 Factores (2FA)</h3>
+                                                    <div class="card-tools">
+                                                        <div class="form-check form-switch mt-1">
+                                                            <input class="form-check-input" type="checkbox" id="twoFactorAtivo" th:field="*{twoFactorAtivo}">
+                                                            <label class="form-check-label fw-bold text-dark" for="twoFactorAtivo" th:text="${segurancaCfg.twoFactorAtivo} ? 'Activado' : 'Desactivado'"></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <i class="fas fa-shield-alt fa-3x text-info"></i>
+                                                        <div>
+                                                            <p class="mb-1 text-muted small">
+                                                                Quando activo, os utilizadores terão de confirmar o login com um segundo factor (app de autenticação ou SMS).
+                                                            </p>
+                                                            <span th:if="${segurancaCfg.twoFactorAtivo}" class="badge bg-success">2FA ACTIVO</span>
+                                                            <span th:unless="${segurancaCfg.twoFactorAtivo}" class="badge bg-secondary">2FA INACTIVO</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="card card-outline card-danger mb-4 shadow-none border">
+                                                <div class="card-header bg-light">
+                                                    <h3 class="card-title fw-bold"><i class="fas fa-network-wired me-2 text-danger"></i>IP Whitelist</h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="form-group mb-0">
+                                                        <label><i class="fas fa-filter me-1 text-muted"></i>IPs Permitidos</label>
+                                                        <textarea class="form-control" th:field="*{ipWhitelist}" rows="3" placeholder="192.168.1.100, 10.0.0.0/24"></textarea>
+                                                        <small class="text-muted">
+                                                            IPs separados por vírgula ou em notação CIDR.<br>
+                                                            <strong>Deixe em branco para permitir todos os IPs.</strong>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Logs de Acesso -->
+                                    <div class="card card-outline card-secondary mb-4 shadow-none border">
+                                        <div class="card-header bg-light">
+                                            <h3 class="card-title fw-bold"><i class="fas fa-list-alt me-2 text-secondary"></i>Auditoria e Logs</h3>
+                                            <div class="card-tools">
+                                                <div class="form-check form-switch mt-1">
+                                                    <input class="form-check-input" type="checkbox" id="logAcessosAtivo" th:field="*{logAcessosAtivo}">
+                                                    <label class="form-check-label fw-bold text-dark" for="logAcessosAtivo">
+                                                        Registo de acessos
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted mb-0">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Quando activo, cada login, logout e operação sensível é registada no log de auditoria para rastreabilidade e conformidade.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 pt-3 border-top">
+                                        <button type="submit" class="btn btn-danger px-4 py-2 shadow-sm rounded-pill fw-bold">
+                                            <i class="fas fa-save me-2"></i>Guardar Segurança
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
                         </div>
-                         <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i><span th:text="#{config.geral.btn.aplicar}">Aplicar Alterações</span>
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </section>
     </div>
     </div>
-<!-- Scripts already loaded via menu :: head -->
+
+    <!-- Scripts from all config pages integrated -->
     <script>
-        // Pré-visualização imediata ao mudar o select (opcional)
-        document.getElementById('temaSelector').addEventListener('change', function () {
-            if (this.value === 'dark') {
-                document.body.classList.add('dark-mode');
-                const sidebar = document.querySelector('.main-sidebar');
-                if (sidebar) sidebar.classList.replace('sidebar-light-primary', 'sidebar-dark-primary');
+        // Tema selector live preview
+        const temaSelector = document.getElementById('temaSelector');
+        if (temaSelector) {
+            temaSelector.addEventListener('change', function () {
+                if (this.value === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    const sidebar = document.querySelector('.main-sidebar');
+                    if (sidebar) sidebar.classList.replace('sidebar-light-primary', 'sidebar-dark-primary');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    const sidebar = document.querySelector('.main-sidebar');
+                    if (sidebar) sidebar.classList.replace('sidebar-dark-primary', 'sidebar-light-primary');
+                }
+            });
+        }
+
+        // Email: show/hide password
+        function togglePass() {
+            const inp = document.getElementById('smtpPass');
+            const ico = document.getElementById('passIcon');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                ico.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
-                document.body.classList.remove('dark-mode');
-                const sidebar = document.querySelector('.main-sidebar');
-                if (sidebar) sidebar.classList.replace('sidebar-dark-primary', 'sidebar-light-primary');
+                inp.type = 'password';
+                ico.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Email: test SMTP connection
+        function testarEmail() {
+            const dest = document.getElementById('emailDestino').value;
+            const resultDiv = document.getElementById('testeResult');
+            resultDiv.className = 'mt-3';
+            resultDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> A testar...</div>';
+
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+            fetch('/configuracoes/email/testar', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ emailDestino: dest })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    resultDiv.innerHTML = '<div class="alert alert-success mb-0"><i class="fas fa-check-circle me-1"></i>' + data.mensagem + '</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-1"></i>' + data.mensagem + '</div>';
+                }
+            })
+            .catch(() => {
+                resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-1"></i>Erro de comunicação com o servidor.</div>';
+            });
+        }
+
+        // Servidor: Toggle proxy visibility
+        function toggleProxy(enabled) {
+            const fields = document.getElementById('proxyFields');
+            if (fields) {
+                fields.style.opacity = enabled ? '1' : '0.4';
+                fields.style.pointerEvents = enabled ? 'auto' : 'none';
+            }
+        }
+
+        // Storage: Toggle Local vs Cloud visibility
+        function toggleStoragePanel(tipo) {
+            const local = document.getElementById('panelLocal');
+            const cloud = document.getElementById('panelCloud');
+            if (local) local.style.display = (tipo === 'LOCAL') ? '' : 'none';
+            if (cloud) cloud.style.display = (tipo === 'CLOUD') ? '' : 'none';
+        }
+
+        // Dynamic Active Tab selector from URL parameter
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabName = urlParams.get('tab');
+            if (tabName) {
+                const tabButton = document.getElementById(tabName + '-tab');
+                if (tabButton) {
+                    // Activate via Bootstrap 5 Tab trigger
+                    const tabInstance = new bootstrap.Tab(tabButton);
+                    tabInstance.show();
+                }
             }
         });
+    </script>
+
+    <!-- Database Maintenance script (only if admin/superadmin) -->
+    <script th:if="${isAdmin or isSuperAdmin}">
+        const btnLimpar = document.getElementById('btnLimparDados');
+        if (btnLimpar) {
+            btnLimpar.addEventListener('click', function() {
+                if (confirm('TEM A CERTEZA? Esta operação irá apagar TODAS as vendas e facturas de forma permanente. Não é possível desfazer.')) {
+                    if (confirm('CONFIRMAÇÃO FINAL: Deseja mesmo prosseguir com a limpeza total dos dados de vendas?')) {
+                        const btn = this;
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>A limpar...';
+
+                        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+                        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+                        const headers = { 'Content-Type': 'application/json' };
+                        if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
+
+                        fetch('/api/limpeza/executar', {
+                            method: 'POST',
+                            headers: headers
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Dados limpos com sucesso! O sistema será recarregado.');
+                                window.location.reload();
+                            } else {
+                                response.text().then(text => alert('Erro: ' + text));
+                                btn.disabled = false;
+                                btn.innerHTML = '<i class="fas fa-eraser me-1"></i>Limpar Base de Dados';
+                            }
+                        })
+                        .catch(error => {
+                            alert('Erro na ligação ao servidor: ' + error);
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-eraser me-1"></i>Limpar Base de Dados';
+                        });
+                    }
+                }
+            });
+        }
     </script>
 </body>
 

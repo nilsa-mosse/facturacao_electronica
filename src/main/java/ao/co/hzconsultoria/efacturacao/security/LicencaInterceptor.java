@@ -19,10 +19,10 @@ public class LicencaInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String uri = request.getRequestURI();
 
-        // Ignorar recursos estáticos, erros, login e ficheiros PWA
+        // Ignorar recursos estáticos, erros, login, logout e ficheiros PWA
         if (uri.startsWith("/assets/") || uri.startsWith("/plugins/") || uri.startsWith("/css/") || 
             uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/error") || 
-            uri.equals("/login") || uri.equals("/licenca-expirada") || uri.equals("/ativar-licenca") ||
+            uri.equals("/login") || uri.equals("/logout") || uri.equals("/licenca-expirada") || uri.equals("/ativar-licenca") ||
             uri.equals("/manifest.json") || uri.equals("/sw.js") ||
             uri.equals("/alterar-senha-obrigatorio") ||
             uri.equals("/forgot-password") || uri.equals("/reset-password")) {

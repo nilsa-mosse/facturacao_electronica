@@ -30,6 +30,7 @@ public class LicencaAdminController {
     @GetMapping("/gerador")
     @PreAuthorize("hasRole('SUPERADMIN')")
     public String gerador(Model model) {
+        model.addAttribute("machineId", licencaService.getMachineId());
         return "geradorLicenca";
     }
 

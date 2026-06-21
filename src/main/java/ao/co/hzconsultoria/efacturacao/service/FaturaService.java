@@ -146,7 +146,8 @@ public class FaturaService {
 
     /**
      * Emite um recibo (Factura-Recibo - FR) representando um pagamento.
-     * Este método gera uma fatura do tipo FR com o montante fornecido (sem recalcular itens)
+     * Este método gera uma fatura do tipo FR com o montante fornecido (sem
+     * recalcular itens)
      * e executa a assinatura/ envio AGT e geração de PDF.
      */
     public Fatura emitirReciboPagamento(Compra compra, double montantePago) {
@@ -187,10 +188,10 @@ public class FaturaService {
         fatura.setEnviadaAGT(false);
         fatura.setStatus("PENDENTE");
 
-        Fatura faturaSalva = faturaRepository.save(fatura);
+        Fatura faturaSalva = faturaRepository.saveAndFlush(fatura);
         // Enviar a AGT (FR deve ser comunicado)
         faturaSalva = processarEnvioAGT(faturaSalva);
-        faturaSalva = faturaRepository.save(faturaSalva);
+        faturaSalva = faturaRepository.saveAndFlush(faturaSalva);
         gerarPdfFatura(faturaSalva);
         return faturaSalva;
     }
@@ -253,7 +254,7 @@ public class FaturaService {
         // Guardar fatura antes de enviar (para ter ID gerado)
         fatura.setEnviadaAGT(false);
         fatura.setStatus("PENDENTE");
-        Fatura faturaSalva = faturaRepository.save(fatura);
+        Fatura faturaSalva = faturaRepository.saveAndFlush(fatura);
 
         if (!"FP".equals(tipo)) {
             faturaSalva = processarEnvioAGT(faturaSalva);
@@ -263,7 +264,7 @@ public class FaturaService {
         }
 
         // Actualizar estado final na BD
-        faturaSalva = faturaRepository.save(faturaSalva);
+        faturaSalva = faturaRepository.saveAndFlush(faturaSalva);
         gerarPdfFatura(faturaSalva);
         return faturaSalva;
     }
@@ -499,7 +500,8 @@ public class FaturaService {
                     tituloDocumento = "NOTA DE DÉBITO";
                 }
 
-                if ("ANULADA".equalsIgnoreCase(fatura.getStatus()) || "CANCELADA".equalsIgnoreCase(fatura.getStatus()) || "A".equalsIgnoreCase(fatura.getInvoiceStatus())) {
+                if ("ANULADA".equalsIgnoreCase(fatura.getStatus()) || "CANCELADA".equalsIgnoreCase(fatura.getStatus())
+                        || "A".equalsIgnoreCase(fatura.getInvoiceStatus())) {
                     tituloDocumento += " (ANULADA)";
                 }
 
@@ -569,6 +571,9 @@ public class FaturaService {
 
                 // Right: Bill To
                 Compra c = fatura.getCompra();
+                if (c != null && c.getId() != null) {
+                    c = compraRepository.findById(c.getId()).orElse(c);
+                }
                 String nomeCli = c != null && c.getNomeCliente() != null ? c.getNomeCliente() : "Consumidor Final";
                 String nifCli = c != null && c.getNifCliente() != null ? c.getNifCliente() : "999999999";
                 String endCli = c != null && c.getMoradaCliente() != null ? c.getMoradaCliente() : "";
@@ -995,7 +1000,8 @@ public class FaturaService {
     public void verificarMutabilidade(Fatura fatura) throws IllegalStateException {
         if (fatura.getValidadaAgt() != null && fatura.getValidadaAgt()) {
             throw new IllegalStateException(
-                    "Factura " + fatura.getNumeroFatura() + " foi validada pela AGT e não pode ser alterada ou eliminada.");
+                    "Factura " + fatura.getNumeroFatura()
+                            + " foi validada pela AGT e não pode ser alterada ou eliminada.");
         }
     }
 
@@ -1005,13 +1011,13 @@ public class FaturaService {
     public void imprimirFatura(Long id) throws Exception {
         Fatura fatura = faturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
-        
+
         verificarMutabilidade(fatura);
-        
+
         fatura.setImpresso(true);
         fatura.setDataImpressao(new Date());
         faturaRepository.save(fatura);
-        
+
         log.info("Factura {} marcada como impressa em {}", fatura.getNumeroFatura(), fatura.getDataImpressao());
     }
 
@@ -1021,23 +1027,23 @@ public class FaturaService {
     public void enviarPorEmail(Long id, String emailDestino) throws Exception {
         Fatura fatura = faturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
-        
+
         if (emailDestino == null || emailDestino.trim().isEmpty()) {
             throw new IllegalArgumentException("Email de destino não fornecido");
         }
-        
+
         // Gerar PDF se não existir
         String filePath = "./uploads/faturas/" + fatura.getNumeroFatura() + ".pdf";
         File pdfFile = new File(filePath);
-        
+
         if (!pdfFile.exists()) {
             gerarPdfFatura(fatura);
         }
-        
+
         // Preparar conteúdo do email
         String assunto = "Factura " + fatura.getNumeroFatura();
         String corpo = gerarCorpoEmailFactura(fatura);
-        
+
         // Enviar email com anexo
         try {
             dynamicMailService.enviarEmailComAnexo(
@@ -1046,13 +1052,12 @@ public class FaturaService {
                     assunto,
                     corpo,
                     fatura.getNumeroFatura() + ".pdf",
-                    pdfFile
-            );
-            
+                    pdfFile);
+
             fatura.setEmailEnviado(true);
             fatura.setDataEmail(new Date());
             faturaRepository.save(fatura);
-            
+
             log.info("Factura {} enviada por email para {}", fatura.getNumeroFatura(), emailDestino);
         } catch (Exception e) {
             log.error("Erro ao enviar factura por email: {}", e.getMessage());
@@ -1066,17 +1071,17 @@ public class FaturaService {
     public Fatura registarPagamentoTotal(Long id, String metodo, String referencia) throws Exception {
         Fatura fatura = faturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
-        
+
         verificarMutabilidade(fatura);
-        
+
         Double total = fatura.getTotal() != null ? fatura.getTotal() : 0.0;
-        
+
         fatura.setValorPago(total);
         fatura.setValorEmAberto(0.0);
         fatura.setStatus("PAGA");
-        
+
         Fatura faturaAtualizada = faturaRepository.save(fatura);
-        
+
         // Atualizar status da compra associada
         if (faturaAtualizada.getCompra() != null) {
             faturaAtualizada.getCompra().setStatus("PAGA");
@@ -1094,7 +1099,7 @@ public class FaturaService {
         } catch (Exception e) {
             log.warn("Pagamento registado mas falha ao gerar recibo: {}", e.getMessage());
         }
-        
+
         return faturaAtualizada;
     }
 
@@ -1104,32 +1109,32 @@ public class FaturaService {
     public Fatura registarPagamentoParcial(Long id, Double valor, String metodo, String referencia) throws Exception {
         Fatura fatura = faturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
-        
+
         verificarMutabilidade(fatura);
-        
+
         if (valor == null || valor <= 0) {
             throw new IllegalArgumentException("Valor de pagamento inválido");
         }
-        
+
         Double total = fatura.getTotal() != null ? fatura.getTotal() : 0.0;
         Double valorAtionalmentePago = fatura.getValorPago() != null ? fatura.getValorPago() : 0.0;
         Double novoValorPago = valorAtionalmentePago + valor;
-        
+
         if (novoValorPago > total) {
             throw new IllegalArgumentException("Valor de pagamento excede o total da factura");
         }
-        
+
         fatura.setValorPago(novoValorPago);
         fatura.setValorEmAberto(total - novoValorPago);
-        
+
         if (novoValorPago.equals(total)) {
             fatura.setStatus("PAGA");
         } else {
             fatura.setStatus("PARCIALMENTE_PAGA");
         }
-        
+
         Fatura faturaAtualizada = faturaRepository.save(fatura);
-        
+
         // Atualizar status da compra associada
         if (faturaAtualizada.getCompra() != null) {
             faturaAtualizada.getCompra().setStatus(faturaAtualizada.getStatus());
@@ -1146,7 +1151,7 @@ public class FaturaService {
         } catch (Exception e) {
             log.warn("Pagamento parcial registado mas falha ao gerar recibo: {}", e.getMessage());
         }
-        
+
         return faturaAtualizada;
     }
 
@@ -1157,30 +1162,30 @@ public class FaturaService {
     public Fatura converterParaFaturaRecibo(Long faturaId) throws Exception {
         Fatura fatura = faturaRepository.findById(faturaId)
                 .orElseThrow(() -> new RuntimeException("Factura não encontrada com ID: " + faturaId));
-        
+
         if (!"FT".equals(fatura.getTipoDocumento())) {
             throw new IllegalArgumentException("Apenas facturas do tipo FT podem ser convertidas para Factura-Recibo");
         }
-        
+
         Compra compra = fatura.getCompra();
         if (compra == null) {
             throw new IllegalStateException("Compra associada à factura não encontrada");
         }
-        
+
         Double total = fatura.getTotal() != null ? fatura.getTotal() : 0.0;
-        
+
         // 1. Marcar a Fatura FT original como PAGA
         fatura.setStatus("PAGA");
         fatura.setValorPago(total);
         fatura.setValorEmAberto(0.0);
         faturaRepository.save(fatura);
-        
+
         // 2. Marcar a Compra original como PAGA
         compra.setStatus("PAGA");
         compra.setValorPago(total);
         compra.setDataPagamento(java.time.LocalDateTime.now());
         compraRepository.save(compra);
-        
+
         // Regenerar o PDF da fatura FT com o estado PAGA
         gerarPdfFatura(fatura);
 
@@ -1194,20 +1199,20 @@ public class FaturaService {
     public Fatura emitirNotaDebito(Long faturaReferenciaId, Double valorAdicional, String motivo) throws Exception {
         Fatura faturaReferencia = faturaRepository.findById(faturaReferenciaId)
                 .orElseThrow(() -> new RuntimeException("Factura de referência não encontrada"));
-        
+
         if (!"FT".equals(faturaReferencia.getTipoDocumento())) {
             throw new IllegalArgumentException("Nota de Débito só pode ser emitida contra uma Factura (FT)");
         }
-        
+
         Devolucao devolucaoFicticia = new Devolucao();
         devolucaoFicticia.setEmpresa(faturaReferencia.getEmpresa());
         devolucaoFicticia.setTotal(valorAdicional);
         devolucaoFicticia.setIva(0.0); // Será definido no método
         devolucaoFicticia.setMotivo(motivo != null ? motivo : "Nota de Débito");
-        
+
         Fatura nota = emitirNota(devolucaoFicticia, "ND");
         nota.setFaturaReferencia(faturaReferencia);
-        
+
         return faturaRepository.save(nota);
     }
 
@@ -1217,7 +1222,7 @@ public class FaturaService {
     public Map<String, Object> consultarEstadoAgt(Long id) throws Exception {
         Fatura fatura = faturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
-        
+
         Map<String, Object> resultado = new java.util.HashMap<>();
         resultado.put("numeroFatura", fatura.getNumeroFatura());
         resultado.put("tipoDocumento", fatura.getTipoDocumento());
@@ -1227,7 +1232,7 @@ public class FaturaService {
         resultado.put("status", fatura.getStatus());
         resultado.put("codigoAgt", fatura.getCodigoAgt());
         resultado.put("hash", fatura.getHash());
-        
+
         // Se ainda não foi validada, tentar validar
         if (!fatura.isEnviadaAGT()) {
             try {
@@ -1242,7 +1247,7 @@ public class FaturaService {
             resultado.put("mensagemAgt", "Factura já foi validada na AGT");
             resultado.put("sucessoAgt", true);
         }
-        
+
         return resultado;
     }
 
@@ -1252,19 +1257,19 @@ public class FaturaService {
     public Fatura anularFatura(Long id, String motivo) throws Exception {
         Fatura fatura = faturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Factura não encontrada"));
-        
+
         verificarMutabilidade(fatura);
-        
+
         if (!"RASCUNHO".equals(fatura.getStatus()) && !"EMITIDA".equals(fatura.getStatus())) {
             throw new IllegalStateException(
                     "Apenas facturas em Rascunho ou Emitida podem ser anuladas");
         }
-        
+
         fatura.setStatus("ANULADA");
         fatura.setInvoiceStatus("A"); // Status A = Anulada
-        
+
         Fatura faturaAnulada = faturaRepository.save(fatura);
-        
+
         // Atualizar status da compra associada
         if (faturaAnulada.getCompra() != null) {
             faturaAnulada.getCompra().setStatus("CANCELADA");
@@ -1276,7 +1281,7 @@ public class FaturaService {
         gerarPdfFatura(faturaAnulada);
 
         log.info("Factura {} anulada. Motivo: {}", fatura.getNumeroFatura(), motivo);
-        
+
         return faturaAnulada;
     }
 
@@ -1294,20 +1299,36 @@ public class FaturaService {
                 .append(new SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao()))
                 .append(".</p>\n");
         html.append("<table style='width: 100%; border-collapse: collapse;'>\n");
-        html.append("<tr><td><strong>Número:</strong></td><td>").append(fatura.getNumeroFatura()).append("</td></tr>\n");
+        html.append("<tr><td><strong>Número:</strong></td><td>").append(fatura.getNumeroFatura())
+                .append("</td></tr>\n");
         html.append("<tr><td><strong>Data:</strong></td><td>")
                 .append(new SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao()))
                 .append("</td></tr>\n");
         String estadoDoc = "Normal";
         if (fatura.getStatus() != null) {
             switch (fatura.getStatus().toUpperCase()) {
-                case "VALIDADA": estadoDoc = "Validada"; break;
-                case "ANULADA": case "CANCELADA": estadoDoc = "Anulada"; break;
-                case "PAGA": estadoDoc = "Paga"; break;
-                case "PARCIALMENTE_PAGA": estadoDoc = "Parcialmente Paga"; break;
-                case "EMITIDA_OFFLINE": estadoDoc = "Emitida Offline"; break;
-                case "FALHA_ENVIO": estadoDoc = "Falha no Envio"; break;
-                default: estadoDoc = fatura.getStatus(); break;
+                case "VALIDADA":
+                    estadoDoc = "Validada";
+                    break;
+                case "ANULADA":
+                case "CANCELADA":
+                    estadoDoc = "Anulada";
+                    break;
+                case "PAGA":
+                    estadoDoc = "Paga";
+                    break;
+                case "PARCIALMENTE_PAGA":
+                    estadoDoc = "Parcialmente Paga";
+                    break;
+                case "EMITIDA_OFFLINE":
+                    estadoDoc = "Emitida Offline";
+                    break;
+                case "FALHA_ENVIO":
+                    estadoDoc = "Falha no Envio";
+                    break;
+                default:
+                    estadoDoc = fatura.getStatus();
+                    break;
             }
         }
         html.append("<tr><td><strong>Estado:</strong></td><td>").append(estadoDoc).append("</td></tr>\n");
@@ -1321,4 +1342,3 @@ public class FaturaService {
         return html.toString();
     }
 }
-

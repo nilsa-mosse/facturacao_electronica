@@ -30,6 +30,14 @@ public class SiteController {
     @GetMapping("/licenca-expirada")
     public String licencaExpirada(Model model) {
         model.addAttribute("machineId", licencaService.getMachineId());
+        
+        // Verificar se o utilizador está autenticado como SUPERADMIN
+        org.springframework.security.core.Authentication auth = 
+            org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isSuperAdmin = auth != null && auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
+        model.addAttribute("isSuperAdmin", isSuperAdmin);
+        
         return "licenca-expirada";
     }
 

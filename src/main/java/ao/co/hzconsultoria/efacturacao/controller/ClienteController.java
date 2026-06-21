@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequestMapping("/clientes")
@@ -70,5 +71,26 @@ public class ClienteController {
     public String mostrarHistorico(Model model) {
         model.addAttribute("cliente", new Cliente());
         return "historicoComprasCliente";
+    }
+
+    @ResponseBody
+    @PostMapping("/api/adicionar")
+    public ResponseEntity<?> apiAdicionarCliente(@RequestBody Cliente cliente) {
+        try {
+            if (cliente.getNome() == null || cliente.getNome().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Nome do cliente é obrigatório");
+            }
+            if (cliente.getNif() == null || cliente.getNif().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("NIF / BI é obrigatório");
+            }
+            if (cliente.getTelefone() == null || cliente.getTelefone().trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("Contacto Telefónico é obrigatório");
+            }
+            Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+            Cliente salvo = clienteService.salvar(cliente, empresaId);
+            return ResponseEntity.ok(salvo);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao salvar cliente: " + e.getMessage());
+        }
     }
 }

@@ -90,7 +90,8 @@ public class SecurityConfig {
                     "/api/compras/proforma", "/api/compras/guia",
                     "/finalizarVenda",
                     "/api/vendas-suspensas/**",
-                    "/ativar-licenca"
+                    "/ativar-licenca",
+                    "/clientes/api/adicionar"
                 )
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 

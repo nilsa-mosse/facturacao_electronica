@@ -15,10 +15,10 @@ public class ClienteService {
     @Autowired
     private ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository empresaRepository;
 
-    public void salvar(Cliente cliente, Long empresaId) {
+    public Cliente salvar(Cliente cliente, Long empresaId) {
         ao.co.hzconsultoria.efacturacao.model.Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
         cliente.setEmpresa(empresa);
-        clienteRepository.save(cliente);
+        return clienteRepository.save(cliente);
     }
 
     public List<Cliente> listarTodos(Long empresaId) {
