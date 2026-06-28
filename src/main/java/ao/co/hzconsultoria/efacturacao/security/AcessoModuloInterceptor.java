@@ -23,9 +23,14 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         
         // Ignorar recursos estáticos e login/logout
-        if (uri.startsWith("/assets/") || uri.startsWith("/plugins/") || uri.startsWith("/css/") || 
-            uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/login") || 
+        if (uri.startsWith("/assets/") || uri.startsWith("/plugins/") || uri.startsWith("/css/") ||
+            uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/login") ||
             uri.equals("/logout") || uri.equals("/error") || uri.equals("/alterar-senha-obrigatorio")) {
+            return true;
+        }
+
+        // O Setup Wizard deve ser sempre acessível (não bloquear por permissões de módulo)
+        if (uri.startsWith("/configuracoes/setup-wizard")) {
             return true;
         }
 

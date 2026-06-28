@@ -91,6 +91,15 @@ public class LicencaAdminController {
         // Ordenar da mais recente para a mais antiga (assumindo que o ID é sequencial)
         licencas.sort((l1, l2) -> l2.getId().compareTo(l1.getId()));
         
+        try {
+            LicencaGerada automatica = licencaService.obterLicencaAutomatica();
+            if (automatica != null) {
+                licencas.add(0, automatica);
+            }
+        } catch (Exception e) {
+            System.err.println("Erro ao obter licenca automatica: " + e.getMessage());
+        }
+        
         model.addAttribute("licencas", licencas);
         return "gestaoLicencas";
     }
@@ -98,6 +107,10 @@ public class LicencaAdminController {
     @GetMapping("/alternar-estado/{id}")
     @PreAuthorize("hasRole('SUPERADMIN')")
     public String alternarEstado(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        if (id == null || id == 0L) {
+            redirectAttributes.addFlashAttribute("erro", "Não é possível alterar o estado da licença automática do sistema.");
+            return "redirect:/superadmin/licenca/gestao";
+        }
         LicencaGerada licenca = licencaGeradaRepository.findById(id).orElse(null);
         if (licenca != null) {
             licenca.setAtiva(!licenca.isAtiva());

@@ -164,6 +164,8 @@ public class ConfiguracaoEmpresa implements Serializable {
     @Column(length = 20)
     private String segPoliticaPassword = "MEDIA";
 
+    private boolean setupCompleto = false;
+
     // ================================================================
     // Getters & Setters
     // ================================================================
@@ -548,4 +550,7 @@ public class ConfiguracaoEmpresa implements Serializable {
     public void setSegLockoutDuracao(int v) { this.segLockoutDuracao = v; }
     public String getSegPoliticaPassword() { return segPoliticaPassword; }
     public void setSegPoliticaPassword(String v) { this.segPoliticaPassword = v; }
+
+    public boolean isSetupCompleto() { return setupCompleto; }
+    public void setSetupCompleto(boolean v) { this.setupCompleto = v; }
 }

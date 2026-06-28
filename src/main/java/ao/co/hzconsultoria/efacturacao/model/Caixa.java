@@ -36,11 +36,14 @@ public class Caixa {
 
     private String estado; // ABERTO, FECHADO
     private String observacoes;
+    private String codigo;
 
     // Construtores
     public Caixa() {}
 
     // Getters e Setters
+    public String getCodigo() { return codigo; }
+    public void setCodigo(String codigo) { this.codigo = codigo; }
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public User getOperador() { return operador; }

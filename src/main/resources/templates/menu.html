@@ -163,6 +163,24 @@
                 <p><b>Ponto de Venda (POS)</b></p>
               </a>
             </li>
+            <li class="nav-item module-vendas-item" th:if="${isOperador}">
+              <a th:href="@{/caixa/abertura}" class="nav-link">
+                <i class="nav-icon fas fa-door-open"></i>
+                <p>Abertura de Caixa</p>
+              </a>
+            </li>
+            <li class="nav-item module-vendas-item" th:if="${isOperador}">
+              <a th:href="@{/caixa/fecho}" class="nav-link">
+                <i class="nav-icon fas fa-door-closed"></i>
+                <p>Fecho de Caixa</p>
+              </a>
+            </li>
+            <li class="nav-item module-vendas-item" th:if="${isAdmin or isSuperAdmin}">
+              <a th:href="@{/caixa/monitor}" class="nav-link">
+                <i class="nav-icon fas fa-desktop"></i>
+                <p>Monitor de Caixas</p>
+              </a>
+            </li>
             <li class="nav-item module-vendas-item">
               <a th:href="@{/historico-vendas}" class="nav-link">
                 <i class="nav-icon fas fa-history"></i>
@@ -396,6 +414,12 @@
                 </p>
               </a>
               <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a th:href="@{/configuracoes/setup-wizard}" class="nav-link">
+                    <i class="fas fa-magic nav-icon text-indigo"></i>
+                    <p>Assistente Inicial</p>
+                  </a>
+                </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/geral}" class="nav-link">
                     <i class="fas fa-sliders-h nav-icon"></i>

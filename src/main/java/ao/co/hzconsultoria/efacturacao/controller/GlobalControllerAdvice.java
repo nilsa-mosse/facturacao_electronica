@@ -41,6 +41,7 @@ public class GlobalControllerAdvice {
         String nomeSistema = "Kwanza ERP";
         String versaoSistema = "1.0.0";
         boolean exibirDatasValidade = true;
+        boolean setupCompleto = true;
         try {
             if (empresaId != null) {
                 java.util.Optional<ao.co.hzconsultoria.efacturacao.model.ConfiguracaoEmpresa> optConfig = configuracaoEmpresaRepository.findByEmpresa_Id(empresaId);
@@ -49,6 +50,7 @@ public class GlobalControllerAdvice {
                     if (config.getSistemaNome() != null) nomeSistema = config.getSistemaNome();
                     if (config.getSistemaVersao() != null) versaoSistema = config.getSistemaVersao();
                     exibirDatasValidade = config.isExibirDatasValidade();
+                    setupCompleto = config.isSetupCompleto();
                     String temp = config.getSistemaTema();
                     if (temp != null && (temp.equalsIgnoreCase("escuro") || temp.equalsIgnoreCase("dark"))) {
                         tema = "dark";
@@ -72,6 +74,7 @@ public class GlobalControllerAdvice {
         model.addAttribute("globalTema", tema);
         model.addAttribute("globalSistemaNome", nomeSistema);
         model.addAttribute("globalSistemaVersao", versaoSistema);
+        model.addAttribute("globalSetupCompleto", setupCompleto);
 
         String sistemaLogotipo = "/img/logo.png";
         try {
@@ -119,12 +122,14 @@ public class GlobalControllerAdvice {
             }
         }
         model.addAttribute("isSuperAdmin", isSuperAdmin);
-        // Expor papel Admin para uso nos templates de menu
+        // Expor papel Admin e Operador para uso nos templates de menu
         if (auth != null && auth.getPrincipal() instanceof ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) {
             String roleAtual = ((ao.co.hzconsultoria.efacturacao.security.CustomUserDetails) auth.getPrincipal()).getRole();
             model.addAttribute("isAdmin", "ADMIN".equals(roleAtual) || "GESTOR".equals(roleAtual));
+            model.addAttribute("isOperador", "OPERADOR".equals(roleAtual));
         } else {
             model.addAttribute("isAdmin", false);
+            model.addAttribute("isOperador", false);
         }
 
         // Injetar permissões de acesso

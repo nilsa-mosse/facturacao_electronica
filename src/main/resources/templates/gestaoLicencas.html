@@ -81,9 +81,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="lic : ${licencas}">
+                                        <tr th:each="lic : ${licencas}" th:classappend="${lic.id == 0} ? 'table-warning' : ''">
                                             <td>
-                                                <div class="fw-bold" th:text="${lic.clienteNome}"></div>
+                                                <div class="fw-bold">
+                                                    <span th:if="${lic.id == 0}" class="badge bg-warning text-dark me-1" title="Gerada automaticamente pelo sistema">
+                                                        <i class="fas fa-robot"></i> AUTO
+                                                    </span>
+                                                    <span th:text="${lic.clienteNome}"></span>
+                                                </div>
                                                 <small class="text-muted" th:text="${lic.observacoes}"></small>
                                             </td>
                                             <td>
@@ -114,14 +119,18 @@
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <!-- Botão de Ativar/Desativar -->
-                                                <a th:href="@{/superadmin/licenca/alternar-estado/{id}(id=${lic.id})}" 
+                                                <!-- Botão de Ativar/Desativar (oculto para licença automática) -->
+                                                <a th:if="${lic.id != 0}"
+                                                   th:href="@{/superadmin/licenca/alternar-estado/{id}(id=${lic.id})}" 
                                                    class="btn btn-sm"
                                                    th:classappend="${lic.ativa ? 'btn-outline-danger' : 'btn-outline-success'}"
                                                    th:title="${lic.ativa ? 'Desativar Licença' : 'Ativar Licença'}"
                                                    onclick="return confirm('Tem a certeza que deseja alterar o estado desta licença?');">
                                                     <i class="fas" th:classappend="${lic.ativa ? 'fa-power-off' : 'fa-check'}"></i>
                                                 </a>
+                                                <span th:if="${lic.id == 0}" class="text-muted" title="Licença do sistema — não modificável">
+                                                    <i class="fas fa-lock"></i>
+                                                </span>
                                                 
                                                 <!-- Botão para ver Detalhes (Modal) -->
                                                 <button type="button" class="btn btn-sm btn-outline-info ms-1" 

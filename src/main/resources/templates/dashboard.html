@@ -135,6 +135,25 @@
         font-size: 0.8rem;
         color: #64748b;
     }
+
+    .text-indigo { color: #4f46e5 !important; }
+    .fw-700 { font-weight: 700; }
+
+    .blink-dot-dash {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #22c55e;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+        animation: pulse-green 1.5s infinite;
+    }
+
+    @keyframes pulse-green {
+        0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+        70%  { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
 </style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
@@ -156,6 +175,24 @@
                             <h5 class="mb-0 fw-bold" id="currentDate">--/--/----</h5>
                             <span class="badge bg-white bg-opacity-25" id="currentTime">00:00</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Setup Wizard Alert Banner -->
+                <div th:if="${!globalSetupCompleto}" class="card border-0 mb-4 rounded-4" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 6px solid #d97706 !important; box-shadow: 0 4px 20px rgba(217, 119, 6, 0.08);">
+                    <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center bg-white text-warning" style="width: 55px; height: 55px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 1.5rem;">
+                                <i class="fas fa-magic"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1">Configurações Iniciais Pendentes</h5>
+                                <p class="mb-0 text-muted small">Antes de começar a vender ou facturar, configure os dados da empresa, regime fiscal, séries, impostos e integração AGT.</p>
+                            </div>
+                        </div>
+                        <a th:href="@{/configuracoes/setup-wizard}" class="btn btn-warning fw-bold px-4 py-2 rounded-pill text-dark shadow-sm">
+                            <i class="fas fa-arrow-right me-1"></i> Iniciar Assistente
+                        </a>
                     </div>
                 </div>
 
@@ -202,6 +239,66 @@
                             <div class="kpi-info">
                                 <div class="kpi-label" th:text="#{dashboard.facturas}">Facturas</div>
                                 <div class="kpi-value" th:text="${totalFacturas != null ? totalFacturas : 0}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Caixa Status Widget (Visible only for Admin/Gestor when caixas are open) -->
+                <div th:if="${qtdCaixasAbertos != null and qtdCaixasAbertos > 0}" class="mb-4">
+                    <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+                        <!-- Animated header bar -->
+                        <div class="card-header border-0 px-4 py-3 d-flex align-items-center justify-content-between"
+                             style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="blink-dot-dash"></span>
+                                <span class="text-white fw-700 fs-6">
+                                    <i class="fas fa-cash-register me-2"></i>Caixas Abertos em Tempo Real
+                                </span>
+                                <span class="badge bg-success px-3 py-2 rounded-pill fw-700"
+                                      th:text="${qtdCaixasAbertos} + ' activo(s)'"></span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-white opacity-75 small fw-600">
+                                    Total Faturado:
+                                    <strong class="text-success fs-6 ms-1"
+                                            th:text="'Kz ' + ${#numbers.formatDecimal(totalFaturadoCaixas, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</strong>
+                                </span>
+                                <a th:href="@{/caixa/monitor}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-600">
+                                    <i class="fas fa-external-link-alt me-1"></i> Ver Monitor Completo
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Caixa rows -->
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead class="bg-light">
+                                        <tr class="small text-muted">
+                                            <th class="ps-4 py-2 fw-700">Sessão</th>
+                                            <th class="fw-700">Operador</th>
+                                            <th class="fw-700">Abertura</th>
+                                            <th class="text-end fw-700">Numerário</th>
+                                            <th class="text-end fw-700">Multicaixa</th>
+                                            <th class="text-end pe-4 fw-700">Total Faturado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="c : ${caixasAbertos}">
+                                            <td class="ps-4 fw-700 text-indigo small"
+                                                th:text="${c.codigo != null ? c.codigo : 'CX-' + c.id}"></td>
+                                            <td class="fw-600 small" th:text="${c.operador.nome}"></td>
+                                            <td class="text-muted small"
+                                                th:text="${#temporals.format(c.dataAbertura, 'HH:mm')} + ' — ' + ${#temporals.format(c.dataAbertura, 'dd/MM')}"></td>
+                                            <td class="text-end small fw-600 text-success"
+                                                th:text="'Kz ' + ${#numbers.formatDecimal(c.totalNumerario != null ? c.totalNumerario : 0, 1, 'POINT', 2, 'COMMA')}"></td>
+                                            <td class="text-end small fw-600 text-info"
+                                                th:text="'Kz ' + ${#numbers.formatDecimal(c.totalMulticaixa != null ? c.totalMulticaixa : 0, 1, 'POINT', 2, 'COMMA')}"></td>
+                                            <td class="text-end pe-4 fw-700"
+                                                th:text="'Kz ' + ${#numbers.formatDecimal(c.totalFaturado != null ? c.totalFaturado : 0, 1, 'POINT', 2, 'COMMA')}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

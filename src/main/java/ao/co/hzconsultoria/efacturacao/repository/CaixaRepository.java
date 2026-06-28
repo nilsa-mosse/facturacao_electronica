@@ -12,4 +12,5 @@ public interface CaixaRepository extends JpaRepository<Caixa, Long> {
     Optional<Caixa> findFirstByOperador_IdAndEstadoOrderByIdDesc(Long operadorId, String estado);
     List<Caixa> findByEmpresa_IdOrderByDataAberturaDesc(Long empresaId);
     List<Caixa> findByOperador_IdOrderByDataAberturaDesc(Long operadorId);
+    List<Caixa> findByEmpresa_IdAndEstadoOrderByDataAberturaDesc(Long empresaId, String estado);
 }

@@ -65,6 +65,10 @@ public class CaixaService {
         caixa.setEstado("ABERTO");
         caixa.setObservacoes(observacoes);
 
+        // Gerar identificador único da sessão de caixa
+        String codigoSessao = "CX-" + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
+        caixa.setCodigo(codigoSessao);
+
         return caixaRepository.save(caixa);
     }
 
@@ -104,5 +108,13 @@ public class CaixaService {
             
             caixaRepository.save(caixa);
         }
+    }
+
+    public java.util.List<Caixa> getCaixasAbertosPorEmpresa(Long empresaId) {
+        return caixaRepository.findByEmpresa_IdAndEstadoOrderByDataAberturaDesc(empresaId, "ABERTO");
+    }
+
+    public java.util.List<Caixa> getCaixasHistoricoPorEmpresa(Long empresaId) {
+        return caixaRepository.findByEmpresa_IdAndEstadoOrderByDataAberturaDesc(empresaId, "FECHADO");
     }
 }

@@ -1,6 +1,8 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.service.DashboardService;
+import ao.co.hzconsultoria.efacturacao.service.CaixaService;
+import ao.co.hzconsultoria.efacturacao.model.Caixa;
 import ao.co.hzconsultoria.efacturacao.model.Compra;
 import ao.co.hzconsultoria.efacturacao.model.Despesa;
 import ao.co.hzconsultoria.efacturacao.model.ItemCompra;
@@ -19,6 +21,12 @@ public class DashboardController {
     private DashboardService dashboardService;
     
     @Autowired
+    private CaixaService caixaService;
+
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.ConfiguracaoEmpresaService configuracaoEmpresaService;
+
+    @Autowired
     private FaturaRepository faturaRepository;
 
     @Autowired
@@ -31,6 +39,16 @@ public class DashboardController {
     public String dashboard(Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         
+        if (empresaId != null) {
+            boolean isSetupCompleto = configuracaoEmpresaService.obterConfiguracao(empresaId).isSetupCompleto();
+            if (!isSetupCompleto) {
+                return "redirect:/configuracoes/setup-wizard";
+            }
+            model.addAttribute("isSetupCompleto", true);
+        } else {
+            model.addAttribute("isSetupCompleto", true);
+        }
+
         model.addAttribute("produtosMaisVendidos", dashboardService.getProdutosMaisVendidos(empresaId, 10));
         model.addAttribute("vendasUltimos30Dias", dashboardService.getVendasUltimos30Dias(empresaId));
         model.addAttribute("produtosEstoqueBaixo", dashboardService.getProdutosEstoqueBaixo(empresaId, 5));
@@ -55,6 +73,19 @@ public class DashboardController {
         model.addAttribute("comparacaoPeriodos", dashboardService.getComparacaoPeriodosData(empresaId));
         model.addAttribute("vendasPorLocalizacao", dashboardService.getVendasPorLocalizacao(empresaId));
         model.addAttribute("horariosPico", dashboardService.getHorariosPicoVendas(empresaId));
+
+        // Widget de Caixas Abertos para Admin/Gestor
+        if (empresaId != null) {
+            List<Caixa> caixasAbertos = caixaService.getCaixasAbertosPorEmpresa(empresaId);
+            double totalFaturadoCaixas = caixasAbertos.stream().mapToDouble(c -> c.getTotalFaturado() != null ? c.getTotalFaturado() : 0.0).sum();
+            model.addAttribute("caixasAbertos", caixasAbertos);
+            model.addAttribute("qtdCaixasAbertos", caixasAbertos.size());
+            model.addAttribute("totalFaturadoCaixas", totalFaturadoCaixas);
+        } else {
+            model.addAttribute("caixasAbertos", new java.util.ArrayList<>());
+            model.addAttribute("qtdCaixasAbertos", 0);
+            model.addAttribute("totalFaturadoCaixas", 0.0);
+        }
 
         return "dashboard";
     }

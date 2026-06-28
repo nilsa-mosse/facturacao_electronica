@@ -256,6 +256,7 @@ public class EfaturacaoApplication {
                 superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
                 superAdmin.setNome("Super Administrador");
                 superAdmin.setRole("SUPERADMIN");
+                superAdmin.setEmpresa(null); // Garantir que não está associado a nenhuma empresa
                 superAdmin.setAtivo(true);
                 superAdmin.setPermissoes(new HashSet<>(Arrays.asList(
                         "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "PAINEL_GLOBAL",
@@ -265,50 +266,13 @@ public class EfaturacaoApplication {
                 // Forçar reset de senha
                 User superAdmin = superOpt.get();
                 superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
+                superAdmin.setEmpresa(null); // Garantir que não está associado a nenhuma empresa
                 superAdmin.setAtivo(true);
                 superAdmin.setTentativasLogin(0);
                 superAdmin.setBloqueadoAte(null);
                 userRepository.save(superAdmin);
             }
 
-            // 4. Inicializar Impostos Padrão (se necessário)
-            if (impostoRepository.count() == 0) {
-                System.out.println("Iniciando criação de impostos padrão...");
-                Imposto iva14 = new Imposto();
-                iva14.setNome("IVA - Taxa Normal");
-                iva14.setPercentagem(new BigDecimal("14.0"));
-                iva14.setTipo("IVA");
-                iva14.setCodigoAgt("NOR");
-                impostoRepository.save(iva14);
-                Imposto iva7 = new Imposto();
-                iva7.setNome("IVA - Taxa Simplificada");
-                iva7.setPercentagem(new BigDecimal("7.0"));
-                iva7.setTipo("IVA");
-                iva7.setCodigoAgt("SIM");
-                impostoRepository.save(iva7);
-                Imposto isento = new Imposto();
-                isento.setNome("Isento");
-                isento.setPercentagem(BigDecimal.ZERO);
-                isento.setTipo("IVA");
-                isento.setCodigoAgt("ISE");
-                isento.setMotivoIsencao("Isenção nos termos da lei");
-                impostoRepository.save(isento);
-                System.out.println(">>> Impostos padrão criados com sucesso!");
-            }
-            // 5. Inicializar Dados Padrão (Clientes) para novas instalações
-            if (clienteRepository.count() == 0) {
-                System.out.println("Populando sistema com dados padrão...");
-
-                Empresa empPadrao = empresaRepository.findAll().stream().findFirst().orElse(null);
-                if (empPadrao != null) {
-                    // Cliente*Z
-                    ao.co.hzconsultoria.efacturacao.model.Cliente clienteFinal = new ao.co.hzconsultoria.efacturacao.model.Cliente();
-                    clienteFinal.setNome("Consumidor Final");
-                    clienteFinal.setNif("999999999");
-                    clienteFinal.setEmpresa(empPadrao);
-                    clienteRepository.save(clienteFinal);
-                }
-            }
         };
     }
 }

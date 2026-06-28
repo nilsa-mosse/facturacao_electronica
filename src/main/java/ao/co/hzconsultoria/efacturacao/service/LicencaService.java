@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
+import ao.co.hzconsultoria.efacturacao.model.LicencaGerada;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
 
 @Service
@@ -168,5 +169,35 @@ public class LicencaService {
         LocalDateTime agora = getCurrentNetworkTime();
         LocalDateTime dataLimite = config.getDataInstalacao().plusDays(7);
         return !agora.isAfter(dataLimite);
+    }
+
+    public LicencaGerada obterLicencaAutomatica() {
+        ConfiguracaoSistemaEntity config = configuracaoSistemaRepository.findById(1L).orElseGet(() -> {
+            ConfiguracaoSistemaEntity e = new ConfiguracaoSistemaEntity();
+            e.setId(1L);
+            e.setDataInstalacao(getCurrentNetworkTime());
+            return configuracaoSistemaRepository.save(e);
+        });
+
+        if (config.getDataInstalacao() == null) {
+            config.setDataInstalacao(getCurrentNetworkTime());
+            config = configuracaoSistemaRepository.save(config);
+        }
+
+        LicencaGerada trial = new LicencaGerada();
+        trial.setId(0L);
+        trial.setMachineId(getMachineId());
+        trial.setClienteNome("Licença de Demonstração (Sistema)");
+        
+        String chave = config.getLicencaChaveAtivacao();
+        trial.setChaveGerada(chave != null && !chave.trim().isEmpty() ? chave : "TRIAL-LICENSE-AUTO-GENERATED");
+        trial.setDataEmissao(config.getDataInstalacao());
+        trial.setDataExpiracao(config.getDataInstalacao().plusDays(7));
+        
+        LocalDateTime agora = getCurrentNetworkTime();
+        trial.setAtiva(!agora.isAfter(trial.getDataExpiracao()));
+        trial.setObservacoes("Período de avaliação de 7 dias concedido automaticamente ao instalar o sistema.");
+        
+        return trial;
     }
 }

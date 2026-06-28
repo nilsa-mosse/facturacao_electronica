@@ -17,10 +17,26 @@ public class HomeController {
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.CaixaService caixaService;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.ConfiguracaoEmpresaService configuracaoEmpresaService;
+
     @GetMapping("/home")
     public String home(Authentication auth, Model model) {
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
             CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+            
+            // Redirect admin/superadmin/gestor if setup is incomplete
+            boolean isManager = "GESTOR".equals(user.getRole()) || "ADMIN".equals(user.getRole()) || "SUPERADMIN".equals(user.getRole());
+            if (isManager) {
+                Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+                if (empresaId != null) {
+                    boolean isSetupCompleto = configuracaoEmpresaService.obterConfiguracao(empresaId).isSetupCompleto();
+                    if (!isSetupCompleto) {
+                        return "redirect:/configuracoes/setup-wizard";
+                    }
+                }
+            }
+
             if ("GESTOR".equals(user.getRole())) {
                 return "redirect:/dashboard";
             }

@@ -1,200 +1,424 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout :: head"></head>
-<body>
-    <div th:replace="layout :: content">
-        <div class="container" style="text-align:center; padding:3rem;">
-            <h1 th:text="${title}">Bem‑vindo</h1>
-            <p th:text="${message}">Licença ativada com sucesso! Explore as funcionalidades.</p>
-            <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" style="max-width:300px; margin-top:1.5rem;"/>
-        </div>
-    </div>
-</body>
-</html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="pt">
 <head>
     <meta charset="UTF-8" />
-    <title th:text="${title}">Welcome</title>
-    <!-- Modern Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kwanza ERP — Bem‑vindo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --indigo: #4f46e5;
+            --indigo-dark: #3730a3;
+            --violet: #7c3aed;
+            --cyan: #06b6d4;
+            --emerald: #10b981;
+            --gold: #f59e0b;
+        }
+
         body {
-            margin: 0;
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #ff7e5f, #feb47b);
-            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            position: relative;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.12);
-            padding: 2rem 3rem;
-            border-radius: 12px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+
+        /* ─── Animated Gradient Orbs ─── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.35;
+            pointer-events: none;
+            animation: floatOrb 12s ease-in-out infinite;
+        }
+        .orb-1 { width: 500px; height: 500px; top: -150px; left: -150px; background: var(--indigo); animation-delay: 0s; }
+        .orb-2 { width: 400px; height: 400px; bottom: -100px; right: -100px; background: var(--violet); animation-delay: -4s; }
+        .orb-3 { width: 300px; height: 300px; top: 40%; left: 60%; background: var(--cyan); animation-delay: -8s; }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(30px, -40px) scale(1.05); }
+            66%       { transform: translate(-20px, 30px) scale(0.97); }
+        }
+
+        /* ─── Particle Canvas ─── */
+        #particleCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Main Card ─── */
+        .welcome-card {
+            position: relative;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            padding: 3.5rem 4rem;
+            max-width: 560px;
+            width: 92%;
             text-align: center;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.05) inset,
+                0 25px 60px rgba(0, 0, 0, 0.5);
+
             opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            transform: translateY(40px) scale(0.95);
+            transition: opacity 0.8s cubic-bezier(.22,1,.36,1),
+                        transform 0.8s cubic-bezier(.22,1,.36,1);
         }
-        .container.visible {
+        .welcome-card.visible {
             opacity: 1;
-            transform: scale(1);
+            transform: translateY(0) scale(1);
         }
-        .container.fade-out {
+        .welcome-card.fade-out {
             opacity: 0;
-            transform: scale(0.95);
+            transform: translateY(-30px) scale(0.97);
             transition: opacity 0.6s ease-in, transform 0.6s ease-in;
         }
-        h1 { margin-bottom: 0.5rem; font-size: 2.5rem; font-weight: 600; }
-        p { margin-top: 0; font-size: 1.2rem; }
-        .illustration {
-            max-width: 280px;
-            margin-top: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+
+        /* ─── Success Icon ─── */
+        .success-icon-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
         }
-    </style>
-</head>
-<body>
-    <div class="container" id="welcomeContainer">
-        <h1 th:text="${title}">Bem‑vindo</h1>
-        <p th:text="${message}">Licença ativada com sucesso!</p>
-        <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" />
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('welcomeContainer');
-            // Fade in
-            requestAnimationFrame(() => container.classList.add('visible'));
-            // After 5 seconds start fade out then redirect to home page
-            setTimeout(() => {
-                container.classList.add('fade-out');
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 650);
-            }, 5000);
-        });
-    </script>
-</body>
-</html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8" />
-    <title th:text="${title}">Welcome</title>
-    <!-- Modern Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #4e54c8, #8f94fb);
-            color: #fff;
+        .success-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            background: linear-gradient(135deg, var(--emerald), var(--cyan)) border-box;
+            -webkit-mask:
+                linear-gradient(#fff 0 0) padding-box,
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            animation: spinRing 4s linear infinite;
+        }
+        @keyframes spinRing {
+            to { transform: rotate(360deg); }
+        }
+        .success-icon-inner {
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669, #10b981);
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            overflow: hidden;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+            animation: pulseIcon 2.5s ease-in-out infinite;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.12);
-            padding: 2rem 3rem;
-            border-radius: 12px;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            text-align: center;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        @keyframes pulseIcon {
+            0%, 100% { box-shadow: 0 0 25px rgba(16,185,129,0.4); transform: scale(1); }
+            50%       { box-shadow: 0 0 45px rgba(16,185,129,0.7); transform: scale(1.04); }
         }
-        .container.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .container.fade-out {
-            opacity: 0;
-            transform: scale(0.95);
-            transition: opacity 0.6s ease-in, transform 0.6s ease-in;
-        }
-        h1 { margin-bottom: 0.5rem; font-size: 2.5rem; font-weight: 600; }
-        p { margin-top: 0; font-size: 1.2rem; }
-        .illustration {
-            max-width: 280px;
-            margin-top: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-    </style>
-</head>
-<body>
-    <div class="container" id="welcomeContainer">
-        <h1 th:text="${title}">Bem‑vindo</h1>
-        <p th:text="${message}">Licença ativada com sucesso!</p>
-        <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" />
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('welcomeContainer');
-            // Fade in
-            requestAnimationFrame(() => container.classList.add('visible'));
-            // After 5 seconds start fade out then redirect
-            setTimeout(() => {
-                container.classList.add('fade-out');
-                // Wait for fade-out transition then navigate
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 650);
-            }, 5000);
-        });
-    </script>
-</body>
-</html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8" />
-    <title th:text="${title}">Welcome</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #4e54c8, #8f94fb);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2rem 3rem;
-            border-radius: 12px;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+
+        /* ─── Text ─── */
+        .badge-label {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--emerald);
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 100px;
+            padding: 0.3rem 1rem;
+            margin-bottom: 1rem;
         }
         h1 {
-            margin-bottom: 0.5rem;
-            font-size: 2.5rem;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 0.8rem;
         }
-        p {
-            margin-top: 0;
-            font-size: 1.2rem;
+        h1 span {
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .illustration {
-            max-width: 300px;
+        .subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        /* ─── Features Row ─── */
+        .features-row {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+        .feature-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 100px;
+            padding: 0.45rem 1rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .feature-chip:hover {
+            background: rgba(255,255,255,0.14);
+            transform: translateY(-2px);
+        }
+        .feature-chip i { font-size: 0.85rem; }
+        .fc-emerald i { color: var(--emerald); }
+        .fc-cyan i    { color: var(--cyan); }
+        .fc-gold i    { color: var(--gold); }
+
+        /* ─── Progress Bar ─── */
+        .redirect-info {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+        }
+        .progress-track {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--indigo), var(--cyan));
+            border-radius: 100px;
+            transform-origin: left;
+            transform: scaleX(1);
+            transition: transform linear;
+        }
+
+        /* ─── CTA Button ─── */
+        .btn-go {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
             margin-top: 1.5rem;
+            padding: 0.85rem 2rem;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            color: #fff;
+            border: none;
+            border-radius: 100px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-go:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(79, 70, 229, 0.65);
+        }
+        .btn-go:active { transform: translateY(-1px); }
+
+        /* ─── Bottom Brand ─── */
+        .brand-footer {
+            margin-top: 2.5rem;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.05em;
+        }
+        .brand-footer strong { color: rgba(255,255,255,0.5); }
+
+        /* ─── Glimmer line ─── */
+        .glimmer-line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--indigo));
+            border-radius: 100px;
+            margin: 1.2rem auto;
+            animation: glimmerPulse 2s ease-in-out infinite;
+        }
+        @keyframes glimmerPulse {
+            0%, 100% { width: 60px; opacity: 0.7; }
+            50%       { width: 90px; opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 th:text="${title}">Bem‑vindo</h1>
-        <p th:text="${message}">Licença ativada com sucesso!</p>
-        <img class="illustration" src="/welcome_illustration.png" alt="Welcome illustration" />
+
+    <!-- Animated Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Particle canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Main Card -->
+    <div class="welcome-card" id="welcomeCard">
+
+        <!-- Success Icon -->
+        <div class="success-icon-wrapper">
+            <div class="success-ring"></div>
+            <div class="success-icon-inner">
+                <i class="fas fa-check"></i>
+            </div>
+        </div>
+
+        <!-- Badge -->
+        <div class="badge-label"><i class="fas fa-shield-alt me-1"></i> LICENÇA VALIDADA</div>
+
+        <!-- Title -->
+        <h1>Bem‑vindo ao<br><span>Kwanza ERP</span></h1>
+
+        <div class="glimmer-line"></div>
+
+        <!-- Subtitle -->
+        <p class="subtitle" th:text="${message}">
+            Licença ativada com sucesso! O sistema está pronto para emitir facturas e gerir o seu negócio.
+        </p>
+
+        <!-- Feature Chips -->
+        <div class="features-row">
+            <div class="feature-chip fc-emerald">
+                <i class="fas fa-file-invoice"></i> Facturação
+            </div>
+            <div class="feature-chip fc-cyan">
+                <i class="fas fa-boxes"></i> Stock
+            </div>
+            <div class="feature-chip fc-gold">
+                <i class="fas fa-chart-line"></i> Relatórios
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="redirect-info" id="redirectInfo">A redirecionar em <strong id="countdownNum">6</strong>s...</div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Manual CTA -->
+        <a href="/dashboard" class="btn-go">
+            <i class="fas fa-rocket"></i>
+            Ir para o Dashboard
+        </a>
+
+        <!-- Brand Footer -->
+        <div class="brand-footer">
+            Powered by <strong>HZ Consultoria</strong> &nbsp;·&nbsp; Kwanza ERP v2.0
+        </div>
+
     </div>
+
+    <script>
+        // ─── Particle System ───────────────────────────────────────────────
+        (function() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let W, H, particles = [];
+
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const COLORS = ['rgba(79,70,229,', 'rgba(6,182,212,', 'rgba(16,185,129,', 'rgba(124,58,237,'];
+
+            function randomParticle() {
+                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                return {
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    r: Math.random() * 2 + 0.5,
+                    a: Math.random() * Math.PI * 2,
+                    speed: Math.random() * 0.4 + 0.1,
+                    opacity: Math.random() * 0.5 + 0.15,
+                    color
+                };
+            }
+
+            for (let i = 0; i < 90; i++) particles.push(randomParticle());
+
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color + p.opacity + ')';
+                    ctx.fill();
+
+                    p.x += Math.cos(p.a) * p.speed;
+                    p.y += Math.sin(p.a) * p.speed;
+                    p.a += (Math.random() - 0.5) * 0.05;
+
+                    if (p.x < -10 || p.x > W + 10 || p.y < -10 || p.y > H + 10) {
+                        Object.assign(p, randomParticle());
+                        p.x = Math.random() * W;
+                        p.y = Math.random() * H;
+                    }
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        // ─── Welcome Card Entrance & Countdown ─────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const card = document.getElementById('welcomeCard');
+            const fill = document.getElementById('progressFill');
+            const countNum = document.getElementById('countdownNum');
+            const DELAY_MS = 6000;
+
+            // Fade in
+            requestAnimationFrame(() => {
+                setTimeout(() => card.classList.add('visible'), 100);
+            });
+
+            // Animate progress bar draining
+            fill.style.transition = `transform ${DELAY_MS}ms linear`;
+            requestAnimationFrame(() => {
+                setTimeout(() => { fill.style.transform = 'scaleX(0)'; }, 200);
+            });
+
+            // Countdown ticker
+            let remaining = Math.ceil(DELAY_MS / 1000);
+            const ticker = setInterval(() => {
+                remaining = Math.max(0, remaining - 1);
+                if (countNum) countNum.textContent = remaining;
+                if (remaining === 0) clearInterval(ticker);
+            }, 1000);
+
+            // Redirect after delay
+            setTimeout(() => {
+                card.classList.add('fade-out');
+                setTimeout(() => { window.location.href = '/dashboard'; }, 650);
+            }, DELAY_MS);
+        });
+    </script>
+
 </body>
 </html>

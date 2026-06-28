@@ -2,129 +2,586 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="menu :: head"></th:block>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .generator-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            padding: 30px;
+        * { font-family: 'Inter', sans-serif; }
+
+        body.hold-transition { background: #0f0c29; }
+
+        .content-wrapper {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
         }
-        .key-box {
-            background: #f8fafc;
-            border: 2px dashed #cbd5e1;
+
+        /* ── PAGE HEADER ── */
+        .licenca-header {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0;
+        }
+        .licenca-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .licenca-header h1 .icon-badge {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
             border-radius: 12px;
-            padding: 20px;
-            font-family: monospace;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(245,158,11,0.4);
+        }
+        .btn-gestao {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 10px;
+            padding: 9px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-gestao:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* ── MAIN CONTENT ── */
+        .licenca-body { padding: 36px 32px; }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex; align-items: center; gap: 16px;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+        }
+        .stat-icon.amber  { background: rgba(245,158,11,0.2); color: #f59e0b; }
+        .stat-icon.green  { background: rgba(34,197,94,0.2);  color: #22c55e; }
+        .stat-icon.purple { background: rgba(168,85,247,0.2); color: #a855f7; }
+        .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 2px; }
+
+        /* ── CARDS ── */
+        .glass-card {
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 32px;
+            height: 100%;
+        }
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .card-title .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            box-shadow: 0 0 8px rgba(245,158,11,0.6);
+        }
+
+        /* ── FORM FIELDS ── */
+        .form-label-custom {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-control-custom {
+            background: rgba(255,255,255,0.08) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            border-radius: 12px !important;
+            color: #fff !important;
+            padding: 12px 16px !important;
+            font-size: 0.9rem !important;
+            transition: all 0.3s ease !important;
+            width: 100%;
+        }
+        .form-control-custom::placeholder { color: rgba(255,255,255,0.3) !important; }
+        .form-control-custom:focus {
+            background: rgba(255,255,255,0.12) !important;
+            border-color: rgba(245,158,11,0.6) !important;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.15) !important;
+            outline: none !important;
+        }
+        .form-control-custom option { background: #302b63; color: #fff; }
+        .form-hint { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 6px; }
+        .form-hint.danger { color: rgba(239,68,68,0.8); }
+
+        .machine-id-wrapper { position: relative; }
+        .machine-id-wrapper .form-control-custom { padding-right: 50px !important; font-family: 'Courier New', monospace; letter-spacing: 2px; font-size: 1rem !important; font-weight: 600; }
+        .machine-id-wrapper .scan-icon {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            color: rgba(245,158,11,0.7); font-size: 1rem; pointer-events: none;
+        }
+
+        .pin-wrapper { position: relative; }
+        .pin-wrapper .form-control-custom { padding-right: 50px !important; border-color: rgba(239,68,68,0.4) !important; }
+        .pin-wrapper .pin-toggle {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .pin-wrapper .pin-toggle:hover { color: rgba(255,255,255,0.8); }
+        .pin-wrapper .form-control-custom:focus { border-color: rgba(239,68,68,0.7) !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important; }
+
+        /* ── SUBMIT BTN ── */
+        .btn-gerar {
+            width: 100%;
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-gerar::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-gerar:hover::before { left: 100%; }
+        .btn-gerar:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.55); }
+        .btn-gerar:active { transform: translateY(0); }
+
+        /* ── SUCCESS PANEL ── */
+        .success-panel {
+            animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .success-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(34,197,94,0.15);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #22c55e;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .success-badge .pulse {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .key-display {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(245,158,11,0.3);
+            border-radius: 14px;
+            padding: 20px 56px 20px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #f59e0b;
             word-break: break-all;
-            font-size: 1.1rem;
-            color: #1e293b;
+            line-height: 1.8;
+            letter-spacing: 1px;
             position: relative;
         }
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+        .btn-copy {
+            position: absolute; top: 14px; right: 14px;
+            background: rgba(245,158,11,0.15);
+            border: 1px solid rgba(245,158,11,0.3);
+            color: #f59e0b;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
         }
+        .btn-copy:hover { background: rgba(245,158,11,0.3); }
+        .btn-copy.copied { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); color: #22c55e; }
+
+        .license-meta {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .license-meta .meta-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.85rem;
+        }
+        .license-meta .meta-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .meta-label { color: rgba(255,255,255,0.4); }
+        .meta-value { color: #fff; font-weight: 600; }
+
+        .btn-share {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: rgba(34,197,94,0.15);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: #22c55e;
+            border-radius: 12px;
+            padding: 11px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
+            width: 100%;
+            margin-top: 16px;
+        }
+        .btn-share:hover { background: rgba(34,197,94,0.25); color: #22c55e; transform: translateY(-1px); }
+
+        /* ── PLACEHOLDER (no key yet) ── */
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center;
+            height: calc(100% - 60px);
+            min-height: 340px;
+        }
+        .empty-icon {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem;
+            color: rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+            animation: rotate 12s linear infinite;
+        }
+        @keyframes rotate { to { transform: rotate(360deg); } }
+        .empty-title { color: rgba(255,255,255,0.4); font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+        .empty-sub   { color: rgba(255,255,255,0.2); font-size: 0.8rem; }
+
+        /* ── SECURITY NOTICE ── */
+        .security-notice {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex; align-items: flex-start; gap: 10px;
+            margin-top: 20px;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.5);
+        }
+        .security-notice i { color: rgba(239,68,68,0.7); margin-top: 1px; flex-shrink: 0; }
     </style>
 </head>
 <body class="hold-transition sidebar-mini">
-    <div class="wrapper">
-        <nav th:replace="menu :: topbar"></nav>
-        <aside th:replace="menu :: sidebar"></aside>
+<div class="wrapper">
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
 
-        <div class="content-wrapper">
-            <section class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1><i class="fas fa-key text-warning"></i> Gerador de Licenças Profissionais</h1>
-                        </div>
-                        <div class="col-sm-6 text-end">
-                            <a th:href="@{/superadmin/licenca/gestao}" class="btn btn-outline-primary">
-                                <i class="fas fa-list"></i> Gerir Licenças Geradas
-                            </a>
-                        </div>
+    <div class="content-wrapper">
+
+        <!-- HEADER -->
+        <div class="licenca-header">
+            <h1>
+                <span class="icon-badge"><i class="fas fa-key"></i></span>
+                Gerador de Licenças
+                <span style="font-size:0.7rem;font-weight:400;color:rgba(255,255,255,0.3);margin-left:4px;">SUPERADMIN</span>
+            </h1>
+            <a th:href="@{/superadmin/licenca/gestao}" class="btn-gestao">
+                <i class="fas fa-th-list"></i> Gerir Licenças
+            </a>
+        </div>
+
+        <div class="licenca-body">
+
+            <!-- STATS -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon amber"><i class="fas fa-shield-alt"></i></div>
+                    <div>
+                        <div class="stat-label">Sistema</div>
+                        <div class="stat-value" th:text="${globalSistemaNome ?: 'KwanzaERP'}">KwanzaERP</div>
                     </div>
                 </div>
-            </section>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                    <div>
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value">Activo</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div class="stat-label">Hora do Servidor</div>
+                        <div class="stat-value" id="serverClock">--:--:--</div>
+                    </div>
+                </div>
+            </div>
 
-            <section class="content">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="generator-card">
-                                <h5 class="mb-4">Configurar Nova Chave</h5>
-                                <form th:action="@{/superadmin/licenca/gerar}" method="post">
-                                    <div class="form-group mb-3">
-                                        <label>Machine ID do Cliente</label>
-                                        <input type="text" name="machineId" class="form-control" th:value="${machineId}" placeholder="Ex: 736E21F0" required>
-                                        <small class="text-muted">Este código é fornecido pelo cliente na tela de expiração.</small>
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label>Nome do Cliente / Computador</label>
-                                        <input type="text" name="clienteNome" class="form-control" placeholder="Ex: Farmácia Central - PC Balcão" required>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label>Data de Expiração</label>
-                                                <input type="date" name="dataExpiracao" class="form-control" th:value="${dataExpiracao}" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label>Hora de Expiração</label>
-                                                <input type="time" name="horaExpiracao" class="form-control" th:value="${horaExpiracao ?: '23:59'}" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label>Observações</label>
-                                        <textarea name="observacoes" class="form-control" rows="2" placeholder="Ex: Licença anual paga via transferência"></textarea>
-                                    </div>
-                                    <div class="form-group mb-4">
-                                        <label class="text-danger"><i class="fas fa-lock"></i> PIN de Segurança Mestre</label>
-                                        <input type="password" name="pin" class="form-control border-danger" placeholder="****" required>
-                                        <small class="text-danger">Apenas o desenvolvedor possui este PIN.</small>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-block py-3">
-                                        <i class="fas fa-magic"></i> GERAR CHAVE DE ATIVAÇÃO
-                                    </button>
-                                </form>
-                            </div>
+            <!-- MAIN GRID -->
+            <div class="row g-4">
+
+                <!-- FORM CARD -->
+                <div class="col-lg-6">
+                    <div class="glass-card">
+                        <div class="card-title">
+                            <span class="dot"></span>
+                            Configurar Nova Licença
                         </div>
 
-                        <div class="col-md-6" th:if="${chaveGerada}">
-                            <div class="generator-card bg-light border-primary">
-                                <h5 class="text-primary mb-4"><i class="fas fa-check-circle"></i> Chave Gerada com Sucesso</h5>
-                                <p class="small text-muted mb-2">Copie o código abaixo e envie ao cliente:</p>
-                                <div class="key-box" id="chaveFinal" th:text="${chaveGerada}"></div>
-                                <button class="btn btn-outline-primary btn-sm mt-3" onclick="copyKey()">
-                                    <i class="fas fa-copy"></i> Copiar Chave
-                                </button>
-                                
-                                <div class="mt-4 p-3 bg-white rounded border">
-                                    <p class="mb-1"><strong>Resumo da Licença:</strong></p>
-                                    <ul class="mb-0 small">
-                                        <li>Máquina: <span th:text="${machineId}"></span></li>
-                                        <li>Expira em: <span th:text="${dataExpiracao + ' ' + horaExpiracao}"></span></li>
-                                    </ul>
+                        <form th:action="@{/superadmin/licenca/gerar}" method="post" id="licencaForm">
+
+                            <!-- Machine ID -->
+                            <div class="mb-4">
+                                <label class="form-label-custom">
+                                    <i class="fas fa-microchip" style="color:#f59e0b;margin-right:5px;"></i>
+                                    Machine ID do Cliente
+                                </label>
+                                <div class="machine-id-wrapper">
+                                    <input type="text" name="machineId" id="machineId"
+                                           class="form-control-custom"
+                                           th:value="${machineId}"
+                                           placeholder="Ex: 736E21F0"
+                                           required autocomplete="off" spellcheck="false">
+                                    <i class="fas fa-qrcode scan-icon"></i>
+                                </div>
+                                <div class="form-hint">Código fornecido pelo cliente na tela de expiração da licença.</div>
+                            </div>
+
+                            <!-- Nome Cliente -->
+                            <div class="mb-4">
+                                <label class="form-label-custom">
+                                    <i class="fas fa-building" style="color:#a855f7;margin-right:5px;"></i>
+                                    Nome do Cliente / Equipamento
+                                </label>
+                                <input type="text" name="clienteNome" id="clienteNome"
+                                       class="form-control-custom"
+                                       placeholder="Ex: Farmácia Central — PC Balcão"
+                                       required autocomplete="off">
+                            </div>
+
+                            <!-- Datas -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-7">
+                                    <label class="form-label-custom">
+                                        <i class="fas fa-calendar-alt" style="color:#22c55e;margin-right:5px;"></i>
+                                        Data de Expiração
+                                    </label>
+                                    <input type="date" name="dataExpiracao"
+                                           class="form-control-custom"
+                                           th:value="${dataExpiracao}"
+                                           required>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label-custom">
+                                        <i class="fas fa-clock" style="color:#38bdf8;margin-right:5px;"></i>
+                                        Hora Limite
+                                    </label>
+                                    <input type="time" name="horaExpiracao"
+                                           class="form-control-custom"
+                                           th:value="${horaExpiracao ?: '23:59'}"
+                                           required>
                                 </div>
                             </div>
+
+                            <!-- Observações -->
+                            <div class="mb-4">
+                                <label class="form-label-custom">
+                                    <i class="fas fa-comment-alt" style="color:#94a3b8;margin-right:5px;"></i>
+                                    Observações
+                                </label>
+                                <textarea name="observacoes" class="form-control-custom"
+                                          rows="2"
+                                          placeholder="Ex: Licença anual — paga via transferência bancária"></textarea>
+                            </div>
+
+                            <!-- PIN -->
+                            <div class="mb-4">
+                                <label class="form-label-custom" style="color:rgba(239,68,68,0.8);">
+                                    <i class="fas fa-lock" style="color:#ef4444;margin-right:5px;"></i>
+                                    PIN de Segurança Mestre
+                                </label>
+                                <div class="pin-wrapper">
+                                    <input type="password" name="pin" id="pinInput"
+                                           class="form-control-custom"
+                                           placeholder="••••••"
+                                           required autocomplete="off">
+                                    <span class="pin-toggle" onclick="togglePin()" id="pinToggleIcon">
+                                        <i class="fas fa-eye" id="pinEyeIcon"></i>
+                                    </span>
+                                </div>
+                                <div class="form-hint danger">Acesso exclusivo ao desenvolvedor do sistema.</div>
+                            </div>
+
+                            <button type="submit" class="btn-gerar" id="btnGerar">
+                                <i class="fas fa-magic"></i>
+                                <span>GERAR CHAVE DE ACTIVAÇÃO</span>
+                            </button>
+                        </form>
+
+                        <div class="security-notice">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Todas as licenças são criptografadas com HMAC-SHA256 e vinculadas ao hardware específico do cliente.</span>
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
-    </div>
 
-    <script>
-        function copyKey() {
-            const text = document.getElementById('chaveFinal').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Chave copiada para a área de transferência!');
-            });
+                <!-- RESULT CARD -->
+                <div class="col-lg-6">
+                    <div class="glass-card">
+                        <div class="card-title">
+                            <span class="dot" style="background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 0 8px rgba(34,197,94,0.6);"></span>
+                            Chave Gerada
+                        </div>
+
+                        <!-- EMPTY STATE -->
+                        <div class="empty-state" th:if="${chaveGerada == null or #strings.isEmpty(chaveGerada)}">
+                            <div class="empty-icon"><i class="fas fa-key"></i></div>
+                            <div class="empty-title">Aguardando geração</div>
+                            <div class="empty-sub">Preencha o formulário e clique em<br>Gerar Chave de Activação</div>
+                        </div>
+
+                        <!-- SUCCESS STATE -->
+                        <div th:if="${chaveGerada != null and !#strings.isEmpty(chaveGerada)}" class="success-panel">
+                            <div class="success-badge">
+                                <span class="pulse"></span>
+                                Licença gerada com sucesso
+                            </div>
+
+                            <div style="position:relative;">
+                                <div class="key-display" id="chaveFinal" th:text="${chaveGerada}"></div>
+                                <button class="btn-copy" id="copyBtn" onclick="copyKey()" title="Copiar chave">
+                                    <i class="fas fa-copy" id="copyIcon"></i>
+                                </button>
+                            </div>
+
+                            <div class="license-meta">
+                                <div class="meta-row">
+                                    <span class="meta-label"><i class="fas fa-microchip" style="margin-right:6px;color:#f59e0b;"></i>Machine ID</span>
+                                    <span class="meta-value" style="font-family:monospace;" th:text="${machineId}">—</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label"><i class="fas fa-calendar-check" style="margin-right:6px;color:#22c55e;"></i>Expira em</span>
+                                    <span class="meta-value" th:text="${dataExpiracao + ' às ' + horaExpiracao}">—</span>
+                                </div>
+                                <div class="meta-row" th:if="${clienteNome}">
+                                    <span class="meta-label"><i class="fas fa-building" style="margin-right:6px;color:#a855f7;"></i>Cliente</span>
+                                    <span class="meta-value" th:text="${clienteNome}">—</span>
+                                </div>
+                            </div>
+
+                            <button class="btn-share" onclick="shareKey()">
+                                <i class="fas fa-share-alt"></i> Partilhar Chave via WhatsApp / Email
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div><!-- /licenca-body -->
+    </div><!-- /content-wrapper -->
+</div>
+
+<script>
+    /* ── Clock ── */
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('serverClock').textContent =
+            now.toLocaleTimeString('pt-AO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* ── PIN toggle ── */
+    function togglePin() {
+        const inp = document.getElementById('pinInput');
+        const ico = document.getElementById('pinEyeIcon');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            ico.className = 'fas fa-eye-slash';
+        } else {
+            inp.type = 'password';
+            ico.className = 'fas fa-eye';
         }
-    </script>
+    }
+
+    /* ── Copy key ── */
+    function copyKey() {
+        const text = document.getElementById('chaveFinal').innerText.trim();
+        const btn  = document.getElementById('copyBtn');
+        const ico  = document.getElementById('copyIcon');
+        navigator.clipboard.writeText(text).then(() => {
+            btn.classList.add('copied');
+            ico.className = 'fas fa-check';
+            setTimeout(() => { btn.classList.remove('copied'); ico.className = 'fas fa-copy'; }, 2000);
+        });
+    }
+
+    /* ── Share key ── */
+    function shareKey() {
+        const key  = document.getElementById('chaveFinal').innerText.trim();
+        const msg  = encodeURIComponent('🔑 *Chave de Activação KwanzaERP*\n\n' + key + '\n\nActivação válida até a data acordada.');
+        window.open('https://wa.me/?text=' + msg, '_blank');
+    }
+
+    /* ── Loading state on submit ── */
+    document.getElementById('licencaForm').addEventListener('submit', function () {
+        const btn  = document.getElementById('btnGerar');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>A gerar...</span>';
+        btn.disabled = true;
+    });
+
+    /* ── Machine ID auto-uppercase ── */
+    document.getElementById('machineId').addEventListener('input', function () {
+        const pos = this.selectionStart;
+        this.value = this.value.toUpperCase();
+        this.setSelectionRange(pos, pos);
+    });
+</script>
 </body>
 </html>

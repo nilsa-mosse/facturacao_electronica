@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper">
+            <section class="content-header py-4 bg-white border-bottom mb-4">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="fw-800 text-dark mb-1">
+                                <i class="fas fa-magic text-indigo me-2"></i>Assistente de Configuração Inicial
+                            </h1>
+                            <p class="text-muted small mb-0">Siga estes passos simples para preparar o Kwanza ERP para as suas vendas e facturação.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <span class="badge bg-soft-indigo text-indigo px-3 py-2 rounded-pill fw-700">CONFIGURAÇÃO DE NOVO SISTEMA</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-10">
+                            
+                            <!-- Stepper header -->
+                            <div class="wizard-stepper mb-5">
+                                <div class="wizard-progress-bar">
+                                    <div class="wizard-progress-fill" id="wizardProgress" style="width: 0%;"></div>
+                                </div>
+                                <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+                                    <div class="step-indicator active" data-step="1">
+                                        <div class="step-bubble"><i class="fas fa-building"></i></div>
+                                        <span class="step-label">Empresa</span>
+                                    </div>
+                                    <div class="step-indicator" data-step="2">
+                                        <div class="step-bubble"><i class="fas fa-store"></i></div>
+                                        <span class="step-label">Loja</span>
+                                    </div>
+                                    <div class="step-indicator" data-step="3">
+                                        <div class="step-bubble"><i class="fas fa-list-ol"></i></div>
+                                        <span class="step-label">Série</span>
+                                    </div>
+                                    <div class="step-indicator" data-step="4">
+                                        <div class="step-bubble"><i class="fas fa-wallet"></i></div>
+                                        <span class="step-label">Pagamentos</span>
+                                    </div>
+                                    <div class="step-indicator" data-step="5">
+                                        <div class="step-bubble"><i class="fas fa-percent"></i></div>
+                                        <span class="step-label">Impostos</span>
+                                    </div>
+                                    <div class="step-indicator" data-step="6">
+                                        <div class="step-bubble"><i class="fas fa-link"></i></div>
+                                        <span class="step-label">AGT</span>
+                                    </div>
+                                    <div class="step-indicator" data-step="7">
+                                        <div class="step-bubble"><i class="fas fa-check-circle"></i></div>
+                                        <span class="step-label">Pronto</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form steps container -->
+                            <div class="card border-0 shadow-soft rounded-4 overflow-hidden mb-5">
+                                <div class="card-body p-5">
+                                    
+                                    <!-- Alert Area -->
+                                    <div id="alertArea" class="alert alert-dismissible fade show d-none" role="alert">
+                                        <span id="alertMessage"></span>
+                                        <button type="button" class="btn-close" onclick="hideAlert()"></button>
+                                    </div>
+
+                                    <!-- Step 1: Empresa & Regime -->
+                                    <div class="wizard-step active" id="step1">
+                                        <div class="text-center mb-4">
+                                            <h3 class="fw-800 text-indigo"><i class="fas fa-building me-2"></i>1. Identidade & Regime Fiscal</h3>
+                                            <p class="text-muted">Introduza os dados legais da sua empresa. Estes dados estarão nas facturas emitidas.</p>
+                                        </div>
+                                        <form id="formEmpresa">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">Denominação Social <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control rounded-3" name="nome" th:value="${empresa.nome}" required placeholder="Nome legal da empresa">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">NIF <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control rounded-3" name="nif" th:value="${empresa.nif}" required placeholder="Ex: 5000214878">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">Regime Fiscal de Faturação <span class="text-danger">*</span></label>
+                                                    <select class="form-select rounded-3" name="regimeFiscal" required>
+                                                        <option value="">Selecione o Regime...</option>
+                                                        <option th:each="r : ${regimes}" th:value="${r.codigo}" th:text="${r.nome}" th:selected="${empresa.regimeFiscal == r.codigo}"></option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">Telefone de Contacto</label>
+                                                    <input type="text" class="form-control rounded-3" name="telefone" th:value="${empresa.telefone}" placeholder="+244 ...">
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="form-label fw-600 text-muted">Email Comercial</label>
+                                                    <input type="email" class="form-control rounded-3" name="email" th:value="${empresa.email}" placeholder="geral@suaempresa.com">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Step 2: Estabelecimento -->
+                                    <div class="wizard-step" id="step2">
+                                        <div class="text-center mb-4">
+                                            <h3 class="fw-800 text-indigo"><i class="fas fa-store me-2"></i>2. Sua Loja ou Ponto de Venda</h3>
+                                            <p class="text-muted">Crie a sua localização ou estabelecimento principal onde as vendas físicas serão efetuadas.</p>
+                                        </div>
+                                        <form id="formEstabelecimento">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">Nome do Estabelecimento / Loja <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control rounded-3" name="nomeEst" th:value="${estabelecimento.nome}" required placeholder="Ex: Sede - Luanda">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">Telefone da Loja</label>
+                                                    <input type="text" class="form-control rounded-3" name="telefoneEst" th:value="${estabelecimento.telefone}" placeholder="Contacto telefónico">
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="form-label fw-600 text-muted">Endereço Físico <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control rounded-3" name="enderecoEst" th:value="${estabelecimento.endereco}" required placeholder="Ex: Av. Deolinda Rodrigues, Luanda">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Step 3: Série -->
+                                    <div class="wizard-step" id="step3">
+                                        <div class="text-center mb-4">
+                                            <h3 class="fw-800 text-indigo"><i class="fas fa-list-ol me-2"></i>3. Série de Faturação</h3>
+                                            <p class="text-muted">A lei angolana exige séries exclusivas de numeração anual para faturas. Configure a sua série principal.</p>
+                                        </div>
+                                        <form id="formSerie">
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-600 text-muted">Prefixo da Série <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control rounded-3" name="prefixo" th:value="${serie.prefixo != null ? serie.prefixo : 'FT'}" required placeholder="Ex: FT, POS">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-600 text-muted">Ano Fiscal <span class="text-danger">*</span></label>
+                                                    <input type="number" class="form-control rounded-3" name="ano" th:value="${serie.ano != null ? serie.ano : 2026}" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-600 text-muted">Próximo Número</label>
+                                                    <input type="number" class="form-control rounded-3" value="1" readonly disabled>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="form-label fw-600 text-muted">Descrição da Série</label>
+                                                    <input type="text" class="form-control rounded-3" name="descricao" th:value="${serie.descricao}" placeholder="Ex: Série Geral de Faturação">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Step 4: Métodos de Pagamento -->
+                                    <div class="wizard-step" id="step4">
+                                        <div class="text-center mb-4">
+                                            <h3 class="fw-800 text-indigo"><i class="fas fa-wallet me-2"></i>4. Métodos de Pagamento</h3>
+                                            <p class="text-muted">Active automaticamente as formas de pagamento recomendadas pelo sistema para as suas caixas e POS.</p>
+                                        </div>
+                                        <div class="d-flex flex-column gap-3 max-width-md mx-auto">
+                                            <div class="payment-method-card active">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="icon-circle bg-soft-success text-success"><i class="fas fa-money-bill-wave"></i></div>
+                                                        <div>
+                                                            <h5 class="fw-700 mb-0">Numerário (Dinheiro Físico)</h5>
+                                                            <span class="text-muted small">Código AGT: <strong>NU</strong></span>
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge bg-success rounded-pill px-3 py-2">Recomendado</span>
+                                                </div>
+                                            </div>
+                                            <div class="payment-method-card active">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="icon-circle bg-soft-info text-info"><i class="fas fa-credit-card"></i></div>
+                                                        <div>
+                                                            <h5 class="fw-700 mb-0">Multicaixa (Pagamento via TPA)</h5>
+                                                            <span class="text-muted small">Código AGT: <strong>MC</strong></span>
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge bg-success rounded-pill px-3 py-2">Recomendado</span>
+                                                </div>
+                                            </div>
+                                            <div class="payment-method-card active">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="icon-circle bg-soft-indigo text-indigo"><i class="fas fa-exchange-alt"></i></div>
+                                                        <div>
+                                                            <h5 class="fw-700 mb-0">Transferência Bancária (TED)</h5>
+                                                            <span class="text-muted small">Código AGT: <strong>TB</strong></span>
+                                                        </div>
+                                                    </div>
+                                                    <span class="badge bg-success rounded-pill px-3 py-2">Recomendado</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 5: Imposto Padrão -->
+                                    <div class="wizard-step" id="step5">
+                                        <div class="text-center mb-4">
+                                            <h3 class="fw-800 text-indigo"><i class="fas fa-percent me-2"></i>5. Impostos e Isenções</h3>
+                                            <p class="text-muted">Associe ou cadastre as regras de tributação obrigatórias no sistema.</p>
+                                            <div class="alert alert-info text-center py-2 mb-4 d-inline-block rounded-pill px-4">
+                                                Regime Seleccionado: <strong id="selectedRegimeText">A carregar...</strong>
+                                            </div>
+                                        </div>
+
+                                        <div id="impostosListContainer" class="d-flex flex-column gap-3 mb-4 max-width-md mx-auto">
+                                            <!-- Dynamic Content Loaded via JS -->
+                                        </div>
+
+                                        <div class="text-center mb-4">
+                                            <button class="btn btn-outline-indigo btn-sm rounded-pill px-4" type="button" onclick="toggleNovoImpostoForm()">
+                                                <i class="fas fa-plus me-1"></i> Novo Imposto
+                                            </button>
+                                        </div>
+
+                                        <div id="novoImpostoFormContainer" class="d-none border p-4 rounded-4 bg-light mb-4 max-width-md mx-auto">
+                                            <h5 class="fw-800 text-dark mb-3"><i class="fas fa-percent text-indigo me-2"></i>Registar Novo Imposto</h5>
+                                            <form id="formNovoImposto">
+                                                <div class="row g-3">
+                                                     <div class="col-md-6">
+                                                         <label class="form-label fw-600 text-muted">Nome do Imposto <span class="text-danger">*</span></label>
+                                                         <input type="text" class="form-control rounded-3" name="nome" required placeholder="Ex: IVA Geral 14%">
+                                                     </div>
+                                                     <div class="col-md-6">
+                                                         <label class="form-label fw-600 text-muted">Percentagem (%) <span class="text-danger">*</span></label>
+                                                         <input type="number" step="0.01" class="form-control rounded-3" name="percentagem" required placeholder="Ex: 14">
+                                                     </div>
+                                                     <div class="col-md-4">
+                                                         <label class="form-label fw-600 text-muted">Tipo <span class="text-danger">*</span></label>
+                                                         <select class="form-select rounded-3" name="tipo" required>
+                                                             <option value="IVA">IVA</option>
+                                                             <option value="IS">Imposto de Selo</option>
+                                                             <option value="OUTRO">Outro</option>
+                                                         </select>
+                                                     </div>
+                                                     <div class="col-md-4">
+                                                         <label class="form-label fw-600 text-muted">Código AGT <span class="text-danger">*</span></label>
+                                                         <select class="form-select rounded-3" name="codigoAgt" required>
+                                                             <option value="NOR">NOR - Taxa Normal</option>
+                                                             <option value="ISE">ISE - Isento</option>
+                                                             <option value="OUT">OUT - Outra taxa</option>
+                                                         </select>
+                                                     </div>
+                                                     <div class="col-md-4">
+                                                         <label class="form-label fw-600 text-muted">Motivo de Isenção</label>
+                                                         <input type="text" class="form-control rounded-3" name="motivoIsencao" placeholder="Ex: M00 - Artigo 12º" disabled>
+                                                     </div>
+                                                     <div class="col-12 text-end mt-4">
+                                                         <button type="button" class="btn btn-soft-dark rounded-pill px-3 me-2" onclick="toggleNovoImpostoForm()">Cancelar</button>
+                                                         <button type="button" class="btn btn-indigo rounded-pill px-4" onclick="salvarNovoImpostoWizard()">Gravar Imposto</button>
+                                                     </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 6: Integração AGT -->
+                                    <div class="wizard-step" id="step6">
+                                        <div class="text-center mb-4">
+                                            <h3 class="fw-800 text-indigo"><i class="fas fa-link me-2"></i>6. Integração com a AGT</h3>
+                                            <p class="text-muted">Configure a comunicação para efeitos de homologação das faturas eletrónicas.</p>
+                                        </div>
+                                        <form id="formAgt">
+                                            <div class="row g-3">
+                                                <div class="col-md-12">
+                                                    <label class="form-label fw-600 text-muted">URL do Serviço Webservice da AGT <span class="text-danger">*</span></label>
+                                                    <input type="url" class="form-control rounded-3" name="urlAgt" th:value="${config.agtUrlServico != null ? config.agtUrlServico : 'https://api.agt.gov.ao/facturacao'}" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">Usuário / Identificador da Empresa <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control rounded-3" name="usuarioAgt" th:value="${config.agtUsuario}" placeholder="Username" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-600 text-muted">Chave de API / Senha AGT <span class="text-danger">*</span></label>
+                                                    <input type="password" class="form-control rounded-3" name="senhaAgt" th:value="${config.agtSenha}" placeholder="••••••••••••" required>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Step 7: Conclusão -->
+                                    <div class="wizard-step text-center" id="step7">
+                                        <div class="py-5">
+                                            <div class="display-1 text-success mb-4 animate-bounce">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <h2 class="fw-800 text-dark mb-2">Tudo pronto e configurado!</h2>
+                                            <p class="text-muted max-width-md mx-auto mb-4">Parabéns! Completou com sucesso todos os passos básicos obrigatórios. O Kwanza ERP está pronto para faturar e gerir o seu negócio.</p>
+                                            <button class="btn btn-indigo btn-lg rounded-pill px-5 fw-700" onclick="finalizarSetup()">Ir para o Dashboard</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Card Footer Actions -->
+                                <div class="card-footer bg-light border-0 px-5 py-4 d-flex justify-content-between align-items-center" id="wizardActions">
+                                    <button class="btn btn-soft-dark rounded-pill px-4 fw-600 d-none" id="btnBack" onclick="moveStep(-1)">
+                                        <i class="fas fa-arrow-left me-1"></i> Anterior
+                                    </button>
+                                    <span class="text-muted fw-600 small" id="stepIndicator">Passo 1 de 6</span>
+                                    <button class="btn btn-indigo rounded-pill px-5 fw-700" id="btnNext" onclick="processStepAndMove()">
+                                        Seguinte <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Styles -->
+    <style>
+        :root {
+            --bg-soft-indigo: rgba(99, 102, 241, 0.1);
+            --bg-soft-success: rgba(34, 197, 94, 0.1);
+            --bg-soft-info: rgba(59, 130, 246, 0.1);
+            --bg-soft-dark: rgba(71, 85, 105, 0.1);
+            --text-indigo: #4f46e5;
+            --shadow-soft: 0 10px 30px rgba(0,0,0,0.04);
+        }
+
+        .fw-800 { font-weight: 800; }
+        .fw-700 { font-weight: 700; }
+        .fw-600 { font-weight: 600; }
+        .bg-soft-indigo { background-color: var(--bg-soft-indigo); }
+        .bg-soft-success { background-color: var(--bg-soft-success); }
+        .bg-soft-info { background-color: var(--bg-soft-info); }
+        .bg-soft-dark { background-color: var(--bg-soft-dark); }
+        .text-indigo { color: var(--text-indigo) !important; }
+        .btn-indigo { background-color: var(--text-indigo); color: white; border: none; }
+        .btn-indigo:hover { background-color: #3b32cc; color: white; }
+        
+        .shadow-soft { box-shadow: var(--shadow-soft); }
+        
+        /* Stepper header layout */
+        .wizard-stepper {
+            position: relative;
+        }
+        .wizard-progress-bar {
+            position: absolute;
+            top: 25px;
+            left: 5%;
+            right: 5%;
+            height: 4px;
+            background-color: #e2e8f0;
+            z-index: 1;
+        }
+        .wizard-progress-fill {
+            height: 100%;
+            background-color: var(--text-indigo);
+            transition: width 0.4s ease;
+        }
+        .step-indicator {
+            text-align: center;
+            width: 80px;
+        }
+        .step-bubble {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 1.2rem;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .step-indicator.active .step-bubble {
+            background-color: var(--text-indigo);
+            color: white;
+            border-color: var(--text-indigo);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+        .step-indicator.completed .step-bubble {
+            background-color: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+        .step-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            display: block;
+        }
+        .step-indicator.active .step-label {
+            color: var(--text-indigo);
+        }
+        .step-indicator.completed .step-label {
+            color: #22c55e;
+        }
+
+        /* Step views */
+        .wizard-step {
+            display: none;
+        }
+        .wizard-step.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Custom Cards */
+        .payment-method-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+        .payment-method-card.active {
+            border-color: #22c55e;
+            background-color: rgba(34, 197, 94, 0.02);
+        }
+        .icon-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        
+        .max-width-md {
+            max-width: 600px;
+        }
+        
+        .tax-card {
+            transition: transform 0.3s ease;
+        }
+        .tax-card:hover {
+            transform: translateY(-5px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-bounce {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+
+    <!-- Javascript Actions -->
+    <script th:inline="javascript">
+        let currentStep = [[${config.setupCompleto != null && config.setupCompleto}]] ? 7 : 1;
+        const totalSteps = 7;
+
+        function updateUI() {
+            // Update steps progress bar width
+            const fillWidth = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('wizardProgress').style.width = fillWidth + '%';
+
+            // Show/Hide back button
+            const btnBack = document.getElementById('btnBack');
+            if (currentStep === 1 || currentStep === 7) {
+                btnBack.classList.add('d-none');
+            } else {
+                btnBack.classList.remove('d-none');
+            }
+
+            // Update Next button label
+            const btnNext = document.getElementById('btnNext');
+            if (currentStep === 6) {
+                btnNext.innerHTML = 'Concluir Setup <i class="fas fa-check ms-1"></i>';
+            } else {
+                btnNext.innerHTML = 'Seguinte <i class="fas fa-arrow-right ms-1"></i>';
+            }
+
+            // Update step indicators active class
+            document.querySelectorAll('.step-indicator').forEach(indicator => {
+                const step = parseInt(indicator.getAttribute('data-step'));
+                indicator.classList.remove('active', 'completed');
+                if (step === currentStep) {
+                    indicator.classList.add('active');
+                } else if (step < currentStep) {
+                    indicator.classList.add('completed');
+                }
+            });
+
+            // Update footer info
+            const stepIndicatorText = document.getElementById('stepIndicator');
+            if (currentStep < 7) {
+                stepIndicatorText.innerText = `Passo ${currentStep} de 6`;
+                document.getElementById('wizardActions').classList.remove('d-none');
+            } else {
+                document.getElementById('wizardActions').classList.add('d-none');
+            }
+
+            // Show current step panel
+            document.querySelectorAll('.wizard-step').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById(`step${currentStep}`).classList.add('active');
+            
+            if (currentStep === 5) {
+                carregarImpostos();
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function moveStep(delta) {
+            currentStep += delta;
+            if (currentStep < 1) currentStep = 1;
+            if (currentStep > totalSteps) currentStep = totalSteps;
+            updateUI();
+            hideAlert();
+        }
+
+        function showAlert(type, message) {
+            const area = document.getElementById('alertArea');
+            area.className = `alert alert-${type} alert-dismissible fade show`;
+            document.getElementById('alertMessage').innerText = message;
+            area.classList.remove('d-none');
+        }
+
+        function hideAlert() {
+            document.getElementById('alertArea').classList.add('d-none');
+        }
+
+        function getHeaders() {
+            const token = document.querySelector('meta[name="_csrf"]')?.content;
+            const header = document.querySelector('meta[name="_csrf_header"]')?.content;
+            const headers = {};
+            if (header && token) {
+                headers[header] = token;
+            }
+            return headers;
+        }
+
+        function processStepAndMove() {
+            hideAlert();
+            
+            if (currentStep === 1) {
+                // Submit Company form
+                const form = document.getElementById('formEmpresa');
+                if (!form.reportValidity()) return;
+
+                const formData = new FormData(form);
+                fetch('/configuracoes/setup-wizard/salvar-empresa', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        moveStep(1);
+                    } else {
+                        showAlert('danger', data.mensagem);
+                    }
+                })
+                .catch(err => showAlert('danger', 'Erro na ligação ao servidor.'));
+
+            } else if (currentStep === 2) {
+                // Submit Establishment
+                const form = document.getElementById('formEstabelecimento');
+                if (!form.reportValidity()) return;
+
+                const formData = new FormData();
+                formData.append("nome", form.querySelector('[name="nomeEst"]').value);
+                formData.append("endereco", form.querySelector('[name="enderecoEst"]').value);
+                formData.append("telefone", form.querySelector('[name="telefoneEst"]').value);
+
+                fetch('/configuracoes/setup-wizard/salvar-estabelecimento', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        moveStep(1);
+                    } else {
+                        showAlert('danger', data.mensagem);
+                    }
+                })
+                .catch(err => showAlert('danger', 'Erro ao gravar estabelecimento.'));
+
+            } else if (currentStep === 3) {
+                // Submit Serie
+                const form = document.getElementById('formSerie');
+                if (!form.reportValidity()) return;
+
+                const formData = new FormData(form);
+                fetch('/configuracoes/setup-wizard/salvar-serie', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        moveStep(1);
+                    } else {
+                        showAlert('danger', data.mensagem);
+                    }
+                })
+                .catch(err => showAlert('danger', 'Erro ao salvar série de facturação.'));
+
+            } else if (currentStep === 4) {
+                // Submit Payment methods activation
+                fetch('/configuracoes/setup-wizard/salvar-pagamentos', {
+                    method: 'POST',
+                    headers: getHeaders()
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        moveStep(1);
+                    } else {
+                        showAlert('danger', data.mensagem);
+                    }
+                })
+                .catch(err => showAlert('danger', 'Erro ao configurar métodos de pagamento.'));
+
+            } else if (currentStep === 5) {
+                // Submit Impostos
+                const checkedBoxes = document.querySelectorAll('#impostosListContainer input[type="checkbox"]:checked');
+                const params = new URLSearchParams();
+                checkedBoxes.forEach(box => {
+                    params.append('impostoIds', box.value);
+                });
+
+                fetch('/configuracoes/setup-wizard/salvar-impostos', {
+                    method: 'POST',
+                    headers: {
+                        ...getHeaders(),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        moveStep(1);
+                    } else {
+                        showAlert('danger', data.mensagem);
+                    }
+                })
+                .catch(err => showAlert('danger', 'Erro ao configurar impostos.'));
+
+            } else if (currentStep === 6) {
+                // Submit AGT config
+                const form = document.getElementById('formAgt');
+                if (!form.reportValidity()) return;
+
+                const formData = new FormData();
+                formData.append("urlServico", form.querySelector('[name="urlAgt"]').value);
+                formData.append("usuario", form.querySelector('[name="usuarioAgt"]').value);
+                formData.append("senha", form.querySelector('[name="senhaAgt"]').value);
+
+                fetch('/configuracoes/setup-wizard/salvar-agt', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        moveStep(1);
+                    } else {
+                        showAlert('danger', data.mensagem);
+                    }
+                })
+                .catch(err => showAlert('danger', 'Erro ao gravar configurações AGT.'));
+            }
+        }
+
+        function finalizarSetup() {
+            fetch('/configuracoes/setup-wizard/finalizar', {
+                method: 'POST',
+                headers: getHeaders()
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    window.location.href = '/dashboard';
+                } else {
+                    showAlert('danger', data.mensagem);
+                }
+            })
+            .catch(err => showAlert('danger', 'Erro ao finalizar o setup.'));
+        }
+
+        function carregarImpostos() {
+            const container = document.getElementById('impostosListContainer');
+            container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-indigo" role="status"></div><p class="text-muted mt-2">A carregar impostos...</p></div>';
+
+            fetch('/configuracoes/setup-wizard/obter-impostos')
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    document.getElementById('selectedRegimeText').innerText = data.regimeNome;
+                    container.innerHTML = '';
+                    if (data.impostos.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center py-4 border border-dashed rounded-4 bg-white">
+                                <i class="fas fa-percent text-muted fs-2 mb-2"></i>
+                                <h6 class="fw-700 text-muted">Nenhum imposto cadastrado no sistema</h6>
+                                <p class="text-muted small mb-0">Utilize o botão abaixo para registar o primeiro imposto.</p>
+                            </div>`;
+                        return;
+                    }
+                    data.impostos.forEach(imp => {
+                        const card = document.createElement('div');
+                        card.className = `payment-method-card d-flex align-items-center justify-content-between py-3 px-4 ${imp.associado ? 'active' : ''}`;
+                        card.style.cursor = 'pointer';
+                        card.onclick = function(e) {
+                            if (e.target.type !== 'checkbox' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'INPUT') {
+                                const chk = card.querySelector('input[type="checkbox"]');
+                                chk.checked = !chk.checked;
+                                card.classList.toggle('active', chk.checked);
+                            }
+                        };
+                        card.innerHTML = `
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="icon-circle ${imp.percentagem > 0 ? 'bg-soft-success text-success' : 'bg-soft-info text-info'}">
+                                    <i class="${imp.percentagem > 0 ? 'fas fa-percentage' : 'fas fa-hand-holding-usd'}"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-700 mb-0">${imp.nome} (${imp.percentagem}%)</h5>
+                                    <span class="text-muted small">Código AGT: <strong>${imp.codigoAgt}</strong> | Tipo: <strong>${imp.tipo}</strong> ${imp.motivoIsencao ? ` | Motivo: <em>${imp.motivoIsencao}</em>` : ''}</span>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input" type="checkbox" value="${imp.id}" ${imp.associado ? 'checked' : ''} onchange="this.closest('.payment-method-card').classList.toggle('active', this.checked)">
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = `<div class="alert alert-danger">${data.mensagem}</div>`;
+                }
+            })
+            .catch(err => {
+                container.innerHTML = '<div class="alert alert-danger">Erro ao carregar impostos.</div>';
+            });
+        }
+
+        function toggleNovoImpostoForm() {
+            const formContainer = document.getElementById('novoImpostoFormContainer');
+            formContainer.classList.toggle('d-none');
+            if (!formContainer.classList.contains('d-none')) {
+                document.getElementById('formNovoImposto').reset();
+                document.querySelector('#formNovoImposto [name="motivoIsencao"]').disabled = true;
+                document.querySelector('#formNovoImposto [name="motivoIsencao"]').required = false;
+                document.getElementById('formNovoImposto').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function salvarNovoImpostoWizard() {
+            const form = document.getElementById('formNovoImposto');
+            if (!form.reportValidity()) return;
+
+            const formData = new FormData(form);
+            fetch('/configuracoes/setup-wizard/salvar-novo-imposto', {
+                method: 'POST',
+                headers: getHeaders(),
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    toggleNovoImpostoForm();
+                    carregarImpostos();
+                    showAlert('success', data.mensagem);
+                } else {
+                    showAlert('danger', data.mensagem);
+                }
+            })
+            .catch(err => {
+                showAlert('danger', 'Erro ao gravar novo imposto.');
+            });
+        }
+
+        // Initialize UI
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+
+            // Setup listener for percentagem input in tax form
+            const pctInput = document.querySelector('#formNovoImposto [name="percentagem"]');
+            if (pctInput) {
+                pctInput.addEventListener('input', function() {
+                    const val = parseFloat(this.value);
+                    const motivoInput = document.querySelector('#formNovoImposto [name="motivoIsencao"]');
+                    const codigoSelect = document.querySelector('#formNovoImposto [name="codigoAgt"]');
+                    if (val === 0) {
+                        motivoInput.disabled = false;
+                        motivoInput.required = true;
+                        codigoSelect.value = 'ISE';
+                    } else {
+                        motivoInput.disabled = true;
+                        motivoInput.required = false;
+                        motivoInput.value = '';
+                        if (codigoSelect.value === 'ISE') {
+                            codigoSelect.value = 'NOR';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
