@@ -46,6 +46,9 @@ public class DataMigrationComponent implements CommandLineRunner {
     private PermissaoModuloRepository permissaoRepo;
 
     @Autowired
+    private RegimeFiscalRepository regimeFiscalRepository;
+
+    @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     @Override
@@ -53,7 +56,18 @@ public class DataMigrationComponent implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println(">>> Iniciando Migração e Seed de Dados Multi-Empresa...");
 
-        // 1. Garantir apenas que o superadmin existe e não tem empresa associada
+        // 1a. Garantir Regimes Fiscais Padrão
+        if (regimeFiscalRepository.count() == 0) {
+            regimeFiscalRepository.save(new RegimeFiscal("Regime Geral", "GERAL",
+                    "Para empresas com faturação superior a 350 Milhões de Kwanzas.", "fas fa-balance-scale"));
+            regimeFiscalRepository.save(new RegimeFiscal("Regime Simplificado", "SIMPLIFICADO",
+                    "Para PMEs com faturação entre 10 e 350 milhões de Kwanzas", "fas fa-shield-alt"));
+            regimeFiscalRepository.save(new RegimeFiscal("Regime de Exclusão", "EXCLUSAO",
+                    "Para negócios menores, com faturação inferior a 10 milhões de Kwanzas", "fas fa-ban"));
+            System.out.println(">>> Regimes Fiscais Padrão inicializados.");
+        }
+
+        // 1b. Garantir apenas que o superadmin existe e não tem empresa associada
         if (!userRepository.findByLogin("superadmin").isPresent()) {
             User superAdmin = new User();
             superAdmin.setLogin("superadmin");

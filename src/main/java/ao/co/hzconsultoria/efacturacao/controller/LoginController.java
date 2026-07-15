@@ -17,7 +17,18 @@ import java.util.Optional;
 @Controller
 public class LoginController {
     @GetMapping("/login")
-    public String login() {
+    public String login(org.springframework.security.core.Authentication auth) {
+        // Se o utilizador já está autenticado, redirecionar para o dashboard
+        if (auth != null && auth.isAuthenticated() &&
+                !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
+            return "redirect:/dashboard";
+        }
+        // Se não existe nenhuma empresa cadastrada → sistema por configurar → setup inicial
+        try {
+            if (empresaRepository.count() == 0) {
+                return "redirect:/setup-inicial";
+            }
+        } catch (Exception ignored) { /* BD ainda a inicializar */ }
         return "login";
     }
 
@@ -29,6 +40,9 @@ public class LoginController {
 
     @Autowired
     private ao.co.hzconsultoria.efacturacao.repository.UserRepository userRepository;
+
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository empresaRepository;
 
     @GetMapping("/forgot-password")
     public String forgotPassword() {

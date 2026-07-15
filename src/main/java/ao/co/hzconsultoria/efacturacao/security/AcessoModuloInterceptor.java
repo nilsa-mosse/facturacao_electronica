@@ -29,8 +29,8 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // O Setup Wizard deve ser sempre acessível (não bloquear por permissões de módulo)
-        if (uri.startsWith("/configuracoes/setup-wizard")) {
+        // O Setup Wizard e o Setup Inicial devem ser sempre acessíveis
+        if (uri.startsWith("/configuracoes/setup-wizard") || uri.startsWith("/setup-inicial")) {
             return true;
         }
 

@@ -20,6 +20,9 @@ public class HomeController {
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.ConfiguracaoEmpresaService configuracaoEmpresaService;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository empresaRepository;
+
     @GetMapping("/home")
     public String home(Authentication auth, Model model) {
         if (auth != null && auth.getPrincipal() instanceof CustomUserDetails) {
@@ -51,7 +54,14 @@ public class HomeController {
     
     @GetMapping("/")
     public String root(Authentication auth) {
-        if (auth != null && auth.isAuthenticated() && 
+        // Primeira instalação: sem empresas → mostrar wizard público
+        try {
+            if (empresaRepository.count() == 0) {
+                return "redirect:/setup-inicial";
+            }
+        } catch (Exception ignored) {}
+
+        if (auth != null && auth.isAuthenticated() &&
             !(auth instanceof org.springframework.security.authentication.AnonymousAuthenticationToken)) {
             
             boolean isManager = auth.getAuthorities().stream()

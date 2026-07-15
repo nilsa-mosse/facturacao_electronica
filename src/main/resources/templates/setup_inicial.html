@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kwanza ERP — Configuração Inicial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --indigo: #4f46e5;
+            --violet: #7c3aed;
+            --cyan: #06b6d4;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --amber: #f59e0b;
+            --glass-bg: rgba(255,255,255,0.06);
+            --glass-border: rgba(255,255,255,0.12);
+        }
+
+        html, body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ─── Canvas ─── */
+        #particleCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Animated Orbs ─── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.25;
+            pointer-events: none;
+            animation: floatOrb 14s ease-in-out infinite;
+            z-index: 0;
+        }
+        .orb-1 { width: 520px; height: 520px; top: -160px; left: -160px; background: var(--indigo); animation-delay: 0s; }
+        .orb-2 { width: 420px; height: 420px; bottom: -120px; right: -120px; background: var(--violet); animation-delay: -5s; }
+        .orb-3 { width: 320px; height: 320px; top: 45%; left: 55%; background: var(--cyan); animation-delay: -10s; }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%       { transform: translate(30px, -20px) scale(1.05); }
+            66%       { transform: translate(-20px, 30px) scale(0.97); }
+        }
+
+        /* ─── Main layout ─── */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        /* ─── Header Band ─── */
+        .wizard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .wizard-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(79,70,229,0.2);
+            border: 1px solid rgba(79,70,229,0.4);
+            border-radius: 100px;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        .wizard-header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+        .wizard-header h1 span {
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .wizard-header p {
+            color: rgba(255,255,255,0.55);
+            font-size: 1rem;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* ─── Card ─── */
+        .wizard-card {
+            width: 100%;
+            max-width: 600px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 30px 80px rgba(0,0,0,0.5);
+            padding: 2.5rem;
+        }
+
+        /* ─── Step indicator ─── */
+        .steps-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        .step-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+        .step-dot.active {
+            width: 28px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--indigo), var(--cyan));
+        }
+        .step-dot.done {
+            background: var(--emerald);
+        }
+
+        /* ─── Section Title ─── */
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 1.5rem;
+        }
+
+        /* ─── Form Controls ─── */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0.4rem;
+        }
+        .form-group .required { color: var(--rose); }
+        .form-control {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            font-size: 0.92rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            outline: none;
+        }
+        .form-control::placeholder { color: rgba(255,255,255,0.3); }
+        .form-control:focus {
+            border-color: var(--indigo);
+            background: rgba(79,70,229,0.08);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
+        }
+        .form-control option {
+            background: #1e1b4b;
+            color: #fff;
+        }
+        .input-group {
+            position: relative;
+        }
+        .input-group .form-control { padding-right: 2.8rem; }
+        .input-group .eye-toggle {
+            position: absolute;
+            right: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .input-group .eye-toggle:hover { color: rgba(255,255,255,0.8); }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+
+        /* ─── Divider ─── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: rgba(255,255,255,0.25);
+            font-size: 0.75rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* ─── Alert ─── */
+        .alert-box {
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+            display: none;
+            align-items: flex-start;
+            gap: 0.6rem;
+        }
+        .alert-box.danger  { background: rgba(244,63,94,0.15);  border: 1px solid rgba(244,63,94,0.3);  color: #fda4af; display: flex; }
+        .alert-box.success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; display: flex; }
+        .alert-box.info    { background: rgba(6,182,212,0.12);  border: 1px solid rgba(6,182,212,0.25); color: #67e8f9; display: flex; }
+
+        /* ─── Button ─── */
+        .btn-primary {
+            width: 100%;
+            padding: 0.85rem 2rem;
+            background: linear-gradient(135deg, var(--indigo), var(--violet));
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            box-shadow: 0 8px 25px rgba(79,70,229,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(79,70,229,0.65); }
+        .btn-primary:active { transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* ─── Footer brand ─── */
+        .brand-footer {
+            margin-top: 1.8rem;
+            text-align: center;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.25);
+            letter-spacing: 0.05em;
+        }
+        .brand-footer strong { color: rgba(255,255,255,0.45); }
+
+        /* ─── Success screen ─── */
+        .success-screen {
+            text-align: center;
+            display: none;
+        }
+        .success-icon-wrap {
+            width: 90px;
+            height: 90px;
+            position: relative;
+            margin: 0 auto 1.5rem;
+        }
+        .success-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(var(--emerald), var(--cyan), var(--emerald));
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #fff 0);
+            animation: spinRing 3s linear infinite;
+        }
+        @keyframes spinRing { to { transform: rotate(360deg); } }
+        .success-icon-inner {
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            background: rgba(16,185,129,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--emerald);
+        }
+
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <canvas id="particleCanvas"></canvas>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="page-wrapper">
+
+        <!-- Header -->
+        <div class="wizard-header">
+            <div class="wizard-badge">
+                <i class="fas fa-rocket"></i>
+                Primeira Instalação
+            </div>
+            <h1>Configure o seu <span>Kwanza ERP</span></h1>
+            <p>Crie a empresa e o utilizador administrador para começar a utilizar o sistema.</p>
+        </div>
+
+        <!-- Wizard Card -->
+        <div class="wizard-card">
+
+            <!-- Step dots -->
+            <div class="steps-bar">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+            </div>
+
+            <!-- Alert -->
+            <div class="alert-box" id="alertBox">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="alertMsg"></span>
+            </div>
+
+            <!-- FORM -->
+            <form id="setupForm" autocomplete="off">
+
+                <!-- Step 1: Empresa -->
+                <div id="step1Panel">
+                    <div class="section-label"><i class="fas fa-building me-1"></i> Dados da Empresa</div>
+
+                    <div class="form-group">
+                        <label>Nome da Empresa <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="nomeEmpresa" name="nomeEmpresa"
+                               placeholder="Ex: Distribuidora Kwanza, Lda." required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>NIF da Empresa <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="nif" name="nif"
+                                   placeholder="Ex: 5000000001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Regime Fiscal <span class="required">*</span></label>
+                            <select class="form-control" id="regimeFiscal" name="regimeFiscal">
+                                <option value="GERAL">Regime Geral (Normal)</option>
+                                <option value="SIMPLIFICADO">Regime Simplificado</option>
+                                <option value="EXCLUSAO">Regime de Exclusão</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.2rem;">
+                        <button type="button" class="btn-primary" id="btnStep1Next" onclick="goToStep2()">
+                            Continuar <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Administrador -->
+                <div id="step2Panel" style="display:none;">
+                    <div class="section-label"><i class="fas fa-user-shield me-1"></i> Conta Administrador</div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome Completo <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="nomeAdmin" name="nomeAdmin"
+                                   placeholder="Ex: João Silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Login <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="loginAdmin" name="loginAdmin"
+                                   placeholder="Ex: admin" required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email (opcional)</label>
+                        <input type="email" class="form-control" id="emailAdmin" name="emailAdmin"
+                               placeholder="admin@empresa.ao">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Senha <span class="required">*</span></label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="senhaAdmin" name="senhaAdmin"
+                                   placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+                            <button type="button" class="eye-toggle" onclick="toggleSenha()">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="divider">Resumo da instalação</div>
+
+                    <div class="alert-box info" id="resumoBox" style="display:flex;">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="resumoText"></span>
+                    </div>
+
+                    <div style="display:flex; gap:0.8rem; margin-top: 1.2rem;">
+                        <button type="button" class="btn-primary" id="btnBack"
+                                onclick="goToStep1()"
+                                style="background: rgba(255,255,255,0.08); box-shadow: none; border: 1px solid rgba(255,255,255,0.12); flex: 0 0 auto; width: auto; padding: 0.85rem 1.4rem;">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button type="button" class="btn-primary" id="btnConcluir" onclick="submeterSetup()">
+                            <i class="fas fa-check-circle"></i> Concluir e Iniciar
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <!-- Success screen -->
+            <div class="success-screen" id="successScreen">
+                <div class="success-icon-wrap">
+                    <div class="success-ring"></div>
+                    <div class="success-icon-inner"><i class="fas fa-check"></i></div>
+                </div>
+                <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem;">Sistema configurado!</h3>
+                <p style="color: rgba(255,255,255,0.55); font-size: 0.9rem;">
+                    A redirecionar para o assistente de configuração...
+                </p>
+                <div style="margin-top: 1.2rem; background: rgba(255,255,255,0.06); border-radius: 8px; height: 6px; overflow: hidden;">
+                    <div id="successBar" style="height: 100%; width: 100%; background: linear-gradient(90deg, var(--indigo), var(--emerald)); transform-origin: left; transition: transform 2.5s linear;"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="brand-footer">
+            <strong>Kwanza ERP</strong> — Powered by HZ Consultoria
+        </div>
+    </div>
+
+    <script>
+        // ─── Particles ──────────────────────────────────────────────
+        (function () {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let W, H, particles = [];
+            const COLORS = ['rgba(79,70,229,', 'rgba(6,182,212,', 'rgba(124,58,237,', 'rgba(16,185,129,'];
+
+            function init() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+                particles = Array.from({ length: 70 }, () => ({
+                    x: Math.random() * W, y: Math.random() * H,
+                    r: Math.random() * 2 + 0.5,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    color: COLORS[Math.floor(Math.random() * COLORS.length)]
+                }));
+            }
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                for (const p of particles) {
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+                    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color + '0.6)';
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+            window.addEventListener('resize', init);
+            init(); draw();
+        })();
+
+        // ─── Wizard Steps ─────────────────────────────────────────
+        function showAlert(type, msg) {
+            const box = document.getElementById('alertBox');
+            box.className = 'alert-box ' + type;
+            document.getElementById('alertMsg').textContent = msg;
+            box.style.display = 'flex';
+        }
+        function hideAlert() {
+            document.getElementById('alertBox').style.display = 'none';
+        }
+
+        function goToStep1() {
+            document.getElementById('step1Panel').style.display = 'block';
+            document.getElementById('step2Panel').style.display = 'none';
+            document.getElementById('dot1').className = 'step-dot active';
+            document.getElementById('dot2').className = 'step-dot';
+            hideAlert();
+        }
+
+        function goToStep2() {
+            const nome = document.getElementById('nomeEmpresa').value.trim();
+            const nif  = document.getElementById('nif').value.trim();
+            if (!nome) { showAlert('danger', 'Por favor, indique o nome da empresa.'); return; }
+            if (!nif)  { showAlert('danger', 'Por favor, indique o NIF da empresa.'); return; }
+
+            // Preencher resumo
+            const regime = document.getElementById('regimeFiscal');
+            document.getElementById('resumoText').textContent =
+                `Empresa: ${nome} | NIF: ${nif} | Regime: ${regime.options[regime.selectedIndex].text}`;
+
+            document.getElementById('step1Panel').style.display = 'none';
+            document.getElementById('step2Panel').style.display = 'block';
+            document.getElementById('dot1').className = 'step-dot done';
+            document.getElementById('dot2').className = 'step-dot active';
+            hideAlert();
+        }
+
+        function toggleSenha() {
+            const input = document.getElementById('senhaAdmin');
+            const icon  = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        function submeterSetup() {
+            const loginAdmin = document.getElementById('loginAdmin').value.trim();
+            const nomeAdmin  = document.getElementById('nomeAdmin').value.trim();
+            const senhaAdmin = document.getElementById('senhaAdmin').value;
+
+            if (!nomeAdmin)        { showAlert('danger', 'O nome do administrador é obrigatório.'); return; }
+            if (!loginAdmin)       { showAlert('danger', 'O login do administrador é obrigatório.'); return; }
+            if (senhaAdmin.length < 6) { showAlert('danger', 'A senha deve ter pelo menos 6 caracteres.'); return; }
+
+            const btn = document.getElementById('btnConcluir');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch spin"></i> A configurar...';
+            hideAlert();
+
+            const formData = new FormData();
+            formData.append('nomeEmpresa', document.getElementById('nomeEmpresa').value.trim());
+            formData.append('nif',         document.getElementById('nif').value.trim());
+            formData.append('regimeFiscal',document.getElementById('regimeFiscal').value);
+            formData.append('nomeAdmin',   nomeAdmin);
+            formData.append('loginAdmin',  loginAdmin);
+            formData.append('senhaAdmin',  senhaAdmin);
+            formData.append('emailAdmin',  document.getElementById('emailAdmin').value.trim());
+
+            fetch('/setup-inicial/criar-empresa-e-admin', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sucesso) {
+                    // Mostrar ecrã de sucesso com barra de progresso
+                    document.getElementById('setupForm').style.display = 'none';
+                    document.getElementById('successScreen').style.display = 'block';
+
+                    // Animar a barra
+                    const bar = document.getElementById('successBar');
+                    requestAnimationFrame(() => {
+                        bar.style.transform = 'scaleX(0)';
+                    });
+
+                    // Redirecionar para o setup-wizard após 2.8s
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/configuracoes/setup-wizard';
+                    }, 2800);
+                } else {
+                    showAlert('danger', data.mensagem || 'Erro desconhecido. Tente novamente.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Concluir e Iniciar';
+                }
+            })
+            .catch(() => {
+                showAlert('danger', 'Erro de ligação ao servidor. Tente novamente.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Concluir e Iniciar';
+            });
+        }
+    </script>
+</body>
+</html>

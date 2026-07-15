@@ -54,6 +54,7 @@ public class SecurityConfig {
                     "/forgot-password", "/reset-password",
                     "/alterar-senha-obrigatorio",
                     "/licenca-expirada", "/ativar-licenca",
+                    "/setup-inicial", "/setup-inicial/**",
                     "/manifest.json", "/sw.js",
                     "/img/**", "/uploads/**", "/assets/**", "/plugins/**",
                     "/css/**", "/js/**", "/images/**"
@@ -91,6 +92,7 @@ public class SecurityConfig {
                     "/finalizarVenda",
                     "/api/vendas-suspensas/**",
                     "/ativar-licenca",
+                    "/setup-inicial/**",
                     "/clientes/api/adicionar"
                 )
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
