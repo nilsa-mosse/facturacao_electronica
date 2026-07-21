@@ -24,6 +24,11 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     List<Produto> findByNomeContainingIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
     
     List<Produto> findByNomeContainingIgnoreCase(String nome);
+
+    // Exact-match duplicate checks (List avoids NonUniqueResultException on existing duplicates)
+    List<Produto> findByNomeIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
+
+    List<Produto> findByCodigoBarraIgnoreCaseAndEmpresa_Id(String codigoBarra, Long empresaId);
     
     List<Produto> findByNomeStartingWithIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
 

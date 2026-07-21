@@ -12,6 +12,16 @@ import java.nio.file.StandardOpenOption;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public String handleAccessDeniedException(org.springframework.security.access.AccessDeniedException e, HttpServletRequest request) {
+        try {
+            String uri = request.getRequestURI();
+            return "redirect:/acesso-negado?endpoint=" + java.net.URLEncoder.encode(uri, "UTF-8");
+        } catch (Exception ex) {
+            return "redirect:/acesso-negado?endpoint=/superadmin/licenca/gerador";
+        }
+    }
+
     @ExceptionHandler(Exception.class)
     @org.springframework.web.bind.annotation.ResponseBody
     public String handleException(Exception e, HttpServletRequest request) {

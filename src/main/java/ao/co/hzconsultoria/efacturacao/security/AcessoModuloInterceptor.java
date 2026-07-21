@@ -25,7 +25,8 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
         // Ignorar recursos estáticos e login/logout
         if (uri.startsWith("/assets/") || uri.startsWith("/plugins/") || uri.startsWith("/css/") ||
             uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/login") ||
-            uri.equals("/logout") || uri.equals("/error") || uri.equals("/alterar-senha-obrigatorio")) {
+            uri.equals("/logout") || uri.equals("/error") || uri.equals("/alterar-senha-obrigatorio") ||
+            uri.startsWith("/acesso-negado")) {
             return true;
         }
 
@@ -46,6 +47,12 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        // Se o utilizador não for SuperAdmin e tentar aceder a qualquer endpoint /superadmin (ex: /superadmin/licenca/gerador)
+        if (uri.startsWith("/superadmin")) {
+            response.sendRedirect("/acesso-negado?endpoint=" + java.net.URLEncoder.encode(uri, "UTF-8"));
+            return false;
+        }
+
         String modulo = identificarModuloPorUri(uri);
         if (modulo == null) {
             return true; // Se não for um módulo mapeado, permitir acesso (ex: perfil do usuário)
@@ -56,7 +63,7 @@ public class AcessoModuloInterceptor implements HandlerInterceptor {
 
         // Bloqueio estrito para Admin: Não entra no Painel Global
         if (isAdmin && "PAINEL_GLOBAL".equals(modulo)) {
-            response.sendRedirect("/dashboard?error=access_denied&module=PAINEL_GLOBAL");
+            response.sendRedirect("/acesso-negado?endpoint=" + java.net.URLEncoder.encode(uri, "UTF-8"));
             return false;
         }
 

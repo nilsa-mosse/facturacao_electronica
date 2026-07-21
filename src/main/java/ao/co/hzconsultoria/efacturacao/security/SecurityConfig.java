@@ -54,6 +54,7 @@ public class SecurityConfig {
                     "/forgot-password", "/reset-password",
                     "/alterar-senha-obrigatorio",
                     "/licenca-expirada", "/ativar-licenca",
+                    "/acesso-negado", "/acesso-negado/**",
                     "/setup-inicial", "/setup-inicial/**",
                     "/manifest.json", "/sw.js",
                     "/img/**", "/uploads/**", "/assets/**", "/plugins/**",
@@ -82,6 +83,10 @@ public class SecurityConfig {
 
                 // === Tudo o resto exige autenticação ===
                 .anyRequest().authenticated()
+
+            .and()
+            .exceptionHandling()
+                .accessDeniedPage("/acesso-negado?endpoint=/superadmin/licenca/gerador")
 
             .and()
             .csrf()

@@ -178,6 +178,20 @@
                     </div>
                 </div>
 
+                <!-- Access Denied / Proibição Alert Banner -->
+                <div th:if="${param.error != null}" class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between" role="alert" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 6px solid #ef4444 !important;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-white text-danger" style="width: 45px; height: 45px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 1.25rem;">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-danger mb-1">Proibição de Acesso à Página</h6>
+                            <p class="mb-0 text-muted small">Não possui permissão para aceder a essa funcionalidade ou endpoint. O seu acesso foi bloqueado por motivos de segurança.</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
                 <!-- Setup Wizard Alert Banner -->
                 <div th:if="${!globalSetupCompleto}" class="card border-0 mb-4 rounded-4" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 6px solid #d97706 !important; box-shadow: 0 4px 20px rgba(217, 119, 6, 0.08);">
                     <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">

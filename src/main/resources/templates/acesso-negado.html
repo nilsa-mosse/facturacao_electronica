@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<style>
+    body {
+        background-color: #f8fafc !important;
+        min-height: 100vh;
+    }
+
+    .proibicao-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        box-shadow: 0 15px 35px rgba(239, 68, 68, 0.1);
+        overflow: hidden;
+    }
+
+    .proibicao-header {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .proibicao-body {
+        padding: 40px;
+    }
+
+    .endpoint-badge {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 1.05rem;
+        word-break: break-all;
+        display: inline-block;
+    }
+
+    .icon-pulse {
+        animation: pulse-lock 2s infinite;
+    }
+
+    @keyframes pulse-lock {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+
+<body class="d-flex align-items-center justify-content-center min-vh-100 py-5" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+
+                <div class="proibicao-card">
+                    <div class="proibicao-header">
+                        <div class="mb-3 icon-pulse">
+                            <i class="fas fa-ban fa-4x"></i>
+                        </div>
+                        <h2 class="fw-bold mb-1">Proibição de Acesso à Página</h2>
+                        <p class="mb-0 text-white-50">Permissões Insuficientes / Acesso Restrito</p>
+                    </div>
+
+                    <div class="proibicao-body text-center">
+                        <div class="alert alert-danger border-0 rounded-4 p-4 mb-4 text-start"
+                            style="background-color: #fff5f5; border-left: 5px solid #ef4444 !important;">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <i class="fas fa-exclamation-triangle text-danger fs-4"></i>
+                                <h5 class="fw-bold text-danger mb-0">Atenção: Acesso Não Autorizado</h5>
+                            </div>
+                            <p class="mb-0 text-muted" th:text="${mensagemProibicao}">
+                                Você não possui permissão para aceder a esta página.
+                            </p>
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="text-muted mb-2 fw-semibold">Endpoint / URL que tentou aceder:</p>
+                            <div class="endpoint-badge">
+                                <i class="fas fa-link me-2 text-danger"></i>
+                                <strong th:text="${fullUrl}">http://localhost:8080/superadmin/licenca/gerador</strong>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mb-4 text-start">
+                            <h6 class="fw-bold text-dark mb-2">
+                                <i class="fas fa-shield-alt text-warning me-2"></i>Porquê que isto acontece?
+                            </h6>
+                            <ul class="mb-0 text-muted small ps-3">
+                                <li>A página <code>/superadmin/licenca/gerador</code> (Gerador de Licenças) é de utilização exclusiva do perfil <strong>SuperAdministrador</strong>.</li>
+                                <li>O seu perfil actual de utilizador não possui os privilégios necessários para aceder ao módulo SaaS/Global.</li>
+                                <li>Se considera que isto é um erro, por favor contacte o Administrador do Sistema.</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+                            <a th:href="@{/dashboard}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-tachometer-alt me-2"></i>Ir para o Dashboard
+                            </a>
+                            <a th:href="@{/home}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+                                <i class="fas fa-home me-2"></i>Página Inicial
+                            </a>
+                            <button onclick="window.history.back()" class="btn btn-light btn-lg rounded-pill px-4 border">
+                                <i class="fas fa-arrow-left me-2"></i>Voltar Atrás
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

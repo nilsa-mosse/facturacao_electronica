@@ -6,28 +6,29 @@
     <style>
         * { font-family: 'Inter', sans-serif; }
 
-        body.hold-transition { background: #0f0c29; }
+        body.hold-transition { background-color: #f4f6f9 !important; }
 
         .content-wrapper {
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background-color: #f4f6f9 !important;
             min-height: 100vh;
+            margin-left: 0 !important;
         }
 
         /* ── PAGE HEADER ── */
         .licenca-header {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
             padding: 20px 32px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .licenca-header h1 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #fff;
+            color: #1e293b;
             margin: 0;
             display: flex;
             align-items: center;
@@ -39,11 +40,12 @@
             border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.2rem;
-            box-shadow: 0 4px 15px rgba(245,158,11,0.4);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(245,158,11,0.3);
         }
         .btn-gestao {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
+            background: #2563eb;
+            border: 1px solid #1d4ed8;
             color: #fff;
             border-radius: 10px;
             padding: 9px 20px;
@@ -54,10 +56,10 @@
             transition: all 0.3s ease;
         }
         .btn-gestao:hover {
-            background: rgba(255,255,255,0.2);
+            background: #1d4ed8;
             color: #fff;
             transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(37,99,235,0.25);
         }
 
         /* ── MAIN CONTENT ── */
@@ -71,12 +73,13 @@
             margin-bottom: 32px;
         }
         .stat-card {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 16px;
             padding: 20px 24px;
             display: flex; align-items: center; gap: 16px;
             transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
         .stat-card:hover { transform: translateY(-3px); }
         .stat-icon {
@@ -84,29 +87,29 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 1.3rem;
         }
-        .stat-icon.amber  { background: rgba(245,158,11,0.2); color: #f59e0b; }
-        .stat-icon.green  { background: rgba(34,197,94,0.2);  color: #22c55e; }
-        .stat-icon.purple { background: rgba(168,85,247,0.2); color: #a855f7; }
-        .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-value { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 2px; }
+        .stat-icon.amber  { background: rgba(245,158,11,0.15); color: #d97706; }
+        .stat-icon.green  { background: rgba(34,197,94,0.15);  color: #16a34a; }
+        .stat-icon.purple { background: rgba(168,85,247,0.15); color: #9333ea; }
+        .stat-label { font-size: 0.75rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-top: 2px; }
 
         /* ── CARDS ── */
         .glass-card {
-            background: rgba(255,255,255,0.07);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 24px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
             padding: 32px;
             height: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
         .card-title {
             font-size: 1rem;
             font-weight: 700;
-            color: #fff;
+            color: #1e293b;
             display: flex; align-items: center; gap: 10px;
             margin-bottom: 28px;
             padding-bottom: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid #f1f5f9;
         }
         .card-title .dot {
             width: 8px; height: 8px; border-radius: 50%;
@@ -118,49 +121,49 @@
         .form-label-custom {
             font-size: 0.78rem;
             font-weight: 600;
-            color: rgba(255,255,255,0.6);
+            color: #475569;
             text-transform: uppercase;
             letter-spacing: 0.6px;
             margin-bottom: 8px;
             display: block;
         }
         .form-control-custom {
-            background: rgba(255,255,255,0.08) !important;
-            border: 1px solid rgba(255,255,255,0.12) !important;
+            background: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
             border-radius: 12px !important;
-            color: #fff !important;
+            color: #0f172a !important;
             padding: 12px 16px !important;
             font-size: 0.9rem !important;
             transition: all 0.3s ease !important;
             width: 100%;
         }
-        .form-control-custom::placeholder { color: rgba(255,255,255,0.3) !important; }
+        .form-control-custom::placeholder { color: #94a3b8 !important; }
         .form-control-custom:focus {
-            background: rgba(255,255,255,0.12) !important;
-            border-color: rgba(245,158,11,0.6) !important;
+            background: #ffffff !important;
+            border-color: #f59e0b !important;
             box-shadow: 0 0 0 3px rgba(245,158,11,0.15) !important;
             outline: none !important;
         }
-        .form-control-custom option { background: #302b63; color: #fff; }
-        .form-hint { font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 6px; }
-        .form-hint.danger { color: rgba(239,68,68,0.8); }
+        .form-control-custom option { background: #ffffff; color: #0f172a; }
+        .form-hint { font-size: 0.75rem; color: #64748b; margin-top: 6px; }
+        .form-hint.danger { color: #dc2626; }
 
         .machine-id-wrapper { position: relative; }
         .machine-id-wrapper .form-control-custom { padding-right: 50px !important; font-family: 'Courier New', monospace; letter-spacing: 2px; font-size: 1rem !important; font-weight: 600; }
         .machine-id-wrapper .scan-icon {
             position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-            color: rgba(245,158,11,0.7); font-size: 1rem; pointer-events: none;
+            color: #d97706; font-size: 1rem; pointer-events: none;
         }
 
         .pin-wrapper { position: relative; }
         .pin-wrapper .form-control-custom { padding-right: 50px !important; border-color: rgba(239,68,68,0.4) !important; }
         .pin-wrapper .pin-toggle {
             position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-            color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.9rem;
+            color: #64748b; cursor: pointer; font-size: 0.9rem;
             transition: color 0.2s;
         }
-        .pin-wrapper .pin-toggle:hover { color: rgba(255,255,255,0.8); }
-        .pin-wrapper .form-control-custom:focus { border-color: rgba(239,68,68,0.7) !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important; }
+        .pin-wrapper .pin-toggle:hover { color: #0f172a; }
+        .pin-wrapper .form-control-custom:focus { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.15) !important; }
 
         /* ── SUBMIT BTN ── */
         .btn-gerar {
@@ -176,18 +179,18 @@
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+            box-shadow: 0 4px 20px rgba(245,158,11,0.3);
             position: relative;
             overflow: hidden;
         }
         .btn-gerar::before {
             content: '';
             position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: left 0.5s ease;
         }
         .btn-gerar:hover::before { left: 100%; }
-        .btn-gerar:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.55); }
+        .btn-gerar:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.45); }
         .btn-gerar:active { transform: translateY(0); }
 
         /* ── SUCCESS PANEL ── */
@@ -203,7 +206,7 @@
             display: inline-flex; align-items: center; gap: 8px;
             background: rgba(34,197,94,0.15);
             border: 1px solid rgba(34,197,94,0.3);
-            color: #22c55e;
+            color: #16a34a;
             border-radius: 30px;
             padding: 6px 16px;
             font-size: 0.8rem;
@@ -212,7 +215,7 @@
         }
         .success-badge .pulse {
             width: 8px; height: 8px; border-radius: 50%;
-            background: #22c55e;
+            background: #16a34a;
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
@@ -221,8 +224,8 @@
         }
 
         .key-display {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid rgba(245,158,11,0.3);
+            background: #1e293b;
+            border: 1px solid #334155;
             border-radius: 14px;
             padding: 20px 56px 20px 20px;
             font-family: 'Courier New', monospace;
@@ -245,11 +248,11 @@
             transition: all 0.2s;
         }
         .btn-copy:hover { background: rgba(245,158,11,0.3); }
-        .btn-copy.copied { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); color: #22c55e; }
+        .btn-copy.copied { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); color: #16a34a; }
 
         .license-meta {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 14px;
             padding: 20px;
             margin-top: 20px;
@@ -257,18 +260,18 @@
         .license-meta .meta-row {
             display: flex; align-items: center; justify-content: space-between;
             padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid #f1f5f9;
             font-size: 0.85rem;
         }
         .license-meta .meta-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .meta-label { color: rgba(255,255,255,0.4); }
-        .meta-value { color: #fff; font-weight: 600; }
+        .meta-label { color: #64748b; }
+        .meta-value { color: #0f172a; font-weight: 600; }
 
         .btn-share {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             background: rgba(34,197,94,0.15);
             border: 1px solid rgba(34,197,94,0.3);
-            color: #22c55e;
+            color: #16a34a;
             border-radius: 12px;
             padding: 11px;
             font-size: 0.85rem;
@@ -279,7 +282,7 @@
             width: 100%;
             margin-top: 16px;
         }
-        .btn-share:hover { background: rgba(34,197,94,0.25); color: #22c55e; transform: translateY(-1px); }
+        .btn-share:hover { background: rgba(34,197,94,0.25); color: #16a34a; transform: translateY(-1px); }
 
         /* ── PLACEHOLDER (no key yet) ── */
         .empty-state {
@@ -291,36 +294,34 @@
         .empty-icon {
             width: 90px; height: 90px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-            border: 2px dashed rgba(255,255,255,0.1);
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
             display: flex; align-items: center; justify-content: center;
             font-size: 2.2rem;
-            color: rgba(255,255,255,0.2);
+            color: #94a3b8;
             margin-bottom: 20px;
             animation: rotate 12s linear infinite;
         }
         @keyframes rotate { to { transform: rotate(360deg); } }
-        .empty-title { color: rgba(255,255,255,0.4); font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
-        .empty-sub   { color: rgba(255,255,255,0.2); font-size: 0.8rem; }
+        .empty-title { color: #475569; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; }
+        .empty-sub   { color: #94a3b8; font-size: 0.8rem; }
 
         /* ── SECURITY NOTICE ── */
         .security-notice {
-            background: rgba(239,68,68,0.08);
-            border: 1px solid rgba(239,68,68,0.2);
+            background: #fef2f2;
+            border: 1px solid #fecaca;
             border-radius: 12px;
             padding: 12px 16px;
             display: flex; align-items: flex-start; gap: 10px;
             margin-top: 20px;
             font-size: 0.78rem;
-            color: rgba(255,255,255,0.5);
+            color: #991b1b;
         }
-        .security-notice i { color: rgba(239,68,68,0.7); margin-top: 1px; flex-shrink: 0; }
+        .security-notice i { color: #ef4444; margin-top: 1px; flex-shrink: 0; }
     </style>
 </head>
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition">
 <div class="wrapper">
-    <nav th:replace="menu :: topbar"></nav>
-    <aside th:replace="menu :: sidebar"></aside>
 
     <div class="content-wrapper">
 
@@ -329,7 +330,7 @@
             <h1>
                 <span class="icon-badge"><i class="fas fa-key"></i></span>
                 Gerador de Licenças
-                <span style="font-size:0.7rem;font-weight:400;color:rgba(255,255,255,0.3);margin-left:4px;">SUPERADMIN</span>
+                <span style="font-size:0.7rem;font-weight:400;color:#64748b;margin-left:4px;">SUPERADMIN</span>
             </h1>
             <a th:href="@{/superadmin/licenca/gestao}" class="btn-gestao">
                 <i class="fas fa-th-list"></i> Gerir Licenças
