@@ -272,7 +272,6 @@ public class EfaturacaoApplication {
                 superAdmin.setBloqueadoAte(null);
                 userRepository.save(superAdmin);
             }
-
         };
     }
 }

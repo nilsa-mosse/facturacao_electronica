@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ColaboradorRepository extends JpaRepository<Colaborador, Long> {
     List<Colaborador> findByEmpresa_Id(Long empresaId);
-    Optional<Colaborador> findByNifAndEmpresa_Id(String nif, Long empresaId);
+    List<Colaborador> findByNifAndEmpresa_Id(String nif, Long empresaId);
+    List<Colaborador> findByNomeIgnoreCaseAndEmpresa_Id(String nome, Long empresaId);
 }

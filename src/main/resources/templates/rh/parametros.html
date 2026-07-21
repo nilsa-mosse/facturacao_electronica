@@ -26,8 +26,8 @@
 
     <div class="row g-4">
       <!-- 1. Configurações Gerais -->
-      <div class="col-lg-4">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
+      <div class="col-lg-3 col-md-4">
+        <div class="card shadow-sm border-0 rounded-4">
           <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
             <h5 class="fw-bold text-dark mb-0"><i class="fas fa-cog text-secondary me-2"></i>Configurações Gerais</h5>
             <small class="text-muted">Taxas base e regras operacionais</small>
@@ -35,34 +35,34 @@
           <div class="card-body p-4">
             <form th:action="@{/rh/parametros/salvar}" method="POST">
               <div class="mb-3">
-                <label class="form-label fw-semibold">Segurança Social - Colaborador (%)</label>
-                <div class="input-group">
-                  <input type="number" step="0.01" min="0" max="100" name="taxaInssTrabalhador" th:value="${parametros.taxaInssTrabalhador}" class="form-control rounded-start-3" required>
+                <label class="form-label fw-semibold small mb-1">Segurança Social - Colaborador (%)</label>
+                <div class="input-group input-group-sm" style="max-width: 140px;">
+                  <input type="number" step="0.01" min="0" max="100" name="taxaInssTrabalhador" th:value="${parametros.taxaInssTrabalhador}" class="form-control rounded-start-3 text-center fw-bold" required>
                   <span class="input-group-text rounded-end-3 bg-light">%</span>
                 </div>
-                <div class="form-text">Padrão em Angola: 3.00%</div>
+                <div class="form-text" style="font-size: 0.75rem;">Padrão em Angola: 3.00%</div>
               </div>
 
               <div class="mb-3">
-                <label class="form-label fw-semibold">Segurança Social - Empresa (%)</label>
-                <div class="input-group">
-                  <input type="number" step="0.01" min="0" max="100" name="taxaInssEmpresa" th:value="${parametros.taxaInssEmpresa}" class="form-control rounded-start-3" required>
+                <label class="form-label fw-semibold small mb-1">Segurança Social - Empresa (%)</label>
+                <div class="input-group input-group-sm" style="max-width: 140px;">
+                  <input type="number" step="0.01" min="0" max="100" name="taxaInssEmpresa" th:value="${parametros.taxaInssEmpresa}" class="form-control rounded-start-3 text-center fw-bold" required>
                   <span class="input-group-text rounded-end-3 bg-light">%</span>
                 </div>
-                <div class="form-text">Padrão em Angola: 8.00%</div>
+                <div class="form-text" style="font-size: 0.75rem;">Padrão em Angola: 8.00%</div>
               </div>
 
               <div class="mb-4">
-                <label class="form-label fw-semibold">Dias Padrão de Processamento</label>
-                <div class="input-group">
-                  <input type="number" min="1" max="31" name="diasPadraoProcessamento" th:value="${parametros.diasPadraoProcessamento}" class="form-control rounded-start-3" required>
+                <label class="form-label fw-semibold small mb-1">Dias Padrão de Processamento</label>
+                <div class="input-group input-group-sm" style="max-width: 140px;">
+                  <input type="number" min="1" max="31" name="diasPadraoProcessamento" th:value="${parametros.diasPadraoProcessamento}" class="form-control rounded-start-3 text-center fw-bold" required>
                   <span class="input-group-text rounded-end-3 bg-light">dias</span>
                 </div>
-                <div class="form-text">Dias calculados por mês comercial (Padrão: 30)</div>
+                <div class="form-text" style="font-size: 0.75rem;">Dias calculados por mês comercial (Padrão: 30)</div>
               </div>
 
-              <button type="submit" class="btn btn-primary rounded-pill w-100 py-2 shadow-sm">
-                <i class="fas fa-save me-1"></i> Guardar Parâmetros Gerais
+              <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 py-2 shadow-sm">
+                <i class="fas fa-save me-1"></i> Guardar Parâmetros
               </button>
             </form>
           </div>
@@ -70,19 +70,19 @@
       </div>
 
       <!-- 2. Tabela Progressiva do IRT -->
-      <div class="col-lg-8">
+      <div class="col-lg-9 col-md-8">
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4 d-flex align-items-center justify-content-between">
             <div>
               <h5 class="fw-bold text-dark mb-0"><i class="fas fa-table text-danger me-2"></i>Tabela Progressiva de IRT</h5>
-              <small class="text-muted">Definição oficial de escalões fiscais e parcelas de imposto</small>
+              <small class="text-muted">Definição oficial de escalões fiscais de Angola (AGT)</small>
             </div>
             <div class="d-flex gap-2">
-              <button type="button" onclick="document.getElementById('importFile').click()" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+              <button type="button" data-bs-toggle="modal" data-bs-target="#modalImportarIRT" class="btn btn-outline-primary btn-sm rounded-pill px-3">
                 <i class="fas fa-file-import me-1"></i> Importar PDF / Excel
               </button>
               <input type="file" id="importFile" accept=".pdf,.xls,.xlsx" style="display: none;" onchange="importarTabela(this)">
-              <form th:action="@{/rh/parametros/irt/redefinir}" method="POST" onsubmit="return confirm('Tem a certeza que deseja redefinir a tabela de IRT para as configurações padrão oficiais da AGT de Angola?')">
+              <form th:action="@{/rh/parametros/irt/redefinir}" method="POST" onsubmit="return confirm('Tem a certeza que deseja repor os parâmetros predefinidos oficiais da AGT?')">
                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                   <i class="fas fa-undo me-1"></i> Redefinir AGT
                 </button>
@@ -92,40 +92,168 @@
               </button>
             </div>
           </div>
+        </div>
+
+        <!-- Modal Importar IRT -->
+        <div class="modal fade" id="modalImportarIRT" tabindex="-1" aria-labelledby="modalImportarIRTLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow-lg">
+              <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <div>
+                  <h5 class="modal-title fw-bold" id="modalImportarIRTLabel">
+                    <i class="fas fa-file-import text-primary me-2"></i>Importar Tabela de IRT
+                  </h5>
+                  <small class="text-muted">Descarregue o modelo, preencha os dados e carregue o ficheiro no sistema.</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body px-4 pt-3 pb-0">
+
+                <!-- Passo 1: Descarregar Modelo -->
+                <div class="card border-0 bg-light rounded-3 p-3 mb-3">
+                  <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                      <span class="fw-bold text-primary">1</span>
+                    </div>
+                    <div>
+                      <p class="fw-semibold mb-1">Descarregue o modelo</p>
+                      <p class="text-muted small mb-2">Baixe o ficheiro modelo, preencha os dados dos escalões e guarde.</p>
+                      <div class="d-flex gap-2 flex-wrap">
+                        <a th:href="@{/rh/parametros/irt/modelo-excel}" class="btn btn-success btn-sm rounded-pill px-3">
+                          <i class="fas fa-file-excel me-1"></i> Modelo Excel (.xlsx)
+                        </a>
+                        <a th:href="@{/rh/parametros/irt/modelo-pdf}" class="btn btn-danger btn-sm rounded-pill px-3" target="_blank">
+                          <i class="fas fa-file-pdf me-1"></i> Modelo PDF (.pdf)
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Passo 2: Carregar Ficheiro -->
+                <div class="card border-0 bg-light rounded-3 p-3 mb-3">
+                  <div class="d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px;height:40px;">
+                      <span class="fw-bold text-success">2</span>
+                    </div>
+                    <div class="flex-grow-1">
+                      <p class="fw-semibold mb-1">Carregue o ficheiro preenchido</p>
+                      <p class="text-muted small mb-2">Selecione o ficheiro Excel (ou PDF) que preencheu com os escalões de IRT.</p>
+                      <div onclick="document.getElementById('importFile').click()" class="rounded-3 border border-2 border-secondary text-center p-3" style="cursor:pointer; border-style:dashed !important;">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-secondary mb-2 d-block"></i>
+                        <span class="text-muted small">Clique para selecionar o ficheiro (.xlsx, .xls, .pdf)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="alert alert-info border-0 rounded-3 py-2 px-3 small mb-0">
+                  <i class="fas fa-info-circle me-1"></i>
+                  Após carregar o ficheiro, os dados serão pré-visualizados na tabela. Confirme e clique em <strong>Guardar Tabela de IRT</strong>.
+                </div>
+
+              </div>
+              <div class="modal-footer border-0 px-4 pt-2 pb-4">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Fim Modal Importar IRT -->
+
+        <div class="card shadow-sm border-0 rounded-4">
           <div class="card-body p-4">
             <form th:action="@{/rh/parametros/irt/salvar}" method="POST">
               <div class="table-responsive">
-                <table class="table table-hover align-middle mb-3" id="tabelaIrt">
-                  <thead class="table-light">
+                <style>
+                  .tabela-irt-agt {
+                    border: 2px solid #222 !important;
+                    border-collapse: collapse !important;
+                    font-size: 0.88rem;
+                    width: 100%;
+                  }
+                  .tabela-irt-agt th, .tabela-irt-agt td {
+                    border: 1px solid #444 !important;
+                    padding: 6px 8px !important;
+                    vertical-align: middle !important;
+                  }
+                  .tabela-irt-agt thead tr:nth-child(1) th {
+                    background-color: #ffffff !important;
+                    color: #000 !important;
+                    font-size: 1rem;
+                  }
+                  .tabela-irt-agt thead tr:nth-child(2) th {
+                    background-color: #e9ecef !important;
+                    color: #000 !important;
+                  }
+                  .tabela-irt-agt tbody tr:nth-child(even) {
+                    background-color: #f8f9fa;
+                  }
+                  .tabela-irt-agt input.irt-input {
+                    background: transparent;
+                    border: 1px transparent solid;
+                    text-align: center;
+                    font-weight: 500;
+                    width: 100%;
+                    padding: 2px 4px;
+                    border-radius: 4px;
+                  }
+                  .tabela-irt-agt input.irt-input:focus {
+                    background-color: #ffffff;
+                    border-color: #0d6efd;
+                    outline: none;
+                    box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+                  }
+                  .tabela-irt-agt input.irt-input:hover {
+                    border-color: #ced4da;
+                  }
+                </style>
+
+                <table class="table tabela-irt-agt text-center mb-3" id="tabelaIrt">
+                  <thead>
                     <tr>
-                      <th style="min-width: 140px;">Mínimo (Kz)</th>
-                      <th style="min-width: 140px;">Máximo (Kz)</th>
-                      <th style="min-width: 120px;">Parcela Fixa (Kz)</th>
-                      <th style="min-width: 100px;">Alíquota Excesso (%)</th>
-                      <th style="width: 50px;"></th>
+                      <th colspan="10" class="text-start ps-3 fw-bold py-2">Tabela do IRT</th>
+                    </tr>
+                    <tr>
+                      <th style="width: 11%;" class="fw-bold">N.º</th>
+                      <th style="width: 8%;"></th>
+                      <th colspan="3" style="width: 33%;" class="fw-bold">GRUPOS DE RENDIMENTO (Kz)</th>
+                      <th colspan="2" style="width: 18%;" class="fw-bold">Parcela Fixa (Kz)</th>
+                      <th style="width: 8%;" class="fw-bold">Taxa</th>
+                      <th colspan="2" style="width: 22%;" class="fw-bold">Excesso (Kz)</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr th:each="esc : ${escaloes}">
-                      <td>
-                        <input type="number" step="0.01" min="0" name="limiteInferior" th:value="${esc.limiteInferior}" class="form-control rounded-3 form-control-sm" required>
-                      </td>
-                      <td>
-                        <input type="number" step="0.01" min="0" name="limiteSuperior" th:value="${esc.limiteSuperior}" class="form-control rounded-3 form-control-sm" placeholder="Sem limite (0)">
-                      </td>
-                      <td>
-                        <input type="number" step="0.01" min="0" name="parcelaFixa" th:value="${esc.parcelaFixa}" class="form-control rounded-3 form-control-sm" required>
-                      </td>
-                      <td>
-                        <div class="input-group input-group-sm">
-                          <input type="number" step="0.01" min="0" max="100" name="taxaExcesso" th:value="${esc.taxaExcesso}" class="form-control rounded-start-3" required>
-                          <span class="input-group-text rounded-end-3 bg-light">%</span>
-                        </div>
-                      </td>
-                      <td>
-                        <button type="button" onclick="removerLinha(this)" class="btn btn-sm btn-outline-danger rounded-circle">
+                    <tr th:each="esc, iter : ${escaloes}">
+                      <td class="fw-bold text-nowrap position-relative">
+                        <span class="escalao-rotulo" th:text="${iter.count + 'º Escalão'}">1º Escalão</span>
+                        <button type="button" onclick="removerLinha(this)" class="btn btn-link text-danger p-0 ms-1" style="font-size: 0.75rem; text-decoration: none;" title="Remover escalão">
                           <i class="fas fa-times"></i>
                         </button>
+                      </td>
+                      <td class="text-muted">Acima de</td>
+                      <td>
+                        <input type="number" step="0.01" min="0" name="limiteInferior" th:value="${esc.limiteInferior}" class="irt-input" required oninput="atualizarExcesso(this)" title="Valor em Kwanzas (Kz)">
+                      </td>
+                      <td class="text-muted">até</td>
+                      <td>
+                        <input type="number" step="0.01" min="0" name="limiteSuperior" th:value="${esc.limiteSuperior != null and esc.limiteSuperior > 0 ? esc.limiteSuperior : ''}" class="irt-input" placeholder="" title="Valor em Kwanzas (Kz)">
+                      </td>
+                      <td class="text-muted">Parcela Fixa</td>
+                      <td>
+                        <input type="number" step="0.01" min="0" name="parcelaFixa" th:value="${esc.parcelaFixa}" class="irt-input" required title="Valor em Kwanzas (Kz)">
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center justify-content-center">
+                          <input type="number" step="0.01" min="0" max="100" name="taxaExcesso" th:value="${esc.taxaExcesso > 0 ? esc.taxaExcesso : ''}" class="irt-input" placeholder="">
+                          <span th:if="${esc.taxaExcesso > 0}" class="small ms-1">%</span>
+                        </div>
+                      </td>
+                      <td class="text-muted">
+                        <span th:if="${esc.taxaExcesso > 0}">Excesso de</span>
+                      </td>
+                      <td>
+                        <span class="fw-bold valor-excesso" th:text="${esc.taxaExcesso > 0 ? #numbers.formatDecimal(esc.limiteInferior, 1, 'POINT', 0, 'COMMA') + ' Kz' : ''}"></span>
                       </td>
                     </tr>
                   </tbody>
@@ -134,7 +262,7 @@
 
               <div class="alert alert-info border-0 rounded-3 mb-4">
                 <i class="fas fa-info-circle me-2"></i>
-                <strong>Nota:</strong> Para o último escalão (sem limite superior), defina o valor do <strong>Máximo (Kz)</strong> como <strong>0</strong> ou vazio. A taxa de excesso incide sobre o rendimento que ultrapassa o valor mínimo estabelecido para a faixa.
+                <strong>Nota:</strong> Todos os valores de rendimentos e parcelas fixas estão expressos em <strong>Kwanzas (Kz)</strong>. Para o último escalão (sem limite superior), deixe o campo <strong>até</strong> em branco ou com valor <strong>0</strong>.
               </div>
 
               <div class="d-flex justify-content-end">
@@ -153,38 +281,77 @@
 </div>
 
 <script>
+function reindexarEscaloes() {
+  const rows = document.querySelectorAll('#tabelaIrt tbody tr');
+  rows.forEach((row, idx) => {
+    const escalaoNum = idx + 1;
+    const rotulo = row.querySelector('.escalao-rotulo');
+    if (rotulo) {
+      rotulo.textContent = escalaoNum + 'º Escalão';
+    }
+  });
+}
+
+function atualizarExcesso(input) {
+  const tr = input.closest('tr');
+  const excessSpan = tr.querySelector('.valor-excesso');
+  const taxaInput = tr.querySelector('input[name="taxaExcesso"]');
+  const taxaVal = parseFloat(taxaInput ? taxaInput.value : 0) || 0;
+  
+  if (excessSpan) {
+    const val = parseFloat(input.value) || 0;
+    if (taxaVal > 0 || val > 0) {
+      excessSpan.textContent = val.toLocaleString('pt-PT') + ' Kz';
+    } else {
+      excessSpan.textContent = '';
+    }
+  }
+}
+
 function adicionarLinhaEscalao() {
   const tbody = document.querySelector('#tabelaIrt tbody');
+  const count = tbody.rows.length + 1;
   const tr = document.createElement('tr');
   
-  tr.innerHTML = `
-    <td>
-      <input type="number" step="0.01" min="0" name="limiteInferior" class="form-control rounded-3 form-control-sm" required>
-    </td>
-    <td>
-      <input type="number" step="0.01" min="0" name="limiteSuperior" class="form-control rounded-3 form-control-sm" placeholder="Sem limite (0)">
-    </td>
-    <td>
-      <input type="number" step="0.01" min="0" name="parcelaFixa" class="form-control rounded-3 form-control-sm" value="0" required>
-    </td>
-    <td>
-      <div class="input-group input-group-sm">
-        <input type="number" step="0.01" min="0" max="100" name="taxaExcesso" class="form-control rounded-start-3" value="0" required>
-        <span class="input-group-text rounded-end-3 bg-light">%</span>
-      </div>
-    </td>
-    <td>
-      <button type="button" onclick="removerLinha(this)" class="btn btn-sm btn-outline-danger rounded-circle">
-        <i class="fas fa-times"></i>
-      </button>
-    </td>
-  `;
+  tr.innerHTML = 
+    '<td class="fw-bold text-nowrap position-relative">' +
+      '<span class="escalao-rotulo">' + count + 'º Escalão</span>' +
+      '<button type="button" onclick="removerLinha(this)" class="btn btn-link text-danger p-0 ms-1" style="font-size: 0.75rem; text-decoration: none;" title="Remover escalão">' +
+        '<i class="fas fa-times"></i>' +
+      '</button>' +
+    '</td>' +
+    '<td class="text-muted">Acima de</td>' +
+    '<td>' +
+      '<input type="number" step="0.01" min="0" name="limiteInferior" class="irt-input" value="0" required oninput="atualizarExcesso(this)" title="Valor em Kwanzas (Kz)">' +
+    '</td>' +
+    '<td class="text-muted">até</td>' +
+    '<td>' +
+      '<input type="number" step="0.01" min="0" name="limiteSuperior" class="irt-input" placeholder="" title="Valor em Kwanzas (Kz)">' +
+    '</td>' +
+    '<td class="text-muted">Parcela Fixa</td>' +
+    '<td>' +
+      '<input type="number" step="0.01" min="0" name="parcelaFixa" class="irt-input" value="0" required title="Valor em Kwanzas (Kz)">' +
+    '</td>' +
+    '<td>' +
+      '<div class="d-flex align-items-center justify-content-center">' +
+        '<input type="number" step="0.01" min="0" max="100" name="taxaExcesso" class="irt-input" value="0" required oninput="atualizarExcesso(this)">' +
+        '<span class="small ms-1">%</span>' +
+      '</div>' +
+    '</td>' +
+    '<td class="text-muted">' +
+      '<span>Excesso de</span>' +
+    '</td>' +
+    '<td>' +
+      '<span class="fw-bold valor-excesso">0 Kz</span>' +
+    '</td>';
   tbody.appendChild(tr);
+  reindexarEscaloes();
 }
 
 function removerLinha(btn) {
   const tr = btn.closest('tr');
   tr.remove();
+  reindexarEscaloes();
 }
 
 function importarTabela(input) {
@@ -194,18 +361,18 @@ function importarTabela(input) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-  const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+  const csrfTokenElement = document.querySelector('meta[name="_csrf"]');
+  const csrfHeaderElement = document.querySelector('meta[name="_csrf_header"]');
+  const csrfToken = csrfTokenElement ? csrfTokenElement.content : null;
+  const csrfHeader = csrfHeaderElement ? csrfHeaderElement.content : null;
 
   const headers = {};
   if (csrfHeader && csrfToken) {
     headers[csrfHeader] = csrfToken;
   }
 
-  // Remove any old alerts
-  document.querySelectorAll('.temp-alert').forEach(el => el.remove());
+  document.querySelectorAll('.temp-alert').forEach(function(el) { el.remove(); });
 
-  // Show a loading feedback
   const alertContainer = document.querySelector('.content-wrapper');
   const alertDiv = document.createElement('div');
   alertDiv.className = 'alert alert-info alert-dismissible fade show rounded-3 shadow-sm temp-alert';
@@ -217,14 +384,14 @@ function importarTabela(input) {
     headers: headers,
     body: formData
   })
-  .then(response => {
-    document.querySelectorAll('.temp-alert').forEach(el => el.remove());
+  .then(function(response) {
+    document.querySelectorAll('.temp-alert').forEach(function(el) { el.remove(); });
     if (!response.ok) {
-      return response.json().then(err => { throw new Error(err.error || "Erro ao ler o ficheiro."); });
+      return response.json().then(function(err) { throw new Error(err.error || "Erro ao ler o ficheiro."); });
     }
     return response.json();
   })
-  .then(data => {
+  .then(function(data) {
     if (!data || data.length === 0) {
       alert("Nenhum escalão de IRT foi encontrado ou interpretado no ficheiro.");
       return;
@@ -233,43 +400,58 @@ function importarTabela(input) {
     const tbody = document.querySelector('#tabelaIrt tbody');
     tbody.innerHTML = '';
     
-    data.forEach(esc => {
+    data.forEach(function(esc, idx) {
       const tr = document.createElement('tr');
       const limSupVal = esc.limiteSuperior > 0 ? esc.limiteSuperior : '';
-      tr.innerHTML = `
-        <td>
-          <input type="number" step="0.01" min="0" name="limiteInferior" value="${esc.limiteInferior}" class="form-control rounded-3 form-control-sm" required>
-        </td>
-        <td>
-          <input type="number" step="0.01" min="0" name="limiteSuperior" value="${limSupVal}" class="form-control rounded-3 form-control-sm" placeholder="Sem limite (0)">
-        </td>
-        <td>
-          <input type="number" step="0.01" min="0" name="parcelaFixa" value="${esc.parcelaFixa}" class="form-control rounded-3 form-control-sm" required>
-        </td>
-        <td>
-          <div class="input-group input-group-sm">
-            <input type="number" step="0.01" min="0" max="100" name="taxaExcesso" value="${esc.taxaExcesso}" class="form-control rounded-start-3" required>
-            <span class="input-group-text rounded-end-3 bg-light">%</span>
-          </div>
-        </td>
-        <td>
-          <button type="button" onclick="removerLinha(this)" class="btn btn-sm btn-outline-danger rounded-circle">
-            <i class="fas fa-times"></i>
-          </button>
-        </td>
-      `;
+      const taxaVal = esc.taxaExcesso > 0 ? esc.taxaExcesso : '';
+      const temTaxa = esc.taxaExcesso > 0;
+      const rotuloExcesso = temTaxa ? 'Excesso de' : '';
+      const valorExcesso = temTaxa ? esc.limiteInferior.toLocaleString('pt-PT') + ' Kz' : '';
+      const percentSpan = temTaxa ? '<span class="small ms-1">%</span>' : '';
+
+      tr.innerHTML = 
+        '<td class="fw-bold text-nowrap position-relative">' +
+          '<span class="escalao-rotulo">' + (idx + 1) + 'º Escalão</span>' +
+          '<button type="button" onclick="removerLinha(this)" class="btn btn-link text-danger p-0 ms-1" style="font-size: 0.75rem; text-decoration: none;" title="Remover escalão">' +
+            '<i class="fas fa-times"></i>' +
+          '</button>' +
+        '</td>' +
+        '<td class="text-muted">Acima de</td>' +
+        '<td>' +
+          '<input type="number" step="0.01" min="0" name="limiteInferior" value="' + esc.limiteInferior + '" class="irt-input" required oninput="atualizarExcesso(this)" title="Valor em Kwanzas (Kz)">' +
+        '</td>' +
+        '<td class="text-muted">até</td>' +
+        '<td>' +
+          '<input type="number" step="0.01" min="0" name="limiteSuperior" value="' + limSupVal + '" class="irt-input" placeholder="" title="Valor em Kwanzas (Kz)">' +
+        '</td>' +
+        '<td class="text-muted">Parcela Fixa</td>' +
+        '<td>' +
+          '<input type="number" step="0.01" min="0" name="parcelaFixa" value="' + esc.parcelaFixa + '" class="irt-input" required title="Valor em Kwanzas (Kz)">' +
+        '</td>' +
+        '<td>' +
+          '<div class="d-flex align-items-center justify-content-center">' +
+            '<input type="number" step="0.01" min="0" max="100" name="taxaExcesso" value="' + taxaVal + '" class="irt-input" placeholder="" oninput="atualizarExcesso(this)">' +
+            percentSpan +
+          '</div>' +
+        '</td>' +
+        '<td class="text-muted">' +
+          '<span>' + rotuloExcesso + '</span>' +
+        '</td>' +
+        '<td>' +
+          '<span class="fw-bold valor-excesso">' + valorExcesso + '</span>' +
+        '</td>';
       tbody.appendChild(tr);
     });
 
     const successDiv = document.createElement('div');
     successDiv.className = 'alert alert-success alert-dismissible fade show rounded-3 shadow-sm temp-alert';
-    successDiv.innerHTML = `<i class="fas fa-check-circle me-2"></i>Tabela importada com sucesso (${data.length} escalões carregados). Por favor, verifique e clique em "Guardar Tabela de IRT" para persistir as alterações.`;
+    successDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>Tabela importada com sucesso (' + data.length + ' escalões carregados). Por favor, verifique e clique em "Guardar Tabela de IRT" para persistir as alterações.';
     alertContainer.insertBefore(successDiv, alertContainer.firstChild);
     
     input.value = '';
   })
-  .catch(error => {
-    document.querySelectorAll('.temp-alert').forEach(el => el.remove());
+  .catch(function(error) {
+    document.querySelectorAll('.temp-alert').forEach(function(el) { el.remove(); });
     alert("Erro: " + error.message);
     input.value = '';
   });

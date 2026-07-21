@@ -114,21 +114,27 @@ public class FolhaSalarioService {
                 });
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void inicializarEscaloesPadraoIrtSeNecessario(Long empresaId) {
         List<EscalaoIrt> escaloes = escalaoIrtRepository.findByEmpresaIdOrderByLimiteInferiorAsc(empresaId);
-        if (escaloes.isEmpty()) {
+        boolean precisaInicializar = escaloes.isEmpty() || 
+            (escaloes.size() == 1 && escaloes.get(0).getLimiteInferior() == 0.0 && (escaloes.get(0).getLimiteSuperior() == null || escaloes.get(0).getLimiteSuperior() == 0.0));
+
+        if (precisaInicializar) {
+            escalaoIrtRepository.deleteByEmpresaId(empresaId);
             Empresa emp = empresaRepository.findById(empresaId).orElse(null);
             if (emp != null) {
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 0.0, 100000.0, 0.0, 0.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 100000.0, 150000.0, 3000.0, 10.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 150000.0, 200000.0, 8000.0, 13.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 200000.0, 300000.0, 14500.0, 16.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 300000.0, 500000.0, 30500.0, 18.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 500000.0, 1000000.0, 66500.0, 20.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 1000000.0, 1500000.0, 166500.0, 21.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 1500000.0, 2000000.0, 271500.0, 22.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 2000000.0, 5000000.0, 381500.0, 23.0));
-                escalaoIrtRepository.save(new EscalaoIrt(emp, 5000000.0, null, 1071500.0, 25.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 0.0, 150000.0, 0.0, 0.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 150000.0, 200000.0, 12500.0, 16.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 200000.0, 300000.0, 31250.0, 18.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 300000.0, 500000.0, 49250.0, 19.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 500000.0, 1000000.0, 87250.0, 20.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 1000000.0, 1500000.0, 187250.0, 21.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 1500000.0, 2000000.0, 292250.0, 22.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 2000000.0, 2500000.0, 402250.0, 23.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 2500000.0, 5000000.0, 517250.0, 24.0));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 5000000.0, 10000000.0, 1117250.0, 24.5));
+                escalaoIrtRepository.save(new EscalaoIrt(emp, 10000000.0, null, 2342250.0, 25.0));
             }
         }
     }

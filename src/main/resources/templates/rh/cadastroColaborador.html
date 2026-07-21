@@ -15,9 +15,27 @@
         </h1>
         <small class="text-muted">Preencha os dados do colaborador e os subsídios aplicáveis</small>
       </div>
-      <a th:href="@{/rh/colaboradores}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
-        <i class="fas fa-arrow-left me-1"></i> Voltar
-      </a>
+      <div class="d-flex gap-2">
+        <button th:if="${colaborador.id == null}" type="button" class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImportarColaboradores">
+          <i class="fas fa-file-import me-1"></i> IMPORTAR
+        </button>
+        <a th:href="@{/rh/colaboradores}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+          <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+      </div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm">
+      <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${errosImportacao}" class="alert alert-warning alert-dismissible fade show rounded-3 shadow-sm">
+      <h6 class="alert-heading fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Alguns registos foram ignorados na importação:</h6>
+      <ul class="mb-0 ps-3">
+         <li th:each="err : ${errosImportacao}" th:text="${err}"></li>
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
     <div th:if="${error}" class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm">
@@ -188,6 +206,110 @@
 
     </form>
   </div>
+  <!-- Modal Importar Colaboradores -->
+  <div class="modal fade" id="modalImportarColaboradores" tabindex="-1" aria-labelledby="modalImportarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow-lg">
+        <div class="modal-header border-0 pb-0 pt-4 px-4">
+          <h5 class="modal-title fw-bold" id="modalImportarLabel">
+            <i class="fas fa-file-import text-primary me-2"></i>Importar Colaboradores
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body p-4">
+          <p class="text-muted small mb-4">Escolha a origem dos dados para a importação. O sistema processa os dados de forma inteligente.</p>
+          
+          <!-- Abas de Navegação -->
+          <ul class="nav nav-pills nav-fill mb-4 p-1 bg-light rounded-pill" id="importTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active rounded-pill fw-semibold" id="excel-tab" data-bs-toggle="tab" data-bs-target="#excel" type="button" role="tab" aria-controls="excel" aria-selected="true">
+                <i class="fas fa-file-excel me-1 text-success"></i>Folha Excel
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill fw-semibold" id="pdf-tab" data-bs-toggle="tab" data-bs-target="#pdf" type="button" role="tab" aria-controls="pdf" aria-selected="false">
+                <i class="fas fa-file-pdf me-1 text-danger"></i>Relatório PDF
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link rounded-pill fw-semibold" id="erp-tab" data-bs-toggle="tab" data-bs-target="#erp" type="button" role="tab" aria-controls="erp" aria-selected="false">
+                <i class="fas fa-network-wired me-1 text-primary"></i>Outros ERPs / XML / JSON
+              </button>
+            </li>
+          </ul>
+          
+          <!-- Conteúdo das Abas -->
+          <div class="tab-content" id="importTabContent">
+            <!-- ABA EXCEL -->
+            <div class="tab-pane fade show active" id="excel" role="tabpanel" aria-labelledby="excel-tab">
+              <form th:action="@{/rh/colaboradores/importar-excel}" method="POST" enctype="multipart/form-data">
+                <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded-3 border">
+                  <div>
+                    <h6 class="fw-bold mb-1">Ficheiro Modelo de Importação</h6>
+                    <small class="text-muted">Utilize o nosso modelo pré-formatado para evitar erros de validação.</small>
+                  </div>
+                  <a th:href="@{/rh/colaboradores/modelo-excel}" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold">
+                    <i class="fas fa-download me-1"></i>Descarregar Modelo
+                  </a>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Selecione o ficheiro Excel (.xlsx, .xls)</label>
+                  <input type="file" name="file" accept=".xlsx, .xls" class="form-control rounded-3" required>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Fechar</button>
+                  <button type="submit" class="btn btn-success rounded-pill px-4 fw-semibold">
+                    <i class="fas fa-upload me-1"></i>Importar Excel
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- ABA PDF -->
+            <div class="tab-pane fade" id="pdf" role="tabpanel" aria-labelledby="pdf-tab">
+              <form th:action="@{/rh/colaboradores/importar-pdf}" method="POST" enctype="multipart/form-data">
+                <div class="alert alert-info border-0 rounded-3 mb-3">
+                  <i class="fas fa-info-circle me-2"></i>
+                  O analisador inteligente lê o texto do PDF e detecta colaboradores baseando-se no NIF (9 dígitos) e em nomes e salários.
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Selecione o ficheiro PDF (.pdf)</label>
+                  <input type="file" name="file" accept=".pdf" class="form-control rounded-3" required>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Fechar</button>
+                  <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold">
+                    <i class="fas fa-upload me-1"></i>Importar PDF
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- ABA ERP -->
+            <div class="tab-pane fade" id="erp" role="tabpanel" aria-labelledby="erp-tab">
+              <form th:action="@{/rh/colaboradores/importar-erp}" method="POST" enctype="multipart/form-data">
+                <div class="alert alert-info border-0 rounded-3 mb-3">
+                  <i class="fas fa-lightbulb me-2"></i>
+                  Importe ficheiros exportados de sistemas como <strong>Primavera, Odoo, SAP</strong> nos formatos <strong>JSON, XML ou CSV</strong>. O sistema mapeia os campos de forma inteligente.
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Selecione o ficheiro de exportação (.csv, .json, .xml)</label>
+                  <input type="file" name="file" accept=".csv, .json, .xml" class="form-control rounded-3" required>
+                </div>
+                <div class="d-flex justify-content-end mt-4">
+                  <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Fechar</button>
+                  <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                    <i class="fas fa-upload me-1"></i>Importar Ficheiro ERP
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer th:replace="menu :: footer"></footer>
 </div>
 </body>
