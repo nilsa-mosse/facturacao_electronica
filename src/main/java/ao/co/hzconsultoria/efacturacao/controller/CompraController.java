@@ -67,6 +67,9 @@ public class CompraController {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.AuditoriaService auditoriaService;
+
     @GetMapping("/pos")
     public String abrirPDV(Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (!caixaService.isCaixaAberto()) {
@@ -125,6 +128,15 @@ public class CompraController {
             tipoDocumento = "FT";
         }
         Compra compraSalva = vendaService.finalizarVenda(compra, tipoDocumento);
+
+        auditoriaService.registar(
+                "EMISSAO_DOCUMENTO",
+                "Compra",
+                String.valueOf(compraSalva.getId()),
+                null,
+                "Tipo: " + tipoDocumento + " | Total: " + compraSalva.getTotal() + " Kz | Cliente: " + compraSalva.getNomeCliente(),
+                "Venda realizada com sucesso no POS"
+        );
 
         java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
         String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "DOC-" + compraSalva.getId();

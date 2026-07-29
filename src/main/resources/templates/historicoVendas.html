@@ -21,42 +21,54 @@
 
             <section class="content">
                 <div class="container-fluid">
-                    <!-- KPI Cards -->
-                    <div class="row mb-4">
+                    <!-- KPI Cards Modernizados -->
+                    <div class="row mb-4 g-3">
                         <div class="col-md-3">
-                            <div class="premium-card grad-primary" onclick="filterByStatus('todos')">
-                                <div class="info-box-icon"><i class="fas fa-file-invoice"></i></div>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Total de Facturas</span>
-                                    <span class="info-box-number" th:text="${totalVendas}">0</span>
+                            <div class="kpi-card kpi-card-total" onclick="filterByStatus('todos')">
+                                <div class="kpi-icon-wrapper">
+                                    <i class="fas fa-file-invoice"></i>
                                 </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Total de Facturas</span>
+                                    <span class="kpi-number" th:text="${totalVendas}">0</span>
+                                </div>
+                                <div class="kpi-badge"><i class="fas fa-layer-group me-1"></i> Todos</div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="premium-card grad-success" onclick="filterByStatus('EMITIDA')">
-                                <div class="info-box-icon"><i class="fas fa-check-circle"></i></div>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Emitidas</span>
-                                    <span class="info-box-number" th:text="${emitidasCount}">0</span>
+                            <div class="kpi-card kpi-card-success" onclick="filterByStatus('EMITIDA')">
+                                <div class="kpi-icon-wrapper">
+                                    <i class="fas fa-check-circle"></i>
                                 </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Emitidas</span>
+                                    <span class="kpi-number" th:text="${emitidasCount}">0</span>
+                                </div>
+                                <div class="kpi-badge"><i class="fas fa-check me-1"></i> Ativas</div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="premium-card grad-warning" onclick="filterByStatus('SUBSTITUIDA')">
-                                <div class="info-box-icon"><i class="fas fa-sync"></i></div>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Substituídas</span>
-                                    <span class="info-box-number" th:text="${substituidasCount != null ? substituidasCount : 0}">0</span>
+                            <div class="kpi-card kpi-card-warning" onclick="filterByStatus('SUBSTITUIDA')">
+                                <div class="kpi-icon-wrapper">
+                                    <i class="fas fa-sync-alt"></i>
                                 </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Substituídas</span>
+                                    <span class="kpi-number" th:text="${substituidasCount != null ? substituidasCount : 0}">0</span>
+                                </div>
+                                <div class="kpi-badge"><i class="fas fa-history me-1"></i> Alteradas</div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="premium-card grad-danger" onclick="filterByStatus('CANCELADA')">
-                                <div class="info-box-icon"><i class="fas fa-ban"></i></div>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Anuladas</span>
-                                    <span class="info-box-number" th:text="${canceladasCount}">0</span>
+                            <div class="kpi-card kpi-card-danger" onclick="filterByStatus('CANCELADA')">
+                                <div class="kpi-icon-wrapper">
+                                    <i class="fas fa-ban"></i>
                                 </div>
+                                <div class="kpi-details">
+                                    <span class="kpi-title">Anuladas</span>
+                                    <span class="kpi-number" th:text="${canceladasCount}">0</span>
+                                </div>
+                                <div class="kpi-badge"><i class="fas fa-times me-1"></i> Canceladas</div>
                             </div>
                         </div>
                     </div>
@@ -781,22 +793,122 @@
     </script>
 
     <style>
-        .premium-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 25px; cursor: pointer; transition: all 0.3s; color: white; display: flex; align-items: center; gap: 20px; }
-        .premium-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-        .grad-primary { background: linear-gradient(135deg, #4361ee, #4895ef); }
-        .grad-success { background: linear-gradient(135deg, #2ec4b6, #cbf3f0); color: #000 !important; }
-        .grad-danger { background: linear-gradient(135deg, #e71d36, #ff9f1c); }
-        .grad-warning { background: linear-gradient(135deg, #ff9f1c, #ffbf69); color: #000 !important; }
-        .info-box-icon { font-size: 2.5rem; opacity: 0.8; }
-        .info-box-content { display: flex; flex-direction: column; }
-        .info-box-text { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-        .info-box-number { font-size: 1.8rem; font-weight: 800; }
-        .bg-soft-success { background: rgba(46,196,182,0.1); }
-        .bg-soft-danger { background: rgba(231,29,54,0.1); }
-        .bg-soft-warning { background: rgba(255,159,28,0.1); }
-        .bg-soft-primary { background: rgba(67,97,238,0.1); }
-        .rounded-pill-start { border-top-left-radius: 50px !important; border-bottom-left-radius: 50px !important; }
-        .rounded-pill-end { border-top-right-radius: 50px !important; border-bottom-right-radius: 50px !important; }
+        /* Modern KPI Cards */
+        .kpi-card {
+            position: relative;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 22px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 15px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            border-radius: 20px 0 0 20px;
+            transition: width 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.09), 0 10px 15px -5px rgba(0, 0, 0, 0.04);
+            border-color: transparent;
+        }
+
+        .kpi-card:hover::before {
+            width: 100%;
+            opacity: 0.06;
+        }
+
+        /* Variantes de cores KPI */
+        .kpi-card-total::before { background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); }
+        .kpi-card-total .kpi-icon-wrapper { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+        .kpi-card-total .kpi-badge { background: #eef2ff; color: #4338ca; }
+
+        .kpi-card-success::before { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .kpi-card-success .kpi-icon-wrapper { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .kpi-card-success .kpi-badge { background: #ecfdf5; color: #047857; }
+
+        .kpi-card-warning::before { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .kpi-card-warning .kpi-icon-wrapper { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .kpi-card-warning .kpi-badge { background: #fffbeb; color: #b45309; }
+
+        .kpi-card-danger::before { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); }
+        .kpi-card-danger .kpi-icon-wrapper { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .kpi-card-danger .kpi-badge { background: #fef2f2; color: #b91c1c; }
+
+        .kpi-icon-wrapper {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.45rem;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover .kpi-icon-wrapper {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .kpi-details {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .kpi-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+
+        .kpi-number {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .kpi-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+        }
+
+        /* Suporte ao Modo Escuro para KPI Cards */
+        .dark-mode .kpi-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .dark-mode .kpi-number { color: #f8fafc; }
+        .dark-mode .kpi-title { color: #94a3b8; }
+        .dark-mode .kpi-card-total .kpi-badge { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .dark-mode .kpi-card-success .kpi-badge { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .dark-mode .kpi-card-warning .kpi-badge { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .dark-mode .kpi-card-danger .kpi-badge { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 
         /* Botões de acção premium */
         .btn-light-primary {
@@ -835,7 +947,6 @@
             font-weight: 500;
             transition: all 0.2s ease;
         }
-        /* Consistência e alinhamento dos ícones no dropdown */
         .dropdown-menu .dropdown-item i {
             display: inline-block;
             width: 20px;
@@ -844,7 +955,6 @@
             font-size: 0.95rem;
             vertical-align: middle;
         }
-        /* Efeitos Hover adaptados para temas Claro e Escuro */
         .dropdown-menu .dropdown-item:hover {
             background-color: rgba(67, 97, 238, 0.1) !important;
             color: #4361ee !important;
@@ -854,7 +964,6 @@
             color: #e71d36 !important;
         }
 
-        /* Botões de acção sempre visíveis */
         tbody tr .row-actions .btn,
         tbody tr .row-actions .dropdown,
         tbody tr .row-actions a,

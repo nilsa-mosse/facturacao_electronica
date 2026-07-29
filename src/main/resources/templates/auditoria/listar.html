@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="menu :: head"></head>
+
+<style>
+    .content-wrapper { background-color: #f8fafc !important; }
+    
+    .page-header-modern {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+    }
+    .page-header-modern h2 {
+        font-weight: 800; color: #1e293b; margin: 0; letter-spacing: -0.02em;
+    }
+    
+    .premium-table-card {
+        background: white; border-radius: 20px;
+        border: 1px solid rgba(226,232,240,0.8);
+        box-shadow: 0 4px 15px -2px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+    .table thead th {
+        background: #f8fafc; color: #64748b; font-weight: 700;
+        text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em;
+        padding: 16px 20px; border-bottom: 1px solid #f1f5f9;
+    }
+    .table tbody td {
+        padding: 14px 20px; color: #1e293b; font-weight: 500; font-size: 0.88rem;
+        vertical-align: middle; border-bottom: 1px solid #f8fafc;
+    }
+    
+    .audit-action-badge {
+        font-size: 0.72rem; font-weight: 800; padding: 5px 12px; border-radius: 12px; text-transform: uppercase;
+    }
+    .action-create { background: #ecfdf5; color: #047857; }
+    .action-edit { background: #eef2ff; color: #4338ca; }
+    .action-delete { background: #fef2f2; color: #b91c1c; }
+    .action-info { background: #f0f9ff; color: #0369a1; }
+    
+    .ip-box {
+        font-family: monospace; font-size: 0.8rem; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; color: #475569;
+    }
+    .host-box {
+        font-size: 0.8rem; font-weight: 600; color: #334155;
+    }
+</style>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <main class="content-wrapper">
+            <div class="container-fluid px-4 py-4">
+
+                <!-- Header -->
+                <div class="page-header-modern">
+                    <div>
+                        <h2><i class="fas fa-shield-alt text-primary me-2"></i>Auditoria do Sistema</h2>
+                        <p class="text-muted small mb-0">Registo completo e rastreabilidade de todas as alterações, acessos e operações no sistema.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary px-3 py-2 rounded-pill fw-bold">
+                            <i class="fas fa-database me-1"></i> <span th:text="${totalItems}">0</span> Registos
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Table Card -->
+                <div class="premium-table-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Data / Hora</th>
+                                    <th>Operador</th>
+                                    <th>IP / Computador</th>
+                                    <th>Ação</th>
+                                    <th>Entidade / Ref</th>
+                                    <th>Valor Anterior</th>
+                                    <th>Valor Novo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="a : ${registos}">
+                                    <td>
+                                        <div class="fw-bold" th:text="${#temporals.format(a.dataHora, 'dd/MM/yyyy HH:mm:ss')}"></div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark" th:text="${a.nomeUsuario ?: 'SISTEMA'}"></div>
+                                        <div class="small text-muted" th:text="${a.emailUsuario ?: '-'}"></div>
+                                    </td>
+                                    <td>
+                                        <div class="host-box"><i class="fas fa-desktop me-1 text-muted"></i> <span th:text="${a.nomeComputador}"></span></div>
+                                        <span class="ip-box" th:text="${a.ipCliente}"></span>
+                                    </td>
+                                    <td>
+                                        <span class="audit-action-badge"
+                                              th:classappend="${a.acao.contains('CRIAR') || a.acao.contains('NOVO') ? 'action-create' : (a.acao.contains('EDIT') || a.acao.contains('ALTER') ? 'action-edit' : (a.acao.contains('EXCLU') || a.acao.contains('ANUL') ? 'action-delete' : 'action-info'))}"
+                                              th:text="${a.acao}">
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-primary" th:text="${a.entidade}"></div>
+                                        <div class="small text-muted" th:text="'ID: ' + ${a.entidadeId}"></div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted text-break" style="max-width: 200px;" th:text="${a.valorAnterior ?: '-'}"></div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-dark text-break" style="max-width: 200px;" th:text="${a.valorNovo ?: '-'}"></div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(registos)}">
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="fas fa-shield-alt fa-3x mb-3 text-slate-300"></i>
+                                        <p class="mb-0">Nenhum registo de auditoria encontrado.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Paginação -->
+                <nav th:if="${totalPages > 1}" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li th:each="p : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${p == currentPage} ? 'active'">
+                            <a class="page-link shadow-sm border-0 mx-1 rounded-3"
+                               th:href="@{/auditoria(page=${p})}"
+                               th:text="${p + 1}"></a>
+                        </li>
+                    </ul>
+                </nav>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

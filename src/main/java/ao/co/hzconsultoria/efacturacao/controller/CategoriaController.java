@@ -5,9 +5,11 @@ import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
+import ao.co.hzconsultoria.efacturacao.service.CategoriaImportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.LinkedHashMap;
@@ -24,6 +26,9 @@ public class CategoriaController {
 
     @Autowired
     private EmpresaRepository empresaRepository;
+
+    @Autowired
+    private CategoriaImportService categoriaImportService;
 
     // ── Utilitário: converter Categoria em DTO simples (evita referência circular) ──
     private Map<String, Object> toDto(Categoria c) {
@@ -127,6 +132,39 @@ public class CategoriaController {
                     .body("Não é possível eliminar esta categoria porque existem produtos associados a ela.");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Erro ao eliminar a categoria: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/importar")
+    public ResponseEntity<?> importar(@RequestParam("file") MultipartFile file) {
+        Long empresaId = SecurityUtils.getCurrentEmpresaId();
+        if (empresaId == null) {
+            return ResponseEntity.status(401).body("Utilizador não tem empresa associada.");
+        }
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        if (empresa == null) {
+            return ResponseEntity.badRequest().body("Empresa não encontrada no sistema.");
+        }
+
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Por favor, selecione um ficheiro para importar.");
+        }
+
+        try {
+            CategoriaImportService.ImportResult result = categoriaImportService.importCategorias(file, empresa);
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("sucesso", true);
+            response.put("importados", result.getImported());
+            response.put("duplicados", result.getDuplicates());
+            response.put("mensagem", String.format("Importação concluída! %d categorias importadas com sucesso. %d duplicadas foram ignoradas.", 
+                    result.getImported(), result.getDuplicates()));
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Erro ao processar ficheiro: " + e.getMessage());
         }
     }
 }
