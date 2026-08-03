@@ -98,7 +98,8 @@ public class SecurityConfig {
                     "/api/vendas-suspensas/**",
                     "/ativar-licenca",
                     "/setup-inicial/**",
-                    "/clientes/api/adicionar"
+                    "/clientes/api/adicionar",
+                    "/ia/**"
                 )
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 

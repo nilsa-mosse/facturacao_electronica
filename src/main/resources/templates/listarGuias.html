@@ -15,12 +15,12 @@
                 <!-- Page Header -->
                 <div class="row mb-4 align-items-center">
                     <div class="col-md-6">
-                        <h2 class="fw-800 text-dark"><i class="fas fa-truck-loading me-2 text-primary"></i> Guias de Remessa</h2>
-                        <p class="text-muted">Gestão de documentos de transporte e movimentação de mercadorias.</p>
+                        <h2 class="fw-800 text-dark"><i class="fas fa-truck-loading me-2 text-primary"></i> <span th:text="#{guias.titulo}">Guias de Remessa</span></h2>
+                        <p class="text-muted" th:text="#{guias.subtitulo}">Gestão de documentos de transporte e movimentação de mercadorias.</p>
                     </div>
                     <div class="col-md-6 text-end">
                         <a th:href="@{/guias/nova}" class="btn btn-primary shadow-sm px-4 py-2 rounded-pill">
-                            <i class="fas fa-plus me-2"></i> Emitir Nova Guia
+                            <i class="fas fa-plus me-2"></i> <span th:text="#{guias.btn.nova}">Emitir Nova Guia</span>
                         </a>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                         <div class="premium-card grad-primary" style="cursor: pointer;" id="cardTotal">
                             <div class="info-box-icon"><i class="fas fa-file-contract"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Total de Guias</span>
+                                <span class="info-box-text" th:text="#{guias.kpi.total}">Total de Guias</span>
                                 <span class="info-box-number" th:text="${totalGuias}">0</span>
                             </div>
                         </div>
@@ -40,7 +40,7 @@
                         <div class="premium-card grad-success" style="cursor: pointer;" id="cardActivas">
                             <div class="info-box-icon"><i class="fas fa-route"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Guias Activas</span>
+                                <span class="info-box-text" th:text="#{guias.kpi.activas}">Guias Activas</span>
                                 <span class="info-box-number" th:text="${guiasActivas}">0</span>
                             </div>
                         </div>
@@ -49,7 +49,7 @@
                         <div class="premium-card grad-warning" style="cursor: pointer;" id="cardSubstituidas">
                             <div class="info-box-icon"><i class="fas fa-history"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Guias Substituídas</span>
+                                <span class="info-box-text" th:text="#{guias.kpi.substituidas}">Guias Substituídas</span>
                                 <span class="info-box-number" th:text="${guiasSubstituidas}">0</span>
                             </div>
                         </div>
@@ -64,11 +64,11 @@
                                 <i class="fas fa-info-circle fa-2x"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <h6 class="fw-bold mb-1 text-dark">Propósito das Guias Activas</h6>
+                                <h6 class="fw-bold mb-1 text-dark" th:text="#{guias.proposito.titulo}">Propósito das Guias Activas</h6>
                                 <div class="d-flex flex-wrap gap-3 small text-muted">
-                                    <span><i class="fas fa-shield-alt text-primary me-1"></i> Auditorias Fiscais</span>
-                                    <span><i class="fas fa-clipboard-check text-success me-1"></i> Controlo Interno</span>
-                                    <span><i class="fas fa-map-marker-alt text-info me-1"></i> Tracking de Mercadorias</span>
+                                    <span><i class="fas fa-shield-alt text-primary me-1"></i> <span th:text="#{guias.proposito.auditorias}">Auditorias Fiscais</span></span>
+                                    <span><i class="fas fa-clipboard-check text-success me-1"></i> <span th:text="#{guias.proposito.controlo}">Controlo Interno</span></span>
+                                    <span><i class="fas fa-map-marker-alt text-info me-1"></i> <span th:text="#{guias.proposito.tracking}">Tracking de Mercadorias</span></span>
                                 </div>
                             </div>
                         </div>
@@ -78,10 +78,10 @@
                 <!-- List Content -->
                 <div class="card border-0 shadow-sm overflow-hidden">
                     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fs-16 fw-700 text-dark">Histórico de Movimentação</h5>
+                        <h5 class="mb-0 fs-16 fw-700 text-dark" th:text="#{guias.historico.titulo}">Histórico de Movimentação</h5>
                         <div class="input-group input-group-sm rounded-pill border overflow-hidden shadow-sm" style="width: 250px;">
                             <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
-                            <input type="text" class="form-control border-0" placeholder="Pesquisar guia...">
+                            <input type="text" class="form-control border-0" th:placeholder="#{guias.pesquisar.placeholder}">
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -89,13 +89,13 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light small fw-bold text-muted uppercase">
                                     <tr>
-                                        <th class="ps-4">Nº da Guia</th>
-                                        <th>Data Emissão</th>
-                                        <th>Cliente</th>
-                                        <th>Origem - Destino</th>
-                                        <th>Viatura / Motorista</th>
-                                        <th class="text-center">Estado</th>
-                                        <th class="text-center pe-4">Acções</th>
+                                        <th class="ps-4" th:text="#{guias.col.numero}">Nº da Guia</th>
+                                        <th th:text="#{notas.column.data}">Data Emissão</th>
+                                        <th th:text="#{column.cliente}">Cliente</th>
+                                        <th th:text="#{guias.col.origem_destino}">Origem - Destino</th>
+                                        <th th:text="#{guias.col.viatura_motorista}">Viatura / Motorista</th>
+                                        <th class="text-center" th:text="#{column.estado}">Estado</th>
+                                        <th class="text-center pe-4" th:text="#{column.acoes}">Acções</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabelaGuiasBody">
@@ -131,16 +131,16 @@
                                         </td>
                                          <td class="text-center">
                                             <span th:if="${guia.status == 'ATIVA'}" class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-2">
-                                                <i class="fas fa-check-circle me-1"></i> Activa
+                                                <i class="fas fa-check-circle me-1"></i> <span th:text="#{status.ativo}">Activa</span>
                                             </span>
                                             <span th:if="${guia.status == 'FECHADA'}" class="badge bg-soft-primary text-primary border border-primary rounded-pill px-3 py-2">
                                                 <i class="fas fa-lock me-1"></i> Fechada
                                             </span>
                                             <span th:if="${guia.status == 'ANULADA'}" class="badge bg-soft-secondary text-secondary border border-secondary rounded-pill px-3 py-2">
-                                                <i class="fas fa-ban me-1"></i> Anulada
+                                                <i class="fas fa-ban me-1"></i> <span th:text="#{status.cancelado}">Anulada</span>
                                             </span>
                                             <span th:if="${guia.status == 'SUBSTITUIDA'}" class="badge bg-soft-warning text-warning border border-warning rounded-pill px-3 py-2">
-                                                <i class="fas fa-sync me-1"></i> Substituída
+                                                <i class="fas fa-sync me-1"></i> <span th:text="#{vendas.kpi.substituidas}">Substituída</span>
                                             </span>
                                          </td>
                                         <td class="text-center pe-4">
@@ -167,7 +167,7 @@
                                         <td colspan="7" class="text-center py-5 text-muted bg-white">
                                             <div class="py-4">
                                                 <i class="fas fa-truck-moving mb-3 fs-40 opacity-20"></i>
-                                                <p class="mb-0">Ainda não foram emitidas guias de remessa.</p>
+                                                <p class="mb-0" th:text="#{guias.empty}">Ainda não foram emitidas guias de remessa.</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -181,7 +181,7 @@
                 <div class="row mt-4">
                     <div class="col-12 text-end">
                         <a th:href="@{/dashboard}" class="btn btn-light shadow-sm border px-4 py-2">
-                            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+                            <i class="fas fa-arrow-left me-2"></i> <span th:text="#{vendas.voltar_dashboard}">Voltar ao Dashboard</span>
                         </a>
                     </div>
                 </div>

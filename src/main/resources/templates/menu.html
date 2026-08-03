@@ -100,9 +100,10 @@
         <form th:action="@{/logout}" method="post" id="logoutFormMenu" class="d-none">
         </form>
         <a class="nav-link text-danger fw-bold d-flex align-items-center gap-2 px-3" href="javascript:void(0)"
-          onclick="document.getElementById('logoutFormMenu').submit();" title="Sair do Sistema">
+          onclick="document.getElementById('logoutFormMenu').submit();" th:title="#{menu.sair.tooltip}"
+          title="Sair do Sistema">
           <i class="fas fa-power-off"></i>
-          <span class="d-none d-sm-inline">Sair</span>
+          <span class="d-none d-sm-inline" th:text="#{menu.sair}">Sair</span>
         </a>
       </li>
     </ul>
@@ -126,18 +127,19 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- HOME MODULE (OPERATORS AND USERS) -->
           <th:block th:if="${!isAdmin and !isSuperAdmin}">
-            <li class="nav-header">GERAL</li>
+            <li class="nav-header" th:text="#{menu.header.geral}">GERAL</li>
             <li class="nav-item">
               <a th:href="@{/home}" class="nav-link">
                 <i class="nav-icon fas fa-home"></i>
-                <p>Página Inicial</p>
+                <p th:text="#{menu.home}">Página Inicial</p>
               </a>
             </li>
           </th:block>
 
           <!-- DASHBOARD MODULE -->
           <th:block th:if="${modulo_DASHBOARD}">
-            <li class="nav-header module-dashboard-header">PAINEL DE CONTROLO</li>
+            <li class="nav-header module-dashboard-header" th:text="#{menu.header.painel_controlo}">PAINEL DE CONTROLO
+            </li>
             <li class="nav-item module-dashboard-item">
               <a th:href="@{/dashboard}" class="nav-link">
                 <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -156,29 +158,30 @@
 
           <!-- SALES MODULE -->
           <th:block th:if="${modulo_VENDAS}">
-            <li class="nav-header module-vendas-header">VENDAS & OPERAÇÕES</li>
+            <li class="nav-header module-vendas-header" th:text="#{menu.header.vendas_operacoes}">VENDAS & OPERAÇÕES
+            </li>
             <li class="nav-item module-vendas-item">
               <a th:href="@{/pos}" class="nav-link bg-primary shadow-sm mb-1">
                 <i class="nav-icon fas fa-cash-register"></i>
-                <p><b>Ponto de Venda (POS)</b></p>
+                <p><b th:text="#{menu.vendas.pos}">Ponto de Venda (POS)</b></p>
               </a>
             </li>
             <li class="nav-item module-vendas-item" th:if="${isOperador}">
               <a th:href="@{/caixa/abertura}" class="nav-link">
                 <i class="nav-icon fas fa-door-open"></i>
-                <p>Abertura de Caixa</p>
+                <p th:text="#{menu.vendas.abertura_caixa}">Abertura de Caixa</p>
               </a>
             </li>
             <li class="nav-item module-vendas-item" th:if="${isOperador}">
               <a th:href="@{/caixa/fecho}" class="nav-link">
                 <i class="nav-icon fas fa-door-closed"></i>
-                <p>Fecho de Caixa</p>
+                <p th:text="#{menu.vendas.fecho_caixa}">Fecho de Caixa</p>
               </a>
             </li>
             <li class="nav-item module-vendas-item" th:if="${isAdmin or isSuperAdmin}">
               <a th:href="@{/caixa/monitor}" class="nav-link">
                 <i class="nav-icon fas fa-desktop"></i>
-                <p>Monitor de Caixas</p>
+                <p th:text="#{menu.vendas.monitor_caixas}">Monitor de Caixas</p>
               </a>
             </li>
             <li class="nav-item module-vendas-item">
@@ -190,19 +193,19 @@
             <li class="nav-item module-vendas-item">
               <a th:href="@{/devolucoes}" class="nav-link">
                 <i class="nav-icon fas fa-undo"></i>
-                <p>Devoluções / Reembolsos</p>
+                <p th:text="#{menu.vendas.devolucoes}">Devoluções / Reembolsos</p>
               </a>
             </li>
           </th:block>
 
           <!-- INVENTORY MODULE -->
           <th:block th:if="${modulo_STOCK}">
-            <li class="nav-header module-stock-header">GESTÃO DE STOCK</li>
+            <li class="nav-header module-stock-header" th:text="#{menu.header.gestao_stock}">GESTÃO DE STOCK</li>
             <li class="nav-item has-treeview module-stock-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-boxes"></i>
                 <p>
-                  Produtos & Serviços
+                  <span th:text="#{menu.stock.produtos_servicos}">Produtos & Serviços</span>
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
@@ -210,31 +213,31 @@
                 <li class="nav-item">
                   <a th:href="@{/produtos/listar}" class="nav-link">
                     <i class="fas fa-list nav-icon"></i>
-                    <p>Lista de Produtos</p>
+                    <p th:text="#{menu.produtos.lista}">Lista de Produtos</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/cadastroProduto}" class="nav-link">
                     <i class="fas fa-plus nav-icon"></i>
-                    <p>Novo Produto</p>
+                    <p th:text="#{menu.produtos.adicionar}">Novo Produto</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/stock/saldos}" class="nav-link">
                     <i class="fas fa-warehouse nav-icon"></i>
-                    <p>Saldos de Stock</p>
+                    <p th:text="#{menu.stock.saldos}">Saldos de Stock</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/categorias/listar}" class="nav-link">
                     <i class="fas fa-tags nav-icon"></i>
-                    <p>Categorias</p>
+                    <p th:text="#{menu.produtos.categorias}">Categorias</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/gestao-inventarios}" class="nav-link">
                     <i class="fas fa-clipboard-check nav-icon"></i>
-                    <p>Gestão de Inventários</p>
+                    <p th:text="#{menu.stock.gestao_inventarios}">Gestão de Inventários</p>
                   </a>
                 </li>
               </ul>
@@ -243,7 +246,7 @@
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-exchange-alt"></i>
                 <p>
-                  Movimentações
+                  <span th:text="#{menu.stock.movimentacoes}">Movimentações</span>
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
@@ -251,19 +254,19 @@
                 <li class="nav-item">
                   <a th:href="@{/stock/entrada}" class="nav-link">
                     <i class="fas fa-sign-in-alt nav-icon"></i>
-                    <p>Entradas</p>
+                    <p th:text="#{menu.inventario.entradas}">Entradas</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/stock/saida}" class="nav-link">
                     <i class="fas fa-sign-out-alt nav-icon"></i>
-                    <p>Saídas</p>
+                    <p th:text="#{menu.inventario.saidas}">Saídas</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/stock/ajuste}" class="nav-link">
                     <i class="fas fa-tools nav-icon"></i>
-                    <p>Ajustes de Stock</p>
+                    <p th:text="#{menu.inventario.ajustes}">Ajustes de Stock</p>
                   </a>
                 </li>
               </ul>
@@ -272,8 +275,8 @@
               <a th:href="@{/stock/alertas}" class="nav-link text-danger">
                 <i class="nav-icon fas fa-exclamation-triangle"></i>
                 <p>
-                  Alertas de Ruptura
-                  <span class="right badge bg-danger">STOCK BAIXO</span>
+                  <span th:text="#{menu.stock.alertas_ruptura}">Alertas de Ruptura</span>
+                  <span class="right badge bg-danger" th:text="#{menu.stock.badge_baixo}">STOCK BAIXO</span>
                 </p>
               </a>
             </li>
@@ -281,47 +284,48 @@
 
           <!-- ENTITIES MODULE -->
           <th:block th:if="${modulo_ENTIDADES}">
-            <li class="nav-header module-entidades-header">ENTIDADES</li>
+            <li class="nav-header module-entidades-header" th:text="#{menu.header.entidades}">ENTIDADES</li>
             <li class="nav-item module-entidades-item">
               <a th:href="@{/clientes/listar}" class="nav-link">
                 <i class="nav-icon fas fa-users"></i>
-                <p>Clientes</p>
+                <p th:text="#{menu.clientes}">Clientes</p>
               </a>
             </li>
             <li class="nav-item module-entidades-item">
               <a th:href="@{/fornecedores/listar}" class="nav-link">
                 <i class="nav-icon fas fa-truck"></i>
-                <p>Fornecedores</p>
+                <p th:text="#{menu.fornecedores}">Fornecedores</p>
               </a>
             </li>
           </th:block>
 
           <!-- BILLING MODULE -->
           <th:block th:if="${modulo_FACTURACAO}">
-            <li class="nav-header module-facturacao-header">FACTURAÇÃO & FISCAL</li>
+            <li class="nav-header module-facturacao-header" th:text="#{menu.header.facturacao_fiscal}">FACTURAÇÃO &
+              FISCAL</li>
             <li class="nav-item module-facturacao-item">
               <a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link">
                 <i class="nav-icon fas fa-file-invoice-dollar"></i>
-                <p>Facturas Emitidas</p>
+                <p th:text="#{menu.facturacao.emitidas}">Facturas Emitidas</p>
               </a>
             </li>
             <li class="nav-item module-facturacao-item">
               <a th:href="@{/guias/listar}" class="nav-link">
                 <i class="nav-icon fas fa-map-marked-alt"></i>
-                <p>Guias de Remessa</p>
+                <p th:text="#{menu.facturacao.guias}">Guias de Remessa</p>
               </a>
             </li>
             <li class="nav-item module-facturacao-item">
               <a th:href="@{/notas/listar}" class="nav-link">
                 <i class="nav-icon fas fa-sticky-note"></i>
-                <p>Notas de Crédito / Débito</p>
+                <p th:text="#{menu.facturacao.notas}">Notas de Crédito / Débito</p>
               </a>
             </li>
             <li class="nav-item has-treeview module-facturacao-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-shield-alt"></i>
                 <p>
-                  Gestão AGT & SAF-T
+                  <span th:text="#{menu.facturacao.gestao_agt_saft}">Gestão AGT & SAF-T</span>
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
@@ -329,19 +333,19 @@
                 <li class="nav-item">
                   <a th:href="@{/factura-eletronica/estado}" class="nav-link">
                     <i class="fas fa-satellite-dish nav-icon"></i>
-                    <p>Estado de Comunicação</p>
+                    <p th:text="#{menu.facturacao.estado}">Estado de Comunicação</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/saft}" class="nav-link">
                     <i class="fas fa-file-export nav-icon"></i>
-                    <p>Exportar SAF-T (AO)</p>
+                    <p th:text="#{menu.configuracoes.saft}">Exportar SAF-T (AO)</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link">
                     <i class="fas fa-gavel nav-icon"></i>
-                    <p>Regime Fiscal</p>
+                    <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
                   </a>
                 </li>
               </ul>
@@ -350,66 +354,66 @@
 
           <!-- FINANCIAL MODULE -->
           <th:block th:if="${modulo_FINANCEIRO}">
-            <li class="nav-header module-financeiro-header">FINANCEIRO</li>
+            <li class="nav-header module-financeiro-header" th:text="#{menu.header.financeiro}">FINANCEIRO</li>
             <li class="nav-item module-financeiro-item">
               <a th:href="@{/despesas/listar}" class="nav-link">
                 <i class="nav-icon fas fa-receipt"></i>
-                <p>Gestão de Despesas</p>
+                <p th:text="#{menu.despesas}">Gestão de Despesas</p>
               </a>
             </li>
             <li class="nav-item module-financeiro-item">
               <a th:href="@{/financeiro/fluxo-caixa}" class="nav-link">
                 <i class="nav-icon fas fa-chart-area"></i>
-                <p>Fluxo de Caixa</p>
+                <p th:text="#{menu.fluxo_caixa}">Fluxo de Caixa</p>
               </a>
             </li>
           </th:block>
 
           <!-- RECURSOS HUMANOS (RH) MODULE -->
           <th:block th:if="${modulo_RH}">
-            <li class="nav-header module-rh-header">RECURSOS HUMANOS (RH)</li>
+            <li class="nav-header module-rh-header" th:text="#{menu.header.rh}">RECURSOS HUMANOS (RH)</li>
             <li class="nav-item module-rh-item">
               <a th:href="@{/rh/colaboradores}" class="nav-link">
                 <i class="nav-icon fas fa-user-tie"></i>
-                <p>Colaboradores</p>
+                <p th:text="#{menu.rh.colaboradores}">Colaboradores</p>
               </a>
             </li>
             <li class="nav-item module-rh-item">
               <a th:href="@{/rh/processamento}" class="nav-link">
                 <i class="nav-icon fas fa-calculator"></i>
-                <p>Folhas de Vencimento</p>
+                <p th:text="#{menu.rh.folhas_vencimento}">Folhas de Vencimento</p>
               </a>
             </li>
             <li class="nav-item module-rh-item">
               <a th:href="@{/rh/departamentos}" class="nav-link">
                 <i class="nav-icon fas fa-sitemap"></i>
-                <p>Departamentos</p>
+                <p th:text="#{menu.rh.departamentos}">Departamentos</p>
               </a>
             </li>
             <li class="nav-item module-rh-item">
               <a th:href="@{/rh/subsidios}" class="nav-link">
                 <i class="nav-icon fas fa-hand-holding-usd"></i>
-                <p>Tipos de Subsídio</p>
+                <p th:text="#{menu.rh.tipos_subsidio}">Tipos de Subsídio</p>
               </a>
             </li>
             <li class="nav-item module-rh-item">
               <a th:href="@{/rh/parametros}" class="nav-link">
                 <i class="nav-icon fas fa-sliders-h"></i>
-                <p>Parâmetros</p>
+                <p th:text="#{menu.rh.parametros}">Parâmetros</p>
               </a>
             </li>
           </th:block>
 
           <!-- CONFIGURATIONS MODULE -->
           <th:block th:if="${modulo_ADMINISTRACAO}">
-            <li class="nav-header module-administracao-header">ADMINISTRAÇÃO</li>
+            <li class="nav-header module-administracao-header" th:text="#{menu.header.administracao}">ADMINISTRAÇÃO</li>
 
             <!-- Group: Definições do Sistema -->
             <li class="nav-item has-treeview module-administracao-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-cogs"></i>
                 <p>
-                  Definições Sistema
+                  <span th:text="#{menu.admin.definicoes_sistema}">Definições Sistema</span>
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
@@ -417,19 +421,13 @@
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/geral}" class="nav-link">
                     <i class="fas fa-sliders-h nav-icon"></i>
-                    <p>Parâmetros Avançados</p>
+                    <p th:text="#{menu.admin.parametros_avancados}">Parâmetros Avançados</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/empresa}" class="nav-link">
                     <i class="fas fa-id-card nav-icon"></i>
-                    <p>Dados da Empresa</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/auditoria}" class="nav-link">
-                    <i class="fas fa-shield-alt nav-icon text-warning"></i>
-                    <p>Auditoria do Sistema</p>
+                    <p th:text="#{menu.configuracoes.empresa}">Dados da Empresa</p>
                   </a>
                 </li>
               </ul>
@@ -440,7 +438,7 @@
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-users-cog"></i>
                 <p>
-                  Gestão Utilizadores
+                  <span th:text="#{menu.admin.gestao_utilizadores}">Gestão Utilizadores</span>
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
@@ -448,13 +446,13 @@
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/utilizadores}" class="nav-link">
                     <i class="fas fa-users nav-icon"></i>
-                    <p>Utilizadores e Perfis</p>
+                    <p th:text="#{menu.configuracoes.utilizadores}">Utilizadores e Perfis</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link">
                     <i class="fas fa-user-shield nav-icon text-info"></i>
-                    <p>Controlo de Acesso</p>
+                    <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
                   </a>
                 </li>
               </ul>
@@ -467,7 +465,7 @@
                 th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/fiscais/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal'))} ? ' active' : ''">
                 <i class="nav-icon fas fa-landmark"></i>
                 <p>
-                  Gestão Tributária
+                  <span th:text="#{menu.admin.gestao_tributaria}">Gestão Tributária</span>
                   <i class="right fas fa-angle-left"></i>
                 </p>
               </a>
@@ -476,42 +474,42 @@
                   <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"
                     th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
                     <i class="fas fa-shield-alt nav-icon"></i>
-                    <p>Configurações AGT</p>
+                    <p th:text="#{menu.configuracoes.agt}">Configurações AGT</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"
                     th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/impostos')} ? ' active' : ''">
                     <i class="fas fa-percent nav-icon"></i>
-                    <p>Impostos (IVA/Selo)</p>
+                    <p th:text="#{menu.configuracoes.fiscais.impostos}">Impostos (IVA/Selo)</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link"
                     th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
                     <i class="fas fa-hand-holding-usd nav-icon"></i>
-                    <p>Taxas Adicionais</p>
+                    <p th:text="#{menu.configuracoes.fiscais.taxas}">Taxas Adicionais</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/moedas}" class="nav-link"
                     th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
                     <i class="fas fa-coins nav-icon"></i>
-                    <p>Moedas e Câmbio</p>
+                    <p th:text="#{menu.configuracoes.moedas}">Moedas e Câmbio</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/series}" class="nav-link"
                     th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
                     <i class="fas fa-list-ol nav-icon"></i>
-                    <p>Séries de Faturação</p>
+                    <p th:text="#{menu.configuracoes.series}">Séries de Faturação</p>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"
                     th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
                     <i class="fas fa-gavel nav-icon"></i>
-                    <p>Regime Fiscal</p>
+                    <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
                   </a>
                 </li>
               </ul>
@@ -521,58 +519,60 @@
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SERVIDOR}">
               <a th:href="@{/configuracoes/geral(tab='servidor')}" class="nav-link">
                 <i class="fas fa-server nav-icon"></i>
-                <p>Servidor e Rede</p>
+                <p th:text="#{menu.admin.servidor_rede}">Servidor e Rede</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_EMAIL}">
               <a th:href="@{/configuracoes/geral(tab='email')}" class="nav-link">
                 <i class="fas fa-envelope-open-text nav-icon"></i>
-                <p>Configuração de Email</p>
+                <p th:text="#{menu.admin.configuracao_email}">Configuração de Email</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_BANCO_DADOS}">
               <a th:href="@{/configuracoes/geral(tab='banco-dados')}" class="nav-link">
                 <i class="fas fa-database nav-icon"></i>
-                <p>Base de Dados</p>
+                <p th:text="#{menu.admin.base_dados}">Base de Dados</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_STORAGE}">
               <a th:href="@{/configuracoes/geral(tab='storage')}" class="nav-link">
                 <i class="fas fa-hdd nav-icon"></i>
-                <p>Armazenamento (Storage)</p>
+                <p th:text="#{menu.admin.armazenamento}">Armazenamento (Storage)</p>
               </a>
             </li>
             <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SEGURANCA}">
               <a th:href="@{/configuracoes/geral(tab='seguranca')}" class="nav-link">
                 <i class="fas fa-lock nav-icon"></i>
-                <p>Segurança e Logs</p>
+                <p th:text="#{menu.admin.seguranca_logs}">Segurança e Logs</p>
               </a>
             </li>
           </th:block>
           <!-- CONTROLO DE ACESSO (Visível para ADMIN, fora do módulo ADMINISTRACAO) -->
           <th:block th:if="${isAdmin and !isSuperAdmin}">
-            <li class="nav-header module-administracao-header">GESTÃO DE ACESSOS</li>
+            <li class="nav-header module-administracao-header" th:text="#{menu.header.gestao_acessos}">GESTÃO DE ACESSOS
+            </li>
             <li class="nav-item module-administracao-item">
               <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link">
                 <i class="nav-icon fas fa-user-shield text-info"></i>
-                <p>Controlo de Acesso</p>
+                <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
               </a>
             </li>
           </th:block>
 
           <!-- SUPER ADMIN SECTION -->
           <th:block th:if="${modulo_PAINEL_GLOBAL}">
-            <li class="nav-header text-warning module-saas-header">PAINEL GLOBAL (SaaS)</li>
+            <li class="nav-header text-warning module-saas-header" th:text="#{menu.header.painel_global}">PAINEL GLOBAL
+              (SaaS)</li>
             <li class="nav-item module-saas-item">
               <a th:href="@{/superadmin/dashboard}" class="nav-link bg-warning text-dark">
                 <i class="nav-icon fas fa-globe"></i>
-                <p>Gestão de Empresas</p>
+                <p th:text="#{menu.saas.gestao_empresas}">Gestão de Empresas</p>
               </a>
             </li>
             <li class="nav-item module-saas-item">
               <a th:href="@{/superadmin/usuarios}" class="nav-link bg-warning text-dark mt-1">
                 <i class="nav-icon fas fa-user-shield"></i>
-                <p>Admins Globais</p>
+                <p th:text="#{menu.saas.admins_globais}">Admins Globais</p>
               </a>
             </li>
             <!--
@@ -585,24 +585,24 @@
             <li class="nav-item module-saas-item">
               <a th:href="@{/superadmin/licenca/gerador}" class="nav-link bg-dark text-warning mt-1">
                 <i class="nav-icon fas fa-key"></i>
-                <p>Gerador de Licenças</p>
+                <p th:text="#{menu.saas.gerador_licencas}">Gerador de Licenças</p>
               </a>
             </li>
             <li class="nav-item module-saas-item">
               <a th:href="@{/superadmin/planos-pagamento}" class="nav-link bg-dark text-warning mt-1"
                 th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
                 <i class="nav-icon fas fa-crown"></i>
-                <p>Planos de Pagamento</p>
+                <p th:text="#{menu.saas.planos_pagamento}">Planos de Pagamento</p>
               </a>
             </li>
           </th:block>
 
-          <li class="nav-header">SISTEMA</li>
+          <li class="nav-header" th:text="#{menu.header.sistema}">SISTEMA</li>
           <li class="nav-item">
             <a href="javascript:void(0)" class="nav-link text-danger"
               onclick="document.getElementById('logoutFormSidebar').submit();">
               <i class="nav-icon fas fa-power-off"></i>
-              <p>Terminar Sessão</p>
+              <p th:text="#{menu.terminar_sessao}">Terminar Sessão</p>
             </a>
             <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none">
             </form>
@@ -618,7 +618,8 @@
     <div class="container-fluid px-4">
       <div class="float-right d-none d-sm-inline" th:text="${globalSistemaNome + ' v' + globalSistemaVersao}">Kwanza ERP
         v2.0</div>
-      <strong>Copyright &copy; 2024 <a href="#">HZ Consultoria</a>.</strong> Todos os direitos reservados.
+      <strong>Copyright &copy; 2024 <a href="#">HZ Consultoria</a>.</strong> <span
+        th:text="#{footer.direitos_reservados}">Todos os direitos reservados.</span>
     </div>
   </footer>
 </body>

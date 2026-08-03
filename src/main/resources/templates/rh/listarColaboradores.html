@@ -12,12 +12,12 @@
                 <div class="container-fluid px-4">
                     <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
                         <div>
-                            <h1 class="fw-bold text-dark">Cadastro de <span class="text-primary">Colaboradores</span></h1>
-                            <p class="text-muted">Faça o registo e a gestão da ficha completa de funcionários da empresa.</p>
+                            <h1 class="fw-bold text-dark" th:text="#{rh.colaboradores.titulo}">Gestão de Colaboradores</h1>
+                            <p class="text-muted" th:text="#{rh.colaboradores.subtitulo}">Faça o registo e a gestão da ficha completa de funcionários da empresa.</p>
                         </div>
                         <div>
                             <a th:href="@{/rh/colaboradores/novo}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
-                                <i class="fas fa-plus-circle me-2"></i> Novo Colaborador
+                                <i class="fas fa-plus-circle me-2"></i> <span th:text="#{rh.colaboradores.btn.novo}">Novo Colaborador</span>
                             </a>
                         </div>
                     </div>
@@ -45,12 +45,12 @@
                                     <thead class="bg-light">
                                         <tr>
                                             <th class="ps-4">ID</th>
-                                            <th>Nome Completo</th>
+                                            <th th:text="#{rh.colaboradores.col.nome}">Nome Completo</th>
                                             <th>NIF</th>
-                                            <th>Cargo / Departamento</th>
-                                            <th>Contrato / Dependentes</th>
-                                            <th class="text-end">Salário Base</th>
-                                            <th class="text-end pe-4">Ações</th>
+                                            <th th:text="#{rh.colaboradores.col.cargo_dept}">Cargo / Departamento</th>
+                                            <th th:text="#{rh.colaboradores.col.contrato_dep}">Contrato / Dependentes</th>
+                                            <th class="text-end" th:text="#{rh.colaboradores.col.salario_base}">Salário Base</th>
+                                            <th class="text-end pe-4" th:text="#{column.acoes}">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -91,7 +91,7 @@
                                         <tr th:if="${#lists.isEmpty(colaboradores)}">
                                             <td colspan="7" class="text-center py-5 text-muted">
                                                 <i class="fas fa-users fa-3x mb-3 text-light"></i>
-                                                <p class="mb-0 fw-medium">Nenhum colaborador registado.</p>
+                                                <p class="mb-0 fw-medium" th:text="#{rh.colaboradores.empty}">Nenhum colaborador registado.</p>
                                             </td>
                                         </tr>
                                     </tbody>

@@ -13,8 +13,8 @@
                 <!-- Page Header -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <h2 class="fw-800"><i class="fas fa-satellite-dish me-2 text-primary"></i> Estado das Facturas AGT</h2>
-                        <p class="text-muted">Monitorização em tempo real da comunicação com a Administração Geral Tributária.</p>
+                        <h2 class="fw-800"><i class="fas fa-satellite-dish me-2 text-primary"></i> <span th:text="#{agt.estado.titulo}">Estado das Facturas AGT</span></h2>
+                        <p class="text-muted" th:text="#{agt.estado.subtitulo}">Monitorização em tempo real da comunicação com a Administração Geral Tributária.</p>
                     </div>
                 </div>
 
@@ -24,7 +24,7 @@
                         <div class="premium-card grad-primary" onclick="filterByStatus('TODOS')">
                             <div class="info-box-icon"><i class="fas fa-file-invoice"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Total Faturas</span>
+                                <span class="info-box-text" th:text="#{agt.estado.total_faturas}">Total Faturas</span>
                                 <span class="info-box-number" th:text="${totalCount}">0</span>
                             </div>
                         </div>
@@ -33,7 +33,7 @@
                         <div class="premium-card grad-success" onclick="filterByStatus('VALIDADA')">
                             <div class="info-box-icon"><i class="fas fa-check-double"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Validadas</span>
+                                <span class="info-box-text" th:text="#{agt.estado.validadas}">Validadas</span>
                                 <span class="info-box-number" th:text="${validadasCount}">0</span>
                             </div>
                         </div>
@@ -42,7 +42,7 @@
                         <div class="premium-card grad-danger" onclick="filterByStatus('FALHA_ENVIO')">
                             <div class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Falhas</span>
+                                <span class="info-box-text" th:text="#{agt.estado.falhas}">Falhas</span>
                                 <span class="info-box-number" th:text="${falhasCount}">0</span>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                         <div class="premium-card grad-warning text-dark" onclick="filterByStatus('PENDENTE')">
                             <div class="info-box-icon"><i class="fas fa-clock"></i></div>
                             <div class="info-box-content">
-                                <span class="info-box-text">Pendentes</span>
+                                <span class="info-box-text" th:text="#{agt.estado.pendentes}">Pendentes</span>
                                 <span class="info-box-number" th:text="${pendentesCount}">0</span>
                             </div>
                         </div>
@@ -61,27 +61,27 @@
                 <!-- Filters Section -->
                 <div class="card shadow-sm border-0 mb-4 overflow-hidden">
                     <div class="card-header bg-white py-3">
-                        <h5 class="mb-0 fs-16 fw-700 text-dark"><i class="fas fa-filter me-2"></i> Filtros de Pesquisa</h5>
+                        <h5 class="mb-0 fs-16 fw-700 text-dark"><i class="fas fa-filter me-2"></i> <span th:text="#{agt.estado.filtros.titulo}">Filtros de Pesquisa</span></h5>
                     </div>
                     <div class="card-body bg-light">
                         <form th:action="@{/factura-eletronica/estado}" method="get" id="filterForm" class="row g-3 align-items-end">
                             <div class="col-md-3">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Estado AGT</label>
+                                <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{notas.column.estado_agt}">Estado AGT</label>
                                 <select name="status" id="statusSelect" class="form-select border-0 shadow-sm" onchange="this.form.submit()">
-                                    <option value="TODOS" th:selected="${statusAtual == 'TODOS'}">Todos os Estados</option>
-                                    <option value="VALIDADA" th:selected="${statusAtual == 'VALIDADA'}">Validada</option>
-                                    <option value="FALHA_ENVIO" th:selected="${statusAtual == 'FALHA_ENVIO'}">Falha no Envio</option>
-                                    <option value="PENDENTE" th:selected="${statusAtual == 'PENDENTE'}">Pendente</option>
+                                    <option value="TODOS" th:selected="${statusAtual == 'TODOS'}" th:text="#{agt.estado.status.todos}">Todos os Estados</option>
+                                    <option value="VALIDADA" th:selected="${statusAtual == 'VALIDADA'}" th:text="#{agt.estado.validadas}">Validada</option>
+                                    <option value="FALHA_ENVIO" th:selected="${statusAtual == 'FALHA_ENVIO'}" th:text="#{notas.stat.falha}">Falha no Envio</option>
+                                    <option value="PENDENTE" th:selected="${statusAtual == 'PENDENTE'}" th:text="#{status.pendente}">Pendente</option>
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Data Início</label>
+                                <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{vendas.filtro.data_inicio}">Data Início</label>
                                 <input type="date" name="dataInicio" class="form-control border-0 shadow-sm" 
                                        th:value="${dataInicioAtual != null ? #dates.format(dataInicioAtual, 'yyyy-MM-dd') : ''}"
                                        onchange="this.form.submit()">
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Data Fim</label>
+                                <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{vendas.filtro.data_fim}">Data Fim</label>
                                 <input type="date" name="dataFim" class="form-control border-0 shadow-sm" 
                                        th:value="${dataFimAtual != null ? #dates.format(dataFimAtual, 'yyyy-MM-dd') : ''}"
                                        onchange="this.form.submit()">
@@ -96,7 +96,7 @@
                             </div>
                             <div class="col-md-2">
                                 <a th:href="@{/factura-eletronica/estado}" class="btn btn-secondary w-100 shadow-sm py-2">
-                                    <i class="fas fa-sync-alt me-1"></i> Limpar
+                                    <i class="fas fa-sync-alt me-1"></i> <span th:text="#{btn.limpar}">Limpar</span>
                                 </a>
                             </div>
                         </form>
@@ -106,12 +106,12 @@
                 <!-- Main Data Table -->
                 <div class="card border-0 shadow-sm overflow-hidden">
                     <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fs-16 fw-700 text-dark">Listagem de Documentos</h5>
+                        <h5 class="mb-0 fs-16 fw-700 text-dark" th:text="#{agt.estado.listagem.titulo}">Listagem de Documentos</h5>
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-soft-primary px-3 py-2 rounded-pill" th:text="${facturas.size() + ' documentos encontrados'}">0</span>
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-success dropdown-toggle rounded-3 fw-700" type="button" id="dropdownExportDocs" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-download me-1"></i> Exportar
+                                    <i class="fas fa-download me-1"></i> <span th:text="#{btn.exportar}">Exportar</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" aria-labelledby="dropdownExportDocs" style="border-radius: 12px; min-width: 160px;">
                                     <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" onclick="exportarDocumentos('json')"><i class="fas fa-file-code text-info me-2"></i> JSON</a></li>
@@ -126,15 +126,15 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="bg-light">
                                     <tr>
-                                        <th class="ps-4">Número</th>
-                                        <th>Tipo de documento</th>
-                                        <th>Data Emissão</th>
-                                        <th>Cliente / NIF</th>
-                                        <th>Regime Fiscal</th>
-                                        <th>Valor Total</th>
-                                        <th>Estado AGT</th>
-                                        <th>Código/Mensagem</th>
-                                        <th class="text-center pe-4">Ações</th>
+                                        <th class="ps-4" th:text="#{notas.column.numero}">Número</th>
+                                        <th th:text="#{vendas.col.tipo_doc}">Tipo de documento</th>
+                                        <th th:text="#{notas.column.data}">Data Emissão</th>
+                                        <th th:text="#{vendas.col.cliente_nif}">Cliente / NIF</th>
+                                        <th th:text="#{regime_fiscal.titulo}">Regime Fiscal</th>
+                                        <th th:text="#{vendas.col.total_geral}">Valor Total</th>
+                                        <th th:text="#{notas.column.estado_agt}">Estado AGT</th>
+                                        <th th:text="#{notas.column.codigo_agt}">Código/Mensagem</th>
+                                        <th class="text-center pe-4" th:text="#{column.acoes}">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -157,15 +157,15 @@
                                         <td>
                                             <!-- Validada -->
                                             <span th:if="${factura.status == 'VALIDADA'}" class="badge bg-soft-success py-2 px-3 rounded-pill text-success">
-                                                <i class="fas fa-check-circle me-1"></i> Validada
+                                                <i class="fas fa-check-circle me-1"></i> <span th:text="#{agt.estado.validadas}">Validada</span>
                                             </span>
                                             <!-- Falha -->
                                             <span th:if="${factura.status == 'FALHA_ENVIO'}" class="badge bg-soft-danger py-2 px-3 rounded-pill text-danger">
-                                                <i class="fas fa-times-circle me-1"></i> Falha
+                                                <i class="fas fa-times-circle me-1"></i> <span th:text="#{agt.estado.falhas}">Falha</span>
                                             </span>
                                             <!-- Pendente -->
                                             <span th:if="${factura.status == 'PENDENTE'}" class="badge bg-soft-warning py-2 px-3 rounded-pill text-warning">
-                                                <i class="fas fa-clock me-1"></i> Pendente
+                                                <i class="fas fa-clock me-1"></i> <span th:text="#{status.pendente}">Pendente</span>
                                             </span>
                                             <!-- Outro / Nulo -->
                                             <span th:if="${factura.status != 'VALIDADA' and factura.status != 'FALHA_ENVIO' and factura.status != 'PENDENTE'}" 
@@ -195,7 +195,7 @@
                                         <td colspan="9" class="text-center py-5 text-muted bg-white">
                                             <div class="py-4">
                                                 <i class="fas fa-search mb-3 fs-40 opacity-20"></i>
-                                                <p class="mb-0">Nenhum documento encontrado com os filtros aplicados.</p>
+                                                <p class="mb-0" th:text="#{agt.estado.empty}">Nenhum documento encontrado com os filtros aplicados.</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -209,7 +209,7 @@
                 <div class="row mt-4">
                     <div class="col-12 text-end">
                         <a th:href="@{/dashboard}" class="btn btn-light shadow-sm border px-4 py-2">
-                            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+                            <i class="fas fa-arrow-left me-2"></i> <span th:text="#{vendas.voltar_dashboard}">Voltar ao Dashboard</span>
                         </a>
                     </div>
                 </div>

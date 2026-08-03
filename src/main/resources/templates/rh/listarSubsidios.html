@@ -8,10 +8,12 @@
   <div class="content-wrapper px-4 py-3">
     <div class="d-flex align-items-center justify-content-between mb-4">
       <div>
-        <h1 class="h4 fw-bold mb-0"><i class="fas fa-hand-holding-usd text-success me-2"></i>Tipos de Subsídio</h1>
-        <small class="text-muted">Configurar os subsídios e respectivos limites de isenção fiscal</small>
+        <h1 class="h4 fw-bold mb-0"><i class="fas fa-hand-holding-usd text-success me-2"></i><span th:text="#{rh.subsidios.titulo}">Tipos de Subsídio</span></h1>
+        <small class="text-muted" th:text="#{rh.subsidios.subtitulo}">Configurar os subsídios e respectivos limites de isenção fiscal</small>
       </div>
-      <button class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSubsidio"><i class="fas fa-plus me-1"></i> Novo Subsídio</button>
+      <button class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalSubsidio">
+        <i class="fas fa-plus me-1"></i> <span th:text="#{rh.subsidios.btn.novo}">Novo Subsídio</span>
+      </button>
     </div>
     <div th:if="${success}" class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm">
       <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
@@ -31,20 +33,20 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="table-dark">
             <tr>
-              <th class="ps-4" style="width:60px">Cód.</th>
-              <th>Nome do Subsídio</th>
-              <th class="text-end">Isenção INSS (Kz)</th>
-              <th class="text-end">Isenção IRT (Kz)</th>
+              <th class="ps-4" style="width:60px" th:text="#{rh.subsidios.col.codigo}">Cód.</th>
+              <th th:text="#{rh.subsidios.col.nome}">Nome do Subsídio</th>
+              <th class="text-end" th:text="#{rh.subsidios.col.isencao_inss}">Isenção INSS (Kz)</th>
+              <th class="text-end" th:text="#{rh.subsidios.col.isencao_irt}">Isenção IRT (Kz)</th>
               <th class="text-center">INSS</th>
               <th class="text-center">IRT</th>
-              <th class="text-end pe-4">Ações</th>
+              <th class="text-end pe-4" th:text="#{column.acoes}">Ações</th>
             </tr>
           </thead>
           <tbody>
             <tr th:if="${#lists.isEmpty(subsidios)}">
               <td colspan="7" class="text-center py-5 text-muted">
                 <i class="fas fa-hand-holding-usd fa-2x mb-2 d-block"></i>
-                Nenhum subsídio cadastrado. Clique em "Novo Subsídio" para começar.
+                <span th:text="#{rh.subsidios.empty}">Nenhum subsídio cadastrado.</span>
               </td>
             </tr>
             <tr th:each="sub : ${subsidios}">
@@ -52,8 +54,8 @@
               <td class="fw-semibold" th:text="${sub.nome}"></td>
               <td class="text-end" th:text="${sub.limiteIsencaoInss != null && sub.limiteIsencaoInss > 0 ? #numbers.formatDecimal(sub.limiteIsencaoInss,1,'POINT',2,'COMMA') : '-'}"></td>
               <td class="text-end" th:text="${sub.limiteIsencaoIrt != null && sub.limiteIsencaoIrt > 0 ? #numbers.formatDecimal(sub.limiteIsencaoIrt,1,'POINT',2,'COMMA') : '-'}"></td>
-              <td class="text-center"><span th:if="${sub.sujeitoInss}" class="badge bg-warning text-dark">Sujeito</span><span th:unless="${sub.sujeitoInss}" class="badge bg-light text-secondary border">Isento</span></td>
-              <td class="text-center"><span th:if="${sub.sujeitoIrt}" class="badge bg-danger">Sujeito</span><span th:unless="${sub.sujeitoIrt}" class="badge bg-light text-secondary border">Isento</span></td>
+              <td class="text-center"><span th:if="${sub.sujeitoInss}" class="badge bg-warning text-dark" th:text="#{rh.subsidios.sujeito}">Sujeito</span><span th:unless="${sub.sujeitoInss}" class="badge bg-light text-secondary border" th:text="#{rh.subsidios.isento}">Isento</span></td>
+              <td class="text-center"><span th:if="${sub.sujeitoIrt}" class="badge bg-danger" th:text="#{rh.subsidios.sujeito}">Sujeito</span><span th:unless="${sub.sujeitoIrt}" class="badge bg-light text-secondary border" th:text="#{rh.subsidios.isento}">Isento</span></td>
               <td class="text-end pe-4">
                 <button class="btn btn-sm btn-outline-primary rounded-circle me-1" title="Editar" th:data-id="${sub.id}" th:data-nome="${sub.nome}" th:data-codigo="${sub.codigo}" th:data-liminss="${sub.limiteIsencaoInss}" th:data-limirt="${sub.limiteIsencaoIrt}" th:data-sujinss="${sub.sujeitoInss}" th:data-sujirt="${sub.sujeitoIrt}" onclick="abrirEdicaoSub(this)"><i class="fas fa-pen"></i></button>
                 <a th:href="@{/rh/subsidios/eliminar/{id}(id=${sub.id})}" class="btn btn-sm btn-outline-danger rounded-circle" onclick="return confirm('Eliminar este subsídio? Esta ação afetará todos os colaboradores associados.')"><i class="fas fa-trash"></i></a>
@@ -117,8 +119,8 @@
             </div>
           </div>
           <div class="modal-footer border-0 pt-0">
-            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success rounded-pill px-4"><i class="fas fa-save me-1"></i>Guardar</button>
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal" th:text="#{btn.cancelar}">Cancelar</button>
+            <button type="submit" class="btn btn-success rounded-pill px-4"><i class="fas fa-save me-1"></i><span th:text="#{btn.guardar}">Guardar</span></button>
           </div>
         </form>
       </div>

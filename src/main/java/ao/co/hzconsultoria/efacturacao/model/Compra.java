@@ -291,4 +291,11 @@ public class Compra {
     public void setEmailCliente(String emailCliente) {
         this.emailCliente = emailCliente;
     }
+
+    @PreRemove
+    public void impedirEliminacao() {
+        if (this.id != null) {
+            throw new IllegalStateException("VIOLAÇÃO DE CONFORMIDADE AGT: Registos de vendas e facturação emitidos são inalteráveis e não podem ser eliminados da base de dados.");
+        }
+    }
 }

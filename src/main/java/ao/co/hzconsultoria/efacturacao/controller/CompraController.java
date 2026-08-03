@@ -67,9 +67,6 @@ public class CompraController {
     @Autowired
     private StockService stockService;
 
-    @Autowired
-    private ao.co.hzconsultoria.efacturacao.service.AuditoriaService auditoriaService;
-
     @GetMapping("/pos")
     public String abrirPDV(Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (!caixaService.isCaixaAberto()) {
@@ -129,15 +126,6 @@ public class CompraController {
         }
         Compra compraSalva = vendaService.finalizarVenda(compra, tipoDocumento);
 
-        auditoriaService.registar(
-                "EMISSAO_DOCUMENTO",
-                "Compra",
-                String.valueOf(compraSalva.getId()),
-                null,
-                "Tipo: " + tipoDocumento + " | Total: " + compraSalva.getTotal() + " Kz | Cliente: " + compraSalva.getNomeCliente(),
-                "Venda realizada com sucesso no POS"
-        );
-
         java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
         String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "DOC-" + compraSalva.getId();
 
@@ -171,7 +159,7 @@ public class CompraController {
                 if ("CONVERTIDA".equals(st) || "ANULADA".equals(st) || "CANCELADA".equals(st)) {
                     return ResponseEntity.badRequest().body("Não é possível editar uma pró-forma " + st.toLowerCase() + ".");
                 }
-                // Apagar faturas e PDFs antigos
+                // Actualizar faturas e PDFs antigos (Sem eliminar registos fiscais)
                 java.util.List<Fatura> oldFaturas = faturaRepository.findByCompra(existing);
                 for (Fatura f : oldFaturas) {
                     java.io.File pdf = new java.io.File("./uploads/faturas/" + f.getNumeroFatura() + ".pdf");
@@ -182,9 +170,7 @@ public class CompraController {
                         pdf = new java.io.File("target/classes/static/uploads/faturas/" + f.getNumeroFatura() + ".pdf");
                     }
                     if (pdf.exists()) { pdf.delete(); }
-                    faturaRepository.delete(f);
                 }
-                faturaRepository.flush();
                 existing.getItens().clear();
                 compraRepository.saveAndFlush(existing);
                 // Actualizar dados do cliente com base na compra enviada

@@ -56,7 +56,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="fw-bold">Gestão Integrada SAF-T (AO)</h1>
+                            <h1 class="fw-bold" th:text="#{saft.titulo}">Gestão Integrada SAF-T (AO)</h1>
                         </div>
                     </div>
                 </div>
@@ -70,23 +70,23 @@
                         <div class="col-md-12">
                             <div class="card saft-container shadow-lg">
                                 <div class="card-body">
-                                    <h4 class="mb-4"><i class="fas fa-file-export me-2"></i> Exportação e Submissão</h4>
+                                    <h4 class="mb-4"><i class="fas fa-file-export me-2"></i> <span th:text="#{saft.exportacao.titulo}">Exportação e Submissão</span></h4>
                                     
                                     <form id="saftForm" class="row g-3 align-items-end">
                                         <div class="col-md-4">
-                                            <label class="form-label">Data de Início</label>
+                                            <label class="form-label" th:text="#{saft.data_inicio}">Data de Início</label>
                                             <input type="date" id="dataInicio" class="form-control form-control-lg" required>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label">Data de Fim</label>
+                                            <label class="form-label" th:text="#{saft.data_fim}">Data de Fim</label>
                                             <input type="date" id="dataFim" class="form-control form-control-lg" required>
                                         </div>
                                         <div class="col-md-4 d-flex gap-2">
                                             <button type="button" onclick="gerarSaft()" class="btn btn-gradient flex-grow-1">
-                                                <i class="fas fa-download me-2"></i> Gerar XML
+                                                <i class="fas fa-download me-2"></i> <span th:text="#{saft.btn.gerar_xml}">Gerar XML</span>
                                             </button>
                                             <button type="button" onclick="submeterAgt()" class="btn btn-gradient-submit flex-grow-1">
-                                                <i class="fas fa-paper-plane me-2"></i> Submeter à AGT
+                                                <i class="fas fa-paper-plane me-2"></i> <span th:text="#{saft.btn.submeter_agt}">Submeter à AGT</span>
                                             </button>
                                         </div>
                                     </form>
@@ -107,17 +107,17 @@
                         <div class="col-md-12">
                             <div class="card shadow-sm border-0" style="border-radius: 15px;">
                                 <div class="card-header bg-white">
-                                    <h5 class="mb-0 fw-bold">Histórico de Exportações</h5>
+                                    <h5 class="mb-0 fw-bold" th:text="#{saft.historico.titulo}">Histórico de Exportações</h5>
                                 </div>
                                 <div class="card-body p-0">
                                     <table class="table table-hover align-middle mb-0">
                                         <thead class="bg-light">
                                             <tr>
-                                                <th>Ref. Protocolo</th>
-                                                <th>Período</th>
-                                                <th>Data Execução</th>
-                                                <th>Estado na AGT</th>
-                                                <th>Accões</th>
+                                                <th th:text="#{saft.col.protocolo}">Ref. Protocolo</th>
+                                                <th th:text="#{saft.col.periodo}">Período</th>
+                                                <th th:text="#{saft.col.data_execucao}">Data Execução</th>
+                                                <th th:text="#{saft.col.estado_agt}">Estado na AGT</th>
+                                                <th th:text="#{vendas.col.accoes}">Accões</th>
                                             </tr>
                                         </thead>
                                         <tbody>

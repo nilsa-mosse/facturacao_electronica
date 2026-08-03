@@ -25,12 +25,12 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a th:href="@{/}" class="nav-link">Home</a></li>
-                        <li class="nav-item"><a th:href="@{/produtos}" class="nav-link">Produtos</a></li>
-                        <li class="nav-item"><a th:href="@{/empresa}" class="nav-link">Empresa</a></li>
-                        <li class="nav-item"><a th:href="@{/servicos}" class="nav-link">Serviços</a></li>
-                        <li class="nav-item"><a th:href="@{/noticias}" class="nav-link">Notícias</a></li>
-                        <li class="nav-item"><a th:href="@{/contato}" class="nav-link">Contato</a></li>
+                        <li class="nav-item"><a th:href="@{/}" class="nav-link" th:text="#{menu.home}">Home</a></li>
+                        <li class="nav-item"><a th:href="@{/produtos}" class="nav-link" th:text="#{menu.produtos}">Produtos</a></li>
+                        <li class="nav-item"><a th:href="@{/empresa}" class="nav-link" th:text="#{menu.configuracoes.empresa}">Empresa</a></li>
+                        <li class="nav-item"><a th:href="@{/servicos}" class="nav-link" th:text="#{menu.servicos}">Serviços</a></li>
+                        <li class="nav-item"><a th:href="@{/noticias}" class="nav-link" th:text="#{menu.noticias}">Notícias</a></li>
+                        <li class="nav-item"><a th:href="@{/contato}" class="nav-link" th:text="#{menu.contato}">Contato</a></li>
                     </ul>
                     <ul class="navbar-nav ms-auto align-items-center">
                         <!-- Idioma Dropdown -->
@@ -55,15 +55,15 @@
                                 <span th:if="${#authentication != null}" th:text="${#authentication.name}" class="fw-bold fw-semibold">Usuário</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-2" aria-labelledby="userDropdown" style="min-width: 200px; border-radius: 1rem;">
-                                <li><a class="dropdown-item rounded-3 p-2 d-flex align-items-center" href="#"><i class="fas fa-user-gear me-2 text-muted"></i> A Minha Conta</a></li>
-                                <li><a class="dropdown-item rounded-3 p-2 d-flex align-items-center" href="#"><i class="fas fa-history me-2 text-muted"></i> Atividade</a></li>
+                                <li><a class="dropdown-item rounded-3 p-2 d-flex align-items-center" href="#"><i class="fas fa-user-gear me-2 text-muted"></i> <span th:text="#{user.minha_conta}">A Minha Conta</span></a></li>
+                                <li><a class="dropdown-item rounded-3 p-2 d-flex align-items-center" href="#"><i class="fas fa-history me-2 text-muted"></i> <span th:text="#{user.atividade}">Atividade</span></a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form th:action="@{/logout}" method="post" id="logoutForm" class="d-none">
                                         <!-- O token CSRF é injetado automaticamente pelo Thymeleaf se estiver configurado -->
                                     </form>
                                     <a class="dropdown-item rounded-3 p-2 d-flex align-items-center text-danger fw-bold" href="javascript:void(0)" onclick="document.getElementById('logoutForm').submit();">
-                                        <i class="fas fa-arrow-right-from-bracket me-2"></i> Terminar Sessão
+                                        <i class="fas fa-arrow-right-from-bracket me-2"></i> <span th:text="#{menu.terminar_sessao}">Terminar Sessão</span>
                                     </a>
                                 </li>
                             </ul>
@@ -87,7 +87,7 @@
             </div>
         </main>
         <footer class="bg-light text-center py-3 mt-4">
-            <strong>&copy; 2026 Kwanza ERP.</strong> Todos os direitos reservados.
+            <strong>&copy; 2026 Kwanza ERP.</strong> <span th:text="#{footer.direitos_reservados}">Todos os direitos reservados.</span>
         </footer>
     </div>
     <script th:src="@{/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>

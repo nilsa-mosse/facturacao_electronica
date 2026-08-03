@@ -147,13 +147,13 @@
                 
                 <div class="page-header-modern">
                     <div>
-                        <h2>Fornecedores</h2>
-                        <p class="text-slate-500 mb-0">Gestão de parceiros e suprimentos</p>
+                        <h2 th:text="#{menu.fornecedores}">Fornecedores</h2>
+                        <p class="text-slate-500 mb-0" th:text="#{fornecedores.subtitulo}">Gestão de parceiros e suprimentos</p>
                     </div>
                     <div class="d-flex gap-2 align-items-center">
                         <div class="dropdown">
                             <button class="btn btn-add-premium dropdown-toggle" type="button" id="dropdownExportFornecedores" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 10px 15px -3px rgba(16,185,129,0.3);">
-                                <i class="fas fa-download me-2"></i> Exportar
+                                <i class="fas fa-download me-2"></i> <span th:text="#{btn.exportar}">Exportar</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" aria-labelledby="dropdownExportFornecedores" style="border-radius: 12px; min-width: 160px;">
                                 <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" onclick="exportarFornecedores('json')"><i class="fas fa-file-code text-info me-2"></i> JSON</a></li>
@@ -162,7 +162,7 @@
                             </ul>
                         </div>
                         <a th:href="@{/fornecedores/adicionar}" class="btn btn-add-premium">
-                            <i class="fas fa-plus me-2"></i> <span>Novo Fornecedor</span>
+                            <i class="fas fa-plus me-2"></i> <span th:text="#{fornecedores.btn.novo}">Novo Fornecedor</span>
                         </a>
                     </div>
                 </div>
@@ -179,12 +179,12 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Nome / Fornecedor</th>
-                                    <th>NIF</th>
-                                    <th>Email</th>
-                                    <th>Telefone</th>
-                                    <th class="text-end">Ações</th>
+                                    <th th:text="#{column.id}">ID</th>
+                                    <th th:text="#{column.fornecedor}">Nome / Fornecedor</th>
+                                    <th th:text="#{column.nif}">NIF</th>
+                                    <th th:text="#{column.email}">Email</th>
+                                    <th th:text="#{column.telefone}">Telefone</th>
+                                    <th class="text-end" th:text="#{column.acoes}">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -199,10 +199,10 @@
                                     <td th:text="${fornecedor.telefone}"></td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <a th:href="@{'/fornecedores/editar/' + ${fornecedor.id}}" class="btn-action btn-action-edit" title="Editar">
+                                            <a th:href="@{'/fornecedores/editar/' + ${fornecedor.id}}" class="btn-action btn-action-edit" th:title="#{btn.editar}">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a th:href="@{'/fornecedores/delete/' + ${fornecedor.id}}" class="btn-action btn-action-delete" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este fornecedor?')">
+                                            <a th:href="@{'/fornecedores/delete/' + ${fornecedor.id}}" class="btn-action btn-action-delete" th:title="#{btn.excluir}" onclick="return confirm('Tem certeza que deseja excluir este fornecedor?')">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </div>
@@ -212,8 +212,8 @@
                                     <td colspan="6">
                                         <div class="empty-state">
                                             <i class="fas fa-truck-ramp-box"></i>
-                                            <h5 class="text-slate-700 fw-bold">Nenhum fornecedor encontrado</h5>
-                                            <p class="text-slate-500">Comece por adicionar o seu primeiro fornecedor ao sistema.</p>
+                                            <h5 class="text-slate-700 fw-bold" th:text="#{pesquisa.sem_resultados}">Nenhum fornecedor encontrado</h5>
+                                            <p class="text-slate-500" th:text="#{tabela.vazia}">Comece por adicionar o seu primeiro fornecedor ao sistema.</p>
                                         </div>
                                     </td>
                                 </tr>

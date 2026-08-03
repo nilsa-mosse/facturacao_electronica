@@ -189,12 +189,12 @@
         <!-- Header Section -->
         <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-4">
           <div>
-            <h1 class="fw-900 mb-2" style="font-size: 2.5rem; letter-spacing: -1px;">Gestão de Artigos</h1>
-            <p class="opacity-75 mb-0 fs-5">Controle o seu inventário e preços com precisão.</p>
+            <h1 class="fw-900 mb-2" style="font-size: 2.5rem; letter-spacing: -1px;" th:text="#{produtos.gestao.titulo}">Gestão de Artigos</h1>
+            <p class="opacity-75 mb-0 fs-5" th:text="#{menu.stock.gestao_inventarios}">Controle o seu inventário e preços com precisão.</p>
           </div>
           <div class="d-flex gap-3">
             <a href="/produtos/novo" class="btn btn-white btn-lg fw-800 px-4 py-3 rounded-4 shadow-lg text-primary">
-              <i class="fas fa-plus-circle me-2"></i> NOVO ARTIGO
+              <i class="fas fa-plus-circle me-2"></i> <span th:text="#{produtos.btn.novo}">NOVO ARTIGO</span>
             </a>
           </div>
         </div>
@@ -223,7 +223,7 @@
               <div class="stat-icon bg-primary-soft text-primary">
                 <i class="fas fa-box"></i>
               </div>
-              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Total de Produtos</h6>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;" th:text="#{dashboard.relat.produtos.titulo}">Total de Produtos</h6>
               <h3 class="fw-900 mb-0" th:text="${produtos.size()}">0</h3>
             </div>
           </div>
@@ -232,8 +232,8 @@
               <div class="stat-icon bg-danger-soft text-danger">
                 <i class="fas fa-exclamation-triangle"></i>
               </div>
-              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Stock Baixo</h6>
-              <h3 class="fw-900 mb-0">Verificar</h3>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;" th:text="#{menu.stock.alertas_ruptura}">Stock Baixo</h6>
+              <h3 class="fw-900 mb-0" th:text="#{btn.detalhes}">Verificar</h3>
             </div>
           </div>
           <div class="col-md-3">
@@ -241,8 +241,8 @@
               <div class="stat-icon bg-warning-soft text-warning">
                 <i class="fas fa-fire"></i>
               </div>
-              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Em Promoção</h6>
-              <h3 class="fw-900 mb-0">Automático</h3>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;" th:text="#{menu.header.geral}">Em Promoção</h6>
+              <h3 class="fw-900 mb-0" th:text="#{status.ativo}">Automático</h3>
             </div>
           </div>
           <div class="col-md-3">
@@ -250,7 +250,7 @@
               <div class="stat-icon bg-success-soft" style="color: #4cc9f0;">
                 <i class="fas fa-chart-line"></i>
               </div>
-              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;">Lucro Total (Stock)</h6>
+              <h6 class="text-muted fw-700 text-uppercase mb-1" style="font-size: 0.7rem;" th:text="#{dashboard.lucro_liquido}">Lucro Total (Stock)</h6>
               <h3 class="fw-900 mb-0" style="color: #4cc9f0; font-size: 1.3rem;"
                   th:text="${#numbers.formatDecimal(lucroTotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h3>
             </div>
@@ -277,7 +277,7 @@
               </div>
               <div class="col-md-3">
                 <div class="d-flex gap-2">
-                  <button type="submit" class="btn btn-primary btn-lg flex-grow-1 rounded-3 fw-700">FILTRAR</button>
+                  <button type="submit" class="btn btn-primary btn-lg flex-grow-1 rounded-3 fw-700" th:text="#{btn.filtrar}">FILTRAR</button>
                   <div class="dropdown" th:if="${(busca != null and !busca.isEmpty() or categoriaSelecionada != null) and !produtos.isEmpty()}">
                     <button class="btn btn-outline-primary btn-lg dropdown-toggle rounded-3 fw-700" type="button" id="dropdownExport" data-bs-toggle="dropdown" aria-expanded="false">
                       <i class="fas fa-download"></i>
@@ -300,13 +300,13 @@
             <table class="table custom-table table-hover mb-0">
               <thead>
                 <tr>
-                  <th style="width: auto;">Nome do Artigo</th>
-                  <th th:if="${globalExibirDatasValidade}" class="text-center" style="width: 15%;">Expiração</th>
-                  <th class="text-center" style="width: 12%;">Preço Unitário</th>
-                  <th class="text-center" style="width: 10%;">Lucro</th>
-                  <th class="text-center" style="width: 8%;">Stock</th>
-                  <th class="text-center" style="width: 10%;">Estado</th>
-                  <th class="text-end" style="width: 1%; white-space: nowrap;">Ações</th>
+                  <th style="width: auto;" th:text="#{column.nome}">Nome do Artigo</th>
+                  <th th:if="${globalExibirDatasValidade}" class="text-center" style="width: 15%;" th:text="#{vendas.col.data}">Expiração</th>
+                  <th class="text-center" style="width: 12%;" th:text="#{column.preco}">Preço Unitário</th>
+                  <th class="text-center" style="width: 10%;" th:text="#{dashboard.lucro_liquido}">Lucro</th>
+                  <th class="text-center" style="width: 8%;" th:text="#{column.estoque}">Stock</th>
+                  <th class="text-center" style="width: 10%;" th:text="#{column.estado}">Estado</th>
+                  <th class="text-end" style="width: 1%; white-space: nowrap;" th:text="#{column.acoes}">Ações</th>
                 </tr>
               </thead>
               <tbody id="tabela-produtos">
@@ -392,45 +392,45 @@
           <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
             <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data" onsubmit="return atualizarProdutos(event, this)">
               <div class="modal-header border-0 p-4">
-                <h5 class="modal-title fw-800" style="font-size: 1.5rem; letter-spacing: -0.5px;">Editar Artigo</h5>
+                <h5 class="modal-title fw-800" style="font-size: 1.5rem; letter-spacing: -0.5px;" th:text="#{produto.editar.titulo}">Editar Artigo</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
               <div class="modal-body p-4 pt-0">
                 <input type="hidden" name="id" th:value="${produto.id}">
                 <div class="row g-4">
                   <div class="col-md-6">
-                    <label class="form-label fw-700">Nome do Artigo</label>
+                    <label class="form-label fw-700" th:text="#{column.nome}">Nome do Artigo</label>
                     <input type="text" name="nome" class="form-control search-input" th:value="${produto.nome}" required>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-700">Preço de Venda (Kz)</label>
+                    <label class="form-label fw-700" th:text="#{column.preco}">Preço de Venda (Kz)</label>
                     <input type="number" step="0.01" name="preco" class="form-control search-input" th:value="${produto.preco}" required>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-700">Preço de Compra (Kz)</label>
+                    <label class="form-label fw-700" th:text="#{column.preco}">Preço de Compra (Kz)</label>
                     <input type="number" step="0.01" name="precoCompra" class="form-control search-input" th:value="${produto.precoCompra}">
                   </div>
                   <div class="col-md-12">
-                    <label class="form-label fw-700">Descrição Detalhada</label>
+                    <label class="form-label fw-700" th:text="#{column.descricao}">Descrição Detalhada</label>
                     <textarea name="descricao" class="form-control search-input" rows="3" maxlength="255" th:text="${produto.descricao}"></textarea>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-700">Categoria</label>
+                    <label class="form-label fw-700" th:text="#{column.categoria}">Categoria</label>
                     <select name="categoriaId" class="form-select search-input">
                       <option th:each="catObj : ${categorias}" th:value="${catObj.id}" th:text="${catObj.nome}"
                               th:selected="${produto.categoria != null && produto.categoria.id == catObj.id}"></option>
                     </select>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-700">Stock Inicial</label>
+                    <label class="form-label fw-700" th:text="#{column.estoque}">Stock Inicial</label>
                     <input type="number" name="quantidadeEstoque" class="form-control search-input" th:value="${produto.quantidadeEstoque}" required>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-700">Código SKU / EAN</label>
+                    <label class="form-label fw-700" th:text="#{column.codigo}">Código SKU / EAN</label>
                     <input type="text" name="codigoBarra" class="form-control search-input" th:value="${produto.codigoBarra}">
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-700">Taxa de IVA (%) <span class="badge bg-light text-muted ms-1" th:text="${regimeFiscal}"></span></label>
+                    <label class="form-label fw-700"><span th:text="#{column.iva}">Taxa de IVA (%)</span> <span class="badge bg-light text-muted ms-1" th:text="${regimeFiscal}"></span></label>
                     <select name="ivaPercentual" class="form-select search-input">
                         <option value="0" th:selected="${produto.ivaPercentual == 0}">Isento / Não Aplicável</option>
                         <!-- Regime Geral -->
@@ -481,8 +481,8 @@
                 </div>
               </div>
               <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light px-4 py-2 fw-700 rounded-3" data-bs-dismiss="modal">CANCELAR</button>
-                <button type="submit" class="btn btn-primary px-5 py-2 fw-800 rounded-3 shadow-lg">GUARDAR ALTERAÇÕES</button>
+                <button type="button" class="btn btn-light px-4 py-2 fw-700 rounded-3" data-bs-dismiss="modal" th:text="#{btn.cancelar}">CANCELAR</button>
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-800 rounded-3 shadow-lg" th:text="#{btn.salvar}">GUARDAR ALTERAÇÕES</button>
               </div>
             </form>
           </div>

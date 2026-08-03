@@ -168,8 +168,8 @@
                 <div class="welcome-hero">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h2 class="fw-bold mb-1">Olá, <span th:text="${usuario_NOME != null ? usuario_NOME : 'Utilizador'}">Utilizador</span>! 👋</h2>
-                            <p class="mb-0 opacity-75">Aqui está o que está a acontecer no seu negócio hoje.</p>
+                            <h2 class="fw-bold mb-1"><span th:text="#{dashboard.ola}">Olá</span>, <span th:text="${usuario_NOME != null ? usuario_NOME : #messages.msg('dashboard.utilizador')}">Utilizador</span>! 👋</h2>
+                            <p class="mb-0 opacity-75" th:text="#{dashboard.subtitulo}">Aqui está o que está a acontecer no seu negócio hoje.</p>
                         </div>
                         <div class="col-md-4 text-md-end d-none d-md-block">
                             <h5 class="mb-0 fw-bold" id="currentDate">--/--/----</h5>
@@ -185,8 +185,8 @@
                             <i class="fas fa-ban"></i>
                         </div>
                         <div>
-                            <h6 class="fw-bold text-danger mb-1">Proibição de Acesso à Página</h6>
-                            <p class="mb-0 text-muted small">Não possui permissão para aceder a essa funcionalidade ou endpoint. O seu acesso foi bloqueado por motivos de segurança.</p>
+                            <h6 class="fw-bold text-danger mb-1" th:text="#{dashboard.proibicao_titulo}">Proibição de Acesso à Página</h6>
+                            <p class="mb-0 text-muted small" th:text="#{dashboard.proibicao_desc}">Não possui permissão para aceder a essa funcionalidade ou endpoint. O seu acesso foi bloqueado por motivos de segurança.</p>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -200,12 +200,12 @@
                                 <i class="fas fa-magic"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold text-dark mb-1">Configurações Iniciais Pendentes</h5>
-                                <p class="mb-0 text-muted small">Antes de começar a vender ou facturar, configure os dados da empresa, regime fiscal, séries, impostos e integração AGT.</p>
+                                <h5 class="fw-bold text-dark mb-1" th:text="#{dashboard.setup_pendente_titulo}">Configurações Iniciais Pendentes</h5>
+                                <p class="mb-0 text-muted small" th:text="#{dashboard.setup_pendente_desc}">Antes de começar a vender ou facturar, configure os dados da empresa, regime fiscal, séries, impostos e integração AGT.</p>
                             </div>
                         </div>
                         <a th:href="@{/configuracoes/setup-wizard}" class="btn btn-warning fw-bold px-4 py-2 rounded-pill text-dark shadow-sm">
-                            <i class="fas fa-arrow-right me-1"></i> Iniciar Assistente
+                            <i class="fas fa-arrow-right me-1"></i> <span th:text="#{dashboard.iniciar_assistente}">Iniciar Assistente</span>
                         </a>
                     </div>
                 </div>
@@ -240,7 +240,7 @@
                                 <i class="fas fa-hand-holding-usd"></i>
                             </div>
                             <div class="kpi-info">
-                                <div class="kpi-label">Lucro Líquido</div>
+                                <div class="kpi-label" th:text="#{dashboard.lucro_liquido}">Lucro Líquido</div>
                                 <div class="kpi-value" th:text="${'Kz ' + #numbers.formatDecimal(lucroLiquidoMensal != null ? lucroLiquidoMensal : 0, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</div>
                             </div>
                         </div>
@@ -267,19 +267,19 @@
                             <div class="d-flex align-items-center gap-3">
                                 <span class="blink-dot-dash"></span>
                                 <span class="text-white fw-700 fs-6">
-                                    <i class="fas fa-cash-register me-2"></i>Caixas Abertos em Tempo Real
+                                    <i class="fas fa-cash-register me-2"></i><span th:text="#{dashboard.caixas_abertos_titulo}">Caixas Abertos em Tempo Real</span>
                                 </span>
                                 <span class="badge bg-success px-3 py-2 rounded-pill fw-700"
                                       th:text="${qtdCaixasAbertos} + ' activo(s)'"></span>
                             </div>
                             <div class="d-flex align-items-center gap-3">
                                 <span class="text-white opacity-75 small fw-600">
-                                    Total Faturado:
+                                    <span th:text="#{dashboard.total_faturado}">Total Faturado</span>:
                                     <strong class="text-success fs-6 ms-1"
                                             th:text="'Kz ' + ${#numbers.formatDecimal(totalFaturadoCaixas, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</strong>
                                 </span>
                                 <a th:href="@{/caixa/monitor}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-600">
-                                    <i class="fas fa-external-link-alt me-1"></i> Ver Monitor Completo
+                                    <i class="fas fa-external-link-alt me-1"></i> <span th:text="#{dashboard.ver_monitor_completo}">Ver Monitor Completo</span>
                                 </a>
                             </div>
                         </div>
@@ -289,12 +289,12 @@
                                 <table class="table table-hover mb-0 align-middle">
                                     <thead class="bg-light">
                                         <tr class="small text-muted">
-                                            <th class="ps-4 py-2 fw-700">Sessão</th>
-                                            <th class="fw-700">Operador</th>
-                                            <th class="fw-700">Abertura</th>
-                                            <th class="text-end fw-700">Numerário</th>
-                                            <th class="text-end fw-700">Multicaixa</th>
-                                            <th class="text-end pe-4 fw-700">Total Faturado</th>
+                                            <th class="ps-4 py-2 fw-700" th:text="#{column.codigo}">Sessão</th>
+                                            <th class="fw-700" th:text="#{column.operador}">Operador</th>
+                                            <th class="fw-700" th:text="#{pos.carrinho.titulo}">Abertura</th>
+                                            <th class="text-end fw-700" th:text="#{menu.vendas}">Numerário</th>
+                                            <th class="text-end fw-700" th:text="#{config.pagamentos.titulo}">Multicaixa</th>
+                                            <th class="text-end pe-4 fw-700" th:text="#{dashboard.total_faturado}">Total Faturado</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -323,10 +323,10 @@
                     <div class="col-lg-8">
                         <div class="chart-container">
                             <div class="chart-header">
-                                <h5 class="chart-title">Desempenho Financeiro (Receita vs Despesas)</h5>
+                                <h5 class="chart-title" th:text="#{dashboard.desempenho_financeiro}">Desempenho Financeiro (Receita vs Despesas)</h5>
                                 <div class="dropdown">
                                     <button class="btn btn-light btn-sm rounded-pill px-3" onclick="exportarGrafico('graficoReceitaDespesa')">
-                                        <i class="fas fa-download me-1"></i> Exportar
+                                        <i class="fas fa-download me-1"></i> <span th:text="#{btn.exportar}">Exportar</span>
                                     </button>
                                 </div>
                             </div>
@@ -338,7 +338,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="chart-container">
-                                    <h5 class="chart-title mb-4">Vendas por Localização</h5>
+                                    <h5 class="chart-title mb-4" th:text="#{dashboard.vendas_localizacao}">Vendas por Localização</h5>
                                     <div class="canvas-wrapper" style="height: 250px;">
                                         <canvas id="graficoLocalizacao"></canvas>
                                     </div>
@@ -346,7 +346,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="chart-container">
-                                    <h5 class="chart-title mb-4">Horários de Pico</h5>
+                                    <h5 class="chart-title mb-4" th:text="#{dashboard.horarios_pico}">Horários de Pico</h5>
                                     <div class="canvas-wrapper" style="height: 250px;">
                                         <canvas id="graficoHorarios"></canvas>
                                     </div>
@@ -358,7 +358,7 @@
                     <div class="col-lg-4">
                         <!-- Top Products -->
                         <div class="chart-container">
-                            <h5 class="chart-title mb-4">Produtos Mais Vendidos</h5>
+                            <h5 class="chart-title mb-4" th:text="#{dashboard.produtos_mais_vendidos}">Produtos Mais Vendidos</h5>
                             <div class="top-products-list">
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item" th:each="produto, iter : ${produtosMaisVendidos}">
@@ -374,7 +374,7 @@
 
                         <!-- Summary Comparison -->
                         <div class="chart-container">
-                            <h5 class="chart-title mb-4">Mês Atual vs Passado</h5>
+                            <h5 class="chart-title mb-4" th:text="#{dashboard.mes_atual_vs_passado}">Mês Atual vs Passado</h5>
                             <div class="canvas-wrapper" style="height: 300px;">
                                 <canvas id="graficoComparacao"></canvas>
                             </div>

@@ -1,466 +1,224 @@
 <!DOCTYPE html>
-<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="menu :: head"></head>
-
-<style>
-    :root { --primary-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); }
-
-    .content-wrapper { background-color: #f8fafc !important; }
-
-    .page-header-modern {
-        display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;
-    }
-    .page-header-modern h2 {
-        font-weight: 800; color: #1e293b; margin: 0; letter-spacing: -0.02em;
-    }
-    .page-subtitle { color: #64748b; margin: 0; font-size: 0.92rem; }
-
-    /* Stats row */
-    .stat-chip {
-        display: inline-flex; align-items: center; gap: 8px;
-        background: white; border: 1px solid #e2e8f0; border-radius: 14px;
-        padding: 8px 16px; font-size: 0.85rem; font-weight: 600; color: #475569;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .stat-chip .badge-count {
-        background: var(--primary-grad); color: white;
-        border-radius: 8px; padding: 2px 8px; font-size: 0.78rem;
-    }
-
-    /* Search */
-    .search-wrapper {
-        position: relative; margin-bottom: 20px;
-    }
-    .search-wrapper i {
-        position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-        color: #94a3b8; font-size: 0.9rem;
-    }
-    .search-wrapper input {
-        padding-left: 38px; border-radius: 12px;
-        border: 1px solid #e2e8f0; font-size: 0.9rem;
-        background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .search-wrapper input:focus {
-        border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); outline: none;
-    }
-
-    /* Table card */
-    .premium-table-card {
-        background: white; border-radius: 20px;
-        border: 1px solid rgba(226,232,240,0.8);
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-        overflow: hidden;
-    }
-    .table thead th {
-        background: #f8fafc; color: #64748b; font-weight: 700;
-        text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.06em;
-        padding: 16px 20px; border-bottom: 1px solid #f1f5f9; border-top: none;
-    }
-    .table tbody td {
-        padding: 14px 20px; color: #1e293b; font-weight: 500;
-        vertical-align: middle; border-bottom: 1px solid #f8fafc; border-top: none;
-    }
-    .table tbody tr:last-child td { border-bottom: none; }
-    .table tbody tr { transition: background 0.15s; }
-    .table tbody tr:hover td { background: #fafaff; }
-
-    /* Category avatar */
-    .cat-avatar {
-        width: 38px; height: 38px; border-radius: 12px;
-        display: inline-flex; align-items: center; justify-content: center;
-        font-weight: 800; font-size: 0.85rem; color: white; flex-shrink: 0;
-    }
-    .cat-name { font-weight: 700; color: #1e293b; }
-    .cat-id { font-weight: 700; color: #94a3b8; font-size: 0.88rem; }
-
-    /* Action buttons */
-    .btn-action {
-        width: 36px; height: 36px; border-radius: 10px;
-        display: inline-flex; align-items: center; justify-content: center;
-        transition: all 0.2s ease; border: none; font-size: 0.82rem; cursor: pointer;
-    }
-    .btn-action-edit { background: #eef2ff; color: #6366f1; }
-    .btn-action-edit:hover { background: #6366f1; color: white; transform: translateY(-2px); }
-    .btn-action-delete { background: #fff1f2; color: #ef4444; }
-    .btn-action-delete:hover { background: #ef4444; color: white; transform: translateY(-2px); }
-
-    /* Premium buttons */
-    .btn-premium {
-        color: white; border: none; padding: 10px 20px; border-radius: 14px;
-        font-weight: 700; font-size: 0.88rem; transition: all 0.3s ease;
-        display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-    }
-    .btn-premium:hover { transform: translateY(-2px); color: white; }
-    .btn-primary-premium {
-        background: var(--primary-grad);
-        box-shadow: 0 8px 15px -3px rgba(99,102,241,0.35);
-    }
-    .btn-primary-premium:hover { box-shadow: 0 12px 20px -3px rgba(99,102,241,0.45); }
-    .btn-success-premium {
-        background: linear-gradient(135deg,#10b981 0%,#059669 100%);
-        box-shadow: 0 8px 15px -3px rgba(16,185,129,0.3);
-    }
-    .btn-success-premium:hover { box-shadow: 0 12px 20px -3px rgba(16,185,129,0.4); }
-    .btn-outline-premium {
-        background: white; color: #475569 !important; border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .btn-outline-premium:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-1px); }
-
-    /* Dropdown */
-    .export-dropdown { border-radius: 14px !important; border: 1px solid #f1f5f9 !important; padding: 6px !important; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1) !important; }
-    .export-dropdown .dropdown-item { border-radius: 8px; padding: 9px 14px; font-size: 0.87rem; font-weight: 600; transition: background 0.15s; }
-    .export-dropdown .dropdown-item:hover { background: #f1f5f9; }
-
-    /* Empty state */
-    .empty-state { padding: 64px 20px; text-align: center; }
-    .empty-state .empty-icon {
-        width: 80px; height: 80px; border-radius: 24px;
-        background: linear-gradient(135deg,#f1f5f9,#e2e8f0);
-        display: inline-flex; align-items: center; justify-content: center;
-        font-size: 2rem; color: #94a3b8; margin-bottom: 16px;
-    }
-
-    /* Toast */
-    #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-    .toast-msg {
-        background: white; border-radius: 14px; padding: 14px 20px;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 12px;
-        font-weight: 600; font-size: 0.9rem; color: #1e293b; min-width: 280px;
-        animation: slideInRight 0.3s ease; border-left: 4px solid #6366f1;
-    }
-    .toast-msg.toast-success { border-left-color: #10b981; }
-    .toast-msg.toast-error { border-left-color: #ef4444; }
-    @keyframes slideInRight { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
-</style>
-
-<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
         <nav th:replace="menu :: topbar"></nav>
         <aside th:replace="menu :: sidebar"></aside>
 
-        <main class="content-wrapper">
-            <div class="container-fluid px-4 py-4">
-
-                <!-- Header -->
-                <div class="page-header-modern">
-                    <div>
-                        <h2><i class="fas fa-tags me-2" style="color:#6366f1;font-size:1.2rem;"></i>Categorias de Produtos</h2>
-                        <p class="page-subtitle">Organize e classifique o seu catálogo de produtos</p>
-                    </div>
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <!-- Contador -->
-                        <span class="stat-chip">
-                            <i class="fas fa-layer-group" style="color:#6366f1;"></i>
-                            <span id="totalCount">0</span> categorias
-                        </span>
-                        <!-- Exportar -->
-                        <div class="dropdown">
-                            <button class="btn-premium btn-outline-premium dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-file-export"></i> Exportar
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end export-dropdown">
-                                <li><a class="dropdown-item" href="/categorias/exportar/excel"><i class="fas fa-file-excel text-success me-2"></i>Excel (.xlsx)</a></li>
-                                <li><a class="dropdown-item" href="/categorias/exportar/pdf"><i class="fas fa-file-pdf text-danger me-2"></i>PDF</a></li>
-                                <li><a class="dropdown-item" href="/categorias/exportar/csv"><i class="fas fa-file-csv text-primary me-2"></i>CSV</a></li>
-                                <li><a class="dropdown-item" href="/categorias/exportar/json"><i class="fas fa-file-code text-warning me-2"></i>JSON</a></li>
-                            </ul>
+        <div class="content-wrapper">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Categorias de Produtos</h1>
                         </div>
-                        <!-- Importar -->
-                        <button class="btn-premium btn-success-premium" data-bs-toggle="modal" data-bs-target="#modalImportacao">
-                            <i class="fas fa-file-import"></i> Importar
-                        </button>
-                        <!-- Nova -->
-                        <button class="btn-premium btn-primary-premium" data-bs-toggle="modal" data-bs-target="#modalCadastro">
-                            <i class="fas fa-plus"></i> Nova Categoria
-                        </button>
+                        <div class="col-sm-6 text-right">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastro">
+                                <i class="fas fa-plus"></i> Nova Categoria
+                            </button>
+                        </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- Search -->
-                <div class="search-wrapper" style="max-width:360px;">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Pesquisar categoria...">
-                </div>
-
-                <!-- Table -->
-                <div class="premium-table-card">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" id="tabelaCategorias">
-                            <thead>
-                                <tr>
-                                    <th style="width:70px;">ID</th>
-                                    <th>Categoria</th>
-                                    <th style="width:110px;" class="text-center">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="cat,iter : ${categorias}"
-                                    th:attr="data-nome=${cat.nome}">
-                                    <td><span class="cat-id" th:text="'#' + ${cat.id}"></span></td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <!-- Avatar colorido por inicial -->
-                                            <div class="cat-avatar" th:style="'background: ' + (${iter.index % 6 == 0} ? 'linear-gradient(135deg,#6366f1,#4338ca)' : (${iter.index % 6 == 1} ? 'linear-gradient(135deg,#10b981,#059669)' : (${iter.index % 6 == 2} ? 'linear-gradient(135deg,#f59e0b,#d97706)' : (${iter.index % 6 == 3} ? 'linear-gradient(135deg,#ef4444,#dc2626)' : (${iter.index % 6 == 4} ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'linear-gradient(135deg,#8b5cf6,#7c3aed)')))))">
-                                                <span th:text="${#strings.substring(cat.nome,0,1).toUpperCase()}">A</span>
-                                            </div>
-                                            <span class="cat-name" th:text="${cat.nome}">Nome</span>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <button class="btn-action btn-action-edit btn-editar" title="Editar"
-                                                    th:data-id="${cat.id}" th:data-nome="${cat.nome}">
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="card card-outline card-primary shadow-sm">
+                        <div class="card-body p-0">
+                            <table class="table table-hover table-striped mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 80px">ID</th>
+                                        <th>Nome da Categoria</th>
+                                        <th style="width: 150px" class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="cat : ${categorias}">
+                                        <td th:text="${cat.id}"></td>
+                                        <td th:text="${cat.nome}" class="font-weight-bold"></td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-info btn-editar" title="Editar"
+                                                    th:data-id="${cat.id}"
+                                                    th:data-nome="${cat.nome}">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button class="btn-action btn-action-delete btn-eliminar" title="Eliminar"
-                                                    th:data-id="${cat.id}" th:data-nome="${cat.nome}">
+                                            <button class="btn btn-sm btn-danger btn-eliminar" title="Eliminar"
+                                                    th:data-id="${cat.id}"
+                                                    th:data-nome="${cat.nome}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(categorias)}" id="emptyRow">
-                                    <td colspan="3">
-                                        <div class="empty-state">
-                                            <div class="empty-icon"><i class="fas fa-tags"></i></div>
-                                            <h5 style="color:#334155;font-weight:700;">Nenhuma categoria encontrada</h5>
-                                            <p style="color:#64748b;">Crie a sua primeira categoria para organizar os produtos.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <!-- Empty search state (hidden by default) -->
-                        <div id="searchEmpty" class="empty-state d-none">
-                            <div class="empty-icon"><i class="fas fa-search"></i></div>
-                            <h5 style="color:#334155;font-weight:700;">Sem resultados</h5>
-                            <p style="color:#64748b;">Nenhuma categoria corresponde à sua pesquisa.</p>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(categorias)}">
+                                        <td colspan="3" class="text-center py-4 text-muted">
+                                            Nenhuma categoria encontrada.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+            </section>
+        </div>
 
-            </div>
-        </main>
-    </div>
-
-    <!-- Toast container -->
-    <div id="toastContainer"></div>
-
-    <!-- Modal Importação -->
-    <div class="modal fade" id="modalImportacao" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow" style="border-radius:20px;overflow:hidden;">
-                <div class="modal-header text-white" style="background:linear-gradient(135deg,#10b981,#059669);border-bottom:none;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-file-import me-2"></i>Importar Categorias</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <!-- Modal Cadastro -->
+        <div class="modal fade" id="modalCadastro" tabindex="-1" aria-labelledby="modalCadastroLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalCadastroLabel"><i class="fas fa-tag"></i> Cadastrar Nova Categoria</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="formCategoria">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="nomeCadastro">Nome da Categoria</label>
+                                <input type="text" class="form-control" id="nomeCadastro" name="nome" placeholder="Ex: Bebidas, Limpeza..." required>
+                                <small class="text-muted">Este nome será exibido no cadastro de produtos.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary px-4">Gravar Categoria</button>
+                        </div>
+                    </form>
                 </div>
-                <form id="formImportacao" enctype="multipart/form-data">
-                    <div class="modal-body p-4">
-                        <div class="alert border-0 mb-3" style="background:#ecfdf5;color:#065f46;border-radius:12px;font-size:0.87rem;">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Formatos suportados: <strong>Excel (.xls/.xlsx)</strong>, <strong>CSV</strong> ou <strong>TXT</strong> — um nome por linha.
-                        </div>
-                        <div class="mb-3">
-                            <label for="fileImport" class="form-label fw-bold text-slate-700" style="color:#334155;">Selecione o Ficheiro</label>
-                            <input type="file" class="form-control" id="fileImport" name="file" accept=".xls,.xlsx,.csv,.txt" required style="border-radius:12px;">
-                        </div>
-                        <a href="/categorias/modelo-importacao" class="text-decoration-none small fw-bold" style="color:#10b981;">
-                            <i class="fas fa-download me-1"></i> Descarregar Modelo de Exemplo (.xlsx)
-                        </a>
-                    </div>
-                    <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal" style="border-radius:12px;">Cancelar</button>
-                        <button type="submit" class="btn-premium btn-success-premium" id="btnSubmitImport">
-                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
-                            <i class="fas fa-upload me-1"></i> Importar
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
-    </div>
 
-    <!-- Modal Cadastro -->
-    <div class="modal fade" id="modalCadastro" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow" style="border-radius:20px;overflow:hidden;">
-                <div class="modal-header text-white" style="background:var(--primary-grad);border-bottom:none;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-tag me-2"></i>Nova Categoria</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="formCategoria">
-                    <div class="modal-body p-4">
-                        <div class="mb-1">
-                            <label for="nomeCadastro" class="form-label fw-bold" style="color:#334155;">Nome da Categoria</label>
-                            <input type="text" class="form-control" id="nomeCadastro" name="nome"
-                                   placeholder="Ex: Bebidas, Limpeza, Electrónica..." required style="border-radius:12px;padding:12px;">
-                            <small class="text-muted">Este nome será exibido no cadastro de produtos.</small>
+        <!-- Modal Edição -->
+        <div class="modal fade" id="modalEdicao" tabindex="-1" aria-labelledby="modalEdicaoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title" id="modalEdicaoLabel"><i class="fas fa-edit"></i> Editar Categoria</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="formEdicao">
+                        <input type="hidden" id="editId">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="editNome">Nome da Categoria</label>
+                                <input type="text" class="form-control" id="editNome" name="nome" placeholder="Nome da categoria" required>
+                                <small class="text-muted">Altere o nome desta categoria.</small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal" style="border-radius:12px;">Cancelar</button>
-                        <button type="submit" class="btn-premium btn-primary-premium">
-                            <i class="fas fa-save me-1"></i> Gravar
-                        </button>
-                    </div>
-                </form>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-info px-4 text-white">Guardar Alterações</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal Edição -->
-    <div class="modal fade" id="modalEdicao" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow" style="border-radius:20px;overflow:hidden;">
-                <div class="modal-header text-white" style="background:linear-gradient(135deg,#06b6d4,#0891b2);border-bottom:none;">
-                    <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2"></i>Editar Categoria</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="formEdicao">
-                    <input type="hidden" id="editId">
-                    <div class="modal-body p-4">
-                        <div class="mb-1">
-                            <label for="editNome" class="form-label fw-bold" style="color:#334155;">Nome da Categoria</label>
-                            <input type="text" class="form-control" id="editNome" name="nome"
-                                   placeholder="Nome da categoria" required style="border-radius:12px;padding:12px;">
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 pt-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal" style="border-radius:12px;">Cancelar</button>
-                        <button type="submit" class="btn-premium" style="background:linear-gradient(135deg,#06b6d4,#0891b2);box-shadow:0 8px 15px -3px rgba(6,182,212,0.3);">
-                            <i class="fas fa-check me-1"></i> Guardar Alterações
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <footer th:replace="menu :: footer"></footer>
     </div>
-
-    <footer th:replace="menu :: footer"></footer>
 
     <script th:inline="javascript">
-    $(document).ready(function () {
-        // ── Contador ────────────────────────────────────────────────
-        const totalRows = $('#tabelaCategorias tbody tr[data-nome]').length;
-        $('#totalCount').text(totalRows);
-
-        // ── CSRF ────────────────────────────────────────────────────
-        function csrfHeader(xhr) {
-            const m = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-            if (m) xhr.setRequestHeader('X-XSRF-TOKEN', decodeURIComponent(m[1]));
-        }
-
-        // ── Toast ───────────────────────────────────────────────────
-        function showToast(msg, type = 'success') {
-            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle';
-            const color = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#6366f1';
-            const id = 'toast_' + Date.now();
-            const el = $(`<div class="toast-msg toast-${type}" id="${id}">
-                <i class="fas fa-${icon}" style="color:${color};font-size:1.1rem;"></i>
-                <span>${msg}</span>
-            </div>`);
-            $('#toastContainer').append(el);
-            setTimeout(() => el.fadeOut(400, () => el.remove()), 3500);
-        }
-
-        // ── Pesquisa em tempo real ──────────────────────────────────
-        $('#searchInput').on('input', function () {
-            const q = $(this).val().toLowerCase().trim();
-            let visible = 0;
-            $('#tabelaCategorias tbody tr[data-nome]').each(function () {
-                const nome = $(this).data('nome').toLowerCase();
-                if (!q || nome.includes(q)) { $(this).show(); visible++; }
-                else $(this).hide();
-            });
-            $('#searchEmpty').toggleClass('d-none', visible > 0);
-        });
-
-        // ── IMPORTAR ────────────────────────────────────────────────
-        $('#formImportacao').on('submit', function (e) {
-            e.preventDefault();
-            const $btn = $('#btnSubmitImport');
-            const $sp = $btn.find('.spinner-border');
-            $btn.prop('disabled', true); $sp.removeClass('d-none');
-            $.ajax({
-                url: '/api/categorias/importar', type: 'POST',
-                data: new FormData(this), processData: false, contentType: false,
-                beforeSend: csrfHeader,
-                success: function (res) {
-                    $btn.prop('disabled', false); $sp.addClass('d-none');
-                    $('#modalImportacao').modal('hide');
-                    showToast(res.mensagem, 'success');
-                    setTimeout(() => location.href = '/categorias/listar?r=' + Date.now(), 1800);
-                },
-                error: function (xhr) {
-                    $btn.prop('disabled', false); $sp.addClass('d-none');
-                    showToast(xhr.status === 403 ? 'Erro CSRF. Recarregue a página.' : 'Erro: ' + (xhr.responseText || 'Desconhecido'), 'error');
+        $(document).ready(function() {
+            // CSRF via Cookie (CookieCsrfTokenRepository — lê o cookie XSRF-TOKEN)
+            function csrfHeader(xhr) {
+                const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+                if (match) {
+                    xhr.setRequestHeader('X-XSRF-TOKEN', decodeURIComponent(match[1]));
                 }
-            });
-        });
+            }
 
-        // ── CADASTRAR ───────────────────────────────────────────────
-        $('#formCategoria').on('submit', function (e) {
-            e.preventDefault();
-            const nome = $('#nomeCadastro').val().trim();
-            if (!nome) return;
-            $.ajax({
-                url: '/api/categorias', type: 'POST', contentType: 'application/json',
-                data: JSON.stringify({ nome }), beforeSend: csrfHeader,
-                success: function () {
-                    $('#modalCadastro').modal('hide');
-                    showToast('Categoria criada com sucesso!', 'success');
-                    setTimeout(() => location.href = '/categorias/listar?r=' + Date.now(), 1200);
-                },
-                error: function (xhr) {
-                    showToast(xhr.status === 403 ? 'Erro CSRF. Recarregue a página.' : 'Erro: ' + (xhr.responseText || 'Desconhecido'), 'error');
+            // ── CADASTRAR ──────────────────────────────────────────
+            $('#formCategoria').on('submit', function(e) {
+                e.preventDefault();
+                const categoria = { nome: $('#nomeCadastro').val().trim() };
+                if (!categoria.nome) return;
+
+                $.ajax({
+                    url: '/api/categorias',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(categoria),
+                    beforeSend: csrfHeader,
+                    success: function() {
+                        alert('Categoria cadastrada com sucesso!');
+                        window.location.href = '/categorias/listar?r=' + Date.now();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert('Erro de permissão (CSRF). Por favor, recarregue a página.');
+                        } else {
+                            alert('Erro ao cadastrar: ' + (xhr.responseText || 'Erro desconhecido'));
+                        }
+                    }
+                });
+            });
+
+            // ── ABRIR MODAL DE EDIÇÃO ──────────────────────────────
+            $(document).on('click', '.btn-editar', function() {
+                const id   = $(this).data('id');
+                const nome = $(this).data('nome');
+                $('#editId').val(id);
+                $('#editNome').val(nome);
+                $('#modalEdicao').modal('show');
+            });
+
+            // ── GUARDAR EDIÇÃO ─────────────────────────────────────
+            $('#formEdicao').on('submit', function(e) {
+                e.preventDefault();
+                const id   = $('#editId').val();
+                const nome = $('#editNome').val().trim();
+                if (!nome) return;
+
+                $.ajax({
+                    url: '/api/categorias/' + id,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ nome: nome }),
+                    beforeSend: csrfHeader,
+                    success: function() {
+                        alert('Categoria actualizada com sucesso!');
+                        window.location.href = '/categorias/listar?r=' + Date.now();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert('Erro de permissão (CSRF). Por favor, recarregue a página.');
+                        } else {
+                            alert('Erro ao editar: ' + (xhr.responseText || 'Erro desconhecido'));
+                        }
+                    }
+                });
+            });
+
+            // ── ELIMINAR ───────────────────────────────────────────
+            $(document).on('click', '.btn-eliminar', function() {
+                const id   = $(this).data('id');
+                const nome = $(this).data('nome');
+
+                if (!confirm('Tem a certeza que deseja eliminar a categoria "' + nome + '"?')) {
+                    return;
                 }
+
+                $.ajax({
+                    url: '/api/categorias/' + id,
+                    type: 'DELETE',
+                    beforeSend: csrfHeader,
+                    success: function() {
+                        alert('Categoria eliminada com sucesso!');
+                        window.location.href = '/categorias/listar?r=' + Date.now();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 403) {
+                            alert('Erro de permissão (CSRF). Por favor, recarregue a página.');
+                        } else if (xhr.status === 400) {
+                            alert(xhr.responseText);
+                        } else {
+                            alert('Erro ao eliminar categoria. Tente novamente mais tarde.');
+                        }
+                    }
+                });
             });
         });
-
-        // ── ABRIR EDIÇÃO ────────────────────────────────────────────
-        $(document).on('click', '.btn-editar', function () {
-            $('#editId').val($(this).data('id'));
-            $('#editNome').val($(this).data('nome'));
-            $('#modalEdicao').modal('show');
-        });
-
-        // ── GUARDAR EDIÇÃO ──────────────────────────────────────────
-        $('#formEdicao').on('submit', function (e) {
-            e.preventDefault();
-            const id = $('#editId').val(), nome = $('#editNome').val().trim();
-            if (!nome) return;
-            $.ajax({
-                url: '/api/categorias/' + id, type: 'PUT', contentType: 'application/json',
-                data: JSON.stringify({ nome }), beforeSend: csrfHeader,
-                success: function () {
-                    $('#modalEdicao').modal('hide');
-                    showToast('Categoria actualizada com sucesso!', 'success');
-                    setTimeout(() => location.href = '/categorias/listar?r=' + Date.now(), 1200);
-                },
-                error: function (xhr) {
-                    showToast(xhr.status === 403 ? 'Erro CSRF. Recarregue a página.' : 'Erro ao editar: ' + (xhr.responseText || ''), 'error');
-                }
-            });
-        });
-
-        // ── ELIMINAR ────────────────────────────────────────────────
-        $(document).on('click', '.btn-eliminar', function () {
-            const id = $(this).data('id'), nome = $(this).data('nome');
-            if (!confirm('Eliminar a categoria "' + nome + '"?')) return;
-            $.ajax({
-                url: '/api/categorias/' + id, type: 'DELETE', beforeSend: csrfHeader,
-                success: function () {
-                    showToast('Categoria eliminada.', 'success');
-                    setTimeout(() => location.href = '/categorias/listar?r=' + Date.now(), 1200);
-                },
-                error: function (xhr) {
-                    if (xhr.status === 400) showToast(xhr.responseText, 'error');
-                    else showToast('Erro ao eliminar. Tente novamente.', 'error');
-                }
-            });
-        });
-    });
     </script>
 </body>
 </html>

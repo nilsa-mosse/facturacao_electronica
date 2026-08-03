@@ -120,11 +120,11 @@
             <!-- Header -->
             <div class="page-header-modern">
                 <div>
-                    <h2><i class="fas fa-file-invoice me-2" style="color: var(--nc-color);"></i>Notas de Crédito e Débito</h2>
-                    <p class="mb-0" style="color:#64748b;">Documentos fiscais de retificação e ajuste emitidos com conformidade AGT</p>
+                    <h2><i class="fas fa-file-invoice me-2" style="color: var(--nc-color);"></i><span th:text="#{notas.titulo}">Notas de Crédito e Débito</span></h2>
+                    <p class="mb-0" style="color:#64748b;" th:text="#{notas.subtitulo}">Documentos fiscais de retificação e ajuste emitidos com conformidade AGT</p>
                 </div>
                 <a th:href="@{/notas/novo}" class="btn-primary-nc">
-                    <i class="fas fa-plus me-2"></i>Nova Nota (NC / ND)
+                    <i class="fas fa-plus me-2"></i><span th:text="#{notas.btn.nova}">Nova Nota (NC / ND)</span>
                 </a>
             </div>
 
@@ -144,7 +144,7 @@
                             <i class="fas fa-file-invoice"></i>
                         </div>
                         <div class="stat-value" th:text="${totalNC != null ? totalNC : 0}">0</div>
-                        <div class="stat-label">NCs Emitidas</div>
+                        <div class="stat-label" th:text="#{notas.stat.ncs}">NCs Emitidas</div>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -153,7 +153,7 @@
                             <i class="fas fa-file-invoice-dollar"></i>
                         </div>
                         <div class="stat-value" th:text="${totalND != null ? totalND : 0}">0</div>
-                        <div class="stat-label">NDs Emitidas</div>
+                        <div class="stat-label" th:text="#{notas.stat.nds}">NDs Emitidas</div>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -162,7 +162,7 @@
                             <i class="fas fa-check-double"></i>
                         </div>
                         <div class="stat-value" th:text="${faturasNC != null ? faturasNC.?[status == 'VALIDADA'].size() : 0}">0</div>
-                        <div class="stat-label">Validadas AGT</div>
+                        <div class="stat-label" th:text="#{notas.stat.validadas}">Validadas AGT</div>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -171,7 +171,7 @@
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                         <div class="stat-value" th:text="${faturasNC != null ? faturasNC.?[status == 'FALHA_ENVIO'].size() : 0}">0</div>
-                        <div class="stat-label">Falha no Envio</div>
+                        <div class="stat-label" th:text="#{notas.stat.falha}">Falha no Envio</div>
                     </div>
                 </div>
             </div>
@@ -181,24 +181,24 @@
                 <div class="table-toolbar">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Pesquisar número, tipo, estado...">
+                        <input type="text" id="searchInput" th:placeholder="#{notas.filtro.placeholder}">
                     </div>
                     <span style="font-size:0.82rem; color:#94a3b8;"
-                          th:text="'Total: ' + ${faturasNC != null ? #lists.size(faturasNC) : 0} + ' documentos'"></span>
+                          th:text="${faturasNC != null ? #lists.size(faturasNC) : 0} + ' ' + #{notas.total_docs(' ')}"></span>
                 </div>
 
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" id="ncTable">
                         <thead>
                             <tr>
-                                <th>Tipo</th>
-                                <th>Nº Documento</th>
-                                <th>Data de Emissão</th>
-                                <th>Factura de Origem</th>
-                                <th class="text-end">Total</th>
-                                <th>Estado AGT</th>
-                                <th>Código AGT</th>
-                                <th class="text-center">Documento</th>
+                                <th th:text="#{notas.column.tipo}">Tipo</th>
+                                <th th:text="#{notas.column.numero}">Nº Documento</th>
+                                <th th:text="#{notas.column.data}">Data de Emissão</th>
+                                <th th:text="#{notas.column.origem}">Factura de Origem</th>
+                                <th class="text-end" th:text="#{dashboard.total_faturado}">Total</th>
+                                <th th:text="#{notas.column.estado_agt}">Estado AGT</th>
+                                <th th:text="#{notas.column.codigo_agt}">Código AGT</th>
+                                <th class="text-center" th:text="#{notas.column.documento}">Documento</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -226,16 +226,16 @@
                                 </td>
                                 <td>
                                     <span th:if="${nc.status == 'VALIDADA'}" class="badge-nc badge-validada">
-                                        <i class="fas fa-check-circle me-1"></i>Validada AGT
+                                        <i class="fas fa-check-circle me-1"></i><span th:text="#{status.validado}">Validada AGT</span>
                                     </span>
                                     <span th:if="${nc.status == 'EMITIDA_OFFLINE'}" class="badge-nc badge-offline">
                                         <i class="fas fa-wifi me-1"></i>Offline
                                     </span>
                                     <span th:if="${nc.status == 'PENDENTE'}" class="badge-nc badge-pendente">
-                                        <i class="fas fa-clock me-1"></i>Pendente
+                                        <i class="fas fa-clock me-1"></i><span th:text="#{status.pendente}">Pendente</span>
                                     </span>
                                     <span th:if="${nc.status == 'FALHA_ENVIO'}" class="badge-nc badge-cancelada">
-                                        <i class="fas fa-times-circle me-1"></i>Falha Envio
+                                        <i class="fas fa-times-circle me-1"></i><span th:text="#{notas.stat.falha}">Falha Envio</span>
                                     </span>
                                     <span th:if="${nc.status != 'VALIDADA' and nc.status != 'EMITIDA_OFFLINE' and nc.status != 'PENDENTE' and nc.status != 'FALHA_ENVIO'}"
                                           class="badge-nc badge-offline" th:text="${nc.status}">Estado</span>
@@ -260,10 +260,10 @@
                                 <td colspan="8">
                                     <div class="empty-state">
                                         <i class="fas fa-file-invoice"></i>
-                                        <h5 style="font-weight:700; color:#1e293b;">Nenhuma Nota de Crédito ou Débito emitida</h5>
-                                        <p style="color:#64748b;">As Notas de Crédito/Débito são geradas automaticamente ao processar uma retificação/ajuste.</p>
+                                        <h5 style="font-weight:700; color:#1e293b;" th:text="#{notas.empty.titulo}">Nenhuma Nota de Crédito ou Débito emitida</h5>
+                                        <p style="color:#64748b;" th:text="#{notas.empty.desc}">As Notas de Crédito/Débito são geradas automaticamente ao processar uma retificação/ajuste.</p>
                                         <a th:href="@{/notas/novo}" class="btn-primary-nc mt-3 d-inline-block">
-                                            <i class="fas fa-plus me-2"></i>Emitir Nova Nota
+                                            <i class="fas fa-plus me-2"></i><span th:text="#{notas.btn.nova}">Emitir Nova Nota</span>
                                         </a>
                                     </div>
                                 </td>

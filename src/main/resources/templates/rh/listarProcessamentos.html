@@ -12,8 +12,8 @@
                 <div class="container-fluid px-4">
                     <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
                         <div>
-                            <h1 class="fw-bold text-dark">Folhas de <span class="text-primary">Vencimento</span></h1>
-                            <p class="text-muted">Gere e consulte os lotes mensais de processamento de salários e obrigações fiscais.</p>
+                            <h1 class="fw-bold text-dark" th:text="#{rh.processamento.titulo}">Folhas de Vencimento</h1>
+                            <p class="text-muted" th:text="#{rh.processamento.subtitulo}">Gere e consulte os lotes mensais de processamento de salários e obrigações fiscais.</p>
                         </div>
                     </div>
                 </div>
@@ -37,12 +37,12 @@
                         <div class="col-lg-4 col-md-12 mb-4">
                             <div class="card border-0 shadow-sm rounded-xl">
                                 <div class="card-header bg-primary text-white py-3" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                                    <h5 class="card-title fw-bold mb-0"><i class="fas fa-plus-circle me-2"></i> Novo Processamento</h5>
+                                    <h5 class="card-title fw-bold mb-0"><i class="fas fa-plus-circle me-2"></i> <span th:text="#{rh.processamento.card.novo}">Novo Processamento</span></h5>
                                 </div>
                                 <div class="card-body p-4">
                                     <form th:action="@{/rh/processamento/novo}" method="POST">
                                         <div class="mb-3">
-                                            <label class="form-label fw-semibold text-muted">Mês Fiscal</label>
+                                            <label class="form-label fw-semibold text-muted" th:text="#{rh.processamento.mes_fiscal}">Mês Fiscal</label>
                                             <select name="mes" class="form-select rounded-pill shadow-none">
                                                 <option value="1" th:selected="${mesAtual == 1}">Janeiro</option>
                                                 <option value="2" th:selected="${mesAtual == 2}">Fevereiro</option>
@@ -59,11 +59,11 @@
                                             </select>
                                         </div>
                                         <div class="mb-4">
-                                            <label class="form-label fw-semibold text-muted">Ano Fiscal</label>
+                                            <label class="form-label fw-semibold text-muted" th:text="#{rh.processamento.ano_fiscal}">Ano Fiscal</label>
                                             <input type="number" name="ano" class="form-control rounded-pill shadow-none" th:value="${anoAtual}" required>
                                         </div>
                                         <button type="submit" class="btn btn-primary rounded-pill w-100 py-2 shadow-sm fw-semibold">
-                                            <i class="fas fa-cogs me-2"></i> Iniciar Processamento
+                                            <i class="fas fa-cogs me-2"></i> <span th:text="#{rh.processamento.btn.iniciar}">Iniciar Processamento</span>
                                         </button>
                                     </form>
                                 </div>
@@ -74,17 +74,17 @@
                         <div class="col-lg-8 col-md-12 mb-4">
                             <div class="card border-0 shadow-sm rounded-xl overflow-hidden h-100">
                                 <div class="card-header bg-white py-3 border-0">
-                                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-list-ul me-2"></i> Histórico de Processamento</h5>
+                                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-list-ul me-2"></i> <span th:text="#{rh.processamento.historico}">Histórico de Processamento</span></h5>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle mb-0">
                                             <thead class="bg-light">
                                                 <tr>
-                                                    <th class="ps-4">Período</th>
-                                                    <th>Data Processamento</th>
-                                                    <th>Estado</th>
-                                                    <th class="text-end pe-4">Ações</th>
+                                                    <th class="ps-4" th:text="#{rh.processamento.col.periodo}">Período</th>
+                                                    <th th:text="#{rh.processamento.col.data}">Data Processamento</th>
+                                                    <th th:text="#{vendas.col.estado}">Estado</th>
+                                                    <th class="text-end pe-4" th:text="#{column.acoes}">Ações</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -100,14 +100,14 @@
                                                     </td>
                                                     <td class="text-end pe-4">
                                                         <a th:href="@{/rh/processamento/detalhes/{id}(id=${folha.id})}" class="btn btn-sm btn-dark rounded-pill px-3 shadow-sm">
-                                                            <i class="fas fa-search me-1"></i> Abrir Lote
+                                                            <i class="fas fa-search me-1"></i> <span th:text="#{rh.processamento.btn.abrir_lote}">Abrir Lote</span>
                                                         </a>
                                                     </td>
                                                 </tr>
                                                 <tr th:if="${#lists.isEmpty(folhas)}">
                                                     <td colspan="4" class="text-center py-5 text-muted">
                                                         <i class="fas fa-calculator fa-3x mb-3 text-light"></i>
-                                                        <p class="mb-0 fw-medium">Nenhuma folha de vencimentos iniciada.</p>
+                                                        <p class="mb-0 fw-medium" th:text="#{rh.processamento.empty}">Nenhuma folha de vencimentos iniciada.</p>
                                                     </td>
                                                 </tr>
                                             </tbody>

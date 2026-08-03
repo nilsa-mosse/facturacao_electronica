@@ -109,11 +109,11 @@
                 
                 <div class="page-header-modern">
                     <div>
-                        <h2>Devoluções de Venda</h2>
-                        <p class="text-slate-500 mb-0">Histórico de reembolsos e retornos de mercadoria</p>
+                        <h2 th:text="#{devolucoes.titulo}">Devoluções de Venda</h2>
+                        <p class="text-slate-500 mb-0" th:text="#{devolucoes.subtitulo}">Histórico de reembolsos e retornos de mercadoria</p>
                     </div>
                     <a th:href="@{/devolucoes/novo}" class="btn btn-add-premium">
-                        <i class="fas fa-undo me-2"></i> <span>Nova Devolução</span>
+                        <i class="fas fa-undo me-2"></i> <span th:text="#{devolucoes.btn.novo}">Nova Devolução</span>
                     </a>
                 </div>
 
@@ -129,12 +129,12 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Data / Hora</th>
-                                    <th>Factura Ref.</th>
-                                    <th>Nota de Crédito</th>
-                                    <th>Motivo</th>
-                                    <th>Operador</th>
-                                    <th class="text-end">Valor Total</th>
+                                    <th th:text="#{devolucoes.col.data_hora}">Data / Hora</th>
+                                    <th th:text="#{devolucoes.col.factura_ref}">Factura Ref.</th>
+                                    <th th:text="#{devolucoes.col.nota_credito}">Nota de Crédito</th>
+                                    <th th:text="#{devolucoes.col.motivo}">Motivo</th>
+                                    <th th:text="#{devolucoes.col.operador}">Operador</th>
+                                    <th class="text-end" th:text="#{vendas.col.total_geral}">Valor Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -165,8 +165,8 @@
                                     <td colspan="7">
                                         <div class="empty-state">
                                             <i class="fas fa-box-open"></i>
-                                            <h5 class="text-slate-700 fw-bold">Nenhuma devolução registrada</h5>
-                                            <p class="text-slate-500">O histórico de devoluções aparecerá aqui.</p>
+                                            <h5 class="text-slate-700 fw-bold" th:text="#{devolucoes.empty.titulo}">Nenhuma devolução registrada</h5>
+                                            <p class="text-slate-500" th:text="#{devolucoes.empty.desc}">O histórico de devoluções aparecerá aqui.</p>
                                         </div>
                                     </td>
                                 </tr>

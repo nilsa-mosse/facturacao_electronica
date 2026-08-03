@@ -148,12 +148,12 @@
                 <div class="page-header-modern">
                     <div>
                         <h2 th:text="#{listagem.clientes.titulo}">Clientes</h2>
-                        <p class="text-slate-500 mb-0">Gestão e controlo de entidades e parceiros</p>
+                        <p class="text-slate-500 mb-0" th:text="#{menu.header.geral}">Gestão e controlo de entidades e parceiros</p>
                     </div>
                     <div class="d-flex gap-2 align-items-center">
                         <div class="dropdown">
                             <button class="btn btn-add-premium dropdown-toggle" type="button" id="dropdownExportClientes" data-bs-toggle="dropdown" aria-expanded="false" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 10px 15px -3px rgba(16,185,129,0.3);">
-                                <i class="fas fa-download me-2"></i> Exportar
+                                <i class="fas fa-download me-2"></i> <span th:text="#{btn.exportar}">Exportar</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2" aria-labelledby="dropdownExportClientes" style="border-radius: 12px; min-width: 160px;">
                                 <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" onclick="exportarClientes('json')"><i class="fas fa-file-code text-info me-2"></i> JSON</a></li>
@@ -199,10 +199,10 @@
                                     <td th:text="${cliente.telefone}"></td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <a th:href="@{'/clientes/editar/' + ${cliente.id}}" class="btn-action btn-action-edit" th:title="#{form.editar}">
+                                            <a th:href="@{'/clientes/editar/' + ${cliente.id}}" class="btn-action btn-action-edit" th:title="#{btn.editar}">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <a th:href="@{'/clientes/delete/' + ${cliente.id}}" class="btn-action btn-action-delete" th:title="#{form.excluir}" onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
+                                            <a th:href="@{'/clientes/delete/' + ${cliente.id}}" class="btn-action btn-action-delete" th:title="#{btn.excluir}" onclick="return confirm('Tem certeza que deseja excluir este cliente?')">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </div>
@@ -212,8 +212,8 @@
                                     <td colspan="6">
                                         <div class="empty-state">
                                             <i class="fas fa-users-slash"></i>
-                                            <h5 class="text-slate-700 fw-bold">Nenhum cliente encontrado</h5>
-                                            <p class="text-slate-500">Comece por adicionar o seu primeiro cliente ao sistema.</p>
+                                            <h5 class="text-slate-700 fw-bold" th:text="#{pesquisa.sem_resultados}">Nenhum cliente encontrado</h5>
+                                            <p class="text-slate-500" th:text="#{tabela.vazia}">Comece por adicionar o seu primeiro cliente ao sistema.</p>
                                         </div>
                                     </td>
                                 </tr>

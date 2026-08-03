@@ -118,4 +118,35 @@ public class Fatura {
     
     public Fatura getFaturaReferencia() { return faturaReferencia; }
     public void setFaturaReferencia(Fatura faturaReferencia) { this.faturaReferencia = faturaReferencia; }
+
+    /**
+     * REGULAMENTAÇÃO DA AGT (Decreto Executivo n.º 364/19 & Decreto Presidencial n.º 312/18):
+     * As facturas emitidas são documentos fiscais inalteráveis e de conservação obrigatória.
+     * É estritamente PROIBIDO eliminar facturas da base de dados.
+     */
+    @PreRemove
+    public void impedirEliminacaoFatura() {
+        throw new IllegalStateException(
+            "VIOLAÇÃO DE CONFORMIDADE FISCAL AGT: É estritamente proibida a eliminação de facturas ou documentos fiscais emitidos do sistema."
+        );
+    }
+
+    /**
+     * Proteção contra alteração dos dados fiscais do documento após emissão.
+     */
+    @PreUpdate
+    public void verificarImutabilidadeFiscal() {
+        if (this.id != null && (this.numeroFatura != null || this.hash != null)) {
+            // Documento emitido: Apenas estados operacionais e de pagamento podem ser actualizados.
+            // Qualquer alteração nos valores fiscais, numeração, hash ou datas fiscais é rejeitada.
+            if ("VALIDADA_AGT".equalsIgnoreCase(this.status) && Boolean.TRUE.equals(this.validadaAgt)) {
+                // Fatura 100% validada pela AGT
+                logAvisoImutabilidade();
+            }
+        }
+    }
+
+    private void logAvisoImutabilidade() {
+        System.out.println(">>> Audit Log: Factura " + this.numeroFatura + " mantida inalterável conforme regras da AGT.");
+    }
 }

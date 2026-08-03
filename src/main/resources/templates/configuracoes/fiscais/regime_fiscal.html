@@ -167,9 +167,9 @@
                     <div>
                         <h1 class="fw-extrabold mb-1 d-flex align-items-center gap-3">
                             <i class="fas fa-gavel text-warning"></i>
-                            <span>Enquadramento e Regime Fiscal</span>
+                            <span th:text="#{regime_fiscal.titulo}">Enquadramento e Regime Fiscal</span>
                         </h1>
-                        <p class="mb-0 opacity-80" style="max-width: 600px;">
+                        <p class="mb-0 opacity-80" style="max-width: 600px;" th:text="#{regime_fiscal.subtitulo}">
                             Configure e faça a gestão do enquadramento tributário da sua empresa junto da AGT. Assegure
                             a liquidação correta de impostos e a conformidade fiscal do SAF-T.
                         </p>
@@ -179,7 +179,7 @@
                             class="btn btn-warning fw-bold px-4 py-2 shadow-sm text-dark d-flex align-items-center gap-2"
                             data-bs-toggle="modal" data-bs-target="#modalNovoRegime"
                             style="border-radius: 12px; font-size: 0.95rem;">
-                            <i class="fas fa-plus-circle"></i> Novo Regime
+                            <i class="fas fa-plus-circle"></i> <span th:text="#{regime_fiscal.btn.novo}">Novo Regime</span>
                         </button>
                     </div>
                 </div>
@@ -217,7 +217,7 @@
                             <div class="card-regime p-4"
                                 th:classappend="${empresa.regimeFiscal == r.codigo ? 'active' : ''}">
                                 <!-- Active Indicator -->
-                                <span th:if="${empresa.regimeFiscal == r.codigo}" class="active-badge">ATIVO</span>
+                                <span th:if="${empresa.regimeFiscal == r.codigo}" class="active-badge" th:text="#{regime_fiscal.ativo}">ATIVO</span>
 
                                 <!-- Icon Wrapper -->
                                 <div class="icon-wrapper"
@@ -241,7 +241,7 @@
                                 <div class="border-top pt-3 mb-4">
                                     <h6 class="fw-bold text-secondary mb-2 d-flex align-items-center gap-2">
                                         <i class="fas fa-percent text-info"></i>
-                                        <span>Impostos Associados</span>
+                                        <span th:text="#{regime_fiscal.impostos_associados}">Impostos Associados</span>
                                     </h6>
                                     <div class="d-flex flex-wrap gap-2">
                                         <th:block th:if="${r.impostos != null && !r.impostos.isEmpty()}">
@@ -253,7 +253,7 @@
                                             </span>
                                         </th:block>
                                         <th:block th:if="${r.impostos == null || r.impostos.isEmpty()}">
-                                            <span class="text-muted small italic">Sem impostos associados</span>
+                                            <span class="text-muted small italic" th:text="#{regime_fiscal.sem_impostos}">Sem impostos associados</span>
                                         </th:block>
                                     </div>
                                 </div>
@@ -262,7 +262,7 @@
                                 <div class="d-flex gap-2">
                                     <button type="button" class="btn btn-action btn-action-secondary flex-grow-1"
                                         data-bs-toggle="modal" th:data-bs-target="${'#modalImpostos-' + r.id}">
-                                        <i class="fas fa-tags me-1"></i> Impostos
+                                        <i class="fas fa-tags me-1"></i> <span th:text="#{regime_fiscal.btn.impostos}">Impostos</span>
                                     </button>
 
                                     <form th:action="@{/configuracoes/fiscais/regime-fiscal/salvar}" method="post"
@@ -271,7 +271,7 @@
                                         <button type="submit" class="btn btn-action btn-action-primary w-100"
                                             th:disabled="${empresa.regimeFiscal == r.codigo}">
                                             <span
-                                                th:text="${empresa.regimeFiscal == r.codigo ? 'Enquadrado' : 'Selecionar'}">Selecionar</span>
+                                                th:text="${empresa.regimeFiscal == r.codigo ? #messages.msg('regime_fiscal.btn.enquadrado') : #messages.msg('regime_fiscal.btn.selecionar')}">Selecionar</span>
                                         </button>
                                     </form>
                                 </div>
@@ -288,8 +288,8 @@
                                 <i class="fas fa-info-circle fa-lg"></i>
                             </div>
                             <div>
-                                <h5 class="fw-bold text-dark mb-1">Informações Legais de Enquadramento</h5>
-                                <p class="mb-0 text-muted small" style="line-height: 1.6;">
+                                <h5 class="fw-bold text-dark mb-1" th:text="#{regime_fiscal.info.legal.titulo}">Informações Legais de Enquadramento</h5>
+                                <p class="mb-0 text-muted small" style="line-height: 1.6;" th:text="#{regime_fiscal.info.legal.desc}">
                                     A alteração do Regime Fiscal afeta diretamente as regras de faturamento, liquidação
                                     de IVA e a emissão do arquivo fiscal SAF-T AO exportado para a AGT. Assegure-se de
                                     que a alteração de regime está devidamente homologada e em consonância com a
