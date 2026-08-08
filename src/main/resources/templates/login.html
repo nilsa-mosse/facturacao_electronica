@@ -289,7 +289,7 @@
             <div class="visual-badge">
                 <i class="fas fa-certificate me-2"></i> Certificado pela AGT
             </div>
-            <h1 class="visual-title">Inovação e Rigor na sua Gestão.</h1>
+            <h1 class="visual-title" th:text="#{auth.welcome.header}">Inovação e Rigor na sua Gestão.</h1>
             <p class="visual-text">
                 Controle o seu negócio com a agilidade que o futuro exige. Simples, rápido e totalmente em conformidade.
             </p>
@@ -303,7 +303,7 @@
 
             <div class="welcome-text">
                 <h2 th:text="${globalSistemaNome}">Kwanza ERP</h2>
-                <p>Introduza as suas credenciais para aceder.</p>
+                <p th:text="#{auth.welcome.sub}">Introduza as suas credenciais para aceder.</p>
             </div>
 
             <form th:action="@{/login}" method="post">
@@ -311,14 +311,14 @@
                 <div th:if="${param.error}" class="modern-alert">
                     <i class="fas fa-exclamation-circle"></i>
                     <div>
-                        <span th:if="${#strings.contains(param.error, 'login.error.bloqueado')}">Acesso bloqueado por segurança.</span>
-                        <span th:if="${!#strings.contains(param.error, 'login.error.bloqueado')}">Credenciais inválidas. Tente novamente.</span>
+                        <span th:if="${#strings.contains(param.error, 'login.error.bloqueado')}" th:text="#{auth.msg.bloqueado}">Acesso bloqueado por segurança.</span>
+                        <span th:if="${!#strings.contains(param.error, 'login.error.bloqueado')}" th:text="#{auth.msg.invalid}">Credenciais inválidas. Tente novamente.</span>
                     </div>
                 </div>
 
                 <div th:if="${param.logout}" class="modern-alert" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #34d399;">
                     <i class="fas fa-check-circle"></i>
-                    <span>Sessão encerrada com sucesso.</span>
+                    <span th:text="#{auth.msg.logout}">Sessão encerrada com sucesso.</span>
                 </div>
 
                 <div class="form-group-custom">

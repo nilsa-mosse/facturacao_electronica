@@ -65,17 +65,17 @@
 
                     <div class="card">
                         <div class="card-header border-0 pb-0">
-                            <h3 class="card-title">Computadores Licenciados</h3>
+                            <h3 class="card-title" th:text="#{licenca.gestao.titulo}">Computadores Licenciados3>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle table-licenses">
                                     <thead>
                                         <tr>
-                                            <th>Cliente / Computador</th>
-                                            <th>Machine ID</th>
-                                            <th>Chave (Resumo)</th>
-                                            <th>Data Emissão</th>
+                                            <th th:text="#{licenca.cliente_pc}">Cliente / Computador</th>
+                                            <th th:text="#{licenca.machine_id}">Machine ID</th>
+                                            <th th:text="#{licenca.chave_resumo}">Chave (Resumo)</th>
+                                            <th th:text="#{licenca.data_emissao}">Data Emissão</th>
                                             <th>Data Expiração</th>
                                             <th>Estado</th>
                                             <th class="text-center">Ações</th>

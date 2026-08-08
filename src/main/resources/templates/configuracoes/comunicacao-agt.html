@@ -84,32 +84,30 @@
 
                                 <!-- ─── Controlo de Envio AGT ──────────────────────────────── -->
                                 <hr class="mt-4">
-                                <h5 class="mt-2 mb-3"><i class="fas fa-toggle-on me-2 text-primary"></i>Controlo de Envio para AGT</h5>
+                                <h5 class="mt-2 mb-3"><i class="fas fa-toggle-on me-2 text-primary"></i><span th:text="#{config.agt.controlo.titulo}">Controlo de Envio para AGT</span></h5>
 
                                 <div class="row">
                                     <!-- Toggle de activação global -->
                                     <div class="form-group col-md-6">
-                                        <label class="fw-bold">Envio de Documentos para AGT</label>
+                                        <label class="fw-bold" th:text="#{config.agt.envio_doc}">Envio de Documentos para AGT</label>
                                         <div class="custom-control custom-switch mt-2">
                                             <input type="checkbox" class="custom-control-input" id="envioAgtAtivo"
                                                 th:field="*{envioAgtAtivo}" onchange="toggleLimiteDiario()">
-                                            <label class="custom-control-label" for="envioAgtAtivo">
-                                                Activar envio automático de documentos para a AGT
-                                            </label>
+                                            <label class="custom-control-label" for="envioAgtAtivo" th:text="#{config.agt.activar.label}">Activar envio automático de documentos para a AGT</label>
                                         </div>
-                                        <small class="text-muted">Quando desactivado, nenhum documento será enviado para a AGT, independentemente das outras configurações.</small>
+                                        <small class="text-muted" th:text="#{config.agt.desactivado.hint}">Quando desactivado, nenhum documento será enviado para a AGT, independentemente das outras configurações.</small>
                                     </div>
 
                                     <!-- Limite diário -->
                                     <div class="form-group col-md-6">
-                                        <label class="fw-bold" for="limiteDocumentosDiarios">Limite Diário de Documentos</label>
+                                        <label class="fw-bold" for="limiteDocumentosDiarios" th:text="#{config.agt.limite_diario}">Limite Diário de Documentos</label>
                                         <div class="input-group">
                                             <input type="number" class="form-control" id="limiteDocumentosDiarios"
                                                 th:field="*{limiteDocumentosDiarios}" min="0" step="1"
                                                 placeholder="0 = sem limite">
                                             <span class="input-group-text">docs/dia</span>
                                         </div>
-                                        <small class="text-muted">Defina <strong>0</strong> para sem limite. Após atingir o limite diário, os documentos seguintes não serão enviados para a AGT.</small>
+                                        <small class="text-muted" th:utext="#{config.agt.limite.hint}">Defina <strong>0</strong> para sem limite. Após atingir o limite diário, os documentos seguintes não serão enviados para a AGT.</small>
                                     </div>
                                 </div>
 
@@ -122,7 +120,7 @@
                                                    th:classappend="${config.envioAgtAtivo} ? 'text-success' : 'text-danger'"></i>
                                             </span>
                                             <div class="info-box-content">
-                                                <span class="info-box-text">Documentos enviados hoje</span>
+                                                <span class="info-box-text" th:text="#{config.agt.docs_enviados_hoje}">Documentos enviados hoje</span>
                                                 <span class="info-box-number">
                                                     <span th:text="${config.documentosEnviadosHoje}">0</span>
                                                     <span th:if="${config.limiteDocumentosDiarios != null and config.limiteDocumentosDiarios > 0}">
@@ -136,7 +134,7 @@
                                                     </div>
                                                 </div>
                                                 <span class="info-box-text text-muted small"
-                                                      th:text="${config.envioAgtAtivo} ? 'Envio activo' : 'Envio desactivado'">
+                                                      th:text="${config.envioAgtAtivo} ? #{config.agt.envio_ativo} : #{config.agt.envio_desativado}">
                                                     Estado do envio
                                                 </span>
                                             </div>

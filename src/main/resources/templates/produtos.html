@@ -9,7 +9,7 @@
         <div class="container">
             <div th:replace="layout :: content">
                 <!-- Conteúdo original do produtos.html será inserido aqui -->
-                <h2 class="mb-4 text-center">Catálogo de Produtos</h2>
+                <h2 class="mb-4 text-center" th:text="#{produto.catalogo}">Catálogo de Produtos</h2>
                 <form th:action="@{/produtos}" method="get" class="mb-4">
                     <div class="row">
                         <div class="col-md-6">
@@ -21,7 +21,7 @@
                         </div>
                         <div class="col-md-6">
                             <select name="cat" class="form-select" onchange="this.form.submit()">
-                                <option value="">Todas as categorias</option>
+                                <option value="" th:text="#{produtos.filtro.todas_categorias}">Todas as categorias</option>
                                 <option th:each="catObj : ${categorias}" th:value="${catObj.id}"
                                     th:text="${catObj.nome}" th:selected="${catObj.id == categoriaSelecionada}">
                                 </option>

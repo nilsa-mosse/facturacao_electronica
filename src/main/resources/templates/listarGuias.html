@@ -218,12 +218,12 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <p class="text-muted small">Por favor, indique o motivo pelo qual deseja anular esta guia de remessa.</p>
+                    <p class="text-muted small" th:text="#{guia.justificar_anulacao}">Por favor, indique o motivo pelo qual deseja anular esta guia de remessa.</p>
                     <textarea name="motivo" class="form-control border-light shadow-sm" rows="4" placeholder="Ex: Erro nos artigos, Viatura avariada..." required></textarea>
                 </div>
                 <div class="modal-footer bg-light p-2">
                     <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger rounded-pill px-4">Anular Guia</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-4" th:text="#{guia.anular_btn}">Anular Guia</button>
                 </div>
             </form>
         </div>
@@ -248,14 +248,14 @@
                         </div>
                         <!-- Coluna Novo Evento -->
                         <div class="col-md-5 ps-4">
-                            <h6 class="fw-bold mb-3">Actualizar Estado</h6>
+                            <h6 class="fw-bold mb-3" th:text="#{guia.actualizar_estado}">Actualizar Estado</h6>
                             <form th:action="@{/guias/tracking/adicionar}" method="POST">
                                 <input type="hidden" name="id" id="trackingGuiaId">
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">Novo Estado</label>
+                                    <label class="form-label small fw-bold" th:text="#{guia.novo_estado}">Novo Estado</label>
                                     <select name="trackingStatus" class="form-select form-select-sm" required>
-                                        <option value="EM_TRANSITO">Em Trânsito</option>
-                                        <option value="ENTREGUE">Entregue</option>
+                                        <option value="EM_TRANSITO" th:text="#{guia.em_transito}">Em Trânsito</option>
+                                        <option value="ENTREGUE" th:text="#{guia.entregue}">Entregue</option>
                                         <option value="RETORNADO">Retornado (Falha na Entrega)</option>
                                         <option value="AGUARDANDO_CLIENTE">Aguardando no Cliente</option>
                                     </select>

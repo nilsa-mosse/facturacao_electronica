@@ -50,7 +50,7 @@
                                         </div>
                                         <span class="badge bg-light text-dark rounded-pill" th:text="${totalItens} + ' Total'">100 Total</span>
                                     </div>
-                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold">Itens Contados</h6>
+                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold" th:text="#{inv.dash.contados}">Itens Contados</h6>
                                     <h2 class="fw-bold mb-0" th:text="${itensContados}">85</h2>
                                     <div class="progress mt-3" style="height: 6px;">
                                         <div class="progress-bar bg-primary" role="progressbar" 
@@ -69,7 +69,7 @@
                                             <i class="fas fa-hourglass-half"></i>
                                         </div>
                                     </div>
-                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold">Itens por Contar</h6>
+                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold" th:text="#{inv.dash.por_contar}">Itens por Contar</h6>
                                     <h2 class="fw-bold mb-0" th:text="${itensPorContar}">15</h2>
                                     <p class="text-muted small mt-2 mb-0">Aguardando contagem física</p>
                                 </div>
@@ -89,7 +89,7 @@
                                             10% do total
                                         </span>
                                     </div>
-                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold">Divergências</h6>
+                                    <h6 class="text-muted text-uppercase mb-1 small fw-bold" th:text="#{inv.dash.divergencias}">Divergências</h6>
                                     <h2 class="fw-bold mb-0 text-danger" th:text="${divergencias}">12</h2>
                                     <p class="text-muted small mt-2 mb-0">Produtos com diferença de stock</p>
                                 </div>
@@ -105,7 +105,7 @@
                                             <i class="fas fa-bullseye"></i>
                                         </div>
                                     </div>
-                                    <h6 class="text-white-50 text-uppercase mb-1 small fw-bold">Precisão do Inventário</h6>
+                                    <h6 class="text-white-50 text-uppercase mb-1 small fw-bold" th:text="#{inv.dash.precisao}">Precisão do Inventário</h6>
                                     <h2 class="fw-bold mb-0" th:text="${#numbers.formatDecimal(precisao, 1, 2) + '%'}">98.5%</h2>
                                     <p class="text-white-50 small mt-2 mb-0">Índice de acerto físico vs sistema</p>
                                 </div>
@@ -123,7 +123,7 @@
                                             <i class="fas fa-wallet fa-lg"></i>
                                         </div>
                                         <div>
-                                            <h5 class="fw-bold mb-0">Impacto Financeiro</h5>
+                                            <h5 class="fw-bold mb-0" th:text="#{inv.dash.impacto}">Impacto Financeiro</h5>
                                             <p class="text-muted small mb-0">Análise de valores em stock e ajustes.</p>
                                         </div>
                                     </div>

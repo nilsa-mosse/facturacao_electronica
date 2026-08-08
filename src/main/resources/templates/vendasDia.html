@@ -162,7 +162,7 @@
                     <div class="stat-icon icon-iva">
                         <i class="fas fa-percentage"></i>
                     </div>
-                    <span class="text-muted small fw-bold">IVA COLETADO</span>
+                    <span class="text-muted small fw-bold" th:text="#{financeiro.iva_coletado}">IVA COLETADO</span>
                     <h2 class="mb-0 fw-bold mt-1"
                         th:text="${#numbers.formatDecimal(totalIvaDia, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
                 </div>

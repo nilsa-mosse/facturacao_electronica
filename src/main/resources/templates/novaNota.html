@@ -30,11 +30,11 @@
                         <div class="col-lg-5">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white py-3">
-                                    <h5 class="mb-0 fw-700">Resumo da Nota</h5>
+                                    <h5 class="mb-0 fw-700" th:text="#{nota.resumo}">Resumo da Nota</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Factura Original</label>
+                                        <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{nota.original}">Factura Original</label>
                                         <input type="text" class="form-control border-0 bg-light rounded-pill shadow-sm fw-bold text-primary" 
                                                th:value="'# ' + ${nota.faturaOriginal.id}" readonly>
                                     </div>
@@ -45,18 +45,18 @@
                                     </div>
                                     <hr class="my-4">
                                     <div class="mb-3">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Motivo da Rectificação</label>
+                                        <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{nota.motivo}">Motivo da Rectificação</label>
                                         <select th:field="*{motivo}" class="form-select border-0 bg-light rounded shadow-sm" required>
-                                            <option value="">Selecione o motivo...</option>
-                                            <option value="Erro nos dados do destinatário">Erro nos dados do destinatário</option>
-                                            <option value="Erro no preço dos artigos">Erro no preço dos artigos</option>
-                                            <option value="Devolução parcial de mercadoria">Devolução parcial de mercadoria</option>
-                                            <option value="Anulação por mútuo acordo">Anulação por mútuo acordo</option>
-                                            <option value="Outros">Outros (especificar)</option>
+                                            <option value="" th:text="#{nota.motivo.select}">Selecione o motivo...</option>
+                                            <option value="Erro nos dados do destinatário" th:text="#{nota.motivo.destinatario}">Erro nos dados do destinatário</option>
+                                            <option value="Erro no preço dos artigos" th:text="#{nota.motivo.preco}">Erro no preço dos artigos</option>
+                                            <option value="Devolução parcial de mercadoria" th:text="#{nota.motivo.devolucao}">Devolução parcial de mercadoria</option>
+                                            <option value="Anulação por mútuo acordo" th:text="#{nota.motivo.acordo}">Anulação por mútuo acordo</option>
+                                            <option value="Outros" th:text="#{nota.motivo.outros}">Outros (especificar)</option>
                                         </select>
                                     </div>
                                     <div class="mb-3 position-relative">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Total a Creditar</label>
+                                        <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{nota.total_creditar}">Total a Creditar</label>
                                         <div class="input-group shadow-sm rounded-pill overflow-hidden">
                                             <input type="number" th:field="*{totalCredito}" class="form-control border-0 bg-dark text-white fw-800 fs-18 py-3 ps-4" step="any" required>
                                             <span class="input-group-text bg-dark border-0 text-white pe-4">Kz</span>
@@ -71,7 +71,7 @@
                         <div class="col-lg-7">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white py-3">
-                                    <h5 class="mb-0 fw-700">Itens e Valores de Crédito</h5>
+                                    <h5 class="mb-0 fw-700" th:text="#{nota.itens_credito}">Itens e Valores de Crédito</h5>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">

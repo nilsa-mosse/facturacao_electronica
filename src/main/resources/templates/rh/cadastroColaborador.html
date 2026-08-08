@@ -13,7 +13,7 @@
           <i class="fas fa-user-tie text-primary me-2"></i>
           <span th:text="${colaborador.id != null ? 'Editar Colaborador' : 'Novo Colaborador'}">Novo Colaborador</span>
         </h1>
-        <small class="text-muted">Preencha os dados do colaborador e os subsídios aplicáveis</small>
+        <small class="text-muted" th:text="#{rh.cadastro.desc}">Preencha os dados do colaborador e os subsídios aplicáveis</small>
       </div>
       <div class="d-flex gap-2">
         <button th:if="${colaborador.id == null}" type="button" class="btn btn-success rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalImportarColaboradores">
@@ -77,16 +77,16 @@
               <input type="text" th:field="*{endereco}" class="form-control rounded-3" placeholder="Rua, número, cidade">
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-semibold">IBAN (para Transferência)</label>
+              <label class="form-label fw-semibold" th:text="#{rh.iban}">IBAN (para Transferência)</label>
               <input type="text" th:field="*{iban}" class="form-control rounded-3" placeholder="AO06 0040 0000 0000 0000 0000 0">
             </div>
             <div class="col-md-3">
-              <label class="form-label fw-semibold">Nº de Dependentes</label>
+              <label class="form-label fw-semibold" th:text="#{rh.dependentes}">Nº de Dependentes</label>
               <input type="number" min="0" th:field="*{dependentes}" class="form-control rounded-3" value="0">
               <div class="form-text">Reduz o IRT em 10%</div>
             </div>
             <div class="col-md-3">
-              <label class="form-label fw-semibold">Habilitações</label>
+              <label class="form-label fw-semibold" th:text="#{rh.habilitacoes}">Habilitações</label>
               <input type="text" th:field="*{habilitacoes}" class="form-control rounded-3" placeholder="ex: Licenciatura">
             </div>
           </div>
@@ -109,7 +109,7 @@
             <div class="col-md-4">
               <label class="form-label fw-semibold">Departamento</label>
               <select name="departamentoId" class="form-select rounded-3">
-                <option value="">-- Seleccionar Departamento --</option>
+                <option value="" th:text="#{rh.select_dept}">-- Seleccionar Departamento --</option>
                 <option th:each="dep : ${departamentos}"
                         th:value="${dep.id}"
                         th:text="${dep.nome}"
@@ -123,7 +123,7 @@
               </div>
             </div>
             <div class="col-md-4">
-              <label class="form-label fw-semibold">Tipo de Contrato</label>
+              <label class="form-label fw-semibold" th:text="#{rh.tipo_contrato}">Tipo de Contrato</label>
               <select th:field="*{tipoContrato}" class="form-select rounded-3">
                 <option value="">-- Seleccionar --</option>
                 <option value="Efectivo">Efectivo</option>

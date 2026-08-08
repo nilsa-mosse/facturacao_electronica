@@ -33,13 +33,13 @@
                         <div class="col-lg-4">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white py-3">
-                                    <h5 class="mb-0 fw-700">Identificação e Pagamento</h5>
+                                    <h5 class="mb-0 fw-700" th:text="#{rectificacao.id_pagamento}">Identificação e Pagamento</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-4">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Cliente / Entidade</label>
+                                        <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{rectificacao.cliente_entidade}">Cliente / Entidade</label>
                                         <select th:field="*{cliente}" class="form-select border-0 bg-light rounded-pill shadow-sm" required>
-                                            <option value="">Consumidor Final</option>
+                                            <option value="" th:text="#{rectificacao.consumidor_final}">Consumidor Final</option>
                                             <option th:each="cli : ${clientes}" th:value="${cli.id}" 
                                                     th:selected="${compra.cliente != null and cli.id == compra.cliente.id}"
                                                     th:text="${cli.nome} + ' (NIF: ' + ${cli.nif} + ')'">
@@ -48,7 +48,7 @@
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="form-label small fw-bold text-muted text-uppercase">Forma de Pagamento</label>
+                                        <label class="form-label small fw-bold text-muted text-uppercase" th:text="#{rectificacao.forma_pagamento}">Forma de Pagamento</label>
                                         <select th:field="*{formaPagamento}" class="form-select border-0 bg-light rounded-pill shadow-sm" required>
                                             <option value="CASH" th:selected="${compra.formaPagamento == 'CASH'}">Dinheiro (CASH)</option>
                                             <option value="MULTICAIXA" th:selected="${compra.formaPagamento == 'MULTICAIXA'}">Multicaixa (TPA)</option>
@@ -69,7 +69,7 @@
                         <div class="col-lg-8">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0 fw-700">Artigos / Serviços</h5>
+                                    <h5 class="mb-0 fw-700" th:text="#{rectificacao.artigos_servicos}">Artigos / Serviços</h5>
                                     <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" onclick="adicionarLinha()">
                                         <i class="fas fa-plus me-1"></i> Adicionar Item
                                     </button>
@@ -79,10 +79,10 @@
                                         <table class="table table-hover align-middle mb-0" id="tabelaItens">
                                             <thead class="bg-light small fw-bold text-muted uppercase">
                                                 <tr>
-                                                    <th class="ps-4">Designação</th>
+                                                    <th class="ps-4" th:text="#{rectificacao.designacao}">Designação</th>
                                                     <th width="100px" class="text-center">Qtd</th>
-                                                    <th width="150px" class="text-end">Preço Unit.</th>
-                                                    <th width="150px" class="text-end pe-4">Subtotal</th>
+                                                    <th width="150px" class="text-end" th:text="#{rectificacao.preco_unit}">Preço Unit.</th>
+                                                    <th width="150px" class="text-end pe-4" th:text="#{rectificacao.subtotal}">Subtotal</th>
                                                     <th width="50px"></th>
                                                 </tr>
                                             </thead>

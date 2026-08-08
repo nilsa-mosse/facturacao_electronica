@@ -113,7 +113,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h1 class="fw-bold mb-2">Bem-vindo ao Portal, <span th:text="${usuario_NOME}">Utilizador</span>! 👋</h1>
-                            <p class="mb-0 opacity-75 fs-5">O que deseja processar hoje?</p>
+                            <p class="mb-0 opacity-75 fs-5" th:text="#{auth.home.processar}">O que deseja processar hoje?</p>
                         </div>
                         <div class="col-md-4 text-md-end d-none d-md-block">
                             <i class="fas fa-desktop fa-4x opacity-25"></i>
@@ -139,8 +139,8 @@
                                 <div class="action-icon-wrapper" style="background: var(--success-grad)">
                                     <i class="fas fa-door-open"></i>
                                 </div>
-                                <h2 class="action-title">Abrir Caixa</h2>
-                                <p class="action-desc">Inicie o seu turno e comece a vender.</p>
+                                <h2 class="action-title" th:text="#{auth.home.abrir_caixa}">Abrir Caixa</h2>
+                                <p class="action-desc" th:text="#{auth.home.abrir_caixa_desc}">Inicie o seu turno e comece a vender.</p>
                                 <i class="fas fa-unlock card-bg-icon"></i>
                             </div>
                         </a>
@@ -153,8 +153,8 @@
                                 <div class="action-icon-wrapper" style="background: var(--success-grad)">
                                     <i class="fas fa-cash-register"></i>
                                 </div>
-                                <h2 class="action-title">Aceder ao POS</h2>
-                                <p class="action-desc">Realize vendas e emita faturas rapidamente.</p>
+                                <h2 class="action-title" th:text="#{auth.home.acceder_pos}">Aceder ao POS</h2>
+                                <p class="action-desc" th:text="#{auth.home.acceder_pos_desc}">Realize vendas e emita faturas rapidamente.</p>
                                 <i class="fas fa-shopping-cart card-bg-icon"></i>
                             </div>
                         </a>

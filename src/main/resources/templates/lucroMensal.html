@@ -214,7 +214,7 @@
                     <div class="stat-icon icon-receita">
                         <i class="fas fa-arrow-up"></i>
                     </div>
-                    <span class="text-muted small fw-bold">RECEITA MENSAL</span>
+                    <span class="text-muted small fw-bold" th:text="#{receita.mensal.titulo}">RECEITA MENSAL</span>
                     <h2 class="mb-0 fw-bold mt-1"
                         th:text="${#numbers.formatDecimal(receitaMensal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
                 </div>
@@ -234,7 +234,7 @@
                     <div class="stat-icon icon-despesas">
                         <i class="fas fa-arrow-down"></i>
                     </div>
-                    <span class="text-muted small fw-bold">DESPESAS OPERACIONAIS</span>
+                    <span class="text-muted small fw-bold" th:text="#{financeiro.despesas_operacionais}">DESPESAS OPERACIONAIS</span>
                     <h2 class="mb-0 fw-bold mt-1"
                         th:text="${#numbers.formatDecimal(totalDespesas, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
                 </div>
@@ -244,7 +244,7 @@
                     <div class="stat-icon icon-lucro-bruto">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <span class="text-muted small fw-bold">LUCRO BRUTO</span>
+                    <span class="text-muted small fw-bold" th:text="#{financeiro.lucro_bruto}">LUCRO BRUTO</span>
                     <h2 class="mb-0 fw-bold mt-1"
                         th:text="${#numbers.formatDecimal(lucroBruto, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
                 </div>
@@ -265,7 +265,7 @@
                     <div class="stat-icon icon-margem">
                         <i class="fas fa-percentage"></i>
                     </div>
-                    <span class="text-muted small fw-bold">MARGEM DE LUCRO</span>
+                    <span class="text-muted small fw-bold" th:text="#{financeiro.margem_lucro}">MARGEM DE LUCRO</span>
                     <h2 class="mb-0 fw-bold mt-1"
                         th:classappend="${margemLucro >= 0 ? 'text-success' : 'text-danger'}"
                         th:text="${#numbers.formatDecimal(margemLucro, 1, 'POINT', 2, 'COMMA')} + '%'">0,00%</h2>

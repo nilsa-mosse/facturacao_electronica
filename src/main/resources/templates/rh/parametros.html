@@ -9,8 +9,8 @@
   <div class="content-wrapper px-4 py-3">
     <div class="d-flex align-items-center justify-content-between mb-4">
       <div>
-        <h1 class="h4 fw-bold mb-0"><i class="fas fa-sliders-h text-primary me-2"></i>Parâmetros de Processamento</h1>
-        <small class="text-muted">Configurar regras de Segurança Social (INSS), tabela progressiva do IRT e outros parâmetros operacionais de folha</small>
+        <h1 class="h4 fw-bold mb-0"><i class="fas fa-sliders-h text-primary me-2"></i><span th:text="#{rh.param.titulo}">Parâmetros de Processamento</span></h1>
+        <small class="text-muted" th:text="#{rh.param.subtitle}">Configurar regras de Segurança Social (INSS), tabela progressiva do IRT e outros parâmetros operacionais de folha</small>
       </div>
     </div>
 
@@ -29,40 +29,40 @@
       <div class="col-lg-3 col-md-4">
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4">
-            <h5 class="fw-bold text-dark mb-0"><i class="fas fa-cog text-secondary me-2"></i>Configurações Gerais</h5>
-            <small class="text-muted">Taxas base e regras operacionais</small>
+            <h5 class="fw-bold text-dark mb-0"><i class="fas fa-cog text-secondary me-2"></i><span th:text="#{rh.param.config_gerais}">Configurações Gerais</span></h5>
+            <small class="text-muted" th:text="#{rh.param.taxas_base}">Taxas base e regras operacionais</small>
           </div>
           <div class="card-body p-4">
             <form th:action="@{/rh/parametros/salvar}" method="POST">
               <div class="mb-3">
-                <label class="form-label fw-semibold small mb-1">Segurança Social - Colaborador (%)</label>
+                <label class="form-label fw-semibold small mb-1" th:text="#{rh.param.inss_colaborador}">Segurança Social - Colaborador (%)</label>
                 <div class="input-group input-group-sm" style="max-width: 140px;">
                   <input type="number" step="0.01" min="0" max="100" name="taxaInssTrabalhador" th:value="${parametros.taxaInssTrabalhador}" class="form-control rounded-start-3 text-center fw-bold" required>
                   <span class="input-group-text rounded-end-3 bg-light">%</span>
                 </div>
-                <div class="form-text" style="font-size: 0.75rem;">Padrão em Angola: 3.00%</div>
+                <div class="form-text" style="font-size: 0.75rem;" th:text="#{rh.param.padrao_3}">Padrão em Angola: 3.00%</div>
               </div>
 
               <div class="mb-3">
-                <label class="form-label fw-semibold small mb-1">Segurança Social - Empresa (%)</label>
+                <label class="form-label fw-semibold small mb-1" th:text="#{rh.param.inss_empresa}">Segurança Social - Empresa (%)</label>
                 <div class="input-group input-group-sm" style="max-width: 140px;">
                   <input type="number" step="0.01" min="0" max="100" name="taxaInssEmpresa" th:value="${parametros.taxaInssEmpresa}" class="form-control rounded-start-3 text-center fw-bold" required>
                   <span class="input-group-text rounded-end-3 bg-light">%</span>
                 </div>
-                <div class="form-text" style="font-size: 0.75rem;">Padrão em Angola: 8.00%</div>
+                <div class="form-text" style="font-size: 0.75rem;" th:text="#{rh.param.padrao_8}">Padrão em Angola: 8.00%</div>
               </div>
 
               <div class="mb-4">
-                <label class="form-label fw-semibold small mb-1">Dias Padrão de Processamento</label>
+                <label class="form-label fw-semibold small mb-1" th:text="#{rh.param.dias_padrao}">Dias Padrão de Processamento</label>
                 <div class="input-group input-group-sm" style="max-width: 140px;">
                   <input type="number" min="1" max="31" name="diasPadraoProcessamento" th:value="${parametros.diasPadraoProcessamento}" class="form-control rounded-start-3 text-center fw-bold" required>
                   <span class="input-group-text rounded-end-3 bg-light">dias</span>
                 </div>
-                <div class="form-text" style="font-size: 0.75rem;">Dias calculados por mês comercial (Padrão: 30)</div>
+                <div class="form-text" style="font-size: 0.75rem;" th:text="#{rh.param.padrao_30}">Dias calculados por mês comercial (Padrão: 30)</div>
               </div>
 
               <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 py-2 shadow-sm">
-                <i class="fas fa-save me-1"></i> Guardar Parâmetros
+                <i class="fas fa-save me-1"></i> <span th:text="#{rh.param.guardar}">Guardar Parâmetros</span>
               </button>
             </form>
           </div>
@@ -74,21 +74,21 @@
         <div class="card shadow-sm border-0 rounded-4">
           <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4 d-flex align-items-center justify-content-between">
             <div>
-              <h5 class="fw-bold text-dark mb-0"><i class="fas fa-table text-danger me-2"></i>Tabela Progressiva de IRT</h5>
-              <small class="text-muted">Definição oficial de escalões fiscais de Angola (AGT)</small>
+              <h5 class="fw-bold text-dark mb-0"><i class="fas fa-table text-danger me-2"></i><span th:text="#{rh.param.tabela_irt}">Tabela Progressiva de IRT</span></h5>
+              <small class="text-muted" th:text="#{rh.param.escaloes_agt}">Definição oficial de escalões fiscais de Angola (AGT)</small>
             </div>
             <div class="d-flex gap-2">
               <button type="button" data-bs-toggle="modal" data-bs-target="#modalImportarIRT" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                <i class="fas fa-file-import me-1"></i> Importar PDF / Excel
+                <i class="fas fa-file-import me-1"></i> <span th:text="#{rh.param.importar_btn}">Importar PDF / Excel</span>
               </button>
               <input type="file" id="importFile" accept=".pdf,.xls,.xlsx" style="display: none;" onchange="importarTabela(this)">
               <form th:action="@{/rh/parametros/irt/redefinir}" method="POST" onsubmit="return confirm('Tem a certeza que deseja repor os parâmetros predefinidos oficiais da AGT?')">
                 <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                  <i class="fas fa-undo me-1"></i> Redefinir AGT
+                  <i class="fas fa-undo me-1"></i> <span th:text="#{rh.param.redefinir_btn}">Redefinir AGT</span>
                 </button>
               </form>
               <button type="button" onclick="adicionarLinhaEscalao()" class="btn btn-success btn-sm rounded-pill px-3">
-                <i class="fas fa-plus me-1"></i> Adicionar Linha
+                <i class="fas fa-plus me-1"></i> <span th:text="#{rh.param.adicionar_linha}">Adicionar Linha</span>
               </button>
             </div>
           </div>
@@ -101,9 +101,9 @@
               <div class="modal-header border-0 pb-0 px-4 pt-4">
                 <div>
                   <h5 class="modal-title fw-bold" id="modalImportarIRTLabel">
-                    <i class="fas fa-file-import text-primary me-2"></i>Importar Tabela de IRT
+                    <i class="fas fa-file-import text-primary me-2"></i><span th:text="#{rh.param.modal_importar_titulo}">Importar Tabela de IRT</span>
                   </h5>
-                  <small class="text-muted">Descarregue o modelo, preencha os dados e carregue o ficheiro no sistema.</small>
+                  <small class="text-muted" th:text="#{rh.param.modal_importar_sub}">Descarregue o modelo, preencha os dados e carregue o ficheiro no sistema.</small>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
               </div>
@@ -116,8 +116,8 @@
                       <span class="fw-bold text-primary">1</span>
                     </div>
                     <div>
-                      <p class="fw-semibold mb-1">Descarregue o modelo</p>
-                      <p class="text-muted small mb-2">Baixe o ficheiro modelo, preencha os dados dos escalões e guarde.</p>
+                      <p class="fw-semibold mb-1" th:text="#{rh.param.passo1_titulo}">Descarregue o modelo</p>
+                      <p class="text-muted small mb-2" th:text="#{rh.param.passo1_desc}">Baixe o ficheiro modelo, preencha os dados dos escalões e guarde.</p>
                       <div class="d-flex gap-2 flex-wrap">
                         <a th:href="@{/rh/parametros/irt/modelo-excel}" class="btn btn-success btn-sm rounded-pill px-3">
                           <i class="fas fa-file-excel me-1"></i> Modelo Excel (.xlsx)
@@ -137,11 +137,11 @@
                       <span class="fw-bold text-success">2</span>
                     </div>
                     <div class="flex-grow-1">
-                      <p class="fw-semibold mb-1">Carregue o ficheiro preenchido</p>
-                      <p class="text-muted small mb-2">Selecione o ficheiro Excel (ou PDF) que preencheu com os escalões de IRT.</p>
+                      <p class="fw-semibold mb-1" th:text="#{rh.param.passo2_titulo}">Carregue o ficheiro preenchido</p>
+                      <p class="text-muted small mb-2" th:text="#{rh.param.passo2_desc}">Selecione o ficheiro Excel (ou PDF) que preencheu com os escalões de IRT.</p>
                       <div onclick="document.getElementById('importFile').click()" class="rounded-3 border border-2 border-secondary text-center p-3" style="cursor:pointer; border-style:dashed !important;">
                         <i class="fas fa-cloud-upload-alt fa-2x text-secondary mb-2 d-block"></i>
-                        <span class="text-muted small">Clique para selecionar o ficheiro (.xlsx, .xls, .pdf)</span>
+                        <span class="text-muted small" th:text="#{rh.param.passo2_drop}">Clique para selecionar o ficheiro (.xlsx, .xls, .pdf)</span>
                       </div>
                     </div>
                   </div>
@@ -149,7 +149,7 @@
 
                 <div class="alert alert-info border-0 rounded-3 py-2 px-3 small mb-0">
                   <i class="fas fa-info-circle me-1"></i>
-                  Após carregar o ficheiro, os dados serão pré-visualizados na tabela. Confirme e clique em <strong>Guardar Tabela de IRT</strong>.
+                  <span th:utext="#{rh.param.importar_note}">Após carregar o ficheiro, os dados serão pré-visualizados na tabela. Confirme e clique em Guardar Tabela de IRT.</span>
                 </div>
 
               </div>
@@ -217,10 +217,10 @@
                     <tr>
                       <th style="width: 11%;" class="fw-bold">N.º</th>
                       <th style="width: 8%;"></th>
-                      <th colspan="3" style="width: 33%;" class="fw-bold">GRUPOS DE RENDIMENTO (Kz)</th>
-                      <th colspan="2" style="width: 18%;" class="fw-bold">Parcela Fixa (Kz)</th>
-                      <th style="width: 8%;" class="fw-bold">Taxa</th>
-                      <th colspan="2" style="width: 22%;" class="fw-bold">Excesso (Kz)</th>
+                      <th colspan="3" style="width: 33%;" class="fw-bold" th:text="#{rh.param.col_grupos}">GRUPOS DE RENDIMENTO (Kz)</th>
+                      <th colspan="2" style="width: 18%;" class="fw-bold" th:text="#{rh.param.col_parcela}">Parcela Fixa (Kz)</th>
+                      <th style="width: 8%;" class="fw-bold" th:text="#{rh.param.col_taxa}">Taxa</th>
+                      <th colspan="2" style="width: 22%;" class="fw-bold" th:text="#{rh.param.col_excesso}">Excesso (Kz)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -231,11 +231,11 @@
                           <i class="fas fa-times"></i>
                         </button>
                       </td>
-                      <td class="text-muted">Acima de</td>
+                      <td class="text-muted" th:text="#{rh.param.acima_de}">Acima de</td>
                       <td>
                         <input type="number" step="0.01" min="0" name="limiteInferior" th:value="${esc.limiteInferior}" class="irt-input" required oninput="atualizarExcesso(this)" title="Valor em Kwanzas (Kz)">
                       </td>
-                      <td class="text-muted">até</td>
+                      <td class="text-muted" th:text="#{rh.param.ate}">até</td>
                       <td>
                         <input type="number" step="0.01" min="0" name="limiteSuperior" th:value="${esc.limiteSuperior != null and esc.limiteSuperior > 0 ? esc.limiteSuperior : ''}" class="irt-input" placeholder="" title="Valor em Kwanzas (Kz)">
                       </td>
@@ -250,7 +250,7 @@
                         </div>
                       </td>
                       <td class="text-muted">
-                        <span th:if="${esc.taxaExcesso > 0}">Excesso de</span>
+                        <span th:if="${esc.taxaExcesso > 0}" th:text="#{rh.param.excesso_de}">Excesso de</span>
                       </td>
                       <td>
                         <span class="fw-bold valor-excesso" th:text="${esc.taxaExcesso > 0 ? #numbers.formatDecimal(esc.limiteInferior, 1, 'POINT', 0, 'COMMA') + ' Kz' : ''}"></span>
@@ -262,12 +262,12 @@
 
               <div class="alert alert-info border-0 rounded-3 mb-4">
                 <i class="fas fa-info-circle me-2"></i>
-                <strong>Nota:</strong> Todos os valores de rendimentos e parcelas fixas estão expressos em <strong>Kwanzas (Kz)</strong>. Para o último escalão (sem limite superior), deixe o campo <strong>até</strong> em branco ou com valor <strong>0</strong>.
+                <span th:utext="#{rh.param.nota_irt}">Todos os valores de rendimentos e parcelas fixas estão expressos em Kwanzas (Kz). Para o último escalão (sem limite superior), deixe o campo até em branco ou com valor 0.</span>
               </div>
 
               <div class="d-flex justify-content-end">
                 <button type="submit" class="btn btn-success rounded-pill px-5 py-2 shadow-sm">
-                  <i class="fas fa-save me-2"></i> Guardar Tabela de IRT
+                  <i class="fas fa-save me-2"></i> <span th:text="#{rh.param.guardar_irt}">Guardar Tabela de IRT</span>
                 </button>
               </div>
             </form>
@@ -320,11 +320,11 @@ function adicionarLinhaEscalao() {
         '<i class="fas fa-times"></i>' +
       '</button>' +
     '</td>' +
-    '<td class="text-muted">Acima de</td>' +
+    '<td class="text-muted" th:text="#{rh.param.acima_de}">Acima de</td>' +
     '<td>' +
       '<input type="number" step="0.01" min="0" name="limiteInferior" class="irt-input" value="0" required oninput="atualizarExcesso(this)" title="Valor em Kwanzas (Kz)">' +
     '</td>' +
-    '<td class="text-muted">até</td>' +
+    '<td class="text-muted" th:text="#{rh.param.ate}">até</td>' +
     '<td>' +
       '<input type="number" step="0.01" min="0" name="limiteSuperior" class="irt-input" placeholder="" title="Valor em Kwanzas (Kz)">' +
     '</td>' +
@@ -416,11 +416,11 @@ function importarTabela(input) {
             '<i class="fas fa-times"></i>' +
           '</button>' +
         '</td>' +
-        '<td class="text-muted">Acima de</td>' +
+        '<td class="text-muted" th:text="#{rh.param.acima_de}">Acima de</td>' +
         '<td>' +
           '<input type="number" step="0.01" min="0" name="limiteInferior" value="' + esc.limiteInferior + '" class="irt-input" required oninput="atualizarExcesso(this)" title="Valor em Kwanzas (Kz)">' +
         '</td>' +
-        '<td class="text-muted">até</td>' +
+        '<td class="text-muted" th:text="#{rh.param.ate}">até</td>' +
         '<td>' +
           '<input type="number" step="0.01" min="0" name="limiteSuperior" value="' + limSupVal + '" class="irt-input" placeholder="" title="Valor em Kwanzas (Kz)">' +
         '</td>' +

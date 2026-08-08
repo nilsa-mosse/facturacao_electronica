@@ -216,14 +216,14 @@
         <div th:if="${mensagem}" class="alert alert-success" th:text="${mensagem}"></div>
 
         <div class="machine-id-section">
-            <span class="label">ID desta Máquina</span>
+            <span class="label" th:text="#{auth.licenca.machine_id}">ID desta Máquina</span>
             <span class="machine-id" th:text="${machineId}">A1B2C3D4</span>
-            <p style="font-size: 0.75rem;">Envie este código ao suporte para gerar sua chave.</p>
+            <p style="font-size: 0.75rem;" th:text="#{auth.licenca.suporte_hint}">Envie este código ao suporte para gerar sua chave.</p>
         </div>
 
         <form th:action="@{/ativar-licenca}" method="post">
             <div class="form-group">
-                <label class="label">Chave de Ativação</label>
+                <label class="label" th:text="#{auth.licenca.chave}">Chave de Ativação</label>
                 <input type="text" name="chave" placeholder="Insira o código recebido..." required autocomplete="off">
             </div>
             <button type="submit" class="btn-activate">ATIVAR SISTEMA AGORA</button>

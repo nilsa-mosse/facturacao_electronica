@@ -169,21 +169,21 @@
             <!-- Side Informative Panel -->
             <div class="side-info">
                 <div>
-                    <span class="step-badge">Gestão de Inventário</span>
+                    <span class="step-badge" th:text="#{stock.gestao}">Gestão de Inventário</span>
                     <div class="icon-box mt-4">
                         <i th:class="${tipo == 'ENTRA' ? 'fas fa-arrow-down-left' : (tipo == 'SAIDA' ? 'fas fa-arrow-up-right' : 'fas fa-sliders-h')}"></i>
                     </div>
                     <h1 class="fw-800" th:text="${titulo}">Movimento</h1>
-                    <p class="opacity-75">Registe com precisão a alteração física de stock para manter a sua empresa auditável e eficiente.</p>
+                    <p class="opacity-75" th:text="#{stock.mov.desc}">Registe com precisão a alteração física de stock para manter a sua empresa auditável e eficiente.</p>
                     
                     <div class="product-meta" id="stockPreview" style="display: none;">
-                        <small class="text-uppercase fw-bold opacity-75 d-block mb-3">Impacto no Inventário</small>
+                        <small class="text-uppercase fw-bold opacity-75 d-block mb-3" th:text="#{stock.impacto}">Impacto no Inventário</small>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>Stock Atual:</span>
+                            <span th:text="#{stock.atual}">Stock Atual:</span>
                             <span class="fw-800" id="currentStock">0.00</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center p-2 rounded-3" style="background: rgba(255,255,255,0.15);">
-                            <span class="small">Após Operação:</span>
+                            <span class="small" th:text="#{stock.apos_operacao}">Após Operação:</span>
                             <span class="fw-900 fs-5" id="futureStock">0.00</span>
                         </div>
                     </div>
@@ -192,7 +192,7 @@
                 <div class="mt-auto">
                     <div class="d-flex align-items-center gap-2 opacity-75">
                         <i class="fas fa-shield-alt"></i>
-                        <small>Ambiente Seguro & Auditado</small>
+                        <small th:text="#{stock.ambiente_seguro}">Ambiente Seguro & Auditado</small>
                     </div>
                 </div>
             </div>
@@ -203,7 +203,7 @@
                     <input type="hidden" name="tipo" th:value="${tipo}">
                     
                     <div class="mb-4">
-                        <label class="form-label">Qual o produto a movimentar?</label>
+                        <label class="form-label" th:text="#{stock.select_produto}">Qual o produto a movimentar?</label>
                         <select name="produtoId" class="form-select input-premium" required onchange="updatePreview(this)">
                             <option value="" disabled selected>Seleccione um artigo...</option>
                             <option th:each="prod : ${produtos}" 

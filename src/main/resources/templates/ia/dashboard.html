@@ -65,7 +65,7 @@
                             <h1 class="m-0 font-weight-bold" style="color: #1e293b;">
                                 <i class="fas fa-brain text-indigo me-2"></i> Inteligência Artificial & Analytics
                             </h1>
-                            <p class="text-muted mb-0 small">Assistente virtual, previsões de vendas, gestão preditiva de stock e retenção de clientes.</p>
+                            <p class="text-muted mb-0 small" th:text="#{ia.subtitle}">Assistente virtual, previsões de vendas, gestão preditiva de stock e retenção de clientes.</p>
                         </div>
                         <div class="col-sm-6 text-sm-end">
                             <span class="badge badge-ai" th:text="${iaStatus}">ONLINE</span>
@@ -116,7 +116,7 @@
                                     <h5 class="fw-bold mb-0" style="color: #1e293b;">
                                         <i class="fas fa-robot text-indigo me-2"></i> Assistente Virtual Kwanza ERP
                                     </h5>
-                                    <span class="badge bg-soft-indigo text-indigo">Chat ao Vivo</span>
+                                    <span class="badge bg-soft-indigo text-indigo" th:text="#{ia.chat_ao_vivo}">Chat ao Vivo</span>
                                 </div>
                                 <div class="card-body px-4">
                                     <div class="chat-container mb-3" id="chatBox">

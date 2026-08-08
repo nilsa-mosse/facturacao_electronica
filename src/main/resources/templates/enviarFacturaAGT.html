@@ -16,23 +16,23 @@
                         <div class="card-body">
                             <form th:action="@{/factura-eletronica/enviar}" method="post" enctype="multipart/form-data">
                                 <div class="mb-3">
-                                    <label for="numeroFactura" class="form-label">Número da Factura</label>
+                                    <label for="numeroFactura" class="form-label" th:text="#{agt.factura.numero}">Número da Factura</label>
                                     <input type="text" class="form-control" id="numeroFactura" name="numeroFactura" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="dataEmissao" class="form-label">Data de Emissão</label>
+                                    <label for="dataEmissao" class="form-label" th:text="#{agt.factura.data_emissao}">Data de Emissão</label>
                                     <input type="date" class="form-control" id="dataEmissao" name="dataEmissao" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="nifCliente" class="form-label">NIF do Cliente</label>
+                                    <label for="nifCliente" class="form-label" th:text="#{agt.factura.nif_cliente}">NIF do Cliente</label>
                                     <input type="text" class="form-control" id="nifCliente" name="nifCliente" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="valorTotal" class="form-label">Valor Total</label>
+                                    <label for="valorTotal" class="form-label" th:text="#{agt.factura.valor_total}">Valor Total</label>
                                     <input type="number" step="0.01" class="form-control" id="valorTotal" name="valorTotal" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="tipoDocumento" class="form-label">Tipo de Documento</label>
+                                    <label for="tipoDocumento" class="form-label" th:text="#{agt.factura.tipo_doc}">Tipo de Documento</label>
                                     <select class="form-control" id="tipoDocumento" name="tipoDocumento" required>
                                         <option value="Factura">Factura</option>
                                         <option value="Nota de Crédito">Nota de Crédito</option>
@@ -40,11 +40,11 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="serie" class="form-label">Série</label>
+                                    <label for="serie" class="form-label" th:text="#{agt.factura.serie}">Série</label>
                                     <input type="text" class="form-control" id="serie" name="serie" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="xml" class="form-label">XML da Factura</label>
+                                    <label for="xml" class="form-label" th:text="#{agt.factura.xml}">XML da Factura</label>
                                     <input type="file" class="form-control" id="xml" name="xml" accept=".xml" required>
                                 </div>
                                 <div class="text-end">

@@ -47,8 +47,8 @@
                         <div class="wizard-step-content active" id="step1-content">
                             <div class="card border-0 shadow-lg rounded-xl p-4">
                                 <div class="card-header bg-transparent border-0 mb-3">
-                                    <h4 class="fw-bold text-primary mb-0">Informações do Inventário</h4>
-                                    <p class="text-muted small">Defina o escopo e os responsáveis pela auditoria.</p>
+                                    <h4 class="fw-bold text-primary mb-0" th:text="#{inv.info}">Informações do Inventário</h4>
+                                    <p class="text-muted small" th:text="#{inv.scope.desc}">Defina o escopo e os responsáveis pela auditoria.</p>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-4">
@@ -80,7 +80,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label
-                                                class="form-label fw-bold text-muted small text-uppercase">Armazém</label>
+                                                class="form-label fw-bold text-muted small text-uppercase" th:text="#{inv.armazem}">Armazém</label>
                                             <select th:field="*{armazem}"
                                                     class="form-select rounded-pill bg-light border-0 px-4 py-2">
                                                 <!-- default empty option -->
@@ -106,7 +106,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label
-                                                class="form-label fw-bold text-muted small text-uppercase">Responsável</label>
+                                                class="form-label fw-bold text-muted small text-uppercase" th:text="#{inv.responsavel}">Responsável</label>
                                             <input type="text"
                                                 class="form-control rounded-pill bg-light border-0 px-4 py-2"
                                                 th:field="*{responsavel}" required>

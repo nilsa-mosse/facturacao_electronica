@@ -156,7 +156,7 @@
                         <i th:if="${produto.imagemBlob == null}" class="fas fa-image fa-3x text-white-50"></i>
                     </div>
                     <div>
-                        <span class="badge bg-white text-primary fw-bold mb-2">MODO EDIÇÃO</span>
+                        <span class="badge bg-white text-primary fw-bold mb-2" th:text="#{produto.modo_edicao}">MODO EDIÇÃO</span>
                         <h2 class="fw-900 mb-0" th:text="${produto.nome}" style="font-size: 2.2rem; letter-spacing: -1px;">Nome do Produto</h2>
                         <p class="mb-0 text-white-50"><i class="fas fa-barcode me-1"></i> <span th:text="${produto.codigoBarra}">SKU</span></p>
                     </div>
@@ -169,7 +169,7 @@
                     </div>
                     <div class="row g-4 mb-5">
                         <div class="col-md-8">
-                            <label class="form-label">Denominação do Artigo</label>
+                            <label class="form-label" th:text="#{produto.nome_completo}">Denominação do Artigo</label>
                             <input type="text" name="nome" class="form-control input-premium" th:value="${produto.nome}" required>
                         </div>
                         <div class="col-md-4">
@@ -182,7 +182,7 @@
                             </select>
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label">Descrição Geral</label>
+                            <label class="form-label" th:text="#{produto.descricao_detalhada}">Descrição Geral</label>
                             <textarea name="descricao" class="form-control input-premium" rows="3" th:text="${produto.descricao}"></textarea>
                         </div>
                     </div>
@@ -193,11 +193,11 @@
                     </div>
                     <div class="row g-4 mb-5">
                         <div class="col-md-4">
-                            <label class="form-label">Preço de Compra (Kz)</label>
+                            <label class="form-label" th:text="#{produto.preco_compra}">Preço de Compra (Kz)</label>
                             <input type="number" name="precoCompra" class="form-control input-premium" th:value="${produto.precoCompra}" step="0.01" min="0">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Preço de Venda (Kz)</label>
+                            <label class="form-label" th:text="#{produto.preco_venda}">Preço de Venda (Kz)</label>
                             <input type="number" name="preco" class="form-control input-premium" th:value="${produto.preco}" step="0.01" min="0" required>
                         </div>
                         <div class="col-md-4">
@@ -205,7 +205,7 @@
                             
                             <!-- Filtro de IVA por Regime -->
                             <select name="ivaPercentual" class="form-select input-premium">
-                                <option value="0" th:selected="${produto.ivaPercentual == null or produto.ivaPercentual == 0}">Isento / Não Aplicável</option>
+                                <option value="0" th:selected="${produto.ivaPercentual == null or produto.ivaPercentual == 0}" th:text="#{produto.iva.isento}">Isento / Não Aplicável</option>
                                 <option th:each="imp : ${impostos}"
                                         th:value="${imp.percentagem}"
                                         th:text="${imp.nome} + ' (' + ${imp.percentagem} + '%)'"
@@ -214,11 +214,11 @@
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Stock Actual</label>
+                            <label class="form-label" th:text="#{produto.stock_actual}">Stock Actual</label>
                             <input type="number" name="quantidadeEstoque" class="form-control input-premium" th:value="${produto.quantidadeEstoque}" min="0" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Unidade de Medida</label>
+                            <label class="form-label" th:text="#{produto.unidade_medida}">Unidade de Medida</label>
                             <select name="unidadeMedida" class="form-select input-premium">
                                 <option value="Unidade (UN)" th:selected="${produto.unidadeMedida == 'Unidade (UN)'}">Unidade (UN)</option>
                                 <option value="Peça (PÇ)" th:selected="${produto.unidadeMedida == 'Peça (PÇ)'}">Peça (PÇ)</option>

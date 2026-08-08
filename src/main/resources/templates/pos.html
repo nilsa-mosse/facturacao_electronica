@@ -748,7 +748,7 @@
                 <!-- Categorias Reais -->
                 <div class="d-flex gap-2 overflow-auto pb-2 hide-scrollbar" id="categoryFilters">
                   <button class="btn btn-sm btn-primary rounded-pill px-4 fw-bold filter-category shadow-sm"
-                    data-category="0">Todos</button>
+                    data-category="0" th:text="#{pos.cat.todos}">Todos</button>
                   <button th:each="cat : ${categorias}"
                     class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold filter-category text-nowrap bg-white shadow-sm"
                     th:data-category="${cat.id}" th:text="${cat.nome}">Categoria</button>
@@ -798,7 +798,7 @@
                         <div class="product-price">
                           <span th:text="${produto.preco}">0</span>
                         </div>
-                        <span th:if="${!produto.disponivel}" class="badge bg-danger">ESGOTADO</span>
+                        <span th:if="${!produto.disponivel}" class="badge bg-danger" th:text="#{pos.status.esgotado}">ESGOTADO</span>
                         <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i
                             class="fas fa-percent me-1"></i> PROMO</span>
                         <span
@@ -878,7 +878,7 @@
           style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
           <div>
             <h4 class="fw-bold mb-0"><i class="fas fa-shopping-bag me-3"></i> Revisão da Compra</h4>
-            <small class="opacity-75">Finalize a sua venda em poucos passos</small>
+            <small class="opacity-75" th:text="#{pos.wizard.subtitle}">Finalize a sua venda em poucos passos</small>
           </div>
           <button type="button" class="btn btn-outline-light rounded-pill px-4 fw-bold" onclick="voltarParaPos()">
             <i class="fas fa-arrow-left me-2"></i> VOLTAR AO POS
@@ -893,15 +893,15 @@
             </div>
             <div class="step-item active" data-step="1">
               <i class="fas fa-shopping-cart"></i>
-              <span class="step-label">Revisão</span>
+              <span class="step-label" th:text="#{pos.wizard.step.revision}">Revisão</span>
             </div>
             <div class="step-item" data-step="2">
               <i class="fas fa-user-tag"></i>
-              <span class="step-label">Cliente</span>
+              <span class="step-label" th:text="#{pos.wizard.step.client}">Cliente</span>
             </div>
             <div class="step-item" data-step="3">
               <i class="fas fa-check-circle"></i>
-              <span class="step-label">Pagamento</span>
+              <span class="step-label" th:text="#{pos.wizard.step.payment}">Pagamento</span>
             </div>
           </div>
 
@@ -913,8 +913,8 @@
                   <div class="step-card">
                     <div class="step-header d-flex justify-content-between align-items-center">
                       <div>
-                        <h5 class="fw-bold mb-0 text-dark">Confirmar Pedido</h5>
-                        <small class="text-muted">Revise os itens antes de emitir o documento</small>
+                        <h5 class="fw-bold mb-0 text-dark" th:text="#{pos.wizard.confirm_order}">Confirmar Pedido</h5>
+                        <small class="text-muted" th:text="#{pos.wizard.review_items}">Revise os itens antes de emitir o documento</small>
                       </div>
                       <div class="d-flex align-items-center gap-3">
                         <span class="badge bg-soft-info rounded-pill px-3 py-2" id="badgeTotalItens"
@@ -1822,7 +1822,7 @@
                         $card.addClass('product-disabled');
                         var $imgContainer = $card.find('.product-img-container');
                         if ($imgContainer.find('.out-of-stock-overlay').length === 0) {
-                          $imgContainer.prepend('<div class="out-of-stock-overlay">ESGOTADO</div>');
+                          $imgContainer.prepend('<div class="out-of-stock-overlay" th:text="#{pos.status.esgotado}">ESGOTADO</div>');
                         }
                         $btn.addClass('bg-danger').css('cursor', 'not-allowed').html('<i class="fas fa-times"></i>');
                         var $priceRow = $card.find('.d-flex.justify-content-between.align-items-center.mt-2');

@@ -256,7 +256,7 @@
         <div class="header-section">
             <div>
                 <h1 class="page-title">Alertas de <span style="color: var(--danger);">Stock</span></h1>
-                <p class="page-subtitle">Monitorização em tempo real dos níveis críticos de inventário.</p>
+                <p class="page-subtitle" th:text="#{stock.baixo.desc}">Monitorização em tempo real dos níveis críticos de inventário.</p>
             </div>
             <div class="d-none d-md-block text-end">
                 <div class="fw-800" style="font-size: 1rem; color: var(--slate); margin-bottom: 5px;">DATA DO RELATÓRIO</div>
@@ -304,7 +304,7 @@
                             <tr>
                                 <th style="width: 40%">Produto</th>
                                 <th style="width: 15%">Stock Atual</th>
-                                <th style="width: 15%">Meta Mínima</th>
+                                <th style="width: 15%" th:text="#{stock.meta_minima}">Meta Mínima</th>
                                 <th style="width: 15%">Estado</th>
                                 <th style="width: 15%">Ações</th>
                             </tr>

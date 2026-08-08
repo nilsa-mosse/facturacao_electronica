@@ -98,7 +98,7 @@
         <div class="content-wrapper">
             <section class="content-header">
                 <div class="container-fluid">
-                    <h1 class="fw-bold">Gestão de Devoluções</h1>
+                    <h1 class="fw-bold" th:text="#{devolucao.titulo}">Gestão de Devoluções</h1>
                 </div>
             </section>
 
@@ -110,8 +110,8 @@
                             <div class="card card-devolucao">
                                 <div class="card-header">
                                     <i class="fas fa-undo-alt fa-2x mb-2"></i>
-                                    <h3 class="card-title d-block w-100 fw-bold">Emitir Nova Nota de Crédito</h3>
-                                    <p class="mb-0 opacity-75">Vincule a uma factura para preenchimento automático</p>
+                                    <h3 class="card-title d-block w-100 fw-bold" th:text="#{devolucao.emitir_nc}">Emitir Nova Nota de Crédito</h3>
+                                    <p class="mb-0 opacity-75" th:text="#{devolucao.vincular_factura}">Vincule a uma factura para preenchimento automático</p>
                                 </div>
 
                                 <form th:action="@{/notas/salvar-devolucao}" th:object="${devolucao}" method="post">
@@ -124,8 +124,8 @@
                                             <div class="col-md-6">
                                                 <label class="fw-bold mb-1"><i class="fas fa-file-invoice me-1"></i> Tipo de Nota / Documento</label>
                                                 <select th:field="*{tipoNota}" id="tipoNota" class="form-control form-control-modern" style="border: 2px solid var(--primary); font-weight: 700; border-radius: 10px;">
-                                                    <option value="NC">Nota de Crédito (NC)</option>
-                                                    <option value="ND">Nota de Débito (ND)</option>
+                                                    <option value="NC" th:text="#{devolucao.nc}">Nota de Crédito (NC)</option>
+                                                    <option value="ND" th:text="#{devolucao.nd}">Nota de Débito (ND)</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6 pt-4 text-muted small d-flex align-items-center">
@@ -148,7 +148,7 @@
                                         </div>
 
                                         <div class="mb-4">
-                                            <label class="fw-bold mb-1" id="motivoLabel">Motivo da Devolução</label>
+                                            <label class="fw-bold mb-1" id="motivoLabel" th:text="#{devolucao.motivo}">Motivo da Devolução</label>
                                             <textarea class="form-control form-control-modern" th:field="*{motivo}" style="height: 80px;" required placeholder="Descreva o motivo..."></textarea>
                                         </div>
 
@@ -167,10 +167,10 @@
                                         <div class="summary-box mt-5">
                                             <div class="row align-items-center">
                                                 <div class="col-md-8">
-                                                    <p class="mb-0" id="summaryText">Ao confirmar, o stock será reposto automaticamente e a Nota de Crédito será gerada.</p>
+                                                    <p class="mb-0" id="summaryText" th:text="#{devolucao.alerta_stock}">Ao confirmar, o stock será reposto automaticamente e a Nota de Crédito será gerada.</p>
                                                 </div>
                                                 <div class="col-md-4 text-end">
-                                                    <span class="small opacity-75">VALOR TOTAL</span>
+                                                    <span class="small opacity-75" th:text="#{devolucao.valor_total}">VALOR TOTAL</span>
                                                     <h2 class="fw-bold mb-0" id="grandTotal">0,00 Kz</h2>
                                                 </div>
                                             </div>
@@ -181,7 +181,7 @@
                                                 <a th:href="@{/notas/listar}" class="btn btn-light w-100 py-3 fw-bold">CANCELAR</a>
                                             </div>
                                             <div class="col-md-6">
-                                                <button type="submit" id="btnSubmit" class="btn btn-primary-modern py-3">CONFIRMAR E EMITIR NC</button>
+                                                <button type="submit" id="btnSubmit" class="btn btn-primary-modern py-3" th:text="#{devolucao.btn.confirmar}">CONFIRMAR E EMITIR NC</button>
                                             </div>
                                         </div>
                                     </div>

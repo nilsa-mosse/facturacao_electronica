@@ -14,7 +14,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h1 class="mb-0 fw-800"><i class="fas fa-store-alt text-primary me-3"></i>Gestão de Estabelecimentos</h1>
-                            <p class="text-muted small mb-0">Configure suas lojas, armazéns e pontos de venda globais.</p>
+                            <p class="text-muted small mb-0" th:text="#{config.estabelecimentos.desc}">Configure suas lojas, armazéns e pontos de venda globais.</p>
                         </div>
                         <button class="btn btn-primary rounded-pill shadow-sm px-4" data-bs-toggle="collapse" data-bs-target="#collapseForm">
                             <i class="fas fa-plus-circle me-2"></i>Novo Estabelecimento
@@ -44,7 +44,7 @@
                                     <div class="bg-soft-primary rounded-pill p-2 me-3">
                                         <i class="fas fa-edit"></i>
                                     </div>
-                                    <h5 class="mb-0 fw-700">Registar Novo Estabelecimento</h5>
+                                    <h5 class="mb-0 fw-700" th:text="#{config.estabelecimentos.novo}">Registar Novo Estabelecimento</h5>
                                 </div>
                             </div>
                             <form th:action="@{/configuracoes/estabelecimentos/salvar}" th:object="${novoEstabelecimento}" method="post">

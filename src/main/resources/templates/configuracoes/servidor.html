@@ -69,7 +69,7 @@
                                     <input type="checkbox" class="custom-control-input" id="proxySwitch"
                                            th:field="*{proxyHabilitado}"
                                            onchange="toggleProxy(this.checked)">
-                                    <label class="custom-control-label fw-bold" for="proxySwitch">Habilitar Proxy</label>
+                                    <label class="custom-control-label fw-bold" for="proxySwitch" th:text="#{config.servidor.proxy}">Habilitar Proxy</label>
                                 </div>
                             </div>
                         </div>

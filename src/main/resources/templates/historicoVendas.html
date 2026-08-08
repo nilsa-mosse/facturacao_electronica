@@ -28,7 +28,7 @@
                             <div class="premium-card grad-primary" onclick="filterByStatus('todos')">
                                 <div class="info-box-icon"><i class="fas fa-file-invoice"></i></div>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Total de Facturas</span>
+                                    <span class="info-box-text" th:text="#{vendas.stat.total}">Total de Facturas</span>
                                     <span class="info-box-number" th:text="${totalVendas}">0</span>
                                 </div>
                             </div>
@@ -37,7 +37,7 @@
                             <div class="premium-card grad-success" onclick="filterByStatus('EMITIDA')">
                                 <div class="info-box-icon"><i class="fas fa-check-circle"></i></div>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Emitidas</span>
+                                    <span class="info-box-text" th:text="#{vendas.stat.emitidas}">Emitidas</span>
                                     <span class="info-box-number" th:text="${emitidasCount}">0</span>
                                 </div>
                             </div>
@@ -46,7 +46,7 @@
                             <div class="premium-card grad-warning" onclick="filterByStatus('SUBSTITUIDA')">
                                 <div class="info-box-icon"><i class="fas fa-sync"></i></div>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Substituídas</span>
+                                    <span class="info-box-text" th:text="#{vendas.stat.substituidas}">Substituídas</span>
                                     <span class="info-box-number"
                                         th:text="${substituidasCount != null ? substituidasCount : 0}">0</span>
                                 </div>
@@ -56,7 +56,7 @@
                             <div class="premium-card grad-danger" onclick="filterByStatus('CANCELADA')">
                                 <div class="info-box-icon"><i class="fas fa-ban"></i></div>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Anuladas</span>
+                                    <span class="info-box-text" th:text="#{vendas.stat.anuladas}">Anuladas</span>
                                     <span class="info-box-number" th:text="${canceladasCount}">0</span>
                                 </div>
                             </div>
@@ -562,7 +562,7 @@
                 <form th:action="@{/historico-vendas/anular}" method="post" class="modal-content border-0 shadow-lg">
                     <input type="hidden" name="id" id="anularFacturaId">
                     <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title fw-bold">Justificar Anulação</h5>
+                        <h5 class="modal-title fw-bold" th:text="#{vendas.modal.anular.titulo}">Justificar Anulação</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -575,7 +575,7 @@
                     <div class="modal-footer bg-light p-2">
                         <button type="button" class="btn btn-secondary rounded-pill px-4"
                             data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger rounded-pill px-4">Confirmar Anulação</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4" th:text="#{vendas.modal.anular.confirmar}">Confirmar Anulação</button>
                     </div>
                 </form>
             </div>
@@ -594,7 +594,7 @@
                     <div class="modal-body p-4">
                         <input type="hidden" id="enviarEmailDocId">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Endereço de Email</label>
+                            <label class="form-label fw-semibold" th:text="#{vendas.modal.email.label}">Endereço de Email</label>
                             <input type="email" id="enviarEmailAddress" class="form-control"
                                 placeholder="cliente@empresa.com" required>
                         </div>
@@ -624,21 +624,21 @@
                     </div>
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Total do Documento</label>
+                            <label class="form-label fw-semibold" th:text="#{vendas.modal.pagamento.total_doc}">Total do Documento</label>
                             <div class="input-group">
                                 <input type="text" id="pagamentoTotalDoc" class="form-control bg-light" readonly>
                                 <span class="input-group-text">Kz</span>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Valor já Pago</label>
+                            <label class="form-label fw-semibold" th:text="#{vendas.modal.pagamento.valor_pago}">Valor já Pago</label>
                             <div class="input-group">
                                 <input type="text" id="pagamentoValorJaPago" class="form-control bg-light" readonly>
                                 <span class="input-group-text">Kz</span>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" id="labelValorAPagar">Valor a Pagar</label>
+                            <label class="form-label fw-semibold" id="labelValorAPagar" th:text="#{vendas.modal.pagamento.valor_pagar}">Valor a Pagar</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" min="0.01" name="valorPago" id="pagamentoValorAPagar"
                                     class="form-control" placeholder="0.00" required>

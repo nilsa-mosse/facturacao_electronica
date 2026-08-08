@@ -75,7 +75,7 @@
                         <div class="col-md-3">
                             <div class="card border-0 shadow-sm rounded-xl bg-primary text-white">
                                 <div class="card-body p-4">
-                                    <h6 class="text-white-50 fw-bold mb-1">Rendimento Ilíquido</h6>
+                                    <h6 class="text-white-50 fw-bold mb-1" th:text="#{rh.proc.rendimento_iliquido}">Rendimento Ilíquido</h6>
                                     <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalIliquido, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
                                     <small class="text-white-50" th:text="'Salários Base: Kz ' + ${#numbers.formatDecimal(totalBase, 1, 'POINT', 2, 'COMMA')}">Salários Base: Kz 0,00</small>
                                 </div>
@@ -84,7 +84,7 @@
                         <div class="col-md-3">
                             <div class="card border-0 shadow-sm rounded-xl bg-info text-white">
                                 <div class="card-body p-4">
-                                    <h6 class="text-white-50 fw-bold mb-1">Descontos INSS (Colaborador)</h6>
+                                    <h6 class="text-white-50 fw-bold mb-1" th:text="#{rh.proc.inss_colaborador}">Descontos INSS (Colaborador)</h6>
                                     <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalInssCol, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
                                     <small class="text-white-50" th:text="'Encargo Empresa: Kz ' + ${#numbers.formatDecimal(totalInssPat, 1, 'POINT', 2, 'COMMA')}">Encargo Empresa: Kz 0,00</small>
                                 </div>
@@ -93,7 +93,7 @@
                         <div class="col-md-3">
                             <div class="card border-0 shadow-sm rounded-xl bg-danger text-white">
                                 <div class="card-body p-4">
-                                    <h6 class="text-white-50 fw-bold mb-1">Retenção de IRT</h6>
+                                    <h6 class="text-white-50 fw-bold mb-1" th:text="#{rh.proc.retencao_irt}">Retenção de IRT</h6>
                                     <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalIrt, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
                                     <small class="text-white-50">Guias consolidadas AGT</small>
                                 </div>
@@ -102,7 +102,7 @@
                         <div class="col-md-3">
                             <div class="card border-0 shadow-sm rounded-xl bg-success text-white">
                                 <div class="card-body p-4">
-                                    <h6 class="text-white-50 fw-bold mb-1">Salário Líquido Total</h6>
+                                    <h6 class="text-white-50 fw-bold mb-1" th:text="#{rh.proc.salario_liquido}">Salário Líquido Total</h6>
                                     <h3 class="fw-bold mb-0" th:text="'Kz ' + ${#numbers.formatDecimal(totalLiquido, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</h3>
                                     <small class="text-white-50">Total a desembolsar</small>
                                 </div>

@@ -64,7 +64,7 @@
                                     <span class="text-muted fw-700 small uppercase text-indigo d-block mb-1">Sessões
                                         Ativas</span>
                                     <h2 class="fw-800 text-dark mb-0" th:text="${qtdCaixasAbertos}">0</h2>
-                                    <span class="text-indigo small fw-600">Caixas atualmente abertos</span>
+                                    <span class="text-indigo small fw-600" th:text="#{caixa.monitor.abertos}">Caixas atualmente abertos</span>
                                 </div>
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                                     <h2 class="fw-800 text-success mb-0"
                                         th:text="${#numbers.formatDecimal(totalNumerario, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
                                         0,00 Kz</h2>
-                                    <span class="text-success small fw-600">Dinheiro físico em gavetas</span>
+                                    <span class="text-success small fw-600" th:text="#{caixa.monitor.cash_gavetas}">Dinheiro físico em gavetas</span>
                                 </div>
                             </div>
                         </div>
@@ -96,7 +96,7 @@
                                     <h2 class="fw-800 text-info mb-0"
                                         th:text="${#numbers.formatDecimal(totalMulticaixa, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
                                         0,00 Kz</h2>
-                                    <span class="text-info small fw-600">Pagamentos via TPA</span>
+                                    <span class="text-info small fw-600" th:text="#{caixa.monitor.pagamentos_tpa}">Pagamentos via TPA</span>
                                 </div>
                             </div>
                         </div>
@@ -112,7 +112,7 @@
                                     <h2 class="fw-800 text-dark mb-0"
                                         th:text="${#numbers.formatDecimal(totalFaturado, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
                                         0,00 Kz</h2>
-                                    <span class="text-purple small fw-600">Total das vendas ativas</span>
+                                    <span class="text-purple small fw-600" th:text="#{caixa.monitor.total_vendas_ativas}">Total das vendas ativas</span>
                                 </div>
                             </div>
                         </div>

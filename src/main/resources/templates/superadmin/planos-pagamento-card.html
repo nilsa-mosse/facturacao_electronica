@@ -90,7 +90,7 @@
             <!-- Módulos do Sistema incluídos (dinâmico) -->
             <div class="d-flex flex-wrap gap-1 mb-2">
                 <th:block th:if="${plano.modulos != null and !#lists.isEmpty(plano.modulos)}">
-                    <span class="small fw-bold text-muted me-2">Módulos:</span>
+                    <span class="small fw-bold text-muted me-2" th:text="#{superadmin.planos_modulos}">Módulos:</span>
                     <span th:each="m : ${plano.modulos}" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill small" th:text="${modulosDisponiveis[m]}">Módulo</span>
                 </th:block>
             </div>

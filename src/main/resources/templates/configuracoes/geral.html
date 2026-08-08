@@ -28,32 +28,32 @@
                         <ul class="nav nav-tabs" id="configTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active fw-bold py-3 px-4 border-0" id="geral-tab" data-bs-toggle="tab" data-bs-target="#geral-pane" type="button" role="tab" aria-controls="geral-pane" aria-selected="true">
-                                    <i class="fas fa-sliders-h me-2"></i>Parâmetros Gerais
+                                    <i class="fas fa-sliders-h me-2"></i><span th:text="#{config.geral.tab.geral}">Parâmetros Gerais</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link fw-bold py-3 px-4 border-0" id="email-tab" data-bs-toggle="tab" data-bs-target="#email-pane" type="button" role="tab" aria-controls="email-pane" aria-selected="false">
-                                    <i class="fas fa-envelope-open-text me-2"></i>Email
+                                    <i class="fas fa-envelope-open-text me-2"></i><span th:text="#{config.geral.tab.email}">Email</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link fw-bold py-3 px-4 border-0" id="servidor-tab" data-bs-toggle="tab" data-bs-target="#servidor-pane" type="button" role="tab" aria-controls="servidor-pane" aria-selected="false">
-                                    <i class="fas fa-server me-2"></i>Servidor
+                                    <i class="fas fa-server me-2"></i><span th:text="#{config.geral.tab.servidor}">Servidor</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link fw-bold py-3 px-4 border-0" id="storage-tab" data-bs-toggle="tab" data-bs-target="#storage-pane" type="button" role="tab" aria-controls="storage-pane" aria-selected="false">
-                                    <i class="fas fa-hdd me-2"></i>Storage
+                                    <i class="fas fa-hdd me-2"></i><span th:text="#{config.geral.tab.storage}">Storage</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link fw-bold py-3 px-4 border-0" id="banco-dados-tab" data-bs-toggle="tab" data-bs-target="#banco-dados-pane" type="button" role="tab" aria-controls="banco-dados-pane" aria-selected="false">
-                                    <i class="fas fa-database me-2"></i>Banco de dados
+                                    <i class="fas fa-database me-2"></i><span th:text="#{config.geral.tab.bd}">Banco de dados</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link fw-bold py-3 px-4 border-0" id="seguranca-tab" data-bs-toggle="tab" data-bs-target="#seguranca-pane" type="button" role="tab" aria-controls="seguranca-pane" aria-selected="false">
-                                    <i class="fas fa-lock me-2"></i>Segurança
+                                    <i class="fas fa-lock me-2"></i><span th:text="#{config.geral.tab.seguranca}">Segurança</span>
                                 </button>
                             </li>
                         </ul>
@@ -64,8 +64,8 @@
                             <!-- Tab: Geral -->
                             <div class="tab-pane fade show active" id="geral-pane" role="tabpanel" aria-labelledby="geral-tab">
                                 <div class="mb-3">
-                                    <h4 class="fw-bold text-slate-800"><i class="fas fa-sliders-h me-2 text-primary"></i>Preferências do Sistema</h4>
-                                    <p class="text-muted small">Defina o nome do sistema, o tema global e opções de backup automático.</p>
+                                    <h4 class="fw-bold text-slate-800"><i class="fas fa-sliders-h me-2 text-primary"></i><span th:text="#{config.geral.pref_titulo}">Preferências do Sistema</span></h4>
+                                    <p class="text-muted small" th:text="#{config.geral.pref_desc}">Defina o nome do sistema, o tema global e opções de backup automático.</p>
                                 </div>
                                 <form th:action="@{/configuracoes/geral/salvar}" th:object="${sistema}" method="post">
                                     <div class="row">
@@ -94,7 +94,7 @@
                                             </div>
                                             <div class="custom-control custom-switch mt-2">
                                                 <input type="checkbox" class="custom-control-input" id="exibirDatasValidade" th:field="*{exibirDatasValidade}">
-                                                <label class="custom-control-label" for="exibirDatasValidade">Exibir Datas de Fabrico e Expiração nos Produtos</label>
+                                                <label class="custom-control-label" for="exibirDatasValidade" th:text="#{config.geral.exibir_datas}">Exibir Datas de Fabrico e Expiração nos Produtos</label>
                                             </div>
                                         </div>
                                     </div>

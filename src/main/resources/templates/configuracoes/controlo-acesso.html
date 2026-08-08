@@ -13,7 +13,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1><i class="fas fa-user-shield me-2 text-primary"></i>Controlo de Acesso</h1>
+                            <h1><i class="fas fa-user-shield me-2 text-primary"></i><span th:text="#{config.access.titulo}">Controlo de Acesso</span></h1>
                         </div>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
                         <div class="col-md-4">
                             <div class="card card-outline card-primary shadow-sm">
                                 <div class="card-header">
-                                    <h3 class="card-title">Utilizadores</h3>
+                                    <h3 class="card-title" th:text="#{config.access.utilizadores}">Utilizadores</h3>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="list-group list-group-flush">
@@ -57,7 +57,7 @@
                                     </h3>
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-primary btn-sm rounded-pill px-4" onclick="salvarPermissoes()">
-                                            <i class="fas fa-save me-1"></i> Gravar Alterações
+                                            <i class="fas fa-save me-1"></i> <span th:text="#{btn.gravar}">Gravar Alterações</span>
                                         </button>
                                     </div>
                                 </div>
@@ -66,8 +66,8 @@
                                         <table class="table table-hover align-middle mb-0" id="tabelaPermissoes">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th class="ps-4">Módulo do Sistema</th>
-                                                    <th class="text-center" style="width: 150px;">Acesso</th>
+                                                    <th class="ps-4" th:text="#{config.access.modulo}">Módulo do Sistema</th>
+                                                    <th class="text-center" style="width: 150px;" th:text="#{config.access.acesso}">Acesso</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -89,15 +89,14 @@
                                     </div>
                                 </div>
                                 <div class="card-footer bg-white text-muted small">
-                                    <i class="fas fa-info-circle me-1"></i> 
-                                    Alterações nestas permissões afectam imediatamente o acesso do utilizador aos módulos seleccionados.
+                                    <i class="fas fa-info-circle me-1"></i> <span th:text="#{config.access.hint}">Alterações nestas permissões afectam imediatamente o acesso do utilizador aos módulos seleccionados.</span>
                                 </div>
                             </div>
                             
                             <div class="card shadow-sm" th:if="${usuarioSelecionado == null}">
                                 <div class="card-body text-center py-5 text-muted">
                                     <i class="fas fa-mouse-pointer fa-3x mb-3"></i>
-                                    <h5>Seleccione um utilizador à esquerda para gerir as suas permissões.</h5>
+                                    <h5 th:text="#{config.access.select_user}">Seleccione um utilizador à esquerda para gerir as suas permissões.</h5>
                                 </div>
                             </div>
                         </div>

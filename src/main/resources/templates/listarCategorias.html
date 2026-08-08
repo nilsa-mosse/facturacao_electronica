@@ -11,7 +11,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1>Categorias de Produtos</h1>
+                            <h1 th:text="#{categoria.titulo}">Categorias de Produtos</h1>
                         </div>
                         <div class="col-sm-6 text-right">
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCadastro">
@@ -75,14 +75,14 @@
                     <form id="formCategoria">
                         <div class="modal-body">
                             <div class="form-group">
-                                <label for="nomeCadastro">Nome da Categoria</label>
+                                <label for="nomeCadastro" th:text="#{categoria.nome}">Nome da Categoria</label>
                                 <input type="text" class="form-control" id="nomeCadastro" name="nome" placeholder="Ex: Bebidas, Limpeza..." required>
-                                <small class="text-muted">Este nome será exibido no cadastro de produtos.</small>
+                                <small class="text-muted" th:text="#{categoria.hint_display}">Este nome será exibido no cadastro de produtos.</small>
                             </div>
                         </div>
                         <div class="modal-footer bg-light">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary px-4">Gravar Categoria</button>
+                            <button type="submit" class="btn btn-primary px-4" th:text="#{categoria.gravar}">Gravar Categoria</button>
                         </div>
                     </form>
                 </div>
@@ -101,7 +101,7 @@
                         <input type="hidden" id="editId">
                         <div class="modal-body">
                             <div class="form-group">
-                                <label for="editNome">Nome da Categoria</label>
+                                <label for="editNome" th:text="#{categoria.nome}">Nome da Categoria</label>
                                 <input type="text" class="form-control" id="editNome" name="nome" placeholder="Nome da categoria" required>
                                 <small class="text-muted">Altere o nome desta categoria.</small>
                             </div>

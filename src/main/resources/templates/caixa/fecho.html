@@ -13,7 +13,7 @@
                         <i class="fas fa-lock fa-2x"></i>
                     </div>
                     <h3 class="card-title w-100 fw-bold fs-4">Fecho de Caixa</h3>
-                    <p class="text-muted small">Efectue o encerramento do seu turno</p>
+                    <p class="text-muted small" th:text="#{caixa.fecho.desc}">Efectue o encerramento do seu turno</p>
                 </div>
                 
                 <div class="card-body">
@@ -26,15 +26,15 @@
                         <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">Resumo Informado pelo Sistema</h6>
                         <div class="row">
                             <div class="col-6 mb-2">
-                                <span class="text-muted d-block small">Fundo de Maneio:</span>
+                                <span class="text-muted d-block small" th:text="#{caixa.fecho.fundo}">Fundo de Maneio:</span>
                                 <span class="fw-bold fs-5 text-dark" th:text="${#numbers.formatDecimal(caixa.saldoInicial, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
                             </div>
                             <div class="col-6 mb-2">
-                                <span class="text-muted d-block small">Vendas a Numerário:</span>
+                                <span class="text-muted d-block small" th:text="#{caixa.fecho.vendas_cash}">Vendas a Numerário:</span>
                                 <span class="fw-bold fs-5 text-success" th:text="${#numbers.formatDecimal(caixa.totalNumerario, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
                             </div>
                             <div class="col-12 mt-2 pt-2 border-top">
-                                <span class="text-muted fw-bold">Total Esperado na Gaveta:</span>
+                                <span class="text-muted fw-bold" th:text="#{caixa.fecho.total_esperado}">Total Esperado na Gaveta:</span>
                                 <span class="fw-bold fs-4 text-primary float-end" th:text="${#numbers.formatDecimal(totalSistema, 1, 'POINT', 2, 'COMMA')} + ' Kz'"></span>
                             </div>
                         </div>
