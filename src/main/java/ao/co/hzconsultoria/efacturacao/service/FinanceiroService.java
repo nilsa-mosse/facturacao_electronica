@@ -327,8 +327,13 @@ public class FinanceiroService {
     }
 
     private Image gerarQrCode(String text) throws Exception {
+        java.util.Map<com.google.zxing.EncodeHintType, Object> hints = new java.util.HashMap<>();
+        hints.put(com.google.zxing.EncodeHintType.ERROR_CORRECTION, com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.M);
+        hints.put(com.google.zxing.EncodeHintType.CHARACTER_SET, "UTF-8");
+        hints.put(com.google.zxing.EncodeHintType.MARGIN, 1);
+
         com.google.zxing.qrcode.QRCodeWriter qrCodeWriter = new com.google.zxing.qrcode.QRCodeWriter();
-        com.google.zxing.common.BitMatrix bitMatrix = qrCodeWriter.encode(text, com.google.zxing.BarcodeFormat.QR_CODE, 100, 100);
+        com.google.zxing.common.BitMatrix bitMatrix = qrCodeWriter.encode(text, com.google.zxing.BarcodeFormat.QR_CODE, 350, 350, hints);
         int width = bitMatrix.getWidth();
         int height = bitMatrix.getHeight();
         java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);

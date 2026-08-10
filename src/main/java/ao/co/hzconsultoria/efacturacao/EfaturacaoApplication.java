@@ -8,6 +8,7 @@ import ao.co.hzconsultoria.efacturacao.repository.EstabelecimentoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ImpostoRepository;
 import ao.co.hzconsultoria.efacturacao.model.Imposto;
+import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -33,6 +34,7 @@ public class EfaturacaoApplication {
             EmpresaRepository empresaRepository,
             EstabelecimentoRepository estabRepository,
             ConfiguracaoSistemaRepository configRepo,
+            ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoAGTRepository agtConfigRepo,
             ImpostoRepository impostoRepository,
             ao.co.hzconsultoria.efacturacao.repository.ClienteRepository clienteRepository,
             ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository categoriaRepository,
@@ -88,6 +90,38 @@ public class EfaturacaoApplication {
             }
 
             // Migração: Garantir que a tabela compra tem as colunas de dados do cliente
+            // Garantir que existe par de chaves RSA de 2048 bits (PEM Base64) configurado
+            // para assinatura AGT
+            try {
+                ConfiguracaoSistemaEntity cfgSys = configRepo.findById(1L).orElseGet(() -> {
+                    ConfiguracaoSistemaEntity newCfg = new ConfiguracaoSistemaEntity();
+                    return configRepo.save(newCfg);
+                });
+                if (cfgSys.getAgtPrivateKey() == null || cfgSys.getAgtPrivateKey().trim().isEmpty() ||
+                        !ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil
+                                .validarChaveRsa2048(cfgSys.getAgtPrivateKey())) {
+                    ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil.KeyPairResult kpr = ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil
+                            .gerarParChavesRsa2048();
+                    cfgSys.setAgtPrivateKey(kpr.getPrivateKeyPem());
+                    cfgSys.setAgtPublicKey(kpr.getPublicKeyPem());
+                    configRepo.save(cfgSys);
+                    System.out.println(
+                            ">>> AGT Compliance: Chave privada/pública RSA de 2048 bits (PEM/Base64) gerada e inicializada com sucesso.");
+                }
+
+                if (agtConfigRepo.count() == 0) {
+                    ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT defaultConfig = new ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT();
+                    defaultConfig.setEnvioAgtAtivo(true);
+                    defaultConfig.setModo("HOMOLOGACAO");
+                    defaultConfig.setUrlApi("https://portaldoparceiro.hml.minfin.gov.ao/api/v1/faturacao-electronica/registar");
+                    defaultConfig.setLimiteDocumentosDiarios(1000);
+                    defaultConfig.setDocumentosEnviadosHoje(0);
+                    agtConfigRepo.save(defaultConfig);
+                    System.out.println(">>> AGT Compliance: Configuração inicial da AGT (Modo Homologação, Envio Ativo) inicializada com sucesso.");
+                }
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao verificar/gerar par de chaves RSA 2048: " + e.getMessage());
+            }
             // (nomeCliente, nifCliente, moradaCliente, telefoneCliente, emailCliente)
             // Estas colunas são essenciais para a propagação dos dados do cliente no POS
             // para o PDF

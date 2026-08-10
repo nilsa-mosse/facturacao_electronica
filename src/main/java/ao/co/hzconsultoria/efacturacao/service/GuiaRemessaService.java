@@ -399,10 +399,26 @@ public class GuiaRemessaService {
                 doc.add(new Paragraph(" "));
                 
                 // Footer Fiscal Info
-                PdfPTable footerTable = new PdfPTable(1);
+                PdfPTable footerTable = new PdfPTable(2);
                 footerTable.setWidthPercentage(100);
+                footerTable.setWidths(new float[]{3f, 7f});
                 footerTable.setSpacingBefore(30);
                 
+                PdfPCell qrCell = new PdfPCell();
+                qrCell.setBorder(0);
+                qrCell.setBorderWidthTop(0.5f);
+                qrCell.setBorderColorTop(borderColor);
+                qrCell.setPaddingTop(10);
+                try {
+                    String nifEmp = configEmpresa != null && configEmpresa.getNif() != null ? configEmpresa.getNif() : "999999999";
+                    Image qr = ao.co.hzconsultoria.efacturacao.util.AgtQrCodeUtil.gerarQrCodeAgtPdfImage(nifEmp, guia.getNumeroGuia());
+                    if (qr != null) {
+                        qr.scaleToFit(55, 55);
+                        qrCell.addElement(qr);
+                    }
+                } catch (Exception ignored) {}
+                footerTable.addCell(qrCell);
+
                 PdfPCell fCell = new PdfPCell();
                 fCell.setBorder(0);
                 fCell.setBorderWidthTop(0.5f);

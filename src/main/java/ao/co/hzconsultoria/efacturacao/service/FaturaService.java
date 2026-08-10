@@ -275,6 +275,13 @@ public class FaturaService {
     }
 
     private Fatura processarEnvioAGT(Fatura fatura) {
+        // Gerar e imprimir o JSON AGT na consola independentemente do modo de envio
+        try {
+            agtService.imprimirJsonAgt(fatura);
+        } catch (Exception e) {
+            log.warn("Erro ao imprimir JSON AGT no log: {}", e.getMessage());
+        }
+
         boolean podeEnviar = true;
         String motivoNaoEnvio = "";
         java.util.List<ConfiguracaoAGT> configsAgt = configuracaoAGTRepository.findAll();
@@ -359,29 +366,14 @@ public class FaturaService {
     }
 
     private String assinarRSA(String dados, String privateKeyPem) {
-        if (privateKeyPem == null || privateKeyPem.isEmpty()) {
+        if (privateKeyPem == null || privateKeyPem.trim().isEmpty()) {
             log.warn("Chave privada RSA não configurada. Usando hash SHA-256 como fallback temporário.");
             return gerarHash(dados);
         }
         try {
-            // Remover cabeçalhos PEM
-            String privateKeyContent = privateKeyPem
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
-
-            byte[] pkcs8EncodedKey = Base64.getDecoder().decode(privateKeyContent);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            PrivateKey privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedKey));
-
-            Signature signature = Signature.getInstance("SHA1withRSA");
-            signature.initSign(privateKey);
-            signature.update(dados.getBytes());
-            byte[] signed = signature.sign();
-
-            return Base64.getEncoder().encodeToString(signed);
+            return ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil.assinar(dados, privateKeyPem);
         } catch (Exception e) {
-            log.error("Erro ao assinar com RSA: {}", e.getMessage());
+            log.error("Erro ao assinar com RSA 2048: {}", e.getMessage());
             return gerarHash(dados);
         }
     }
@@ -755,7 +747,8 @@ public class FaturaService {
                 PdfPCell qrCell = new PdfPCell();
                 qrCell.setBorder(0);
                 try {
-                    Image qr = gerarQrCode(fatura.getNumeroFatura() + "|" + fatura.getHash());
+                    String nifEmp = configEmpresa != null && configEmpresa.getNif() != null ? configEmpresa.getNif() : "999999999";
+                    Image qr = ao.co.hzconsultoria.efacturacao.util.AgtQrCodeUtil.gerarQrCodeAgtPdfImage(nifEmp, fatura.getNumeroFatura());
                     if (qr != null) {
                         qr.scaleToFit(60, 60);
                         qrCell.addElement(qr);
@@ -941,23 +934,8 @@ public class FaturaService {
         table.addCell(c);
     }
 
-    private Image gerarQrCode(String texto) {
-        try {
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(texto, BarcodeFormat.QR_CODE, 200, 200);
-            BufferedImage bufferedImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
-            for (int x = 0; x < 200; x++) {
-                for (int y = 0; y < 200; y++) {
-                    bufferedImage.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
-                }
-            }
-            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-            ImageIO.write(bufferedImage, "png", baos);
-            return Image.getInstance(baos.toByteArray());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    private Image gerarQrCode(String nifEmissor, String numeroDocumento) {
+        return ao.co.hzconsultoria.efacturacao.util.AgtQrCodeUtil.gerarQrCodeAgtPdfImage(nifEmissor, numeroDocumento);
     }
 
     public void gerarFatura(Carrinho carrinho) {
