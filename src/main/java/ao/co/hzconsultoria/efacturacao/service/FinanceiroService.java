@@ -22,7 +22,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
@@ -42,6 +44,9 @@ public class FinanceiroService {
 
     @Autowired
     private CompraRepository compraRepository;
+
+    @Autowired
+    private PdfTranslationService pdfTranslation;
 
     public List<MovimentacaoDTO> obterFluxoDeCaixa(LocalDate inicio, LocalDate fim) {
         List<MovimentacaoDTO> movimentacoes = new ArrayList<>();
@@ -103,6 +108,10 @@ public class FinanceiroService {
     }
 
     public void gerarPdfFluxoCaixa(List<MovimentacaoDTO> movs, LocalDate inicio, LocalDate fim, String filePath) throws Exception {
+        gerarPdfFluxoCaixa(movs, inicio, fim, filePath, LocaleContextHolder.getLocale());
+    }
+
+    public void gerarPdfFluxoCaixa(List<MovimentacaoDTO> movs, LocalDate inicio, LocalDate fim, String filePath, Locale locale) throws Exception {
         Document doc = new Document(PageSize.A4, 36, 36, 36, 36);
         PdfWriter.getInstance(doc, new FileOutputStream(filePath));
         doc.open();
@@ -138,16 +147,16 @@ public class FinanceiroService {
         PdfPCell leftCell = new PdfPCell();
         leftCell.setBorder(Rectangle.NO_BORDER);
         leftCell.addElement(new Paragraph("KWANZA ERP", brandFont));
-        leftCell.addElement(new Paragraph("Relatório de Fluxo de Caixa", titleFont));
+        leftCell.addElement(new Paragraph(pdfTranslation.t("pdf.financeiro.titulo", locale), titleFont));
         headerTable.addCell(leftCell);
 
         // Period info
         PdfPCell rightCell = new PdfPCell();
         rightCell.setBorder(Rectangle.NO_BORDER);
         rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        Paragraph p1 = new Paragraph("Período: " + inicio.format(dtf) + " até " + fim.format(dtf), infoFont);
+        Paragraph p1 = new Paragraph(pdfTranslation.t("pdf.financeiro.periodo", locale) + ": " + inicio.format(dtf) + " " + pdfTranslation.t("pdf.financeiro.ate", locale) + " " + fim.format(dtf), infoFont);
         p1.setAlignment(Element.ALIGN_RIGHT);
-        Paragraph p2 = new Paragraph("Emitido em: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), infoFont);
+        Paragraph p2 = new Paragraph(pdfTranslation.t("pdf.financeiro.emitido_em", locale) + ": " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), infoFont);
         p2.setAlignment(Element.ALIGN_RIGHT);
         rightCell.addElement(p1);
         rightCell.addElement(p2);
@@ -169,9 +178,9 @@ public class FinanceiroService {
         double totalOut = getTotalSaidas(movs);
         double saldo = totalIn - totalOut;
 
-        resumoTable.addCell(createSummaryCell("ENTRADAS (VENDAS)", "Kz " + String.format("%.2f", totalIn), new java.awt.Color(16, 185, 129))); // Success green
-        resumoTable.addCell(createSummaryCell("SAÍDAS (DESPESAS)", "Kz " + String.format("%.2f", totalOut), new java.awt.Color(239, 68, 68))); // Danger red
-        resumoTable.addCell(createSummaryCell("SALDO LÍQUIDO", "Kz " + String.format("%.2f", saldo), saldo >= 0 ? new java.awt.Color(67, 97, 238) : new java.awt.Color(239, 68, 68)));
+        resumoTable.addCell(createSummaryCell(pdfTranslation.t("pdf.financeiro.entradas", locale), "Kz " + String.format("%.2f", totalIn), new java.awt.Color(16, 185, 129)));
+        resumoTable.addCell(createSummaryCell(pdfTranslation.t("pdf.financeiro.saidas", locale), "Kz " + String.format("%.2f", totalOut), new java.awt.Color(239, 68, 68)));
+        resumoTable.addCell(createSummaryCell(pdfTranslation.t("pdf.financeiro.saldo", locale), "Kz " + String.format("%.2f", saldo), saldo >= 0 ? new java.awt.Color(67, 97, 238) : new java.awt.Color(239, 68, 68)));
         
         doc.add(resumoTable);
 
@@ -180,7 +189,13 @@ public class FinanceiroService {
         table.setWidthPercentage(100);
         table.setWidths(new float[] { 2.2f, 3.5f, 2f, 1.3f, 2f });
 
-        String[] headers = { "DATA", "DESCRIÇÃO", "CATEGORIA", "TIPO", "VALOR" };
+        String[] headers = {
+            pdfTranslation.t("pdf.financeiro.col.data", locale),
+            pdfTranslation.t("pdf.financeiro.col.descricao", locale),
+            pdfTranslation.t("pdf.financeiro.col.categoria", locale),
+            pdfTranslation.t("pdf.financeiro.col.tipo", locale),
+            pdfTranslation.t("pdf.financeiro.col.valor", locale)
+        };
         for (String h : headers) {
             PdfPCell c = new PdfPCell(new Phrase(h, headerFont));
             c.setBackgroundColor(new java.awt.Color(67, 97, 238));
@@ -216,7 +231,9 @@ public class FinanceiroService {
             table.addCell(catCell);
 
             // Tipo
-            String tipoText = "ENTRADA".equals(m.getTipo()) ? "ENTRADA" : "SAÍDA";
+            String tipoText = "ENTRADA".equals(m.getTipo())
+                ? pdfTranslation.t("pdf.financeiro.tipo.entrada", locale)
+                : pdfTranslation.t("pdf.financeiro.tipo.saida", locale);
             PdfPCell tipoCell = new PdfPCell(new Phrase(tipoText, cellFontBold));
             tipoCell.setPadding(7f);
             tipoCell.setBorderColor(borderColor);

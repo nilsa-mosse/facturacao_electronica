@@ -35,7 +35,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.stream.Collectors;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @Service
 public class GuiaRemessaService {
@@ -54,6 +56,9 @@ public class GuiaRemessaService {
 
     @Autowired
     private ProdutoRepository produtoRepository;
+
+    @Autowired
+    private PdfTranslationService pdfTranslation;
 
     private static final Logger log = LoggerFactory.getLogger(GuiaRemessaService.class);
 
@@ -156,7 +161,14 @@ public class GuiaRemessaService {
         
         guiaRemessaRepository.save(guia);
         log.info("Guia {} salva com {} itens.", guia.getNumeroGuia(), guia.getItens() != null ? guia.getItens().size() : 0);
-        gerarPdfGuia(guia);
+        gerarPdfGuia(guia, LocaleContextHolder.getLocale());
+    }
+
+    public void salvarComLocale(GuiaRemessa guia, Locale locale) {
+        // Delegar para salvar() mas sobrepor com o locale fornecido explicitamente
+        guiaRemessaRepository.save(guia);
+        log.info("Guia {} salva com locale {} explícito.", guia.getNumeroGuia(), locale);
+        gerarPdfGuia(guia, locale);
     }
 
     private void comunicarAGT(GuiaRemessa guia) {
@@ -190,22 +202,25 @@ public class GuiaRemessaService {
     }
 
     private void gerarPdfGuia(GuiaRemessa guia) {
+        gerarPdfGuia(guia, new Locale("pt"));
+    }
+
+    public void gerarPdfGuia(GuiaRemessa guia, Locale locale) {
         try {
-            // Salva em ./uploads/guias (pasta externa)
             File dir = new File("./uploads/guias");
             if (!dir.exists()) dir.mkdirs();
 
             String filePath = "./uploads/guias/" + guia.getNumeroGuia() + ".pdf";
 
             log.info("Iniciando geração de PDF para guia {} -> {}", guia.getNumeroGuia(), filePath);
-            gerarPdf(filePath, guia);
+            gerarPdf(filePath, guia, locale);
             log.info("PDF da Guia gerado em: {}", filePath);
         } catch (Exception e) {
             log.error("Erro crítico ao gerar PDF da Guia {}: ", guia.getNumeroGuia(), e);
         }
     }
 
-    private void gerarPdf(String filePath, GuiaRemessa guia) throws Exception {
+    private void gerarPdf(String filePath, GuiaRemessa guia, Locale locale) throws Exception {
         Path finalPath = Paths.get(filePath).toAbsolutePath().normalize();
         Path tempPath = Paths.get(filePath + ".tmp").toAbsolutePath().normalize();
 
@@ -258,7 +273,7 @@ public class GuiaRemessaService {
 
                 PdfPCell titleCell = new PdfPCell();
                 titleCell.setBorder(0);
-                titleCell.addElement(new Phrase("GUIA DE REMESSA", fontTitle));
+                titleCell.addElement(new Phrase(pdfTranslation.t("pdf.guia.titulo", locale), fontTitle));
                 titleCell.addElement(new Paragraph(guia.getNumeroGuia(), fontSubtitle));
                 mainHeader.addCell(titleCell);
 
@@ -307,21 +322,21 @@ public class GuiaRemessaService {
                 PdfPCell cellDe = new PdfPCell();
                 cellDe.setBorder(0);
                 cellDe.setPaddingRight(20);
-                cellDe.addElement(new Paragraph("DE:", small));
+                cellDe.addElement(new Paragraph(pdfTranslation.t("pdf.guia.de", locale), small));
                 cellDe.addElement(new Paragraph(configEmpresa.getNome(), bold));
                 cellDe.addElement(new Paragraph(configEmpresa.getEndereco(), normal));
-                cellDe.addElement(new Paragraph("NIF: " + configEmpresa.getNif(), normal));
+                cellDe.addElement(new Paragraph(pdfTranslation.t("pdf.guia.nif", locale) + " " + configEmpresa.getNif(), normal));
                 infoTable.addCell(cellDe);
 
                 // Meta (Doc info)
                 PdfPCell cellMeta = new PdfPCell();
                 cellMeta.setBorder(0);
-                cellMeta.addElement(new Paragraph("PARA:", small));
-                cellMeta.addElement(new Paragraph(guia.getCliente() != null ? guia.getCliente().getNome() : "Consumidor Final", bold));
-                cellMeta.addElement(new Paragraph("NIF: " + (guia.getCliente() != null ? guia.getCliente().getNif() : "999999999"), normal));
+                cellMeta.addElement(new Paragraph(pdfTranslation.t("pdf.guia.para", locale), small));
+                cellMeta.addElement(new Paragraph(guia.getCliente() != null ? guia.getCliente().getNome() : pdfTranslation.t("pdf.guia.consumidor_final", locale), bold));
+                cellMeta.addElement(new Paragraph(pdfTranslation.t("pdf.guia.nif", locale) + " " + (guia.getCliente() != null ? guia.getCliente().getNif() : "999999999"), normal));
                 
                 String dataDoc = guia.getDataEmissao() != null ? guia.getDataEmissao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "-";
-                cellMeta.addElement(new Paragraph("DATA EMISSÃO: " + dataDoc, normal));
+                cellMeta.addElement(new Paragraph(pdfTranslation.t("pdf.guia.data_emissao", locale) + " " + dataDoc, normal));
                 infoTable.addCell(cellMeta);
                 
                 doc.add(infoTable);
@@ -330,7 +345,7 @@ public class GuiaRemessaService {
                 // Transportation Details
                 PdfPTable transportTable = new PdfPTable(1);
                 transportTable.setWidthPercentage(100);
-                PdfPCell transHeader = new PdfPCell(new Phrase("DETALHES DE TRANSPORTE", fontSubtitle));
+                PdfPCell transHeader = new PdfPCell(new Phrase(pdfTranslation.t("pdf.guia.detalhes_transporte", locale), fontSubtitle));
                 transHeader.setBackgroundColor(lightGrayBg);
                 transHeader.setBorderColor(borderColor);
                 transHeader.setPadding(8);
@@ -347,10 +362,10 @@ public class GuiaRemessaService {
                 
                 PdfPTable tInner = new PdfPTable(2);
                 tInner.setWidthPercentage(100);
-                addTransportRow(tInner, "ORIGEM:", origem, small, normal);
-                addTransportRow(tInner, "DESTINO:", destino, small, normal);
-                addTransportRow(tInner, "VIATURA:", viatura, small, normal);
-                addTransportRow(tInner, "MOTORISTA:", motorista, small, normal);
+                addTransportRow(tInner, pdfTranslation.t("pdf.guia.origem", locale), origem, small, normal);
+                addTransportRow(tInner, pdfTranslation.t("pdf.guia.destino", locale), destino, small, normal);
+                addTransportRow(tInner, pdfTranslation.t("pdf.guia.viatura", locale), viatura, small, normal);
+                addTransportRow(tInner, pdfTranslation.t("pdf.guia.motorista", locale), motorista, small, normal);
                 
                 transBody.addElement(tInner);
                 transportTable.addCell(transBody);
@@ -361,7 +376,7 @@ public class GuiaRemessaService {
                 PdfPTable itemsTable = new PdfPTable(new float[] { 6, 2, 2 });
                 itemsTable.setWidthPercentage(100);
                 
-                String[] headers = { "ARTIGO / DESIGNAÇÃO", "QTD", "UNIDADE" };
+                String[] headers = { pdfTranslation.t("pdf.guia.col.artigo", locale), pdfTranslation.t("pdf.guia.col.qtd", locale), pdfTranslation.t("pdf.guia.col.unidade", locale) };
                 for (String h : headers) {
                     PdfPCell c = new PdfPCell(new Phrase(h, tableHeaderFont));
                     c.setBackgroundColor(primaryColor);
@@ -395,11 +410,11 @@ public class GuiaRemessaService {
                 fCell.setPaddingTop(10);
                 
                 if (guia.getCodigoValidacao() != null) {
-                    fCell.addElement(new Paragraph("CÓDIGO DE VALIDAÇÃO AGT: " + guia.getCodigoValidacao(), smallBold));
+                    fCell.addElement(new Paragraph(pdfTranslation.t("pdf.guia.codigo_agt", locale) + " " + guia.getCodigoValidacao(), smallBold));
                     String miniHash = guia.getHashAgt() != null ? guia.getHashAgt() : "-";
-                    fCell.addElement(new Paragraph("HASH: " + miniHash, small));
+                    fCell.addElement(new Paragraph(pdfTranslation.t("pdf.guia.hash", locale) + " " + miniHash, small));
                 }
-                fCell.addElement(new Paragraph("Os bens foram colocados à disposição na data do documento.", small));
+                fCell.addElement(new Paragraph(pdfTranslation.t("pdf.guia.bens_disponiveis", locale), small));
                 footerTable.addCell(fCell);
                 doc.add(footerTable);
 

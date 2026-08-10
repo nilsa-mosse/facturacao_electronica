@@ -17,7 +17,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @Service
 public class FolhaSalarioService {
@@ -42,6 +44,9 @@ public class FolhaSalarioService {
 
     @Autowired
     private EscalaoIrtRepository escalaoIrtRepository;
+
+    @Autowired
+    private PdfTranslationService pdfTranslation;
 
     private static final DecimalFormat DF = new DecimalFormat("#,##0.00");
 
@@ -235,6 +240,10 @@ public class FolhaSalarioService {
     }
 
     public byte[] gerarReciboPdf(Long salarioId) throws Exception {
+        return gerarReciboPdf(salarioId, LocaleContextHolder.getLocale());
+    }
+
+    public byte[] gerarReciboPdf(Long salarioId, Locale locale) throws Exception {
         SalarioProcessado sp = salarioRepository.findById(salarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Registo de salário não encontrado"));
 
@@ -283,12 +292,12 @@ public class FolhaSalarioService {
         recCell.setBorderColor(priBorder);
         recCell.setPadding(8f);
         
-        Paragraph pRecTitle = new Paragraph("RECIBO DE VENCIMENTO", titleFont);
+        Paragraph pRecTitle = new Paragraph(pdfTranslation.t("pdf.recibo.titulo", locale), titleFont);
         pRecTitle.setSpacingAfter(4f);
         recCell.addElement(pRecTitle);
-        recCell.addElement(new Paragraph("Período de Processamento: " + String.format("%02d/%d", sp.getFolhaProcessamento().getMes(), sp.getFolhaProcessamento().getAno()), valBold));
-        recCell.addElement(new Paragraph("Data de Emissão: " + LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), valFont));
-        recCell.addElement(new Paragraph("Via: Original", valFont));
+        recCell.addElement(new Paragraph(pdfTranslation.t("pdf.recibo.periodo", locale) + " " + String.format("%02d/%d", sp.getFolhaProcessamento().getMes(), sp.getFolhaProcessamento().getAno()), valBold));
+        recCell.addElement(new Paragraph(pdfTranslation.t("pdf.recibo.data_emissao", locale) + " " + LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), valFont));
+        recCell.addElement(new Paragraph(pdfTranslation.t("pdf.recibo.via", locale), valFont));
         headerTable.addCell(recCell);
 
         document.add(headerTable);
@@ -302,15 +311,15 @@ public class FolhaSalarioService {
         workerTable.setWidthPercentage(100f);
         workerTable.setWidths(new float[]{1.5f, 4.5f, 2f, 2f});
 
-        workerTable.addCell(createPrimaveraCell("Cód. Trab.", String.valueOf(col.getId()), labelFont, valBold, priBorder));
-        workerTable.addCell(createPrimaveraCell("Nome do Trabalhador", col.getNome(), labelFont, valBold, priBorder));
-        workerTable.addCell(createPrimaveraCell("N.º Contr. (NIF)", col.getNif(), labelFont, valFont, priBorder));
-        workerTable.addCell(createPrimaveraCell("N.º Seg. Social", col.getNif() != null && col.getNif().length() > 8 ? "SS-" + col.getNif().substring(0, 8) : "-", labelFont, valFont, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.cod_trabalhador", locale), String.valueOf(col.getId()), labelFont, valBold, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.nome_trabalhador", locale), col.getNome(), labelFont, valBold, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.nif", locale), col.getNif(), labelFont, valFont, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.seg_social", locale), col.getNif() != null && col.getNif().length() > 8 ? "SS-" + col.getNif().substring(0, 8) : "-", labelFont, valFont, priBorder));
 
-        workerTable.addCell(createPrimaveraCell("Categoria / Cargo", col.getCargo(), labelFont, valFont, priBorder));
-        workerTable.addCell(createPrimaveraCell("Secção / Depto.", col.getDepartamento() != null ? col.getDepartamento().getNome() : "-", labelFont, valFont, priBorder));
-        workerTable.addCell(createPrimaveraCell("Data Admissão", col.getDataAdmissao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), labelFont, valFont, priBorder));
-        workerTable.addCell(createPrimaveraCell("IBAN para Pagamento", col.getIban() != null && !col.getIban().isEmpty() ? col.getIban() : "Não indicado", labelFont, valFont, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.cargo", locale), col.getCargo(), labelFont, valFont, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.departamento", locale), col.getDepartamento() != null ? col.getDepartamento().getNome() : "-", labelFont, valFont, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.data_admissao", locale), col.getDataAdmissao().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), labelFont, valFont, priBorder));
+        workerTable.addCell(createPrimaveraCell(pdfTranslation.t("pdf.recibo.iban", locale), col.getIban() != null && !col.getIban().isEmpty() ? col.getIban() : pdfTranslation.t("pdf.recibo.iban_nao_indicado", locale), labelFont, valFont, priBorder));
 
         document.add(workerTable);
         document.add(spacer);
@@ -320,7 +329,7 @@ public class FolhaSalarioService {
         table.setWidthPercentage(100f);
         table.setWidths(new float[]{1f, 4.5f, 1.5f, 1.5f, 1.5f});
 
-        String[] headers = {"Cód.", "Descrição", "Quant./Dias", "Abonos (Kz)", "Descontos (Kz)"};
+        String[] headers = {pdfTranslation.t("pdf.recibo.col.cod", locale), pdfTranslation.t("pdf.recibo.col.descricao", locale), pdfTranslation.t("pdf.recibo.col.dias", locale), pdfTranslation.t("pdf.recibo.col.abonos", locale), pdfTranslation.t("pdf.recibo.col.descontos", locale)};
         for (String header : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(header, headerFont));
             cell.setBackgroundColor(priBlue);
@@ -328,14 +337,14 @@ public class FolhaSalarioService {
             cell.setBorderColor(priBlue);
             if (header.contains("Kz")) {
                 cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            } else if (header.equals("Quant./Dias") || header.equals("Cód.")) {
+            } else if (header.equals(pdfTranslation.t("pdf.recibo.col.dias", locale)) || header.equals(pdfTranslation.t("pdf.recibo.col.cod", locale))) {
                 cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             }
             table.addCell(cell);
         }
 
         // Adicionar Linhas de Movimentos
-        addPrimaveraRow(table, "100", "Salário Base", "30", sp.getSalarioBase(), 0.0, valFont, priBorder);
+        addPrimaveraRow(table, "100", pdfTranslation.t("pdf.recibo.salario_base", locale), "30", sp.getSalarioBase(), 0.0, valFont, priBorder);
         
         // Subsídios dinâmicos
         for (SalarioProcessadoSubsidio sps : sp.getSubsidios()) {
@@ -346,16 +355,16 @@ public class FolhaSalarioService {
         }
 
         if (sp.getSubsidioFerias() > 0) {
-            addPrimaveraRow(table, "103", "Subsídio de Férias", "1", sp.getSubsidioFerias(), 0.0, valFont, priBorder);
+            addPrimaveraRow(table, "103", pdfTranslation.t("pdf.recibo.subsidio_ferias", locale), "1", sp.getSubsidioFerias(), 0.0, valFont, priBorder);
         }
         if (sp.getSubsidioNatal() > 0) {
-            addPrimaveraRow(table, "104", "Subsídio de Natal", "1", sp.getSubsidioNatal(), 0.0, valFont, priBorder);
+            addPrimaveraRow(table, "104", pdfTranslation.t("pdf.recibo.subsidio_natal", locale), "1", sp.getSubsidioNatal(), 0.0, valFont, priBorder);
         }
 
         // Descontos
-        addPrimaveraRow(table, "500", "Segurança Social (Desconto 3%)", "-", 0.0, sp.getDescontoSegurancaSocial(), valFont, priBorder);
+        addPrimaveraRow(table, "500", pdfTranslation.t("pdf.recibo.desc_inss", locale), "-", 0.0, sp.getDescontoSegurancaSocial(), valFont, priBorder);
         if (sp.getDescontoIrt() > 0) {
-            addPrimaveraRow(table, "501", "I.R.T. (Imposto de Trabalho)", "-", 0.0, sp.getDescontoIrt(), valFont, priBorder);
+            addPrimaveraRow(table, "501", pdfTranslation.t("pdf.recibo.desc_irt", locale), "-", 0.0, sp.getDescontoIrt(), valFont, priBorder);
         }
 
         // Adicionar Linhas Vazias de preenchimento para simular o estilo Primavera (pelo menos 12 linhas no total)
@@ -380,7 +389,7 @@ public class FolhaSalarioService {
         cAb.setBorder(Rectangle.BOX);
         cAb.setBorderColor(priBorder);
         cAb.setPadding(6f);
-        cAb.addElement(new Paragraph("TOTAL ABONOS", labelFont));
+        cAb.addElement(new Paragraph(pdfTranslation.t("pdf.recibo.total_abonos", locale), labelFont));
         Paragraph pAbVal = new Paragraph("Kz " + DF.format(sp.getRendimentoIliquido()), valBold);
         pAbVal.setAlignment(Element.ALIGN_RIGHT);
         cAb.addElement(pAbVal);
@@ -391,7 +400,7 @@ public class FolhaSalarioService {
         cDsc.setBorder(Rectangle.BOX);
         cDsc.setBorderColor(priBorder);
         cDsc.setPadding(6f);
-        cDsc.addElement(new Paragraph("TOTAL DESCONTOS", labelFont));
+        cDsc.addElement(new Paragraph(pdfTranslation.t("pdf.recibo.total_descontos", locale), labelFont));
         Paragraph pDescVal = new Paragraph("Kz " + DF.format(sp.getDescontoSegurancaSocial() + sp.getDescontoIrt()), valBold);
         pDescVal.setAlignment(Element.ALIGN_RIGHT);
         cDsc.addElement(pDescVal);
@@ -403,7 +412,7 @@ public class FolhaSalarioService {
         cLiq.setBorderColor(priBorder);
         cLiq.setBackgroundColor(priBgLight);
         cLiq.setPadding(6f);
-        cLiq.addElement(new Paragraph("LÍQUIDO A RECEBER", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, priBlue)));
+        cLiq.addElement(new Paragraph(pdfTranslation.t("pdf.recibo.liquido", locale), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, priBlue)));
         Paragraph pLiqVal = new Paragraph("Kz " + DF.format(sp.getSalarioLiquido()), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, priBlue));
         pLiqVal.setAlignment(Element.ALIGN_RIGHT);
         cLiq.addElement(pLiqVal);
@@ -422,15 +431,15 @@ public class FolhaSalarioService {
 
         PdfPCell statementCell = new PdfPCell();
         statementCell.setBorder(Rectangle.NO_BORDER);
-        Paragraph pStatement = new Paragraph("Declaro ter recebido a importância líquida acima referida.", FontFactory.getFont(FontFactory.HELVETICA, 7, new java.awt.Color(80, 80, 80)));
+        Paragraph pStatement = new Paragraph(pdfTranslation.t("pdf.recibo.declaracao", locale), FontFactory.getFont(FontFactory.HELVETICA, 7, new java.awt.Color(80, 80, 80)));
         statementCell.addElement(pStatement);
-        statementCell.addElement(new Paragraph("\nData: ____/____/________", FontFactory.getFont(FontFactory.HELVETICA, 8, new java.awt.Color(80, 80, 80))));
+        statementCell.addElement(new Paragraph("\n" + pdfTranslation.t("pdf.recibo.data_assinatura", locale), FontFactory.getFont(FontFactory.HELVETICA, 8, new java.awt.Color(80, 80, 80))));
         footTable.addCell(statementCell);
 
         PdfPCell signatureCell = new PdfPCell();
         signatureCell.setBorder(Rectangle.NO_BORDER);
         signatureCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        Paragraph pSignLine = new Paragraph("\n\n_____________________________________\nAssinatura do Trabalhador", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, new java.awt.Color(80, 80, 80)));
+        Paragraph pSignLine = new Paragraph("\n\n_____________________________________\n" + pdfTranslation.t("pdf.recibo.assinatura", locale), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, new java.awt.Color(80, 80, 80)));
         pSignLine.setAlignment(Element.ALIGN_CENTER);
         footTable.addCell(signatureCell);
 
@@ -586,6 +595,10 @@ public class FolhaSalarioService {
     }
 
     public byte[] gerarGuiaIrtPdf(Long folhaId) throws Exception {
+        return gerarGuiaIrtPdf(folhaId, LocaleContextHolder.getLocale());
+    }
+
+    public byte[] gerarGuiaIrtPdf(Long folhaId, Locale locale) throws Exception {
         FolhaProcessamento folha = folhaRepository.findById(folhaId)
                 .orElseThrow(() -> new IllegalArgumentException("Folha não encontrada"));
 
@@ -629,8 +642,8 @@ public class FolhaSalarioService {
 
         PdfPCell leftCell = new PdfPCell();
         leftCell.setBorder(Rectangle.NO_BORDER);
-        leftCell.addElement(new Paragraph("GUIA DE RETENÇÃO NA FONTE - IRT", brandFont));
-        leftCell.addElement(new Paragraph("Administração Geral Tributária (AGT)\nAngola", subtitleFont));
+        leftCell.addElement(new Paragraph(pdfTranslation.t("pdf.irt.titulo", locale), brandFont));
+        leftCell.addElement(new Paragraph(pdfTranslation.t("pdf.irt.subtitulo", locale), subtitleFont));
         headerTable.addCell(leftCell);
 
         PdfPCell rightCell = new PdfPCell();
@@ -652,10 +665,10 @@ public class FolhaSalarioService {
         detailsTable.setWidthPercentage(100f);
         detailsTable.setSpacingAfter(20f);
 
-        detailsTable.addCell(createWorkerInfoCell("Período Fiscal:", String.format("%02d/%d", folha.getMes(), folha.getAno()), normalBold, normalFont));
-        detailsTable.addCell(createWorkerInfoCell("Imposto:", "IRT - Rendimento de Trabalho (Conta Outrem)", normalBold, normalFont));
-        detailsTable.addCell(createWorkerInfoCell("Nº de Trabalhadores:", String.valueOf(numTrabalhadores), normalBold, normalFont));
-        detailsTable.addCell(createWorkerInfoCell("Data de Retenção:", folha.getDataProcessamento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), normalBold, normalFont));
+        detailsTable.addCell(createWorkerInfoCell(pdfTranslation.t("pdf.irt.periodo_fiscal", locale), String.format("%02d/%d", folha.getMes(), folha.getAno()), normalBold, normalFont));
+        detailsTable.addCell(createWorkerInfoCell(pdfTranslation.t("pdf.irt.imposto", locale), pdfTranslation.t("pdf.irt.imposto_valor", locale), normalBold, normalFont));
+        detailsTable.addCell(createWorkerInfoCell(pdfTranslation.t("pdf.irt.num_trabalhadores", locale), String.valueOf(numTrabalhadores), normalBold, normalFont));
+        detailsTable.addCell(createWorkerInfoCell(pdfTranslation.t("pdf.irt.data_retencao", locale), folha.getDataProcessamento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), normalBold, normalFont));
 
         document.add(detailsTable);
 
@@ -665,8 +678,8 @@ public class FolhaSalarioService {
         valuesTable.setWidths(new float[]{7f, 3f});
         valuesTable.setSpacingAfter(25f);
 
-        addValueRow(valuesTable, "Total Matéria Coletável:", "Kz " + DF.format(totalMateriaColetavel), normalFont, false);
-        addValueRow(valuesTable, "Total Imposto Retido (IRT a Pagar):", "Kz " + DF.format(totalIrt), normalBold, true);
+        addValueRow(valuesTable, pdfTranslation.t("pdf.irt.materia_coletavel", locale), "Kz " + DF.format(totalMateriaColetavel), normalFont, false);
+        addValueRow(valuesTable, pdfTranslation.t("pdf.irt.imposto_retido", locale), "Kz " + DF.format(totalIrt), normalBold, true);
 
         document.add(valuesTable);
 
@@ -680,10 +693,8 @@ public class FolhaSalarioService {
         infoCell.setBorderColor(new java.awt.Color(217, 119, 6));
         infoCell.setBorderWidth(1f);
         
-        Paragraph infoTitle = new Paragraph("INSTRUÇÕES DE PAGAMENTO", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, new java.awt.Color(180, 83, 9)));
-        Paragraph infoText = new Paragraph("Esta guia deve ser liquidada junto dos bancos comerciais autorizados ou via Portal do Contribuinte da AGT até ao final do mês seguinte ao do processamento dos salários.\n\n" +
-                "Código do Imposto: 1040 - IRT Retenção na Fonte\n" +
-                "A presente guia serve de comprovativo para fins de preenchimento do Modelo 2 do IRT.", normalFont);
+        Paragraph infoTitle = new Paragraph(pdfTranslation.t("pdf.irt.instrucoes_titulo", locale), FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, new java.awt.Color(180, 83, 9)));
+        Paragraph infoText = new Paragraph(pdfTranslation.t("pdf.irt.instrucoes_texto", locale), normalFont);
         
         infoCell.addElement(infoTitle);
         infoCell.addElement(infoText);

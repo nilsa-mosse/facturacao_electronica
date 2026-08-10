@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @Service
 public class DevolucaoService {
@@ -118,7 +119,7 @@ public class DevolucaoService {
             devolucaoRepository.save(salva);
             
             // AGORA SIM, com o vínculo salvo no banco, geramos o PDF
-            faturaService.gerarPdfFatura(nc);
+            faturaService.gerarPdfFatura(nc, LocaleContextHolder.getLocale());
         }
 
         return salva;

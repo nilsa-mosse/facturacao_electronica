@@ -45,7 +45,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Map;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -87,6 +89,9 @@ public class FaturaService {
 
     @Autowired
     private DynamicMailService dynamicMailService;
+
+    @Autowired
+    private PdfTranslationService pdfTranslation;
 
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
@@ -192,7 +197,7 @@ public class FaturaService {
         // Enviar a AGT (FR deve ser comunicado)
         faturaSalva = processarEnvioAGT(faturaSalva);
         faturaSalva = faturaRepository.saveAndFlush(faturaSalva);
-        gerarPdfFatura(faturaSalva);
+        gerarPdfFatura(faturaSalva, LocaleContextHolder.getLocale());
         return faturaSalva;
     }
 
@@ -265,7 +270,7 @@ public class FaturaService {
 
         // Actualizar estado final na BD
         faturaSalva = faturaRepository.saveAndFlush(faturaSalva);
-        gerarPdfFatura(faturaSalva);
+        gerarPdfFatura(faturaSalva, LocaleContextHolder.getLocale());
         return faturaSalva;
     }
 
@@ -335,7 +340,7 @@ public class FaturaService {
         Fatura processada = processarEnvioAGT(fatura);
         processada = faturaRepository.save(processada);
         if (processada.isEnviadaAGT()) {
-            gerarPdfFatura(processada);
+            gerarPdfFatura(processada, LocaleContextHolder.getLocale());
         }
         return processada;
     }
@@ -396,6 +401,10 @@ public class FaturaService {
     }
 
     public void gerarPdfFatura(Fatura fatura) {
+        gerarPdfFatura(fatura, new Locale("pt"));
+    }
+
+    public void gerarPdfFatura(Fatura fatura, Locale locale) {
         try {
             // Salva em ./uploads/faturas (pasta externa, acessível via /uploads/faturas/**)
             File dir = new File("./uploads/faturas");
@@ -405,8 +414,7 @@ public class FaturaService {
             String filePath = "./uploads/faturas/" + fatura.getNumeroFatura() + ".pdf";
 
             log.info("Iniciando geração de PDF para fatura {} -> {}", fatura.getNumeroFatura(), filePath);
-            // Gera o PDF no local externo (usando escrita atômica)
-            gerarPdf(filePath, fatura);
+            gerarPdf(filePath, fatura, locale);
             log.info("PDF da fatura gerado em: {}", filePath);
         } catch (Exception e) {
             log.error("Erro ao gerar PDF da fatura: {}", e.getMessage());
@@ -414,7 +422,7 @@ public class FaturaService {
         }
     }
 
-    private void gerarPdf(String filePath, Fatura fatura) throws Exception {
+    private void gerarPdf(String filePath, Fatura fatura, Locale locale) throws Exception {
         // Use a temp file and then move it into place to avoid partially-written files
         // being served
         Path finalPath = Paths.get(filePath).toAbsolutePath().normalize();
@@ -489,20 +497,18 @@ public class FaturaService {
                 mainHeader.setWidthPercentage(100);
                 mainHeader.setWidths(new float[] { 7, 3 });
 
-                String tituloDocumento = "FACTURA";
-                if ("FP".equals(fatura.getTipoDocumento())) {
-                    tituloDocumento = "FACTURA PRÓ-FORMA";
-                } else if ("FR".equals(fatura.getTipoDocumento())) {
-                    tituloDocumento = "FACTURA RECIBO";
-                } else if ("NC".equals(fatura.getTipoDocumento())) {
-                    tituloDocumento = "NOTA DE CRÉDITO";
-                } else if ("ND".equals(fatura.getTipoDocumento())) {
-                    tituloDocumento = "NOTA DE DÉBITO";
+                String tituloDocumento;
+                switch (fatura.getTipoDocumento() != null ? fatura.getTipoDocumento() : "FT") {
+                    case "FP": tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.fp", locale); break;
+                    case "FR": tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.fr", locale); break;
+                    case "NC": tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.nc", locale); break;
+                    case "ND": tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.nd", locale); break;
+                    default:   tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.ft", locale); break;
                 }
 
                 if ("ANULADA".equalsIgnoreCase(fatura.getStatus()) || "CANCELADA".equalsIgnoreCase(fatura.getStatus())
                         || "A".equalsIgnoreCase(fatura.getInvoiceStatus())) {
-                    tituloDocumento += " (ANULADA)";
+                    tituloDocumento += " " + pdfTranslation.t("pdf.fatura.anulada", locale);
                 }
 
                 PdfPCell titleCell = new PdfPCell();
@@ -558,7 +564,7 @@ public class FaturaService {
                 PdfPCell myInfoCell = new PdfPCell();
                 myInfoCell.setBorder(0);
                 myInfoCell.setPaddingRight(20);
-                myInfoCell.addElement(new Paragraph("DE:", smallFont));
+                myInfoCell.addElement(new Paragraph(pdfTranslation.t("pdf.fatura.de", locale), smallFont));
                 myInfoCell.addElement(new Paragraph(configEmpresa.getNome(), bold));
                 myInfoCell.addElement(new Paragraph(
                         configEmpresa.getEndereco() != null ? configEmpresa.getEndereco() : "Angola", normal));
@@ -574,13 +580,13 @@ public class FaturaService {
                 if (c != null && c.getId() != null) {
                     c = compraRepository.findById(c.getId()).orElse(c);
                 }
-                String nomeCli = c != null && c.getNomeCliente() != null ? c.getNomeCliente() : "Consumidor Final";
+                String nomeCli = c != null && c.getNomeCliente() != null ? c.getNomeCliente() : pdfTranslation.t("pdf.fatura.consumidor_final", locale);
                 String nifCli = c != null && c.getNifCliente() != null ? c.getNifCliente() : "999999999";
                 String endCli = c != null && c.getMoradaCliente() != null ? c.getMoradaCliente() : "";
 
                 PdfPCell billToCell = new PdfPCell();
                 billToCell.setBorder(0);
-                billToCell.addElement(new Paragraph("FACTURADO A:", smallFont));
+                billToCell.addElement(new Paragraph(pdfTranslation.t("pdf.fatura.facturado_a", locale), smallFont));
                 billToCell.addElement(new Paragraph(nomeCli, bold));
                 billToCell.addElement(new Paragraph("NIF: " + nifCli, normal));
                 if (!endCli.isEmpty())
@@ -596,17 +602,17 @@ public class FaturaService {
                 metaBar.setSpacingBefore(10);
                 metaBar.setSpacingAfter(10);
 
-                addMetaCell(metaBar, "DATA DE EMISSÃO",
+                addMetaCell(metaBar, pdfTranslation.t("pdf.fatura.data_emissao", locale),
                         fatura.getDataEmissao() != null
                                 ? new SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao())
                                 : "-",
                         smallFont, bold, lightGrayBg);
-                addMetaCell(metaBar, "DATA DE VENCIMENTO",
+                addMetaCell(metaBar, pdfTranslation.t("pdf.fatura.data_vencimento", locale),
                         fatura.getDataEmissao() != null
                                 ? new SimpleDateFormat("dd/MM/yyyy").format(fatura.getDataEmissao())
                                 : "-",
                         smallFont, bold, lightGrayBg);
-                addMetaCell(metaBar, "MOEDA", "AOA (Kwanza)", smallFont, bold, lightGrayBg);
+                addMetaCell(metaBar, pdfTranslation.t("pdf.fatura.moeda", locale), "AOA (Kwanza)", smallFont, bold, lightGrayBg);
 
                 String refDoc = "N/A";
                 if (fatura.getCompra() != null && fatura.getCompra().getFaturaReferencia() != null) {
@@ -615,36 +621,22 @@ public class FaturaService {
                     refDoc = !faturasOrig.isEmpty() ? faturasOrig.get(0).getNumeroFatura()
                             : "#" + fatura.getCompra().getFaturaReferencia().getId();
                 }
-                addMetaCell(metaBar, "DOC. REFERÊNCIA", refDoc, smallFont, bold, lightGrayBg);
+                addMetaCell(metaBar, pdfTranslation.t("pdf.fatura.doc_referencia", locale), refDoc, smallFont, bold, lightGrayBg);
 
-                String estadoDoc = "NORMAL";
+                String estadoDoc = fatura.getStatus() != null ? fatura.getStatus().toUpperCase() : "NORMAL";
                 if (fatura.getStatus() != null) {
                     switch (fatura.getStatus().toUpperCase()) {
-                        case "VALIDADA":
-                            estadoDoc = "VALIDADA";
-                            break;
+                        case "VALIDADA":          estadoDoc = pdfTranslation.t("pdf.fatura.estado.validada", locale); break;
                         case "ANULADA":
-                        case "CANCELADA":
-                            estadoDoc = "ANULADA";
-                            break;
-                        case "PAGA":
-                            estadoDoc = "PAGA";
-                            break;
-                        case "PARCIALMENTE_PAGA":
-                            estadoDoc = "PAGA PARCIAL";
-                            break;
-                        case "EMITIDA_OFFLINE":
-                            estadoDoc = "OFFLINE";
-                            break;
-                        case "FALHA_ENVIO":
-                            estadoDoc = "FALHA ENVIO";
-                            break;
-                        default:
-                            estadoDoc = fatura.getStatus().toUpperCase();
-                            break;
+                        case "CANCELADA":         estadoDoc = pdfTranslation.t("pdf.fatura.estado.anulada", locale); break;
+                        case "PAGA":              estadoDoc = pdfTranslation.t("pdf.fatura.estado.paga", locale); break;
+                        case "PARCIALMENTE_PAGA": estadoDoc = pdfTranslation.t("pdf.fatura.estado.paga_parcial", locale); break;
+                        case "EMITIDA_OFFLINE":   estadoDoc = pdfTranslation.t("pdf.fatura.estado.offline", locale); break;
+                        case "FALHA_ENVIO":        estadoDoc = pdfTranslation.t("pdf.fatura.estado.falha_envio", locale); break;
+                        default:                  estadoDoc = fatura.getStatus().toUpperCase(); break;
                     }
                 }
-                addMetaCell(metaBar, "ESTADO", estadoDoc, smallFont, bold, lightGrayBg);
+                addMetaCell(metaBar, pdfTranslation.t("pdf.fatura.estado", locale), estadoDoc, smallFont, bold, lightGrayBg);
 
                 doc.add(metaBar);
                 doc.add(new Paragraph(" "));
@@ -654,12 +646,12 @@ public class FaturaService {
                 table.setWidthPercentage(100);
                 table.setWidths(new float[] { 4f, 1f, 1.5f, 1f, 1.2f, 1.8f });
 
-                addModernHeader(table, "DESCRIÇÃO", tableHeaderFont, primaryColor);
-                addModernHeader(table, "QTD", tableHeaderFont, primaryColor);
-                addModernHeader(table, "UNITÁRIO", tableHeaderFont, primaryColor);
-                addModernHeader(table, "IVA", tableHeaderFont, primaryColor);
-                addModernHeader(table, "VAL. IVA", tableHeaderFont, primaryColor);
-                addModernHeader(table, "TOTAL", tableHeaderFont, primaryColor);
+                addModernHeader(table, pdfTranslation.t("pdf.fatura.col.descricao", locale), tableHeaderFont, primaryColor);
+                addModernHeader(table, pdfTranslation.t("pdf.fatura.col.qtd", locale), tableHeaderFont, primaryColor);
+                addModernHeader(table, pdfTranslation.t("pdf.fatura.col.unitario", locale), tableHeaderFont, primaryColor);
+                addModernHeader(table, pdfTranslation.t("pdf.fatura.col.iva", locale), tableHeaderFont, primaryColor);
+                addModernHeader(table, pdfTranslation.t("pdf.fatura.col.val_iva", locale), tableHeaderFont, primaryColor);
+                addModernHeader(table, pdfTranslation.t("pdf.fatura.col.total", locale), tableHeaderFont, primaryColor);
 
                 double totalIva = 0;
                 double subtotalGeral = 0;
@@ -731,13 +723,13 @@ public class FaturaService {
                 }
                 double totalFinalComLiquido = (subtotalGeral + totalIva) - comissao;
 
-                addModernTotalRow(totalTable, "SUBTOTAL", df.format(subtotalGeral), normal, normal, null, borderColor);
-                addModernTotalRow(totalTable, "TOTAL IVA", df.format(totalIva), normal, normal, null, borderColor);
+                addModernTotalRow(totalTable, pdfTranslation.t("pdf.fatura.subtotal", locale), df.format(subtotalGeral), normal, normal, null, borderColor);
+                addModernTotalRow(totalTable, pdfTranslation.t("pdf.fatura.total_iva", locale), df.format(totalIva), normal, normal, null, borderColor);
                 if (comissao > 0) {
-                    addModernTotalRow(totalTable, "DESC. COMISSÃO TPA", "-" + df.format(comissao), normal, normal, null,
+                    addModernTotalRow(totalTable, pdfTranslation.t("pdf.fatura.desc_comissao", locale), "-" + df.format(comissao), normal, normal, null,
                             borderColor);
                 }
-                addModernTotalRow(totalTable, "TOTAL FINAL", df.format(totalFinalComLiquido) + " Kz", fontSubtitle,
+                addModernTotalRow(totalTable, pdfTranslation.t("pdf.fatura.total_final", locale), df.format(totalFinalComLiquido) + " Kz", fontSubtitle,
                         fontSubtitle, lightGrayBg, primaryColor);
 
                 doc.add(totalTable);
@@ -811,16 +803,16 @@ public class FaturaService {
                     nomeOperador = "N/A";
                 }
 
-                qrCell.addElement(new Paragraph("Hash AGT: " + hash, smallFont));
-                qrCell.addElement(new Paragraph("Operador: " + nomeOperador, smallFont));
+                qrCell.addElement(new Paragraph(pdfTranslation.t("pdf.fatura.hash_agt", locale) + " " + hash, smallFont));
+                qrCell.addElement(new Paragraph(pdfTranslation.t("pdf.fatura.operador", locale) + " " + nomeOperador, smallFont));
                 qrCell.addElement(new Paragraph(
-                        complianceHash + "-Processado por programa validado n.º " + certNo + "/AGT", smallFont));
+                        complianceHash + "-" + pdfTranslation.t("pdf.fatura.certificado", locale) + " " + certNo + "/AGT", smallFont));
                 footerTable.addCell(qrCell);
 
                 PdfPCell thanksCell = new PdfPCell();
                 thanksCell.setBorder(0);
                 thanksCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-                Paragraph pThanks = new Paragraph("OBRIGADO PELA PREFERÊNCIA", bold);
+                Paragraph pThanks = new Paragraph(pdfTranslation.t("pdf.fatura.obrigado", locale), bold);
                 pThanks.setAlignment(Element.ALIGN_RIGHT);
                 thanksCell.addElement(pThanks);
 
@@ -831,8 +823,7 @@ public class FaturaService {
                     pRodape.setAlignment(Element.ALIGN_RIGHT);
                     thanksCell.addElement(pRodape);
                 } else {
-                    Paragraph p2 = new Paragraph("Os bens/serviços foram colocados à disposição na data do documento.",
-                            smallFont);
+                    Paragraph p2 = new Paragraph(pdfTranslation.t("pdf.fatura.bens_servicos", locale), smallFont);
                     p2.setAlignment(Element.ALIGN_RIGHT);
                     thanksCell.addElement(p2);
                 }
@@ -840,7 +831,7 @@ public class FaturaService {
                 doc.add(footerTable);
 
                 if ("FP".equals(fatura.getTipoDocumento())) {
-                    Paragraph pWarning = new Paragraph("ESTE DOCUMENTO NÃO SERVE DE FACTURA", bold);
+                    Paragraph pWarning = new Paragraph(pdfTranslation.t("pdf.fatura.nao_serve_factura", locale), bold);
                     pWarning.setAlignment(Element.ALIGN_CENTER);
                     pWarning.setSpacingBefore(15);
                     doc.add(pWarning);
@@ -1037,7 +1028,7 @@ public class FaturaService {
         File pdfFile = new File(filePath);
 
         if (!pdfFile.exists()) {
-            gerarPdfFatura(fatura);
+            gerarPdfFatura(fatura, LocaleContextHolder.getLocale());
         }
 
         // Preparar conteúdo do email
@@ -1091,7 +1082,7 @@ public class FaturaService {
         }
 
         // Regenerar o PDF com o estado atualizado
-        gerarPdfFatura(faturaAtualizada);
+        gerarPdfFatura(faturaAtualizada, LocaleContextHolder.getLocale());
 
         // Gerar Factura-Recibo
         try {
@@ -1187,7 +1178,7 @@ public class FaturaService {
         compraRepository.save(compra);
 
         // Regenerar o PDF da fatura FT com o estado PAGA
-        gerarPdfFatura(fatura);
+        gerarPdfFatura(fatura, LocaleContextHolder.getLocale());
 
         // 3. Emitir a nova Fatura do tipo FR
         return emitirReciboPagamento(compra, total);
@@ -1278,7 +1269,7 @@ public class FaturaService {
         }
 
         // Regenerar o PDF com o estado atualizado
-        gerarPdfFatura(faturaAnulada);
+        gerarPdfFatura(faturaAnulada, LocaleContextHolder.getLocale());
 
         log.info("Factura {} anulada. Motivo: {}", fatura.getNumeroFatura(), motivo);
 

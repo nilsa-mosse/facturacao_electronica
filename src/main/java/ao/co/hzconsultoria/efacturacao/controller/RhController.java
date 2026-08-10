@@ -446,7 +446,7 @@ public class RhController {
             if (!spOpt.isPresent() || !spOpt.get().getFolhaProcessamento().getEmpresa().getId().equals(empresaId)) {
                 return ResponseEntity.notFound().build();
             }
-            byte[] pdf = folhaService.gerarReciboPdf(salarioId);
+            byte[] pdf = folhaService.gerarReciboPdf(salarioId, org.springframework.context.i18n.LocaleContextHolder.getLocale());
             String filename = "Recibo_" + spOpt.get().getColaborador().getNome().replaceAll("\\s+", "_") + "_"
                     + String.format("%02d_%d", spOpt.get().getFolhaProcessamento().getMes(),
                             spOpt.get().getFolhaProcessamento().getAno()) + ".pdf";
@@ -485,7 +485,7 @@ public class RhController {
             if (!folhaOpt.isPresent() || !folhaOpt.get().getEmpresa().getId().equals(empresaId)) {
                 return ResponseEntity.notFound().build();
             }
-            byte[] pdf = folhaService.gerarGuiaIrtPdf(id);
+            byte[] pdf = folhaService.gerarGuiaIrtPdf(id, org.springframework.context.i18n.LocaleContextHolder.getLocale());
             String filename = "Guia_IRT_" + String.format("%02d_%d", folhaOpt.get().getMes(), folhaOpt.get().getAno()) + ".pdf";
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)

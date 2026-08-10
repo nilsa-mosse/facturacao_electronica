@@ -89,7 +89,7 @@ public class FacturaOperacoesController {
                 return ResponseEntity.badRequest().body("Factura não encontrada");
             }
 
-            faturaService.gerarPdfFatura(fatura);
+            faturaService.gerarPdfFatura(fatura, org.springframework.context.i18n.LocaleContextHolder.getLocale());
 
             Map<String, Object> resp = new HashMap<>();
             resp.put("mensagem", "PDF gerado com sucesso");

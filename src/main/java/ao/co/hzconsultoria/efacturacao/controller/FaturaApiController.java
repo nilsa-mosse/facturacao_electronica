@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 @RestController
 @RequestMapping("/api/faturas")
@@ -78,7 +79,7 @@ public class FaturaApiController {
         }
         compraRepository.save(compra);
         faturaRepository.save(fatura);
-        faturaService.gerarPdfFatura(fatura);
+        faturaService.gerarPdfFatura(fatura, LocaleContextHolder.getLocale());
 
         // Gerar Factura-Recibo (FR) para o pagamento efetuado
         try {

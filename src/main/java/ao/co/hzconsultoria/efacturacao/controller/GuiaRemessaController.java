@@ -48,7 +48,7 @@ public class GuiaRemessaController {
             if (guia.getGuiaReferencia() != null && guia.getGuiaReferencia().getId() != null) {
                 System.out.println("DEBUG: Recebida guia com referência: ID " + guia.getGuiaReferencia().getId());
             }
-            guiaRemessaService.salvar(guia);
+            guiaRemessaService.salvarComLocale(guia, org.springframework.context.i18n.LocaleContextHolder.getLocale());
             redirectAttributes.addFlashAttribute("mensagemSucesso", "Guia de Remessa emitida com sucesso!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao emitir guia: " + e.getMessage());
@@ -76,7 +76,7 @@ public class GuiaRemessaController {
             // Garantir que o PDF existe (fallback para guias antigas)
             File pdfFile = new File("./uploads/guias/" + guia.getNumeroGuia() + ".pdf");
             if (!pdfFile.exists()) {
-                guiaRemessaService.salvar(guia); // Isto dispara a geração do PDF
+                guiaRemessaService.salvarComLocale(guia, org.springframework.context.i18n.LocaleContextHolder.getLocale());
             }
             res.put("url", "/uploads/guias/" + guia.getNumeroGuia() + ".pdf");
         }

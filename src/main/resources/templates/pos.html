@@ -769,13 +769,13 @@
                     <div class="product-img-container">
                       <div th:if="${!produto.disponivel}" class="out-of-stock-overlay clickable-when-disabled"
                         th:data-id="${produto.id}" th:data-nome="${produto.nome}"
-                        style="pointer-events:auto;cursor:pointer;">
+                        style="pointer-events:auto;cursor:pointer;" th:text="#{pos.status.esgotado}">
                         ESGOTADO
                       </div>
                       <!-- Overlay when product is blocked by a PARCIAL inventory -->
                       <div th:if="${produtosBloqueados != null and produtosBloqueados.contains(produto.id)}"
                         class="inventory-block-overlay clickable-when-disabled" th:data-id="${produto.id}"
-                        th:data-nome="${produto.nome}" style="pointer-events:auto;cursor:not-allowed;">
+                        th:data-nome="${produto.nome}" style="pointer-events:auto;cursor:not-allowed;" th:text="#{pos.status.produto_inventario}">
                         PRODUTO EM INVENTÁRIO
                       </div>
                       <img
@@ -787,7 +787,7 @@
                       <!-- Badge de Promoção -->
                       <div th:if="${produto.emPromocao}" class="position-absolute top-0 start-0 m-2">
                         <span class="badge rounded-pill bg-warning text-dark shadow-sm fw-bold animate-pulse">
-                          <i class="fas fa-fire me-1"></i> PROMO
+                          <i class="fas fa-fire me-1"></i> <span th:text="#{pos.badge.promo}">PROMO</span>
                         </span>
                       </div>
                     </div>
@@ -799,18 +799,14 @@
                           <span th:text="${produto.preco}">0</span>
                         </div>
                         <span th:if="${!produto.disponivel}" class="badge bg-danger" th:text="#{pos.status.esgotado}">ESGOTADO</span>
-                        <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i
-                            class="fas fa-percent me-1"></i> PROMO</span>
+                        <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i class="fas fa-percent me-1"></i> <span th:text="#{pos.badge.promo}">PROMO</span></span>
                         <span
                           th:if="${produto.disponivel && (produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5)}"
-                          class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i>
-                          BAIXO</span>
+                          class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> <span th:text="#{pos.status.baixo}">BAIXO</span></span>
                       </div>
                       <div class="small text-muted mt-1 fw-bold d-flex justify-content-between">
-                        <span>Stock: <span
-                            th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '∞'}">0</span></span>
-                        <span th:if="${produto.ivaPercentual != null}" class="text-info">IVA <span
-                            th:text="${produto.ivaPercentual}">0</span>%</span>
+                        <span><span th:text="#{pos.stock}">Stock:</span> <span th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '∞'}">0</span></span>
+                        <span th:if="${produto.ivaPercentual != null}" class="text-info"><span th:text="#{pos.iva_label}">IVA</span> <span th:text="${produto.ivaPercentual}">0</span>%</span>
                       </div>
                     </div>
                   </div>
@@ -830,12 +826,12 @@
               </div>
               <div class="d-flex gap-2 align-items-center">
                 <button type="button" class="btn btn-sm btn-light rounded-pill px-3 fw-bold border"
-                  onclick="abrirModalVendasSuspensas()" title="Recuperar Vendas Suspensas">
+                  onclick="abrirModalVendasSuspensas()" th:title="#{pos.carrinho.recuperar_vendas_suspensas}">
                   <i class="fas fa-history me-1 text-amber-500"></i>
                   <span id="suspendedCountBadge" class="badge bg-amber-100 text-amber-700 rounded-pill ms-1"
                     style="display: none;">0</span>
                 </button>
-                <span id="cartCountBadge" class="badge bg-indigo-600 rounded-pill px-3 py-2">0 Itens</span>
+                <span id="cartCountBadge" class="badge bg-indigo-600 rounded-pill px-3 py-2" th:text="'0 ' + #{pos.itens}">0 Itens</span>
               </div>
             </div>
 
@@ -862,7 +858,7 @@
               <button type="button" id="btnContinuar"
                 class="btn btn-premium-success w-100 py-3 rounded-pill fw-bold text-uppercase letter-spacing-1"
                 onclick="abrirModalCheckout()">
-                <i class="fas fa-check-circle me-2"></i> Finalizar Venda
+                <i class="fas fa-check-circle me-2"></i> <span th:text="#{pos.btn.finalizar_venda}">Finalizar Venda</span>
               </button>
 
             </div>
@@ -877,11 +873,11 @@
         <div class="checkout-header py-4 px-5 text-white d-flex justify-content-between align-items-center"
           style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
           <div>
-            <h4 class="fw-bold mb-0"><i class="fas fa-shopping-bag me-3"></i> Revisão da Compra</h4>
+            <h4 class="fw-bold mb-0"><i class="fas fa-shopping-bag me-3"></i> <span th:text="#{pos.wizard.revisao_compra}">Revisão da Compra</span></h4>
             <small class="opacity-75" th:text="#{pos.wizard.subtitle}">Finalize a sua venda em poucos passos</small>
           </div>
           <button type="button" class="btn btn-outline-light rounded-pill px-4 fw-bold" onclick="voltarParaPos()">
-            <i class="fas fa-arrow-left me-2"></i> VOLTAR AO POS
+            <i class="fas fa-arrow-left me-2"></i> <span th:text="#{pos.wizard.voltar_pos}">VOLTAR AO POS</span>
           </button>
         </div>
 
@@ -918,10 +914,10 @@
                       </div>
                       <div class="d-flex align-items-center gap-3">
                         <span class="badge bg-soft-info rounded-pill px-3 py-2" id="badgeTotalItens"
-                          style="font-size: 0.8rem;">0 itens</span>
+                          style="font-size: 0.8rem;" th:text="'0 ' + #{pos.itens}">0 itens</span>
                         <button type="button" class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3"
                           onclick="voltarParaPos()">
-                          <i class="fas fa-plus-circle me-1"></i> ADICIONAR MAIS
+                          <i class="fas fa-plus-circle me-1"></i> <span th:text="#{pos.wizard.adicionar_mais}">ADICIONAR MAIS</span>
                         </button>
                       </div>
                     </div>
@@ -930,10 +926,10 @@
                         <table class="table table-hover align-middle mb-0" id="modalCartTable">
                           <thead class="bg-light sticky-top">
                             <tr>
-                              <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Produto</th>
-                              <th class="text-center py-3 text-uppercase small fw-bold text-muted">Qtd</th>
-                              <th class="text-end py-3 text-uppercase small fw-bold text-muted">Unitário</th>
-                              <th class="text-end py-3 text-uppercase small fw-bold text-muted">Total</th>
+                              <th class="ps-4 py-3 text-uppercase small fw-bold text-muted" th:text="#{pos.col.produto}">Produto</th>
+                              <th class="text-center py-3 text-uppercase small fw-bold text-muted" th:text="#{pos.col.qtd}">Qtd</th>
+                              <th class="text-end py-3 text-uppercase small fw-bold text-muted" th:text="#{pos.col.unitario}">Unitário</th>
+                              <th class="text-end py-3 text-uppercase small fw-bold text-muted" th:text="#{pos.col.total}">Total</th>
                               <th class="text-end pe-4 py-3 text-uppercase small fw-bold text-muted"></th>
                             </tr>
                           </thead>
@@ -946,16 +942,16 @@
                       <div class="row justify-content-end">
                         <div class="col-12 col-md-5">
                           <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted small">Subtotal:</span>
+                            <span class="text-muted small" th:text="#{pos.subtotal_label}">Subtotal:</span>
                             <span class="fw-bold" id="modalSubtotal">0.00 Kz</span>
                           </div>
                           <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted small">Impostos (IVA):</span>
+                            <span class="text-muted small" th:text="#{pos.impostos_iva}">Impostos (IVA):</span>
                             <span class="fw-bold text-danger" id="modalIva">0.00 Kz</span>
                           </div>
                           <hr class="my-3 opacity-10">
                           <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold text-dark">TOTAL DA COMPRA</span>
+                            <span class="fw-bold text-dark" th:text="#{pos.total_compra}">TOTAL DA COMPRA</span>
                             <span class="h3 fw-bold text-primary mb-0" id="modalTotal">0.00 Kz</span>
                           </div>
                         </div>
@@ -972,8 +968,8 @@
                 <div class="col-12 col-lg-12">
                   <div class="step-card">
                     <div class="step-header">
-                      <h5 class="fw-bold mb-0 text-dark">Identificação & Documento</h5>
-                      <small class="text-muted">Selecione o tipo de fatura e os dados do cliente</small>
+                      <h5 class="fw-bold mb-0 text-dark" th:text="#{pos.wizard.identificacao_doc}">Identificação & Documento</h5>
+                      <small class="text-muted" th:text="#{pos.wizard.selecione_tipo_fatura}">Selecione o tipo de fatura e os dados do cliente</small>
                     </div>
                     <div class="step-body">
                       <!-- Tipo de Documento -->
@@ -989,8 +985,8 @@
                                   <i class="fas fa-file-invoice-dollar"></i>
                                 </div>
                                 <div style="line-height: 1.1;">
-                                  <span class="doc-name">F. Recibo</span>
-                                  <small class="doc-desc">Pronto Pagamento</small>
+                                  <span class="doc-name" th:text="#{pos.doc.fr}">F. Recibo</span>
+                                  <small class="doc-desc" th:text="#{pos.doc.fr.desc}">Pronto Pagamento</small>
                                 </div>
                               </div>
                             </div>
@@ -1003,8 +999,8 @@
                                   <i class="fas fa-file-invoice"></i>
                                 </div>
                                 <div style="line-height: 1.1;">
-                                  <span class="doc-name">Factura</span>
-                                  <small class="doc-desc">Venda a Crédito</small>
+                                  <span class="doc-name" th:text="#{pos.doc.ft}">Factura</span>
+                                  <small class="doc-desc" th:text="#{pos.doc.ft.desc}">Venda a Crédito</small>
                                 </div>
                               </div>
                             </div>
@@ -1017,8 +1013,8 @@
                                   <i class="fas fa-file-alt"></i>
                                 </div>
                                 <div style="line-height: 1.1;">
-                                  <span class="doc-name">Pró-forma</span>
-                                  <small class="doc-desc">Cotação</small>
+                                  <span class="doc-name" th:text="#{pos.doc.fp}">Pró-forma</span>
+                                  <small class="doc-desc" th:text="#{pos.doc.fp.desc}">Cotação</small>
                                 </div>
                               </div>
                             </div>
@@ -1048,19 +1044,19 @@
                       <div class="bg-light bg-opacity-50 p-4 rounded-4 border border-white">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                           <h6 class="fw-bold mb-0 text-dark d-flex align-items-center">
-                            <i class="fas fa-user-circle me-2 text-primary"></i> Cliente
+                            <i class="fas fa-user-circle me-2 text-primary"></i> <span th:text="#{pos.cliente.titulo}">Cliente</span>
                           </h6>
                           <div class="btn-group p-1 bg-white rounded-pill shadow-sm">
                             <button type="button" class="btn btn-primary btn-sm px-3 rounded-pill"
-                              id="btnClienteExistente" onclick="toggleClienteMode('existente')">Existente</button>
+                              id="btnClienteExistente" onclick="toggleClienteMode('existente')" th:text="#{pos.cliente.existente}">Existente</button>
                             <button type="button" class="btn btn-light btn-sm px-3 rounded-pill" id="btnClienteNovo"
-                              onclick="toggleClienteMode('novo')">Novo Registo</button>
+                              onclick="toggleClienteMode('novo')" th:text="#{pos.cliente.novo_registo}">Novo Registo</button>
                           </div>
                         </div>
 
                         <div id="painelClienteExistente">
                           <select id="selectCliente" class="form-select border-0 shadow-sm py-3 px-4 rounded-4">
-                            <option value="">-- Consumidor Final (999999999) --</option>
+                            <option value="" th:text="#{pos.cliente.consumidor_final_option}">-- Consumidor Final (999999999) --</option>
                             <option th:each="c : ${clientes}" th:value="${c.id}"
                               th:text="${c.nome + ' — NIF: ' + c.nif}"></option>
                           </select>
@@ -1069,36 +1065,36 @@
                         <div id="painelClienteNovo" style="display: none;">
                           <div class="row g-3">
                             <div class="col-md-6">
-                              <label class="form-label small fw-bold text-muted">Nome Completo *</label>
+                              <label class="form-label small fw-bold text-muted" th:text="#{pos.cliente.nome_completo}">Nome Completo *</label>
                               <input type="text" id="novoClienteNome"
-                                class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="Ex: João Silva">
+                                class="form-control border-0 shadow-sm py-2 rounded-3" th:placeholder="#{pos.cliente.nome_placeholder}">
                             </div>
                             <div class="col-md-6">
-                              <label class="form-label small fw-bold text-muted">NIF / BI *</label>
+                              <label class="form-label small fw-bold text-muted" th:text="#{pos.cliente.nif_bi}">NIF / BI *</label>
                               <input type="text" id="novoClienteNif"
-                                class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="999999999">
+                                class="form-control border-0 shadow-sm py-2 rounded-3" th:placeholder="#{pos.cliente.nif_placeholder}">
                             </div>
                             <div class="col-md-12">
-                              <label class="form-label small fw-bold text-muted">Morada Completa</label>
+                              <label class="form-label small fw-bold text-muted" th:text="#{pos.cliente.morada_completa}">Morada Completa</label>
                               <input type="text" id="novoClienteMorada"
                                 class="form-control border-0 shadow-sm py-2 rounded-3"
-                                placeholder="Rua, Bairro, Cidade">
+                                th:placeholder="#{pos.cliente.morada_placeholder}">
                             </div>
                             <div class="col-md-6">
-                              <label class="form-label small fw-bold text-muted">Contacto Telefónico *</label>
+                              <label class="form-label small fw-bold text-muted" th:text="#{pos.cliente.contacto_telefónico}">Contacto Telefónico *</label>
                               <input type="text" id="novoClienteTelefone"
-                                class="form-control border-0 shadow-sm py-2 rounded-3" placeholder="+244 ...">
+                                class="form-control border-0 shadow-sm py-2 rounded-3" th:placeholder="#{pos.cliente.contacto_placeholder}">
                             </div>
                             <div class="col-md-6">
-                              <label class="form-label small fw-bold text-muted">Endereço de Email</label>
+                              <label class="form-label small fw-bold text-muted" th:text="#{pos.cliente.email}">Endereço de Email</label>
                               <input type="email" id="novoClienteEmail"
                                 class="form-control border-0 shadow-sm py-2 rounded-3"
-                                placeholder="cliente@exemplo.com">
+                                th:placeholder="#{pos.cliente.email_placeholder}">
                             </div>
                             <div class="col-md-12 d-flex justify-content-end mt-2">
                               <button type="button" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm fw-bold"
                                 id="btnGravarClienteNovo" onclick="gravarClienteNovoPossivel()">
-                                <i class="fas fa-save me-2"></i> Gravar Registo
+                                <i class="fas fa-save me-2"></i> <span th:text="#{pos.cliente.btn_gravar}">Gravar Registo</span>
                               </button>
                             </div>
                           </div>
@@ -1116,14 +1112,13 @@
                 <div class="col-12 col-lg-12">
                   <div class="step-card">
                     <div class="step-header">
-                      <h5 class="fw-bold mb-0 text-dark">Finalizar Pagamento</h5>
-                      <small class="text-muted">Escolha o método e conclua a venda</small>
+                      <h5 class="fw-bold mb-0 text-dark" th:text="#{pos.wizard.finalizar_pagamento}">Finalizar Pagamento</h5>
+                      <small class="text-muted" th:text="#{pos.wizard.escolha_metodo}">Escolha o método e conclua a venda</small>
                     </div>
                     <div class="step-body">
                       <div class="row g-5">
                         <div class="col-md-6">
-                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block"
-                            style="letter-spacing: 1px;">Método de Pagamento</label>
+                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block" style="letter-spacing: 1px;" th:text="#{pos.wizard.metodo_pagamento}">Método de Pagamento</label>
                           <div class="d-flex flex-column gap-3 mb-4">
                             <div class="payment-method-option">
                               <input type="checkbox" class="btn-check pagamento-check" id="pagCASH" value="CASH"
@@ -1134,8 +1129,8 @@
                                   <i class="fas fa-money-bill-wave fa-xl"></i>
                                 </div>
                                 <div>
-                                  <div class="fw-bold fs-5">DINHEIRO</div>
-                                  <small class="text-muted">Pagamento em espécie (Cash)</small>
+                                  <div class="fw-bold fs-5" th:text="#{pos.metodo.dinheiro}">DINHEIRO</div>
+                                  <small class="text-muted" th:text="#{pos.metodo.dinheiro.desc}">Pagamento em espécie (Cash)</small>
                                 </div>
                                 <div class="ms-auto check-icon">
                                   <i class="fas fa-check-circle fa-lg"></i>
@@ -1151,8 +1146,8 @@
                                   <i class="fas fa-credit-card fa-xl"></i>
                                 </div>
                                 <div>
-                                  <div class="fw-bold fs-5">MULTICAIXA</div>
-                                  <small class="text-muted">Cartão TPA / Multibanco</small>
+                                  <div class="fw-bold fs-5" th:text="#{pos.metodo.multicaixa}">MULTICAIXA</div>
+                                  <small class="text-muted" th:text="#{pos.metodo.multicaixa.desc}">Cartão TPA / Multibanco</small>
                                 </div>
                                 <div class="ms-auto check-icon">
                                   <i class="fas fa-check-circle fa-lg"></i>
@@ -1163,23 +1158,21 @@
 
                           <div id="painelMulticaixa" class="bg-white p-4 rounded-4 shadow-sm border d-none mt-4">
                             <h6 class="fw-bold mb-4 text-primary d-flex align-items-center">
-                              <span class="bg-primary-subtle p-2 rounded-3 me-2"><i
-                                  class="fas fa-terminal text-primary"></i></span>
-                              Terminal de Pagamento (TPA)
+                              <span class="bg-primary-subtle p-2 rounded-3 me-2"><i class="fas fa-terminal text-primary"></i></span> <span th:text="#{pos.multicaixa.tpa}">Terminal de Pagamento (TPA)</span>
                             </h6>
                             <div class="mb-4">
-                              <label class="form-label small fw-bold text-muted">Banco Emissor</label>
+                              <label class="form-label small fw-bold text-muted" th:text="#{pos.multicaixa.banco}">Banco Emissor</label>
                               <select id="multicaixaBanco" class="form-select border-light bg-light py-2 rounded-3">
                                 <option value="BAI">BAI</option>
                                 <option value="BFA">BFA</option>
                                 <option value="BIC">BIC</option>
                                 <option value="SOL">Banco SOL</option>
-                                <option value="OUTRO">Outro Banco</option>
+                                <option value="OUTRO" th:text="#{pos.multicaixa.outro_banco}">Outro Banco</option>
                               </select>
                             </div>
                             <div class="row g-3">
                               <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Valor no Cartão</label>
+                                <label class="form-label small fw-bold text-muted" th:text="#{pos.multicaixa.valor_cartao}">Valor no Cartão</label>
                                 <div class="input-group">
                                   <span
                                     class="input-group-text border-0 bg-primary-subtle text-primary fw-bold">Kz</span>
@@ -1188,7 +1181,7 @@
                                 </div>
                               </div>
                               <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Troco / Cash</label>
+                                <label class="form-label small fw-bold text-muted" th:text="#{pos.multicaixa.troco_cash}">Troco / Cash</label>
                                 <div class="input-group">
                                   <span
                                     class="input-group-text border-0 bg-success-subtle text-success fw-bold">Kz</span>
@@ -1201,22 +1194,21 @@
                         </div>
 
                         <div class="col-md-6 ps-md-5">
-                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block"
-                            style="letter-spacing: 1px;">Resumo Final</label>
+                          <label class="form-label small fw-bold text-muted text-uppercase mb-4 d-block" style="letter-spacing: 1px;" th:text="#{pos.resumo.final}">Resumo Final</label>
                           <div class="bg-dark text-white p-4 rounded-4 shadow-lg mb-4"
                             style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
                             <div class="d-flex justify-content-between mb-3 opacity-75">
-                              <span>Total Bruto</span>
+                              <span th:text="#{pos.resumo.total_bruto}">Total Bruto</span>
                               <span class="fw-bold" id="resumoTotalBruto">0.00 Kz</span>
                             </div>
                             <div class="d-flex justify-content-between mb-3 text-warning" id="linhaComissaoTPA"
                               style="display: none !important;">
-                              <span>Taxa TPA (1.5%)</span>
+                              <span th:text="#{pos.resumo.taxa_tpa}">Taxa TPA (1.5%)</span>
                               <span id="multicaixaComissao" class="fw-bold">- 0.00 Kz</span>
                             </div>
                             <hr class="border-secondary my-4">
                             <div class="d-flex justify-content-between align-items-center">
-                              <span class="fs-6 fw-bold">TOTAL LÍQUIDO</span>
+                              <span class="fs-6 fw-bold" th:text="#{pos.resumo.total_liquido}">TOTAL LÍQUIDO</span>
                               <span id="multicaixaValorLiquido" class="h2 fw-bold text-info mb-0">0.00 Kz</span>
                             </div>
                           </div>
@@ -1226,9 +1218,8 @@
                             <div class="d-flex gap-3">
                               <i class="fas fa-shield-alt text-primary fs-4"></i>
                               <div>
-                                <h6 class="fw-bold text-primary mb-1">Certificação AGT</h6>
-                                <p class="small text-muted mb-0">Este documento será assinado digitalmente e comunicado
-                                  às autoridades fiscais.</p>
+                                <h6 class="fw-bold text-primary mb-1" th:text="#{pos.agt.certificacao}">Certificação AGT</h6>
+                                <p class="small text-muted mb-0" th:text="#{pos.agt.certificacao_desc}">Este documento será assinado digitalmente e comunicado às autoridades fiscais.</p>
                               </div>
                             </div>
                           </div>
@@ -1245,26 +1236,26 @@
           <div class="checkout-footer-nav d-flex justify-content-center gap-3 mt-5 pb-5">
             <button type="button" class="btn btn-ghost-danger rounded-pill px-4 py-2 fw-bold"
               onclick="cancelarCompra()">
-              <i class="fas fa-times me-2"></i> ANULAR
+              <i class="fas fa-times me-2"></i> <span th:text="#{pos.btn.anular}">ANULAR</span>
             </button>
             <button type="button" class="btn btn-ghost-secondary rounded-pill px-4 py-2 fw-bold"
               onclick="suspenderVenda()">
-              <i class="fas fa-pause me-2"></i> SUSPENDER
+              <i class="fas fa-pause me-2"></i> <span th:text="#{pos.btn.suspender}">SUSPENDER</span>
             </button>
             <div class="d-flex gap-3 ms-md-auto">
               <button type="button" class="btn btn-outline-secondary rounded-pill px-5 py-2 fw-bold d-none"
                 id="btnAnteriorWizard" onclick="changeStep(-1)">
-                <i class="fas fa-arrow-left me-2"></i> ANTERIOR
+                <i class="fas fa-arrow-left me-2"></i> <span th:text="#{pos.btn.anterior}">ANTERIOR</span>
               </button>
 
               <button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold" id="btnProximoWizard"
                 onclick="changeStep(1)">
-                PRÓXIMO PASSO <i class="fas fa-arrow-right ms-2"></i>
+                <span th:text="#{pos.btn.proximo_passo}">PRÓXIMO PASSO</span> <i class="fas fa-arrow-right ms-2"></i>
               </button>
 
               <button type="button" class="btn btn-lg btn-premium-success rounded-pill px-5 fw-bold d-none"
                 id="btnFinalizarModal">
-                <i class="fas fa-check-double me-3"></i> EMITIR DOCUMENTO
+                <i class="fas fa-check-double me-3"></i> <span th:text="#{pos.btn.emitir_documento}">EMITIR DOCUMENTO</span>
               </button>
             </div>
           </div>
@@ -1272,11 +1263,28 @@
       </div>
     </div> <!-- Fim de content-wrapper -->
 
-    <!-- Hidden Translations for JS -->
+        <!-- Hidden Translations for JS -->
     <div id="translations" style="display: none;">
       <span id="t-msg-sucesso" th:text="#{pos.msg.sucesso}"></span>
       <span id="t-fatura-baixar" th:text="#{pos.fatura.baixar}"></span>
       <span id="t-proforma-baixar" th:text="#{pos.proforma.baixar}"></span>
+      <span id="t-msg-stock-insuficiente" th:text="#{pos.msg.stock_insuficiente}"></span>
+      <span id="t-msg-produto-bloqueado" th:text="#{pos.msg.produto_bloqueado}"></span>
+      <span id="t-msg-stock-max-atingido" th:text="#{pos.msg.stock_max_atingido}"></span>
+      <span id="t-msg-carrinho-vazio" th:text="#{pos.msg.carrinho_vazio}"></span>
+      <span id="t-msg-valide-multicaixa" th:text="#{pos.msg.valide_multicaixa}"></span>
+      <span id="t-msg-preencha-motorista" th:text="#{pos.msg.preencha_motorista}"></span>
+      <span id="t-msg-venda-suspensa-sucesso" th:text="#{pos.msg.venda_suspensa_sucesso}"></span>
+      <span id="t-msg-deseja-cancelar" th:text="#{pos.msg.deseja_cancelar}"></span>
+      <span id="t-msg-deseja-remover-item" th:text="#{pos.msg.deseja_remover_item}"></span>
+      <span id="t-msg-deseja-substituir-suspensa" th:text="#{pos.msg.deseja_substituir_suspensa}"></span>
+      <span id="t-msg-deseja-eliminar-suspensa" th:text="#{pos.msg.deseja_eliminar_suspensa}"></span>
+      <span id="t-msg-nenhuma-venda-suspensa" th:text="#{pos.msg.nenhuma_venda_suspensa}"></span>
+      <span id="t-msg-restaurar" th:text="#{pos.msg.restaurar}"></span>
+      <span id="t-msg-consumidor-final" th:text="#{pos.msg.consumidor_final}"></span>
+      <span id="t-msg-pdf-indisponivel" th:text="#{pos.msg.pdf_indisponivel}"></span>
+      <span id="t-sucesso-descarregar-doc" th:text="#{pos.sucesso.descarregar_doc}"></span>
+      <span id="t-msg-proforma-sucesso" th:text="#{pos.msg.proforma_sucesso}"></span>
     </div>
 
 
@@ -1286,8 +1294,7 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
           <div class="modal-header border-0 p-4 pb-0">
             <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
-              <i class="fas fa-truck me-3 text-info"></i>
-              Detalhes de Transporte
+              <i class="fas fa-truck me-3 text-info"></i> <span th:text="#{pos.guia.detalhes_transporte}">Detalhes de Transporte</span>
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
@@ -1295,38 +1302,38 @@
             <div class="row g-4">
               <!-- Coluna 1: Informação Geral -->
               <div class="col-12 col-md-6 border-end">
-                <h6 class="fw-bold text-muted text-uppercase small mb-3">Informação Logística</h6>
+                <h6 class="fw-bold text-muted text-uppercase small mb-3" th:text="#{pos.guia.info_logistica}">Informação Logística</h6>
                 <div class="mb-3">
-                  <label class="form-label small fw-bold">Nome do Motorista *</label>
-                  <input type="text" id="guiaMotorista" class="form-control form-control-sm" placeholder="Nome completo"
+                  <label class="form-label small fw-bold" th:text="#{pos.guia.motorista}">Nome do Motorista *</label>
+                  <input type="text" id="guiaMotorista" class="form-control form-control-sm" th:placeholder="#{pos.guia.motorista_placeholder}"
                     style="border-radius: 8px;">
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-bold">Matrícula da Viatura *</label>
+                  <label class="form-label small fw-bold" th:text="#{pos.guia.matricula}">Matrícula da Viatura *</label>
                   <input type="text" id="guiaMatricula" class="form-control form-control-sm"
-                    placeholder="Ex: LD-00-00-AA" style="border-radius: 8px;">
+                    th:placeholder="#{pos.guia.matricula_placeholder}" style="border-radius: 8px;">
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-bold">Local de Carga</label>
+                  <label class="form-label small fw-bold" th:text="#{pos.guia.local_carga}">Local de Carga</label>
                   <input type="text" id="guiaLocalCarga" class="form-control form-control-sm"
-                    placeholder="Onde os produtos saem" style="border-radius: 8px;">
+                    th:placeholder="#{pos.guia.local_carga_placeholder}" style="border-radius: 8px;">
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-bold">Local de Descarga</label>
+                  <label class="form-label small fw-bold" th:text="#{pos.guia.local_descarga}">Local de Descarga</label>
                   <input type="text" id="guiaLocalDescarga" class="form-control form-control-sm"
-                    placeholder="Onde os produtos serão entregues" style="border-radius: 8px;">
+                    th:placeholder="#{pos.guia.local_descarga_placeholder}" style="border-radius: 8px;">
                 </div>
               </div>
 
               <!-- Coluna 2: Artigos a Transportar -->
               <div class="col-12 col-md-6 bg-light bg-opacity-50 p-3" style="border-radius: 12px;">
-                <h6 class="fw-bold text-muted text-uppercase small mb-3">Artigos do Carrinho</h6>
+                <h6 class="fw-bold text-muted text-uppercase small mb-3" th:text="#{pos.guia.artigos_carrinho}">Artigos do Carrinho</h6>
                 <div class="table-responsive" style="max-height: 250px;">
                   <table class="table table-sm table-borderless align-middle">
                     <thead class="bg-white border-bottom shadow-sm">
                       <tr>
-                        <th class="small">Produto</th>
-                        <th class="small text-center">Qtd</th>
+                        <th class="small" th:text="#{pos.col.produto}">Produto</th>
+                        <th class="small text-center" th:text="#{pos.col.qtd}">Qtd</th>
                       </tr>
                     </thead>
                     <tbody id="listaArtigosTransporte">
@@ -1334,21 +1341,15 @@
                     </tbody>
                   </table>
                 </div>
-                <div class="alert alert-info border-0 mt-3 mb-0 py-2 px-3 small" style="border-radius: 8px;">
-                  <i class="fas fa-info-circle me-1"></i> Os itens acima serão convertidos automaticamente em registos
-                  de
-                  Guia de Remessa.
-                </div>
+                <div class="alert alert-info border-0 mt-3 mb-0 py-2 px-3 small" style="border-radius: 8px;"><i class="fas fa-info-circle me-1"></i> <span th:text="#{pos.guia.itens_conversao_info}">Os itens acima serão convertidos automaticamente em registos de Guia de Remessa.</span></div>
               </div>
             </div>
           </div>
           <div class="modal-footer border-0 p-4 pt-0">
-            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">
-              Cancelar
-            </button>
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal" th:text="#{pos.btn.cancelar}">Cancelar</button>
             <button type="button" class="btn btn-info text-white rounded-pill px-5 fw-bold shadow-sm"
               onclick="confirmarEmissaoGuia()">
-              <i class="fas fa-check-circle me-1"></i> Gerar Guia de Remessa
+              <i class="fas fa-check-circle me-1"></i> <span th:text="#{pos.guia.btn_gerar}">Gerar Guia de Remessa</span>
             </button>
           </div>
         </div>
@@ -1361,15 +1362,14 @@
         <div class="modal-content">
           <div class="modal-header">
             <div>
-              <h5 class="modal-title mb-0" id="estoqueModalLabel">Disponibilidade</h5>
-              <small class="text-muted" id="estoqueModalSubtitle">Lojas / Armazéns</small>
+              <h5 class="modal-title mb-0" id="estoqueModalLabel" th:text="#{pos.estoque.disponibilidade}">Disponibilidade</h5>
+              <small class="text-muted" id="estoqueModalSubtitle" th:text="#{pos.estoque.lojas_armazens}">Lojas / Armazéns</small>
             </div>
             <div class="ms-3 text-end" style="min-width:160px;">
               <div id="estoqueSpinner" class="spinner-border text-primary d-none" role="status"
                 style="width:1.4rem;height:1.4rem;vertical-align:middle;"></div>
               <div class="d-inline-block ms-2"><strong id="estoqueModalNomeSmall"></strong></div>
-              <div class="d-block small text-muted" style="font-size:0.78rem;"><span id="estoqueCount">--</span> locais
-              </div>
+              <div class="d-block small text-muted" style="font-size:0.78rem;"><span id="estoqueCount">--</span> <span th:text="#{pos.estoque.locais}">locais</span></div>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -1380,23 +1380,23 @@
                 <div class="input-group input-group-sm">
                   <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
                   <input id="estoqueSearch" type="text" class="form-control border-start-0"
-                    placeholder="Pesquisar por nome, endereço ou tipo...">
+                    th:placeholder="#{pos.estoque.search_placeholder}">
                 </div>
               </div>
               <div style="width: 130px;">
                 <select id="estoqueFilterTipo" class="form-select form-select-sm">
-                  <option value="">Todos Tipos</option>
+                  <option value="" th:text="#{pos.estoque.todos_tipos}">Todos Tipos</option>
                   <option value="LOJA">LOJA</option>
                   <option value="ARMAZEM">ARMAZEM</option>
                 </select>
               </div>
               <div class="form-check ms-2 mb-0">
                 <input class="form-check-input" type="checkbox" value="" id="estoqueShowZero">
-                <label class="form-check-label small" for="estoqueShowZero">Mostrar zeros</label>
+                <label class="form-check-label small" for="estoqueShowZero" th:text="#{pos.estoque.mostrar_zeros}">Mostrar zeros</label>
               </div>
               <div class="form-check ms-2 mb-0">
                 <input class="form-check-input" type="checkbox" value="" id="estoqueIncludeAll">
-                <label class="form-check-label small" for="estoqueIncludeAll">Pesquisar todo o grupo</label>
+                <label class="form-check-label small" for="estoqueIncludeAll" th:text="#{pos.estoque.pesquisar_todo_grupo}">Pesquisar todo o grupo</label>
               </div>
             </div>
             <div class="mb-2"><strong id="estoqueModalNome"></strong></div>
@@ -1404,27 +1404,23 @@
               <table class="table table-striped table-hover">
                 <thead>
                   <tr>
-                    <th>Estabelecimento</th>
-                    <th>Endereço</th>
-                    <th class="text-end">Quantidade</th>
-                    <th>Tipo</th>
+                    <th th:text="#{pos.estoque.estabelecimento}">Estabelecimento</th>
+                    <th th:text="#{pos.estoque.endereco}">Endereço</th>
+                    <th class="text-end" th:text="#{pos.estoque.quantidade}">Quantidade</th>
+                    <th th:text="#{pos.estoque.tipo}">Tipo</th>
                   </tr>
                 </thead>
                 <tbody id="estoqueModalBody">
                   <tr>
-                    <td colspan="4" class="text-center text-muted">Pesquisando...</td>
+                    <td colspan="4" class="text-center text-muted" th:text="#{pos.estoque.pesquisando}">Pesquisando...</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div class="mt-2 small text-muted">
-              <span class="badge bg-success me-2">Disponível</span> locais com stock &nbsp; &nbsp;
-              <span class="badge bg-secondary me-2">Sem stock</span> locais com quantidade 0 &nbsp; &nbsp;
-              <span class="badge bg-warning text-dark">Oculto</span> estabelecimento marcado como não visível
-            </div>
+            <div class="mt-2 small text-muted"><span class="badge bg-success me-2" th:text="#{pos.status.disponivel}">Disponível</span> <span th:text="#{pos.estoque.locais_com_stock}">locais com stock</span> &nbsp; &nbsp; <span class="badge bg-secondary me-2" th:text="#{pos.status.sem_stock}">Sem stock</span> <span th:text="#{pos.estoque.locais_com_zero}">locais com quantidade 0</span> &nbsp; &nbsp; <span class="badge bg-warning text-dark" th:text="#{pos.status.oculto}">Oculto</span> <span th:text="#{pos.estoque.estabelecimento_oculto}">estabelecimento marcado como não visível</span></div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{pos.btn.fechar}">Fechar</button>
           </div>
         </div>
       </div>
@@ -1478,7 +1474,7 @@
       function increaseQty(index) {
         var item = cart[index];
         if (item.stockMax !== undefined && item.qtd + 1 > item.stockMax) {
-          alert('Stock insuficiente!');
+          alert($('#t-msg-stock-insuficiente').text() || 'Stock insuficiente!');
           return;
         }
         item.qtd++;
@@ -1527,7 +1523,7 @@
         var spinner = $('#estoqueSpinner');
         $('#estoqueModalNomeSmall').text('');
         $('#estoqueCount').text('--');
-        body.html('<tr><td colspan="4" class="text-center text-muted">Pesquisando...</td></tr>');
+        body.html('<tr><td colspan="4" class="text-center text-muted" th:text="#{pos.estoque.pesquisando}">Pesquisando...</td></tr>');
         spinner.removeClass('d-none');
 
         var url = '/api/produtos/' + produtoId + '/disponibilidade?showZero=' + (showZero ? 'true' : 'false') + '&includeAll=' + (includeAll ? 'true' : 'false');
@@ -1609,7 +1605,7 @@
           // if this product is blocked by an active PARCIAL inventory, show warning and stop
           var isBlocked = $btn.attr('data-bloqueado') === 'true' || $btn.data('bloqueado') === true;
           if (isBlocked) {
-            alert('Atenção: Este produto está em inventário e a venda está temporariamente bloqueada.');
+            alert($('#t-msg-produto-bloqueado').text() || 'Atenção: Este produto está em inventário e a venda está temporariamente bloqueada.');
             return;
           }
           var id = parseInt($btn.data('id'));
@@ -1641,7 +1637,7 @@
 
           if (item) {
             if (item.qtd + 1 > stockAtual) {
-              alert('Quantidade máxima atingida conforme o stock disponível.');
+              alert($('#t-msg-stock-max-atingido').text() || 'Quantidade máxima atingida conforme o stock disponível.');
               return;
             }
             item.qtd++;
@@ -1687,7 +1683,7 @@
 
         function processarVenda(url, successMsg, btnId, skipModalClose) {
           if (cart.length === 0) {
-            alert('Carrinho vazio!');
+            alert($('#t-msg-carrinho-vazio').text() || 'Carrinho vazio!');
             return;
           }
 
@@ -1787,10 +1783,10 @@
 
               if (actualPdfPath && actualPdfPath.trim() !== '') {
                 btnDownload.addClass('btn-primary');
-                btnDownload.html('<i class="fas fa-file-pdf me-2"></i> DESCARREGAR DOCUMENTO');
+                btnDownload.html('<i class="fas fa-file-pdf me-2"></i> ' + ($('#t-sucesso-descarregar-doc').text() || 'DESCARREGAR DOCUMENTO'));
               } else {
                 btnDownload.addClass('btn-warning text-dark');
-                btnDownload.html('<i class="fas fa-exclamation-triangle me-2"></i> PDF INDISPONÍVEL (VER CONSOLA)');
+                btnDownload.html('<i class="fas fa-exclamation-triangle me-2"></i> ' + ($('#t-msg-pdf-indisponivel').text() || 'PDF INDISPONÍVEL (VER CONSOLA)'));
                 console.error('Resposta do servidor:', window.lastResponse);
               }
 
@@ -2009,7 +2005,7 @@
         window.modalIncreaseQty = function (idx) {
           var item = cart[idx];
           if (item.stockMax !== Infinity && item.qtd + 1 > item.stockMax) {
-            alert('Stock insuficiente!');
+            alert($('#t-msg-stock-insuficiente').text() || 'Stock insuficiente!');
             return;
           }
           item.qtd++;
@@ -2031,7 +2027,7 @@
         };
 
         window.modalRemoveItem = function (idx) {
-          if (confirm("Deseja remover este item do carrinho?")) {
+          if (confirm($('#t-msg-deseja-remover-item').text() || 'Deseja remover este item do carrinho?')) {
             cart.splice(idx, 1);
             renderCart();
             renderModalCart();
@@ -2049,7 +2045,7 @@
         });
 
         function cancelarCompra() {
-          if (confirm('Tem a certeza que deseja cancelar esta compra? O carrinho será limpo.')) {
+          if (confirm($('#t-msg-deseja-cancelar').text() || 'Tem a certeza que deseja cancelar esta compra? O carrinho será limpo.')) {
             cart = [];
             renderCart();
             voltarParaPos();
@@ -2253,7 +2249,7 @@
           // Modo "novo cliente"
           if ($('#painelClienteNovo').is(':visible')) {
             var nome = $('#novoClienteNome').val().trim();
-            return nome !== '' ? nome : 'Consumidor Final';
+            return nome !== '' ? nome : ($('#t-msg-consumidor-final').text() || 'Consumidor Final');
           }
           // Modo "cliente existente"
           var val = $('#selectCliente').val();
@@ -2261,7 +2257,7 @@
             var texto = $('#selectCliente option:selected').text();
             return texto.split(' \u2014')[0].trim();
           }
-          return 'Consumidor Final';
+          return $('#t-msg-consumidor-final').text() || 'Consumidor Final';
         }
 
         // Retorna o NIF do cliente
@@ -2323,7 +2319,7 @@
           if ((docType === 'FR' || docType === 'FT') && $('.pagamento-check:checked').length > 1 && $('#pagMULTICAIXA').is(':checked') && $('#pagCASH').is(':checked')) {
             var vMulticaixa = parseFloat($('#multicaixaValorPago').val()) || 0;
             if (vMulticaixa > total || vMulticaixa <= 0) {
-              alert('Valide o montante Multicaixa.'); return;
+              alert($('#t-msg-valide-multicaixa').text() || 'Valide o montante Multicaixa.'); return;
             }
           }
 
@@ -2344,7 +2340,7 @@
 
 
         $('#btnEmitirProformaModal').click(function () {
-          processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal', true);
+          processarVenda('/api/compras/proforma', $('#t-msg-proforma-sucesso').text() || 'Pró-forma emitida com sucesso!', '#btnEmitirProformaModal', true);
           // Não fechamos o modal aqui, o skipModalClose=true lida com isso
         });
 
@@ -2376,7 +2372,7 @@
           var matricula = $('#guiaMatricula').val().trim();
 
           if (!motorista || !matricula) {
-            alert('Por favor, preencha o motorista e a matrícula do veículo.');
+            alert($('#t-msg-preencha-motorista').text() || 'Por favor, preencha o motorista e a matrícula do veículo.');
             return;
           }
 
@@ -2496,7 +2492,7 @@
 
         function suspenderVenda() {
           if (cart.length === 0) {
-            alert("O carrinho está vazio.");
+            alert($('#t-msg-carrinho-vazio').text() || 'O carrinho está vazio.');
             return;
           }
 
@@ -2511,7 +2507,7 @@
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function () {
-              alert("Venda suspensa com sucesso!");
+              alert($('#t-msg-venda-suspensa-sucesso').text() || 'Venda suspensa com sucesso!');
               cart = [];
               renderCart();
               atualizarContadorSuspensas();
@@ -2533,7 +2529,7 @@
               const list = $('#listaVendasSuspensas');
               list.empty();
               if (vendas.length === 0) {
-                list.append('<div class="text-center p-4 text-muted">Nenhuma venda suspensa.</div>');
+                list.append('<div class="text-center p-4 text-muted" th:text="#{pos.msg.nenhuma_venda_suspensa}">Nenhuma venda suspensa.</div>');
               } else {
                 vendas.forEach(v => {
                   const data = new Date(v.dataHora).toLocaleString();
@@ -2569,7 +2565,7 @@
           if (!venda) return;
 
           if (cart.length > 0) {
-            if (!confirm("O carrinho actual tem itens. Deseja substituí-los pela venda suspensa?")) {
+            if (!confirm($('#t-msg-deseja-substituir-suspensa').text() || 'O carrinho actual tem itens. Deseja substituí-los pela venda suspensa?')) {
               return;
             }
           }
@@ -2587,7 +2583,7 @@
         }
 
         function eliminarVendaSuspensa(id, quiet = false) {
-          if (!quiet && !confirm("Deseja eliminar esta venda suspensa?")) return;
+          if (!quiet && !confirm($('#t-msg-deseja-eliminar-suspensa').text() || 'Deseja eliminar esta venda suspensa?')) return;
           $.ajax({
             url: '/api/vendas-suspensas/' + id,
             method: 'DELETE',
@@ -2608,7 +2604,7 @@
         });
 
         $('#emitirProforma').click(function () {
-          processarVenda('/api/compras/proforma', 'Pró-forma emitida com sucesso!', '#emitirProforma');
+          processarVenda('/api/compras/proforma', $('#t-msg-proforma-sucesso').text() || 'Pró-forma emitida com sucesso!', '#emitirProforma');
         });
 
         // Inicializar contador de vendas suspensas ao carregar a página
@@ -2620,7 +2616,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
           <div class="modal-header bg-warning text-dark border-0">
-            <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i> Vendas Suspensas <span
+            <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i> <span th:text="#{pos.suspensas.titulo}">Vendas Suspensas</span> <span
                 id="modalSuspendedCount" class="badge bg-dark text-white rounded-pill ms-2"
                 style="font-size: 0.8rem;"></span></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -2631,7 +2627,7 @@
             </div>
           </div>
           <div class="modal-footer border-0">
-            <button type="button" class="btn btn-secondary rounded-pill fw-bold" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-secondary rounded-pill fw-bold" data-bs-dismiss="modal" th:text="#{pos.btn.fechar}">Fechar</button>
           </div>
         </div>
       </div>
@@ -2646,17 +2642,16 @@
                 <i class="fas fa-check-circle" style="font-size: 4rem;"></i>
               </div>
             </div>
-            <h3 class="fw-bold text-dark mb-2">Venda Concluída!</h3>
-            <p class="text-muted mb-4">O documento foi gerado com sucesso. Pode descarregá-lo no botão abaixo ou
-              continuar para uma nova venda.</p>
+            <h3 class="fw-bold text-dark mb-2" th:text="#{pos.sucesso.titulo}">Venda Concluída!</h3>
+            <p class="text-muted mb-4" th:text="#{pos.sucesso.desc}">O documento foi gerado com sucesso. Pode descarregá-lo no botão abaixo ou continuar para uma nova venda.</p>
             <div class="d-grid gap-3">
               <button type="button" id="btnDownloadFatura" onclick="abrirPdfFatura()"
                 class="btn btn-lg btn-primary rounded-pill fw-bold py-3 shadow-sm">
-                <i class="fas fa-file-pdf me-2"></i> DESCARREGAR DOCUMENTO
+                <i class="fas fa-file-pdf me-2"></i> <span th:text="#{pos.sucesso.descarregar_doc}">DESCARREGAR DOCUMENTO</span>
               </button>
               <button type="button" class="btn btn-outline-secondary rounded-pill fw-bold py-2" data-bs-dismiss="modal"
                 onclick="voltarParaPos()">
-                FECHAR E VOLTAR AO POS
+                <span th:text="#{pos.sucesso.fechar_voltar}">FECHAR E VOLTAR AO POS</span>
               </button>
             </div>
           </div>
