@@ -728,6 +728,67 @@
   .letter-spacing-1 {
     letter-spacing: 1px;
   }
+
+  /* Restaurant Management Dashboard Styling */
+  .kpi-card-restaurante {
+    border: none;
+    border-radius: 20px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card-restaurante:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+  }
+  .table-card-modern {
+    border-radius: 20px;
+    border: 2px solid #e2e8f0;
+    background: #ffffff;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+  .table-card-modern:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 36px rgba(0,0,0,0.08);
+  }
+  .table-card-livre {
+    border-color: #10b981;
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+  }
+  .table-card-ocupada {
+    border-color: #f43f5e;
+    background: linear-gradient(180deg, #ffffff 0%, #fff1f2 100%);
+  }
+  .table-card-conta {
+    border-color: #f59e0b;
+    background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+    animation: glowAmber 2s infinite alternate;
+  }
+  @keyframes glowAmber {
+    from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
+    to { box-shadow: 0 0 22px rgba(245, 158, 11, 0.5); }
+  }
+  .pulse-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: pulseRed 1.6s infinite;
+  }
+  @keyframes pulseRed {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+  .bg-emerald-500 { background-color: #10b981 !important; }
+  .text-emerald-500 { color: #10b981 !important; }
+  .bg-rose-600 { background-color: #e11d48 !important; }
+  .text-rose-500 { color: #f43f5e !important; }
 </style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
@@ -748,93 +809,217 @@
                 <!-- Barra Superior de Atalhos e Ferramentas POS -->
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
                   <div class="d-flex gap-2 align-items-center flex-wrap">
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="abrirModalMesas()">
-                      <i class="fas fa-utensils text-warning me-1"></i> [F8] Mesas
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="abrirModalSplitBill()">
-                      <i class="fas fa-calculator text-primary me-1"></i> [F9] Split Bill
-                    </button>
+
+                    <!-- Botões de Restauração: visíveis conforme o modo restauração -->
+                    <div id="blocoMesas" th:classappend="${!modoRestauracao ? 'd-none' : ''}">
+                      <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="abrirModalMesas()">
+                        <i class="fas fa-utensils text-warning me-1"></i> [F8] Mesas
+                      </button>
+                    </div>
+                    <div id="blocoSplitBill" th:classappend="${!modoRestauracao ? 'd-none' : ''}">
+                      <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="abrirModalSplitBill()">
+                        <i class="fas fa-calculator text-primary me-1"></i> [F9] Split Bill
+                      </button>
+                    </div>
+
                     <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="PosEngine.pulsarGavetaDinheiro()">
                       <i class="fas fa-cash-register text-success me-1"></i> [F10] Gaveta
                     </button>
-                    <a href="/pos/kds" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill fw-bold">
+                    <a id="linkKds" href="/pos/kds" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill fw-bold" th:classappend="${!modoRestauracao ? 'd-none' : ''}">
                       <i class="fas fa-tv me-1"></i> Monitor Cozinha (KDS)
                     </a>
-                  </div>
-                  <div>
                     <span id="badgeOfflineCount" class="badge bg-warning text-dark p-2 rounded-pill shadow-sm" style="display:none; cursor:pointer;" onclick="PosEngine.sincronizarVendasOffline()">
                       <i class="fas fa-wifi-slash me-1"></i> Vendas Offline Pendentes: <span id="offlineVal">0</span>
                     </span>
                   </div>
+
+                 </div>
+
+                <!-- Aba de Navegação Superior do Modo Restauração -->
+                <div id="restauranteNavTabs" class="mb-3 pb-2 border-bottom" th:classappend="${!modoRestauracao ? 'd-none' : ''}">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex gap-2 align-items-center">
+                      <button type="button" class="btn btn-sm btn-primary rounded-pill fw-bold px-3 shadow-sm" id="btnTabSalao" onclick="switchRestauranteView('salao')">
+                        <i class="fas fa-layer-group text-warning me-1"></i> Salão & Mesas
+                      </button>
+                      <button type="button" class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3 shadow-sm bg-white" id="btnTabCardapio" onclick="switchRestauranteView('cardapio')">
+                        <i class="fas fa-book-open text-primary me-1"></i> Cardápio & Atendimento
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="search-wrapper mb-3">
-                  <i class="fas fa-search search-icon text-indigo-500"></i>
-                  <input type="text" id="search" class="form-control" th:placeholder="#{pos.procurar}">
-                </div>
-
-                <!-- Categorias Reais -->
-                <div class="d-flex gap-2 overflow-auto pb-2 hide-scrollbar" id="categoryFilters">
-                  <button class="btn btn-sm btn-primary rounded-pill px-4 fw-bold filter-category shadow-sm"
-                    data-category="0" th:text="#{pos.cat.todos}">Todos</button>
-                  <button th:each="cat : ${categorias}"
-                    class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold filter-category text-nowrap bg-white shadow-sm"
-                    th:data-category="${cat.id}" th:text="${cat.nome}">Categoria</button>
-                </div>
-              </div>
-
-              <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4" id="productList">
-                <div class="col product-item" th:each="produto : ${produtos}"
-                  th:attr="data-category-id=${produto.categoria != null ? produto.categoria.id : 0}">
-                  <div class="product-card"
-                    th:classappend="${produto.disponivel ? 'btn-quick-add active-card' : 'product-disabled'}"
-                    th:style="${produto.disponivel ? 'cursor: pointer;' : ''}" th:data-id="${produto.id}"
-                    th:data-nome="${produto.nome}" th:data-preco="${produto.preco}"
-                    th:data-iva="${produto.ivaPercentual}"
-                    th:data-stock="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : ''}"
-                    th:attr="data-bloqueado=${produtosBloqueados != null and produtosBloqueados.contains(produto.id)}">
-
-                    <div class="product-img-container">
-                      <div th:if="${!produto.disponivel}" class="out-of-stock-overlay clickable-when-disabled"
-                        th:data-id="${produto.id}" th:data-nome="${produto.nome}"
-                        style="pointer-events:auto;cursor:pointer;" th:text="#{pos.status.esgotado}">
-                        ESGOTADO
-                      </div>
-                      <!-- Overlay when product is blocked by a PARCIAL inventory -->
-                      <div th:if="${produtosBloqueados != null and produtosBloqueados.contains(produto.id)}"
-                        class="inventory-block-overlay clickable-when-disabled" th:data-id="${produto.id}"
-                        th:data-nome="${produto.nome}" style="pointer-events:auto;cursor:not-allowed;" th:text="#{pos.status.produto_inventario}">
-                        PRODUTO EM INVENTÁRIO
-                      </div>
-                      <img
-                        th:src="${produto.imagem != null && !produto.imagem.isEmpty() ? produto.imagem : '/dist/img/no-image.png'}"
-                        class="product-img" alt="Produto">
-                      <div class="btn-quick-add-float" th:if="${produto.disponivel}">
-                        <i class="fas fa-plus"></i>
-                      </div>
-                      <!-- Badge de Promoção -->
-                      <div th:if="${produto.emPromocao}" class="position-absolute top-0 start-0 m-2">
-                        <span class="badge rounded-pill bg-warning text-dark shadow-sm fw-bold animate-pulse">
-                          <i class="fas fa-fire me-1"></i> <span th:text="#{pos.badge.promo}">PROMO</span>
-                        </span>
+                <!-- VISÃO DEDICADA DE SALÃO & MESAS (Modo Restauração) -->
+                <div id="viewSalaoMesas" class="mb-4" th:classappend="${!modoRestauracao ? 'd-none' : ''}">
+                  
+                  <!-- KPIs Dashboard do Restaurante em Formato de Cartões -->
+                  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+                    <div class="col">
+                      <div class="kpi-card-restaurante" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <small class="text-white text-uppercase fw-bold letter-spacing-1" style="font-size: 0.75rem;">Mesas Livres</small>
+                            <h2 class="fw-bolder text-white m-0 mt-1" id="kpiMesasLivresVal">0</h2>
+                          </div>
+                          <div class="p-3 bg-white bg-opacity-20 rounded-circle text-white">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div class="product-info">
-                      <div class="product-name text-truncate" th:text="${produto.nome}">Nome do Produto</div>
-                      <div class="d-flex justify-content-between align-items-center mt-2">
-                        <div class="product-price">
-                          <span th:text="${produto.preco}">0</span>
+                    <div class="col">
+                      <div class="kpi-card-restaurante" style="background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <small class="text-white text-uppercase fw-bold letter-spacing-1" style="font-size: 0.75rem;">Mesas Ocupadas</small>
+                            <h2 class="fw-bolder text-white m-0 mt-1" id="kpiMesasOcupadasVal">0</h2>
+                          </div>
+                          <div class="p-3 bg-white bg-opacity-20 rounded-circle text-white">
+                            <i class="fas fa-user-friends fa-2x"></i>
+                          </div>
                         </div>
-                        <span th:if="${!produto.disponivel}" class="badge bg-danger" th:text="#{pos.status.esgotado}">ESGOTADO</span>
-                        <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i class="fas fa-percent me-1"></i> <span th:text="#{pos.badge.promo}">PROMO</span></span>
-                        <span
-                          th:if="${produto.disponivel && (produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5)}"
-                          class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> <span th:text="#{pos.status.baixo}">BAIXO</span></span>
                       </div>
-                      <div class="small text-muted mt-1 fw-bold d-flex justify-content-between">
-                        <span><span th:text="#{pos.stock}">Stock:</span> <span th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '∞'}">0</span></span>
-                        <span th:if="${produto.ivaPercentual != null}" class="text-info"><span th:text="#{pos.iva_label}">IVA</span> <span th:text="${produto.ivaPercentual}">0</span>%</span>
+                    </div>
+
+                    <div class="col">
+                      <div class="kpi-card-restaurante" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <small class="text-white text-uppercase fw-bold letter-spacing-1" style="font-size: 0.75rem;">Contas Pedidas</small>
+                            <h2 class="fw-bolder text-white m-0 mt-1" id="kpiMesasContaVal">0</h2>
+                          </div>
+                          <div class="p-3 bg-white bg-opacity-20 rounded-circle text-white">
+                            <i class="fas fa-receipt fa-2x"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col">
+                      <div class="kpi-card-restaurante" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div>
+                            <small class="text-white text-uppercase fw-bold letter-spacing-1" style="font-size: 0.75rem;">Faturação em Curso</small>
+                            <h3 class="fw-bolder text-white m-0 mt-1" id="kpiMesasTotalValorVal">0,00 Kz</h3>
+                          </div>
+                          <div class="p-3 bg-white bg-opacity-20 rounded-circle text-white">
+                            <i class="fas fa-coins fa-2x"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Painel do Salão de Atendimento -->
+                  <div class="card border-0 shadow-sm rounded-4 p-4" style="background: #ffffff;">
+                    <!-- Sub-header do Salão: Pesquisa, Filtro de Estado e Zonas -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 pb-3 border-bottom">
+                      <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <h5 class="fw-bold m-0 text-dark me-2"><i class="fas fa-utensils text-warning me-2"></i> Salão de Atendimento</h5>
+                        
+                        <!-- Filtros por Estado -->
+                        <div class="btn-group btn-group-sm rounded-pill p-1 bg-light border" role="group">
+                          <button type="button" class="btn btn-sm rounded-pill fw-bold btn-primary" id="btnFiltroMesaTodos" onclick="filtrarEstadoMesas('TODOS')">Todas</button>
+                          <button type="button" class="btn btn-sm rounded-pill fw-bold btn-light" id="btnFiltroMesaLivres" onclick="filtrarEstadoMesas('LIVRE')">🟢 Livres</button>
+                          <button type="button" class="btn btn-sm rounded-pill fw-bold btn-light" id="btnFiltroMesaOcupadas" onclick="filtrarEstadoMesas('OCUPADA')">🔴 Ocupadas</button>
+                        </div>
+                      </div>
+
+                      <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <!-- Campo de Pesquisa de Mesas -->
+                        <div class="input-group input-group-sm" style="max-width: 220px;">
+                          <span class="input-group-text bg-light border-end-0 rounded-start-pill text-muted"><i class="fas fa-search"></i></span>
+                          <input type="text" id="searchMesaInput" class="form-control bg-light border-start-0 rounded-end-pill" placeholder="Buscar mesa..." onkeyup="filtrarTextoMesa()">
+                        </div>
+
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill fw-bold" onclick="carregarGrelhaMesasSalao()" title="Atualizar Salão">
+                          <i class="fas fa-sync-alt me-1"></i> Atualizar
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm rounded-pill fw-bold px-3 shadow-sm" onclick="adicionarNovaMesa()">
+                          <i class="fas fa-plus-circle me-1"></i> + Nova Mesa
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Grelha Dinâmica de Mesas do Salão -->
+                    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-xl-4 g-4" id="grelhaMesasSalao">
+                      <!-- Carregado via JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- VISÃO DE CARDÁPIO & PRODUTOS -->
+                <div id="viewCardapioProdutos" th:classappend="${modoRestauracao ? 'd-none' : ''}">
+                  <div class="search-wrapper mb-3">
+                    <i class="fas fa-search search-icon text-indigo-500"></i>
+                    <input type="text" id="search" class="form-control" th:placeholder="#{pos.procurar}">
+                  </div>
+
+                  <!-- Categorias Reais -->
+                  <div class="d-flex gap-2 overflow-auto pb-2 hide-scrollbar mb-3" id="categoryFilters">
+                    <button class="btn btn-sm btn-primary rounded-pill px-4 fw-bold filter-category shadow-sm"
+                      data-category="0" th:text="#{pos.cat.todos}">Todos</button>
+                    <button th:each="cat : ${categorias}"
+                      class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-bold filter-category text-nowrap bg-white shadow-sm"
+                      th:data-category="${cat.id}" th:text="${cat.nome}">Categoria</button>
+                  </div>
+
+                  <!-- Grelha de Produtos/Cardápio -->
+                  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4" id="productList">
+                    <div class="col product-item" th:each="produto : ${produtos}"
+                      th:attr="data-category-id=${produto.categoria != null ? produto.categoria.id : 0}">
+                      <div class="product-card"
+                        th:classappend="${produto.disponivel ? 'btn-quick-add active-card' : 'product-disabled'}"
+                        th:style="${produto.disponivel ? 'cursor: pointer;' : ''}" th:data-id="${produto.id}"
+                        th:data-nome="${produto.nome}" th:data-preco="${produto.preco}"
+                        th:data-iva="${produto.ivaPercentual}"
+                        th:data-stock="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : ''}"
+                        th:attr="data-bloqueado=${produtosBloqueados != null and produtosBloqueados.contains(produto.id)}">
+
+                        <div class="product-img-container">
+                          <div th:if="${!produto.disponivel}" class="out-of-stock-overlay clickable-when-disabled"
+                            th:data-id="${produto.id}" th:data-nome="${produto.nome}"
+                            style="pointer-events:auto;cursor:pointer;" th:text="#{pos.status.esgotado}">
+                            ESGOTADO
+                          </div>
+                          <!-- Overlay when product is blocked by a PARCIAL inventory -->
+                          <div th:if="${produtosBloqueados != null and produtosBloqueados.contains(produto.id)}"
+                            class="inventory-block-overlay clickable-when-disabled" th:data-id="${produto.id}"
+                            th:data-nome="${produto.nome}" style="pointer-events:auto;cursor:not-allowed;" th:text="#{pos.status.produto_inventario}">
+                            PRODUTO EM INVENTÁRIO
+                          </div>
+                          <img
+                            th:src="${produto.imagem != null && !produto.imagem.isEmpty() ? produto.imagem : '/dist/img/no-image.png'}"
+                            class="product-img" alt="Produto">
+                          <div class="btn-quick-add-float" th:if="${produto.disponivel}">
+                            <i class="fas fa-plus"></i>
+                          </div>
+                          <!-- Badge de Promoção -->
+                          <div th:if="${produto.emPromocao}" class="position-absolute top-0 start-0 m-2">
+                            <span class="badge rounded-pill bg-warning text-dark shadow-sm fw-bold animate-pulse">
+                              <i class="fas fa-fire me-1"></i> <span th:text="#{pos.badge.promo}">PROMO</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        <div class="product-info">
+                          <div class="product-name text-truncate" th:text="${produto.nome}">Nome do Produto</div>
+                          <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div class="product-price">
+                              <span th:text="${produto.preco}">0</span>
+                            </div>
+                            <span th:if="${!produto.disponivel}" class="badge bg-danger" th:text="#{pos.status.esgotado}">ESGOTADO</span>
+                            <span th:if="${produto.emPromocao}" class="badge bg-info text-white"><i class="fas fa-percent me-1"></i> <span th:text="#{pos.badge.promo}">PROMO</span></span>
+                            <span
+                              th:if="${produto.disponivel && (produto.quantidadeEstoque != null && produto.quantidadeEstoque < 5)}"
+                              class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> <span th:text="#{pos.status.baixo}">BAIXO</span></span>
+                          </div>
+                          <div class="small text-muted mt-1 fw-bold d-flex justify-content-between">
+                            <span><span th:text="#{pos.stock}">Stock:</span> <span th:text="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : '∞'}">0</span></span>
+                            <span th:if="${produto.ivaPercentual != null}" class="text-info"><span th:text="#{pos.iva_label}">IVA</span> <span th:text="${produto.ivaPercentual}">0</span>%</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -845,8 +1030,8 @@
 
           <!-- Seção de Carrinho -->
           <div class="cart-section">
-            <!-- Banner de Mesa Ativa (Restauração) -->
-            <div id="activeTableBanner" class="alert alert-warning border-warning rounded-4 p-2 mb-3 d-none justify-content-between align-items-center shadow-sm">
+            <div id="activeTableBanner"
+                 class="alert alert-warning border-warning rounded-4 p-2 mb-3 d-none justify-content-between align-items-center shadow-sm">
               <div>
                 <i class="fas fa-utensils text-dark me-2"></i>
                 <strong id="activeTableName" class="text-dark fs-6">Mesa 01</strong>
@@ -2719,26 +2904,85 @@
               <h3 class="fw-bold text-success mt-2" id="totalAcumuladoMesaLabel">0,00 Kz</h3>
             </div>
 
-            <div class="d-grid gap-3">
+            <!-- Tabela de Produtos Pedidos/Consumidos na Mesa -->
+            <div class="mt-4 text-start">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-dark m-0">
+                  <i class="fas fa-utensils text-primary me-2"></i> Produtos Associados a esta Mesa
+                </h6>
+                <span class="badge bg-secondary rounded-pill px-3 py-1" id="totalItensMesaCount">0 Itens</span>
+              </div>
+              <div class="table-responsive rounded-3 border bg-white shadow-sm" style="max-height: 200px; overflow-y: auto;">
+                <table class="table table-hover table-sm align-middle mb-0" style="font-size: 0.85rem;">
+                  <thead class="bg-light sticky-top">
+                    <tr>
+                      <th class="ps-3">Produto</th>
+                      <th class="text-center">Qtd</th>
+                      <th class="text-end">Preço</th>
+                      <th class="text-end pe-3">Subtotal</th>
+                      <th class="text-center">KDS</th>
+                    </tr>
+                  </thead>
+                  <tbody id="corpoTabelaItensMesa">
+                    <tr>
+                      <td colspan="5" class="text-center py-3 text-muted">A carregar produtos da mesa...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
               <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" onclick="associarMesaAoCarrinho()">
-                <i class="fas fa-shopping-cart me-2"></i> Adicionar Produtos no Carrinho POS
+                <i class="fas fa-shopping-cart me-2"></i> + Adicionar Mais Produtos (Ir p/ Cardápio)
               </button>
-              <button class="btn btn-outline-primary btn-lg rounded-pill fw-bold" onclick="alterarPessoasMesa()">
+              <button class="btn btn-outline-primary rounded-pill fw-bold" onclick="alterarPessoasMesa()">
                 <i class="fas fa-user-plus me-2 text-primary"></i> Alterar / Adicionar Pessoas
               </button>
-              <button class="btn btn-outline-warning btn-lg rounded-pill text-dark fw-bold" onclick="enviarPedidoMesaKds()">
+              <button class="btn btn-outline-warning rounded-pill text-dark fw-bold" onclick="enviarPedidoMesaKds()">
                 <i class="fas fa-concierge-bell me-2 text-warning"></i> Enviar Carrinho Atual para Cozinha (KDS)
               </button>
-              <button class="btn btn-outline-info btn-lg rounded-pill text-dark fw-bold" onclick="abrirSplitBillDaMesa()">
+              <button class="btn btn-outline-info rounded-pill text-dark fw-bold" onclick="abrirSplitBillDaMesa()">
                 <i class="fas fa-calculator me-2 text-info"></i> Dividir Conta da Mesa (Split Bill)
               </button>
-              <button class="btn btn-danger btn-lg rounded-pill fw-bold" onclick="libertarMesaAtual()">
+              <button class="btn btn-danger rounded-pill fw-bold" onclick="libertarMesaAtual()">
                 <i class="fas fa-door-open me-2"></i> Libertar Mesa (Fechar Atendimento)
               </button>
             </div>
           </div>
           <div class="modal-footer border-0">
             <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DIRECCIONAMENTO PARA CONFIGURAÇÕES DE RESTAURAÇÃO -->
+    <div class="modal fade" id="modalConfigRestauracaoPrompt" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+          <div class="modal-header bg-dark text-white border-0">
+            <h5 class="modal-title fw-bold"><i class="fas fa-utensils text-warning me-2"></i> Activação da Gestão de Restauração</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4 text-center">
+            <div class="mb-3">
+              <div class="d-inline-block p-3 rounded-circle bg-warning bg-opacity-10 text-warning mb-3">
+                <i class="fas fa-sliders-h fa-3x"></i>
+              </div>
+              <h5 class="fw-bold text-dark">Deseja alterar a Gestão de Restauração?</h5>
+              <p class="text-muted" style="font-size: 0.95rem;">
+                Apenas o <strong>SuperUtilizador</strong> tem autorização para activar ou desactivar o modo de Restauração (Mesas, Salão e KDS). Aceda às <strong>Configurações Gerais</strong> no separador <strong>Parâmetros Gerais</strong>.
+              </p>
+            </div>
+            <div class="d-grid gap-2">
+              <a href="/configuracoes/geral?tab=geral" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                <i class="fas fa-cogs me-2"></i> Ir para Configurações Gerais (Parâmetros Gerais)
+              </a>
+              <button type="button" class="btn btn-outline-secondary rounded-pill fw-bold" data-bs-dismiss="modal">
+                Cancelar / Voltar ao POS
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2771,6 +3015,122 @@
           </div>
           <div class="modal-footer border-0">
             <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DIAGNÓSTICO E RESOLUÇÃO DE PROBLEMAS DA GAVETA -->
+    <div class="modal fade" id="modalAjudaGaveta" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+          <div class="modal-header bg-dark text-white border-0 py-3">
+            <h5 class="modal-title fw-bold"><i class="fas fa-cash-register text-success me-2"></i> Abertura de Gaveta & Diagnóstico</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            
+            <!-- Notificação de Estado -->
+            <div class="alert alert-success border-0 rounded-4 d-flex align-items-center mb-4 p-3 shadow-sm">
+              <i class="fas fa-paper-plane fa-2x me-3 text-success"></i>
+              <div>
+                <strong class="d-block text-dark">Sinal ESC/POS enviado com sucesso!</strong>
+                <small class="text-muted">Comando elétrico enviado para a porta de impressão: <code>ESC p 0 25 250</code>.</small>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-exclamation-triangle text-warning me-2"></i> Se a gaveta não abriu, verifique as causas e siga os passos abaixo:</h6>
+            
+            <div class="accordion accordion-flush mb-4 rounded-3 border" id="accordionGavetaAjuda">
+              
+              <!-- Causa 1: Cabo RJ11/RJ12 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingGaveta1">
+                  <button class="accordion-button fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGaveta1" aria-expanded="true" aria-controls="collapseGaveta1">
+                    <i class="fas fa-plug text-primary me-2"></i> 1. Cabo RJ11 / RJ12 Desconectado ou Folgado
+                  </button>
+                </h2>
+                <div id="collapseGaveta1" class="accordion-collapse collapse show" aria-labelledby="headingGaveta1" data-bs-parent="#accordionGavetaAjuda">
+                  <div class="accordion-body text-muted small">
+                    <p class="mb-1">A gaveta de dinheiro não se liga diretamente ao computador via USB. Ela necessita de ser conectada à impressora térmica através de um cabo RJ11/RJ12 (semelhante ao cabo telefónico).</p>
+                    <strong class="text-dark">Passos para Solução:</strong>
+                    <ol class="mb-0 mt-1 ps-3">
+                      <li>Verifique a parte traseira da impressora térmica e confirme se o cabo está ligado na porta <strong>DK</strong> (Drawer Kick) ou <strong>Cash Drawer</strong>.</li>
+                      <li>Desligue e volte a encaixar o cabo firmemente até ouvir o clique de encaixe.</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Causa 2: Impressora Desligada/Sem Papel -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingGaveta2">
+                  <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGaveta2" aria-expanded="false" aria-controls="collapseGaveta2">
+                    <i class="fas fa-print text-danger me-2"></i> 2. Impressora Térmica Desligada, Sem Papel ou com Erro
+                  </button>
+                </h2>
+                <div id="collapseGaveta2" class="accordion-collapse collapse" aria-labelledby="headingGaveta2" data-bs-parent="#accordionGavetaAjuda">
+                  <div class="accordion-body text-muted small">
+                    <p class="mb-1">O pulso elétrico é transmitido através da impressora. Se a impressora estiver desligada, sem papel ou com a tampa aberta, o sinal não chega à gaveta.</p>
+                    <strong class="text-dark">Passos para Solução:</strong>
+                    <ol class="mb-0 mt-1 ps-3">
+                      <li>Verifique se a luz verde <strong>POWER</strong> está acesa e se a luz vermelha de erro (<strong>ERROR/PAPER</strong>) está apagada.</li>
+                      <li>Substitua o rolo de papel térmico se estiver no fim.</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Causa 3: Fecho Mecânico / Chave -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingGaveta3">
+                  <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGaveta3" aria-expanded="false" aria-controls="collapseGaveta3">
+                    <i class="fas fa-key text-warning me-2"></i> 3. Fechadura Mecânica Trancada à Chave
+                  </button>
+                </h2>
+                <div id="collapseGaveta3" class="accordion-collapse collapse" aria-labelledby="headingGaveta3" data-bs-parent="#accordionGavetaAjuda">
+                  <div class="accordion-body text-muted small">
+                    <p class="mb-1">Se a fechadura frontal da gaveta estiver rodada para a posição de tranca manual, o solenoide elétrico é bloqueado mecanicamente.</p>
+                    <strong class="text-dark">Passos para Solução:</strong>
+                    <ol class="mb-0 mt-1 ps-3">
+                      <li>Insira a chave física na fechadura da gaveta.</li>
+                      <li>Gire a chave para a posição neutra/vertical (desbloqueada).</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Causa 4: Configuração no Driver do Windows -->
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingGaveta4">
+                  <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGaveta4" aria-expanded="false" aria-controls="collapseGaveta4">
+                    <i class="fas fa-desktop text-info me-2"></i> 4. Configuração do Driver de Impressão no SO (Windows)
+                  </button>
+                </h2>
+                <div id="collapseGaveta4" class="accordion-collapse collapse" aria-labelledby="headingGaveta4" data-bs-parent="#accordionGavetaAjuda">
+                  <div class="accordion-body text-muted small">
+                    <p class="mb-1">Algumas impressoras exigem a ativação da abertura da gaveta nas propriedades do driver do sistema operacional.</p>
+                    <strong class="text-dark">Passos para Solução:</strong>
+                    <ol class="mb-0 mt-1 ps-3">
+                      <li>No Windows, aceda a <code>Painel de Controlo > Dispositivos e Impressoras</code>.</li>
+                      <li>Clique com o botão direito na impressora térmica > <strong>Propriedades da Impressora</strong>.</li>
+                      <li>Aceda ao separador <strong>Configurações do Dispositivo</strong> (Device Settings).</li>
+                      <li>Altere a opção <code>Cash Drawer</code> para <strong>Open Before Printing</strong>.</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
+              <button type="button" class="btn btn-success rounded-pill fw-bold" onclick="PosEngine.pulsarGavetaDinheiro()">
+                <i class="fas fa-redo me-1"></i> Tentar Enviar Sinal Novamente
+              </button>
+              <button type="button" class="btn btn-outline-secondary rounded-pill fw-bold" data-bs-dismiss="modal">
+                Fechar Diagnóstico
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2833,8 +3193,282 @@
       }
     });
 
+    // ── Toggle e Visões do Modo Restauração ─────────────────────────────────────
+    let modoRestauracaoAtivo = /*[[${modoRestauracao}]]*/ true;
+
+    function switchRestauranteView(view) {
+      if (view === 'salao') {
+        $('#btnTabSalao').removeClass('btn-outline-primary bg-white').addClass('btn-primary text-white');
+        $('#btnTabCardapio').removeClass('btn-primary text-white').addClass('btn-outline-primary bg-white');
+        $('#viewSalaoMesas').removeClass('d-none');
+        $('#viewCardapioProdutos').addClass('d-none');
+        carregarGrelhaMesasSalao();
+      } else if (view === 'cardapio') {
+        $('#btnTabCardapio').removeClass('btn-outline-primary bg-white').addClass('btn-primary text-white');
+        $('#btnTabSalao').removeClass('btn-primary text-white').addClass('btn-outline-primary bg-white');
+        $('#viewSalaoMesas').addClass('d-none');
+        $('#viewCardapioProdutos').removeClass('d-none');
+      }
+    }
+
+    let filtroEstadoAtual = 'TODOS';
+
+    function filtrarEstadoMesas(estado) {
+      filtroEstadoAtual = estado;
+      $('#btnFiltroMesaTodos, #btnFiltroMesaLivres, #btnFiltroMesaOcupadas').removeClass('btn-primary').addClass('btn-light');
+      if (estado === 'TODOS') $('#btnFiltroMesaTodos').removeClass('btn-light').addClass('btn-primary');
+      if (estado === 'LIVRE') $('#btnFiltroMesaLivres').removeClass('btn-light').addClass('btn-primary');
+      if (estado === 'OCUPADA') $('#btnFiltroMesaOcupadas').removeClass('btn-light').addClass('btn-primary');
+      renderizarCartoesMesas();
+    }
+
+    function filtrarTextoMesa() {
+      renderizarCartoesMesas();
+    }
+
+    function carregarGrelhaMesasSalao() {
+      $.get('/api/pos/mesas', function (mesas) {
+        mesasCacheList = mesas || [];
+        
+        let livres = 0, ocupadas = 0, contas = 0, totalValor = 0;
+        mesasCacheList.forEach(m => {
+          if (m.status === 'OCUPADA') {
+            ocupadas++;
+            totalValor += (m.totalAcumulado || 0);
+          } else if (m.status === 'CONTA_PEDIDA') {
+            contas++;
+            totalValor += (m.totalAcumulado || 0);
+          } else {
+            livres++;
+          }
+        });
+
+        $('#kpiMesasLivresVal').text(livres);
+        $('#kpiMesasOcupadasVal').text(ocupadas);
+        $('#kpiMesasContaVal').text(contas);
+        $('#kpiMesasTotalValorVal').text(totalValor.toLocaleString('pt-AO', { minimumFractionDigits: 2 }) + ' Kz');
+
+        renderizarCartoesMesas();
+      });
+    }
+
+    function renderizarCartoesMesas() {
+      const grelha = $('#grelhaMesasSalao');
+      grelha.empty();
+
+      const busca = ($('#searchMesaInput').val() || '').toLowerCase().trim();
+
+      const mesasFiltradas = mesasCacheList.filter(m => {
+        if (filtroEstadoAtual !== 'TODOS' && m.status !== filtroEstadoAtual) {
+          if (filtroEstadoAtual === 'OCUPADA' && m.status !== 'CONTA_PEDIDA' && m.status !== 'OCUPADA') return false;
+          if (filtroEstadoAtual === 'LIVRE' && m.status !== 'LIVRE') return false;
+        }
+        if (busca) {
+          const num = (m.numeroMesa || '').toLowerCase();
+          const zona = (m.zona || '').toLowerCase();
+          return num.includes(busca) || zona.includes(busca);
+        }
+        return true;
+      });
+
+      if (mesasFiltradas.length === 0) {
+        grelha.append(`
+          <div class="col-12 text-center py-5">
+            <div class="p-4 rounded-4 bg-light d-inline-block">
+              <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+              <h6 class="fw-bold text-secondary">Nenhuma mesa encontrada.</h6>
+              <button class="btn btn-sm btn-success rounded-pill mt-2 fw-bold shadow-sm" onclick="adicionarNovaMesa()">
+                <i class="fas fa-plus me-1"></i> Criar Nova Mesa
+              </button>
+            </div>
+          </div>
+        `);
+        return;
+      }
+
+      mesasFiltradas.forEach(m => {
+        let cardClass = 'table-card-livre';
+        let badgeHtml = `<span class="badge bg-emerald-500 text-white rounded-pill px-3 py-1 fw-bold"><i class="fas fa-check-circle me-1"></i> LIVRE</span>`;
+        let iconHtml = `<i class="fas fa-chair fa-3x text-emerald-500 opacity-75 my-2"></i>`;
+        let footerActionHtml = `
+          <button class="btn btn-sm btn-outline-success rounded-pill w-100 fw-bold mt-2 shadow-sm" onclick="event.stopPropagation(); clicarMesaSalao(${m.id})">
+            <i class="fas fa-plus me-1"></i> Abrir Mesa
+          </button>`;
+
+        if (m.status === 'OCUPADA') {
+          cardClass = 'table-card-ocupada';
+          badgeHtml = `<span class="badge bg-rose-600 text-white rounded-pill px-3 py-1 fw-bold"><span class="pulse-dot me-1"></span> OCUPADA</span>`;
+          iconHtml = `<i class="fas fa-utensils fa-3x text-rose-500 opacity-75 my-2"></i>`;
+          footerActionHtml = `
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-sm btn-primary rounded-pill flex-grow-1 fw-bold shadow-sm" onclick="event.stopPropagation(); clicarMesaSalao(${m.id})">
+                <i class="fas fa-shopping-cart me-1"></i> Pedidos
+              </button>
+              <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" onclick="event.stopPropagation(); abrirModalOpcoesMesaPorId(${m.id})" title="Opções da Mesa">
+                <i class="fas fa-cog"></i>
+              </button>
+            </div>`;
+        } else if (m.status === 'CONTA_PEDIDA') {
+          cardClass = 'table-card-conta';
+          badgeHtml = `<span class="badge bg-amber-500 text-dark rounded-pill px-3 py-1 fw-bold"><i class="fas fa-receipt me-1"></i> CONTA PEDIDA</span>`;
+          iconHtml = `<i class="fas fa-file-invoice-dollar fa-3x text-amber-500 opacity-75 my-2"></i>`;
+          footerActionHtml = `
+            <button class="btn btn-sm btn-warning text-dark rounded-pill w-100 fw-bold mt-2 shadow-sm" onclick="event.stopPropagation(); clicarMesaSalao(${m.id})">
+              <i class="fas fa-cash-register me-1"></i> Finalizar & Fechar
+            </button>`;
+        }
+
+        const totalVal = (m.totalAcumulado || 0);
+        const totalFmt = totalVal.toLocaleString('pt-AO', { minimumFractionDigits: 2 }) + ' Kz';
+
+        const card = `
+        <div class="col">
+          <div class="table-card-modern ${cardClass} p-3 text-center h-100 shadow-sm" onclick="clicarMesaSalao(${m.id})">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              ${badgeHtml}
+              <small class="text-muted fw-bold"><i class="fas fa-users text-slate-400 me-1"></i> ${m.numeroPessoas || 1}/${m.capacidade || 4}</small>
+            </div>
+
+            ${iconHtml}
+
+            <h5 class="fw-bolder m-0 text-dark">${m.numeroMesa}</h5>
+            <small class="text-muted fw-bold d-block" style="font-size: 0.75rem;">${m.zona || 'Salão Principal'}</small>
+
+            <div class="mt-2 pt-2 border-top">
+              <div class="fs-6 fw-extrabold text-indigo-600">${totalFmt}</div>
+            </div>
+
+            ${footerActionHtml}
+          </div>
+        </div>`;
+        grelha.append(card);
+      });
+    }
+
+    function carregarItensDaMesa(mesaId) {
+      const tbody = $('#corpoTabelaItensMesa');
+      tbody.html('<tr><td colspan="5" class="text-center py-3 text-muted"><i class="fas fa-spinner fa-spin me-1"></i> A carregar produtos...</td></tr>');
+      $('#totalItensMesaCount').text('0 Itens');
+
+      $.get(`/api/pos/mesas/${mesaId}/itens`, function(itens) {
+        tbody.empty();
+        if (!itens || itens.length === 0) {
+          tbody.append('<tr><td colspan="5" class="text-center py-3 text-muted">Nenhum produto associado a esta mesa ainda.</td></tr>');
+          $('#totalItensMesaCount').text('0 Itens');
+          return;
+        }
+
+        $('#totalItensMesaCount').text(`${itens.length} ${itens.length === 1 ? 'Item' : 'Itens'}`);
+        
+        itens.forEach(item => {
+          let badgeStatus = '<span class="badge bg-secondary">PENDENTE</span>';
+          if (item.statusPedido === 'EM_PREPARACAO') badgeStatus = '<span class="badge bg-warning text-dark">EM PREPARAÇÃO</span>';
+          if (item.statusPedido === 'PRONTO') badgeStatus = '<span class="badge bg-info text-white">PRONTO</span>';
+          if (item.statusPedido === 'ENTREGUE') badgeStatus = '<span class="badge bg-success">ENTREGUE</span>';
+
+          const precoUnit = (item.precoUnitario || 0).toLocaleString('pt-AO', { minimumFractionDigits: 2 });
+          const totalItem = (item.total || 0).toLocaleString('pt-AO', { minimumFractionDigits: 2 });
+
+          const row = `
+            <tr>
+              <td class="ps-3 fw-bold text-dark">
+                ${item.nomeProduto}
+                ${item.observacao ? `<br><small class="text-muted italic"><i class="far fa-comment-dots me-1"></i>${item.observacao}</small>` : ''}
+              </td>
+              <td class="text-center fw-bold">${item.quantidade}</td>
+              <td class="text-end text-muted">${precoUnit} Kz</td>
+              <td class="text-end pe-3 fw-bold text-primary">${totalItem} Kz</td>
+              <td class="text-center">${badgeStatus}</td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+      }).fail(function() {
+        tbody.html('<tr><td colspan="5" class="text-center py-3 text-danger">Erro ao carregar produtos da mesa.</td></tr>');
+      });
+    }
+
+    function abrirModalOpcoesMesaPorId(id) {
+      const m = mesasCacheList.find(x => x.id === id);
+      if (m) {
+        $('#mesaSelecionadaId').val(m.id);
+        $('#mesaSelecionadaNumero').val(m.numeroMesa);
+        $('#tituloMesaSelecionada').html(`<i class="fas fa-utensils text-warning me-2"></i> ${m.numeroMesa} (${m.status})`);
+        $('#badgePessoasMesa').html(`<i class="fas fa-users me-1"></i> ${m.numeroPessoas || 1} Pessoas Registadas`);
+        const totalVal = (m.totalAcumulado || 0).toLocaleString('pt-AO', { minimumFractionDigits: 2 }) + ' Kz';
+        $('#totalAcumuladoMesaLabel').text(totalVal);
+
+        carregarItensDaMesa(m.id);
+
+        const modalEl = document.getElementById('modalOpcoesMesa');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      }
+    }
+
+    function clicarMesaSalao(id) {
+      const m = mesasCacheList.find(x => x.id === id);
+      if (!m) return;
+
+      if (m.status === 'LIVRE') {
+        const pessoas = prompt(`Abrir ${m.numeroMesa}. Quantas pessoas na mesa?`, "2");
+        if (pessoas && !isNaN(pessoas)) {
+          $.post(`/api/pos/mesas/${m.id}/abrir?pessoas=${parseInt(pessoas)}`, function (mesaAberta) {
+            definirMesaAtiva(mesaAberta || m);
+            switchRestauranteView('cardapio');
+            if (window.toastr) toastr.success(`${m.numeroMesa} aberta! Selecione os produtos no cardápio.`);
+          }).fail(function(err) {
+            alert("Erro ao abrir mesa: " + (err.responseText || "Erro de permissão"));
+          });
+        }
+      } else {
+        definirMesaAtiva(m);
+        abrirModalOpcoesMesaPorId(m.id);
+      }
+    }
+
+    function solicitarConfiguracaoRestauracao() {
+      const modalEl = document.getElementById('modalConfigRestauracaoPrompt');
+      if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      }
+    }
+
+    function toggleModoRestauracao() {
+      const $btn = $('#btnToggleRestauracao');
+      $btn.prop('disabled', true);
+
+      $.post('/api/pos/configuracao/toggle-restauracao', function(res) {
+        $btn.prop('disabled', false);
+        const ativo = res.modoRestauracaoAtivo;
+        modoRestauracaoAtivo = ativo;
+
+        if (ativo) {
+          $('#blocoMesas, #blocoSplitBill, #linkKds, #restauranteNavTabs').removeClass('d-none');
+          $btn.removeClass('btn-outline-secondary').addClass('btn-success')
+              .html('<i class="fas fa-store me-1"></i> <span>Restauração Ativa</span>')
+              .attr('title', 'Desativar Gestão por Mesas');
+          switchRestauranteView('salao');
+          if (window.toastr) toastr.success('Modo Restauração ativado! Gestão por mesas ativada.');
+        } else {
+          $('#blocoMesas, #blocoSplitBill, #linkKds, #restauranteNavTabs').addClass('d-none');
+          if (typeof desassociarMesa === 'function') desassociarMesa();
+          $btn.removeClass('btn-success').addClass('btn-outline-secondary')
+              .html('<i class="fas fa-store-slash me-1"></i> <span>Restauração Off</span>')
+              .attr('title', 'Ativar Gestão por Mesas (Restauração)');
+          switchRestauranteView('cardapio');
+          if (window.toastr) toastr.info('Modo Restauração desativado. POS em modo caixa simples.');
+        }
+      }).fail(function(err) {
+        $btn.prop('disabled', false);
+        alert('Erro ao alterar o modo de restauração: ' + (err.responseText || 'Erro desconhecido'));
+      });
+    }
+
     let mesaAtualObjeto = null;
     let mesasCacheList = [];
+
 
     function definirMesaAtiva(m) {
       mesaAtualObjeto = m;
@@ -3169,6 +3803,9 @@
           console.warn('Erro ao carregar pro-forma para edição:', err);
           alert('Não foi possível carregar a Pro-forma para edição: ' + err.message);
         });
+      if (typeof modoRestauracaoAtivo !== 'undefined' && modoRestauracaoAtivo) {
+        switchRestauranteView('salao');
+      }
     })();
   </script>
 

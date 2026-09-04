@@ -98,6 +98,16 @@ public class PosApiController {
     }
 
     /**
+     * Obter lista de produtos/itens associados a uma mesa
+     */
+    @GetMapping("/mesas/{id}/itens")
+    public ResponseEntity<?> getItensMesa(@PathVariable("id") Long id) {
+        Empresa e = getEmpresaAtual();
+        List<Map<String, Object>> res = posService.obterItensConsumoMesa(id, e);
+        return ResponseEntity.ok(res);
+    }
+
+    /**
      * Criar uma nova mesa para a empresa
      */
     @PostMapping("/mesas/criar")
@@ -169,6 +179,7 @@ public class PosApiController {
         return ResponseEntity.ok(res);
     }
 
+
     /**
      * Obter/Guardar configurações de POS (Esc/POS, Gaveta, Balança)
      */
@@ -178,4 +189,23 @@ public class PosApiController {
         ConfiguracaoPos cfg = posService.obterOuCriarConfiguracaoPos(e);
         return ResponseEntity.ok(cfg);
     }
+
+    /**
+     * Ativar / Desativar o Modo Restauração (gestão de mesas) para a empresa
+     */
+    @PostMapping("/configuracao/toggle-restauracao")
+    public ResponseEntity<?> toggleModoRestauracao() {
+        if (!ao.co.hzconsultoria.efacturacao.security.SecurityUtils.isSuperAdmin()) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("sucesso", false);
+            err.put("mensagem", "Apenas o SuperUtilizador tem autorização para alterar a Gestão de Restaurante.");
+            return ResponseEntity.status(403).body(err);
+        }
+        Empresa e = getEmpresaAtual();
+        ConfiguracaoPos cfg = posService.toggleModoRestauracao(e);
+        Map<String, Object> res = new HashMap<>();
+        res.put("modoRestauracaoAtivo", cfg.getModoRestauracaoAtivo());
+        return ResponseEntity.ok(res);
+    }
 }
+

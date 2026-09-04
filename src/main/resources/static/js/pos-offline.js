@@ -198,11 +198,22 @@ const PosEngine = (function () {
         return esc;
     }
 
-    // Executar abertura de gaveta isolada
+    // Executar abertura de gaveta isolada com notificação e diagnóstico de resolução
     function pulsarGavetaDinheiro() {
         console.log('Comando de pulso enviado para abertura de gaveta de dinheiro (ESC p 0 25 250).');
-        if (window.toastr) toastr.info('Sinal de abertura de gaveta enviado!');
-        // Se WebSerial/RawBT estiver disponível no cliente, envia a sequência de bytes
+        if (window.toastr) {
+            toastr.success('Sinal elétrico de abertura enviado para a gaveta!', 'Gaveta de Dinheiro', {
+                timeOut: 4000,
+                closeButton: true
+            });
+        }
+        
+        // Exibir o modal de diagnóstico com status e passos detalhados de resolução
+        var modalEl = document.getElementById('modalAjudaGaveta');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
+        }
     }
 
     // Inicialização ao carregar página

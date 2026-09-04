@@ -230,9 +230,11 @@ public class EfaturacaoApplication {
                                 "largura_papel VARCHAR(20) DEFAULT '80mm', " +
                                 "abrir_gaveta_auto BOOLEAN DEFAULT TRUE, " +
                                 "prefixo_balanca VARCHAR(10) DEFAULT '20', " +
-                                "modo_restauração_ativo BOOLEAN DEFAULT TRUE, " +
+                                "modo_restauracao_ativo BOOLEAN DEFAULT TRUE, " +
                                 "atalhos_teclado_json TEXT" +
                                 ")");
+                jdbcTemplate.execute(
+                        "ALTER TABLE configuracoes_pos ADD COLUMN IF NOT EXISTS modo_restauracao_ativo BOOLEAN DEFAULT TRUE");
                 System.out.println(">>> Migração: Tabelas de POS, Mesas e KDS verificadas/criadas com sucesso.");
             } catch (Exception e) {
                 System.err.println(">>> Erro ao migrar tabelas POS/Mesas/KDS: " + e.getMessage());

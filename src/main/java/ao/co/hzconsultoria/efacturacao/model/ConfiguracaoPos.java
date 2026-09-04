@@ -18,7 +18,8 @@ public class ConfiguracaoPos {
     private Boolean abrirGavetaAuto = true;
     private String prefixoBalanca = "20"; // Código EAN-13 de balança de retalho
 
-    private Boolean modoRestauraçãoAtivo = true;
+    @Column(name = "modo_restauracao_ativo")
+    private Boolean modoRestauracaoAtivo = true;
 
     @Column(columnDefinition = "TEXT")
     private String atalhosTecladoJson; // Guarda mapeamento customizado de teclas se necessário
@@ -44,8 +45,12 @@ public class ConfiguracaoPos {
     public String getPrefixoBalanca() { return prefixoBalanca; }
     public void setPrefixoBalanca(String prefixoBalanca) { this.prefixoBalanca = prefixoBalanca; }
 
-    public Boolean getModoRestauraçãoAtivo() { return modoRestauraçãoAtivo; }
-    public void setModoRestauraçãoAtivo(Boolean modoRestauraçãoAtivo) { this.modoRestauraçãoAtivo = modoRestauraçãoAtivo; }
+    public Boolean getModoRestauracaoAtivo() { return modoRestauracaoAtivo != null ? modoRestauracaoAtivo : true; }
+    public void setModoRestauracaoAtivo(Boolean modoRestauracaoAtivo) { this.modoRestauracaoAtivo = modoRestauracaoAtivo; }
+
+    // Métodos de compatibilidade
+    public Boolean getModoRestauraçãoAtivo() { return getModoRestauracaoAtivo(); }
+    public void setModoRestauraçãoAtivo(Boolean modo) { setModoRestauracaoAtivo(modo); }
 
     public String getAtalhosTecladoJson() { return atalhosTecladoJson; }
     public void setAtalhosTecladoJson(String atalhosTecladoJson) { this.atalhosTecladoJson = atalhosTecladoJson; }

@@ -68,6 +68,7 @@
                                     <p class="text-muted small" th:text="#{config.geral.pref_desc}">Defina o nome do sistema, o tema global e opções de backup automático.</p>
                                 </div>
                                 <form th:action="@{/configuracoes/geral/salvar}" th:object="${sistema}" method="post">
+                                    <input type="hidden" name="empresaIdContext" th:value="${empresaIdContext}">
                                     <div class="row">
                                          <div class="form-group col-md-6">
                                             <label th:text="#{config.geral.nome_sistema}">Nome do Sistema</label>
@@ -95,6 +96,15 @@
                                             <div class="custom-control custom-switch mt-2">
                                                 <input type="checkbox" class="custom-control-input" id="exibirDatasValidade" th:field="*{exibirDatasValidade}">
                                                 <label class="custom-control-label" for="exibirDatasValidade" th:text="#{config.geral.exibir_datas}">Exibir Datas de Fabrico e Expiração nos Produtos</label>
+                                            </div>
+                                            <div class="custom-control custom-switch mt-3 p-3 bg-light rounded-3 border">
+                                                <input type="checkbox" class="custom-control-input" id="modoRestauracaoAtivo" name="modoRestauracaoAtivo" th:checked="${modoRestauracaoAtivo}" th:disabled="${!isSuperAdmin}">
+                                                <label class="custom-control-label fw-bold text-dark" for="modoRestauracaoAtivo">
+                                                    <i class="fas fa-utensils text-warning me-2"></i> Activar Gestão de Restauração (Mesas & Atendimento no POS)
+                                                </label>
+                                                <span th:if="${!isSuperAdmin}" class="badge bg-warning text-dark ms-2"><i class="fas fa-lock me-1"></i> Apenas SuperUtilizador</span>
+                                                <small class="d-block text-muted mt-1" th:if="${isSuperAdmin}">Habilita a gestão de salão, mesas, envio de comandas para a cozinha (KDS) e divisão de conta no módulo POS.</small>
+                                                <small class="d-block text-warning fw-bold mt-1" th:if="${!isSuperAdmin}"><i class="fas fa-exclamation-circle me-1"></i> Apenas o SuperUtilizador tem autorização para alterar a Gestão de Restaurante.</small>
                                             </div>
                                         </div>
                                     </div>

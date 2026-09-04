@@ -26,7 +26,11 @@ import ao.co.hzconsultoria.efacturacao.service.FaturaService;
 import ao.co.hzconsultoria.efacturacao.service.GuiaRemessaService;
 import ao.co.hzconsultoria.efacturacao.service.VendaService;
 import ao.co.hzconsultoria.efacturacao.service.ProdutoService;
+import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoPos;
+import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.model.GuiaRemessa;
+import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
+import ao.co.hzconsultoria.efacturacao.service.PosService;
 import ao.co.hzconsultoria.efacturacao.service.StockService;
 import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
 
@@ -67,6 +71,12 @@ public class CompraController {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private PosService posService;
+
+    @Autowired
+    private EmpresaRepository empresaRepository;
+
     @GetMapping("/pos")
     public String abrirPDV(Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (!caixaService.isCaixaAberto()) {
@@ -91,10 +101,22 @@ public class CompraController {
             categorias = categoriaRepository.findAll();
         }
 
+        // Carregar configuração POS (inclui modo restauração)
+        Empresa empresa = null;
+        if (empresaId != null) {
+            empresa = empresaRepository.findById(empresaId).orElse(null);
+        }
+        if (empresa == null) {
+            empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
+        }
+        ConfiguracaoPos configPos = posService.obterOuCriarConfiguracaoPos(empresa);
+        boolean modoRestauracao = configPos.getModoRestauracaoAtivo();
+
         model.addAttribute("produtos", produtos);
         model.addAttribute("categorias", categorias);
         model.addAttribute("clientes", clienteRepository.findAll());
         model.addAttribute("caixaAberto", caixaService.getCaixaAbertoAtual());
+        model.addAttribute("modoRestauracao", modoRestauracao);
         java.util.Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();
         model.addAttribute("produtosBloqueados", bloqueados);
         return "pos";

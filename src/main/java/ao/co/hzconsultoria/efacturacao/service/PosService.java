@@ -170,4 +170,39 @@ public class PosService {
         return configuracaoPosRepository.findByEmpresaId(empresa.getId())
                 .orElseGet(() -> configuracaoPosRepository.save(new ConfiguracaoPos(empresa)));
     }
+
+    @Transactional
+    public ConfiguracaoPos toggleModoRestauracao(Empresa empresa) {
+        ConfiguracaoPos config = obterOuCriarConfiguracaoPos(empresa);
+        Boolean atual = config.getModoRestauracaoAtivo();
+        config.setModoRestauracaoAtivo(!atual);
+        return configuracaoPosRepository.save(config);
+    }
+
+    public List<Map<String, Object>> obterItensConsumoMesa(Long mesaId, Empresa empresa) {
+        if (mesaId == null) return Collections.emptyList();
+        List<PedidoCozinha> pedidos = pedidoCozinhaRepository.findByMesaIdAndStatusNot(mesaId, "CANCELADO");
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        for (PedidoCozinha p : pedidos) {
+            if (p.getItens() != null) {
+                for (ItemPedidoCozinha item : p.getItens()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("pedidoId", p.getId());
+                    map.put("numeroPedido", p.getNumeroPedido());
+                    map.put("statusPedido", p.getStatus());
+                    map.put("dataHora", p.getDataHora());
+                    map.put("produtoId", item.getProduto() != null ? item.getProduto().getId() : null);
+                    map.put("nomeProduto", item.getNomeProduto());
+                    map.put("quantidade", item.getQuantidade());
+                    double preco = item.getProduto() != null ? item.getProduto().getPreco() : 0.0;
+                    map.put("precoUnitario", preco);
+                    map.put("total", preco * item.getQuantidade());
+                    map.put("observacao", item.getObservacao());
+                    resultado.add(map);
+                }
+            }
+        }
+        return resultado;
+    }
 }

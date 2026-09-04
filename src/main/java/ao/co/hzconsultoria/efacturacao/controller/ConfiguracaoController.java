@@ -67,6 +67,10 @@ public class ConfiguracaoController {
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     @Autowired
     private ao.co.hzconsultoria.efacturacao.service.UserRegistrationService userRegistrationService;
+    @Autowired
+    private ao.co.hzconsultoria.efacturacao.service.PosService posService;
+    @Autowired
+    private ConfiguracaoPosRepository configuracaoPosRepository;
 
     @Value("${app.upload.logo.dir:./uploads/logo/}")
     private String logoUploadDir;
@@ -492,8 +496,18 @@ public class ConfiguracaoController {
     }
 
     @GetMapping("/geral")
-    public String geral(Model model) {
+    public String geral(@RequestParam(name = "empresaId", required = false) Long empresaIdParam, Model model) {
+        boolean isSuperAdmin = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.isSuperAdmin();
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        // SuperAdmin sem empresa na sessão pode usar o parâmetro ou a primeira empresa do sistema
+        if (empresaId == null && isSuperAdmin) {
+            if (empresaIdParam != null) {
+                empresaId = empresaIdParam;
+            } else {
+                List<Empresa> todas = empresaRepository.findAll();
+                if (!todas.isEmpty()) empresaId = todas.get(0).getId();
+            }
+        }
         if (empresaId != null) {
             ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
             Sistema s = new Sistema();
@@ -595,12 +609,43 @@ public class ConfiguracaoController {
             model.addAttribute("segurancaCfg", cfgService.getSeguranca());
         }
 
+        // Modo Restauração Config
+        Empresa eAtual = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
+        ConfiguracaoPos posCfg = posService.obterOuCriarConfiguracaoPos(eAtual);
+        model.addAttribute("modoRestauracaoAtivo", posCfg.getModoRestauracaoAtivo());
+        // Passar o empresaId ao template para o POST conseguir identificar a empresa
+        model.addAttribute("empresaIdContext", empresaId);
+
         return "configuracoes/geral";
     }
 
     @PostMapping("/geral/salvar")
-    public String salvarSistema(@ModelAttribute Sistema sistema, RedirectAttributes redirectAttributes) {
+    public String salvarSistema(@ModelAttribute Sistema sistema,
+            @RequestParam(name = "modoRestauracaoAtivo", required = false, defaultValue = "false") Boolean modoRestauracaoAtivo,
+            @RequestParam(name = "empresaIdContext", required = false) Long empresaIdContext,
+            RedirectAttributes redirectAttributes) {
+        boolean isSuperAdmin = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.isSuperAdmin();
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        // SuperAdmin sem empresa na sessão usa o contexto enviado pelo formulário
+        if (empresaId == null && isSuperAdmin) {
+            if (empresaIdContext != null) {
+                empresaId = empresaIdContext;
+            } else {
+                List<Empresa> todas = empresaRepository.findAll();
+                if (!todas.isEmpty()) empresaId = todas.get(0).getId();
+            }
+        }
+        Empresa e = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
+        if (isSuperAdmin) {
+            // SuperAdmin pode alterar mesmo que a empresa venha de findAll()
+            // Se empresa for null (sistema sem empresas), criar config genérica de fallback
+            if (e != null) {
+                ConfiguracaoPos posCfg = posService.obterOuCriarConfiguracaoPos(e);
+                posCfg.setModoRestauracaoAtivo(modoRestauracaoAtivo);
+                configuracaoPosRepository.save(posCfg);
+            }
+        }
+
         if (empresaId != null) {
             ConfiguracaoEmpresa config = configuracaoEmpresaService.obterConfiguracao(empresaId);
             config.setSistemaNome(sistema.getNome());
