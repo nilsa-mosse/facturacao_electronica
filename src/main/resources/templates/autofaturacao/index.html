@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper bg-light">
+            <div class="container-fluid px-4 py-4">
+                
+                <!-- Page Header -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-6">
+                        <h2 class="fw-800 text-dark"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i> <span>Autofaturação (Art. 9º DP 312/18)</span></h2>
+                        <p class="text-muted">Emissão de faturas em nome do fornecedor/particular com retenção na fonte.</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a th:href="@{/autofaturacao/nova}" class="btn btn-primary shadow-sm px-4 py-2 rounded-pill">
+                            <i class="fas fa-plus me-2"></i> <span>Emitir Autofaturação</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="premium-card grad-primary">
+                            <div class="info-box-icon"><i class="fas fa-file-alt"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Emitidas (AF)</span>
+                                <span class="info-box-number" th:text="${totalCount}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="premium-card grad-success">
+                            <div class="info-box-icon"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Volume Total de Compras</span>
+                                <span class="info-box-number" th:text="${#numbers.formatDecimal(totalGeral, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="premium-card grad-warning">
+                            <div class="info-box-icon"><i class="fas fa-percentage"></i></div>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Imposto Retido</span>
+                                <span class="info-box-number" th:text="${#numbers.formatDecimal(totalRetencoes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Banner Legal -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert bg-white border-0 shadow-sm d-flex align-items-center p-3" style="border-radius: 12px; border-left: 4px solid #17a2b8 !important;">
+                            <div class="me-3 text-info">
+                                <i class="fas fa-balance-scale fa-2x"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1 text-dark">Enquadramento Legal AGT</h6>
+                                <p class="small text-muted mb-0">
+                                    Conforme o Artigo 9.º do Decreto Presidencial n.º 312/18, a autofaturação é permitida na aquisição de bens a particulares e produtores agrícolas. Os documentos emitidos (AF) contêm o indicador <code class="bg-light px-1 text-dark rounded">SelfBillingIndicator = 1</code> e transmissão de retenção na fonte.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Content -->
+                <div class="card border-0 shadow-sm overflow-hidden">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fs-16 fw-700 text-dark">Histórico de Faturas de Autofaturação</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light small fw-bold text-muted uppercase">
+                                    <tr>
+                                        <th class="ps-4">Nº Autofatura</th>
+                                        <th>Data Emissão</th>
+                                        <th>Fornecedor / Particular</th>
+                                        <th>Valor Ilíquido</th>
+                                        <th>Retenção Fonte</th>
+                                        <th>Valor Líquido Pago</th>
+                                        <th class="text-center">AGT Status</th>
+                                        <th class="text-center pe-4">Acções</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="af : ${autofaturas}">
+                                        <td class="ps-4">
+                                            <span class="fw-bold text-primary" th:text="${af.numeroFatura}">AF 2026/1</span>
+                                        </td>
+                                        <td th:text="${#dates.format(af.dataEmissao, 'dd/MM/yyyy HH:mm')}">13/08/2026</td>
+                                        <td>
+                                            <span class="fw-bold text-dark" th:text="${af.compra?.nomeCliente != null ? af.compra.nomeCliente : 'Particular'}">Fornecedor</span>
+                                            <div class="small text-muted" th:text="'NIF: ' + ${af.compra?.nifCliente != null ? af.compra.nifCliente : '999999999'}"></div>
+                                        </td>
+                                        <td class="fw-bold" th:text="${#numbers.formatDecimal(af.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</td>
+                                        <td class="text-danger fw-bold" th:text="${#numbers.formatDecimal(af.valorRetencao, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</td>
+                                        <td class="text-success fw-bold" th:text="${#numbers.formatDecimal(af.valorPago, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</td>
+                                        <td class="text-center">
+                                            <span th:if="${af.enviadaAGT}" class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-1">
+                                                <i class="fas fa-check-circle me-1"></i> Validada AGT
+                                            </span>
+                                            <span th:unless="${af.enviadaAGT}" class="badge bg-soft-warning text-warning border border-warning rounded-pill px-3 py-1">
+                                                <i class="fas fa-clock me-1"></i> Pendente AGT
+                                            </span>
+                                        </td>
+                                        <td class="text-center pe-4">
+                                            <a th:href="@{'/uploads/faturas/' + ${af.numeroFatura} + '.pdf'}" target="_blank" class="btn btn-white btn-sm border shadow-sm" title="Descarregar PDF">
+                                                <i class="fas fa-file-pdf text-danger me-1"></i> PDF
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(autofaturas)}">
+                                        <td colspan="8" class="text-center py-5 text-muted bg-white">
+                                            <i class="fas fa-file-invoice mb-3 fs-40 opacity-20"></i>
+                                            <p class="mb-0">Ainda não foram emitidas faturas de autofaturação.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Navigation -->
+                <div class="row mt-4">
+                    <div class="col-12 text-end">
+                        <a th:href="@{/dashboard}" class="btn btn-light shadow-sm border px-4 py-2">
+                            <i class="fas fa-arrow-left me-2"></i> <span>Voltar ao Dashboard</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var msgSucesso = /*[[${mensagemSucesso}]]*/ null;
+            var msgErro = /*[[${mensagemErro}]]*/ null;
+            if(msgSucesso) {
+                $(document).Toasts('create', { class: 'bg-success', title: 'Sucesso', autohide: true, delay: 5000, body: msgSucesso });
+            }
+            if(msgErro) {
+                $(document).Toasts('create', { class: 'bg-danger', title: 'Erro', autohide: true, delay: 7000, body: msgErro });
+            }
+        });
+    </script>
+</body>
+</html>

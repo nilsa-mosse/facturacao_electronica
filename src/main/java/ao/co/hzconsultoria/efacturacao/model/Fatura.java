@@ -33,6 +33,9 @@ public class Fatura {
     private Date dataImpressao;
     private Date dataEmail;
     private Boolean emailEnviado = false;
+    private Double valorRetencao = 0.0; // Imposto retido na fonte (AF / Serviços)
+    private String formaPagamento; // Forma de pagamento (para RC)
+    private String observacoes;
 
     @ManyToOne
     @JoinColumn(name = "empresa_id")
@@ -115,6 +118,15 @@ public class Fatura {
     
     public Boolean getEmailEnviado() { return emailEnviado; }
     public void setEmailEnviado(Boolean emailEnviado) { this.emailEnviado = emailEnviado; }
+    
+    public Double getValorRetencao() { return valorRetencao; }
+    public void setValorRetencao(Double valorRetencao) { this.valorRetencao = valorRetencao; }
+    
+    public String getFormaPagamento() { return formaPagamento; }
+    public void setFormaPagamento(String formaPagamento) { this.formaPagamento = formaPagamento; }
+    
+    public String getObservacoes() { return observacoes; }
+    public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
     
     public Fatura getFaturaReferencia() { return faturaReferencia; }
     public void setFaturaReferencia(Fatura faturaReferencia) { this.faturaReferencia = faturaReferencia; }

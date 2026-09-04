@@ -141,7 +141,7 @@ public class ConfiguracaoController {
             @RequestParam(value = "estabelecimentoIds", required = false) List<Long> estabelecimentoIds,
             RedirectAttributes redirectAttributes) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
         if ("SUPERADMIN".equals(user.getRole()))
             user.setRole("OPERADOR");
         boolean isNew = (user.getId() == null);
@@ -228,7 +228,7 @@ public class ConfiguracaoController {
     @PostMapping("/series/salvar")
     public String salvarSerie(@ModelAttribute Serie serie, RedirectAttributes redirectAttributes) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        Empresa empresa = empresaRepository.findById(empresaId).orElse(null);
+        Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
         serie.setEmpresa(empresa);
         serieRepository.save(serie);
         redirectAttributes.addFlashAttribute("mensagem",
@@ -390,7 +390,19 @@ public class ConfiguracaoController {
             result.put("mensagem", "Email enviado para " + dest);
         } catch (Exception e) {
             result.put("sucesso", false);
-            result.put("mensagem", "Erro: " + e.getMessage());
+            String erroMsg = (e.getMessage() != null) ? e.getMessage() : e.toString();
+            if (erroMsg.contains("534-5.7.9") || erroMsg.contains("Application-specific password required") || erroMsg.contains("InvalidSecondFactor")) {
+                erroMsg = "Erro de Autenticação (Gmail / Google):\n\n"
+                        + "O Google exige uma 'Palavra-passe de aplicação' (App Password) para envio de emails via SMTP quando a autenticação de dois fatores está ativa.\n\n"
+                        + "Passos para resolver:\n"
+                        + "1. Aceda às definições da sua Conta Google (myaccount.google.com)\n"
+                        + "2. Ative a 'Verificação em duas etapas' na secção Segurança\n"
+                        + "3. Pesquise por 'Palavras-passe de aplicação' (App Passwords) e crie um código para 'Correio'\n"
+                        + "4. Copie a palavra-passe de 16 caracteres gerada e cole-a no campo 'Palavra-passe SMTP' do Kwanza ERP.";
+            } else {
+                erroMsg = "Erro: " + erroMsg;
+            }
+            result.put("mensagem", erroMsg);
         }
         return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(result);
     }
@@ -764,7 +776,7 @@ public class ConfiguracaoController {
         if (isSuperAdmin && empresaSelecionadaId != null) {
             empresa = empresaRepository.findById(empresaSelecionadaId).orElse(null);
         } else {
-            empresa = empresaRepository.findById(currentEmpresaId).orElse(null);
+            empresa = (currentEmpresaId != null) ? empresaRepository.findById(currentEmpresaId).orElse(null) : null;
         }
         estabelecimento.setEmpresa(empresa);
         estabelecimentoRepository.save(estabelecimento);

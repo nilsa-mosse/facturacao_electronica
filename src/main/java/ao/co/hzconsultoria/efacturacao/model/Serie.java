@@ -24,6 +24,14 @@ public class Serie {
 
     private String descricao;
 
+    // Campos de Integração AGT (Solicitação de Série v1.2)
+    private String codigoSerieAgt;
+    private String tipoDocumento = "FT";
+    private String numeroEstabelecimento = "SEDE";
+    private String indicadorContingencia = "N";
+    private Long quantidadeAutorizada;
+    private String estadoAgt = "PENDENTE";
+
     @ManyToOne
     @JoinColumn(name = "empresa_id")
     private Empresa empresa;
@@ -49,4 +57,22 @@ public class Serie {
 
     public String getDescricao() { return descricao; }
     public void setDescricao(String descricao) { this.descricao = descricao; }
+
+    public String getCodigoSerieAgt() { return codigoSerieAgt; }
+    public void setCodigoSerieAgt(String codigoSerieAgt) { this.codigoSerieAgt = codigoSerieAgt; }
+
+    public String getTipoDocumento() { return tipoDocumento; }
+    public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
+
+    public String getNumeroEstabelecimento() { return numeroEstabelecimento; }
+    public void setNumeroEstabelecimento(String numeroEstabelecimento) { this.numeroEstabelecimento = numeroEstabelecimento; }
+
+    public String getIndicadorContingencia() { return indicadorContingencia; }
+    public void setIndicadorContingencia(String indicadorContingencia) { this.indicadorContingencia = indicadorContingencia; }
+
+    public Long getQuantidadeAutorizada() { return quantidadeAutorizada; }
+    public void setQuantidadeAutorizada(Long quantidadeAutorizada) { this.quantidadeAutorizada = quantidadeAutorizada; }
+
+    public String getEstadoAgt() { return estadoAgt; }
+    public void setEstadoAgt(String estadoAgt) { this.estadoAgt = estadoAgt; }
 }

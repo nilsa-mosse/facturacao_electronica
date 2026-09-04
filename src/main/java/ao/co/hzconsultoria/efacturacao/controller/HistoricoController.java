@@ -553,26 +553,18 @@ public class HistoricoController {
             return "redirect:/historico-vendas";
         }
 
-        double acumulado = (compra.getValorPago() != null ? compra.getValorPago() : 0.0) + valorPago;
-        compra.setValorPago(acumulado);
-        if (metodoPagamento != null && !metodoPagamento.isEmpty()) {
-            compra.setMetodoPagamentoRegistado(metodoPagamento);
-        }
-        if (dataVencimento != null && !dataVencimento.isEmpty()) {
-            compra.setDataVencimento(LocalDate.parse(dataVencimento));
-        }
-        double total = compra.getTotal() != null ? compra.getTotal() : 0.0;
-        if (acumulado >= total) {
-            compra.setStatus("PAGA");
-            compra.setDataPagamento(LocalDateTime.now());
-            redirectAttributes.addFlashAttribute("mensagemSucesso",
-                    "Pagamento total registado. Factura marcada como PAGA.");
-        } else {
-            compra.setStatus("PARCIALMENTE_PAGA");
-            redirectAttributes.addFlashAttribute("mensagemSucesso",
-                    String.format("Pagamento parcial de %.2f Kz registado.", valorPago));
-        }
-        compraRepository.save(compra);
+        // Localizar a fatura FT associada
+        List<Fatura> faturasFT = faturaRepository.findAll().stream()
+                .filter(f -> f.getCompra() != null && f.getCompra().getId().equals(id)
+                        && ("FT".equals(f.getTipoDocumento()) || f.getTipoDocumento() == null))
+                .sorted((a, b) -> b.getId().compareTo(a.getId()))
+                .collect(Collectors.toList());
+
+        Fatura faturaFT = faturasFT.isEmpty() ? null : faturasFT.get(0);
+        Fatura reciboRC = faturaService.emitirReciboAutonomoRC(faturaFT, valorPago, metodoPagamento, "Recibo de quitação de factura");
+
+        redirectAttributes.addFlashAttribute("mensagemSucesso",
+                String.format("Pagamento de %.2f Kz registado com sucesso! Recibo de Quitação (RC) emitido: %s", valorPago, reciboRC.getNumeroFatura()));
         return "redirect:/historico-vendas";
     }
 

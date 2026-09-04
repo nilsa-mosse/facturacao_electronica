@@ -375,7 +375,12 @@ public class AgtService {
                     taxObj.put("taxCode", "ISE");
                     taxObj.put("taxPercentage", 0);
                     taxObj.put("taxContribution", 0);
-                    taxObj.put("taxExemptionCode", "M00"); // Código genérico de isenção
+                    String codigoIsencao = "M00";
+                    if (item.getProduto() != null && item.getProduto().getCodigoIsencao() != null
+                            && !item.getProduto().getCodigoIsencao().trim().isEmpty()) {
+                        codigoIsencao = item.getProduto().getCodigoIsencao().trim();
+                    }
+                    taxObj.put("taxExemptionCode", codigoIsencao);
                 } else {
                     taxObj.put("taxCode", "NOR");
                     taxObj.put("taxPercentage", ivaTax);
@@ -441,5 +446,179 @@ public class AgtService {
 
     private AgtResponse falha(String mensagem) {
         return new AgtResponse(false, null, "FALHA_ENVIO", mensagem);
+    }
+
+    /**
+     * Solicita a criação/aprovação de uma série de facturação à AGT (/servicos/solicitar.html).
+     */
+    public boolean solicitarSerieAgt(ao.co.hzconsultoria.efacturacao.model.Serie serie) {
+        try {
+            List<ConfiguracaoAGT> configs = agtRepository.findAll();
+            if (configs.isEmpty()) {
+                log.warn("Nenhuma configuração da AGT encontrada para solicitar série.");
+                return false;
+            }
+            ConfiguracaoAGT config = configs.get(0);
+            String urlBase = config.getUrlApi();
+            if (urlBase == null || urlBase.trim().isEmpty()) return false;
+
+            String urlSolicitar = urlBase.replace("/registar.html", "/solicitar.html");
+            if (!urlSolicitar.contains("/solicitar.html")) {
+                urlSolicitar = urlBase.replaceAll("/registar$", "") + "/solicitar.html";
+            }
+
+            ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity configSistema =
+                    configuracaoSistemaRepository.findById(1L).orElse(new ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity());
+
+            String privateKeyPem = configSistema.getAgtPrivateKey();
+            String nifEmissor = "5001636863";
+            if (serie.getEmpresa() != null && serie.getEmpresa().getNif() != null) {
+                nifEmissor = serie.getEmpresa().getNif();
+            }
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("schemaVersion", "1.2");
+            payload.put("submissionUUID", java.util.UUID.randomUUID().toString());
+            payload.put("taxRegistrationNumber", nifEmissor);
+
+            java.text.SimpleDateFormat isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            isoFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            payload.put("submissionTimeStamp", isoFormat.format(new java.util.Date()));
+
+            // softwareInfo
+            Map<String, Object> softwareInfo = new HashMap<>();
+            Map<String, Object> softwareInfoDetail = new HashMap<>();
+            softwareInfoDetail.put("productId", configSistema.getSistemaNome() != null ? configSistema.getSistemaNome() : "Kwanza ERP");
+            softwareInfoDetail.put("productVersion", configSistema.getSistemaVersao() != null ? configSistema.getSistemaVersao() : "1.0.0");
+            softwareInfoDetail.put("softwareValidationNumber", configSistema.getAgtCertificadoNumero() != null ? configSistema.getAgtCertificadoNumero() : "C_134");
+
+            String jsonSoftwareDetail = toJson(softwareInfoDetail);
+            String jwsSoftwareSignature = ao.co.hzconsultoria.efacturacao.util.JwsUtil.gerarJwsRs256(jsonSoftwareDetail, privateKeyPem);
+            softwareInfo.put("softwareInfoDetail", softwareInfoDetail);
+            softwareInfo.put("jwsSoftwareSignature", jwsSoftwareSignature);
+            payload.put("softwareInfo", softwareInfo);
+
+            int anoSerie = serie.getAno() != null ? serie.getAno() : java.time.Year.now().getValue();
+            String tipoDoc = serie.getTipoDocumento() != null ? serie.getTipoDocumento() : "FT";
+            String estabNum = serie.getNumeroEstabelecimento() != null ? serie.getNumeroEstabelecimento() : "SEDE";
+            String contingencia = serie.getIndicadorContingencia() != null ? serie.getIndicadorContingencia() : "N";
+
+            payload.put("seriesYear", anoSerie);
+            payload.put("documentType", tipoDoc);
+            payload.put("establishmentNumber", estabNum);
+            payload.put("seriesContingencyIndicator", contingencia);
+
+            // Assinatura JWS dos campos da série
+            Map<String, Object> seriesToSign = new HashMap<>();
+            seriesToSign.put("taxRegistrationNumber", nifEmissor);
+            seriesToSign.put("establishmentNumber", estabNum);
+            seriesToSign.put("seriesYear", anoSerie);
+            seriesToSign.put("documentType", tipoDoc);
+            String jwsSignature = ao.co.hzconsultoria.efacturacao.util.JwsUtil.gerarJwsRs256(toJson(seriesToSign), privateKeyPem);
+            payload.put("jwsSignature", jwsSignature);
+
+            log.info("[AGT Série] Solicitando criação de série para {} ({}) no endpoint {}", tipoDoc, anoSerie, urlSolicitar);
+            System.out.println("==================== [AGT PAYLOAD SOLICITAR SÉRIE] ====================");
+            System.out.println(toJsonPretty(payload));
+            System.out.println("=======================================================================");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (config.getToken() != null && !config.getToken().trim().isEmpty()) {
+                headers.set("Authorization", "Bearer " + config.getToken());
+            }
+            headers.set("X-AGT-Modo", config.getModo() != null ? config.getModo() : "HOMOLOGACAO");
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+            ResponseEntity<Map> response = restTemplate.exchange(urlSolicitar, HttpMethod.POST, request, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map body = response.getBody();
+                if (body.containsKey("seriesFEResult")) {
+                    Map res = (Map) body.get("seriesFEResult");
+                    String seriesCode = String.valueOf(res.get("seriesCode"));
+                    serie.setCodigoSerieAgt(seriesCode);
+                    serie.setEstadoAgt("APROVADA_AGT");
+                    log.info("[AGT Série] Série aprovada com sucesso. Código AGT: {}", seriesCode);
+                    return true;
+                }
+            }
+            serie.setEstadoAgt("SOLICITADA_HOMOLOGACAO");
+            return true;
+        } catch (Exception e) {
+            log.error("[AGT Série] Erro ao solicitar série na AGT: {}", e.getMessage());
+            serie.setEstadoAgt("FALHA_SOLICITACAO");
+            return false;
+        }
+    }
+
+    /**
+     * Consulta o estado de um documento processado assincronamente na AGT (/servicos/consultar.html).
+     */
+    public AgtResponse consultarEstadoFaturaAgt(String requestId) {
+        try {
+            List<ConfiguracaoAGT> configs = agtRepository.findAll();
+            if (configs.isEmpty()) {
+                return falha("Configuração da AGT não encontrada.");
+            }
+            ConfiguracaoAGT config = configs.get(0);
+            String urlBase = config.getUrlApi();
+            if (urlBase == null || urlBase.trim().isEmpty()) {
+                return falha("URL da API não configurada.");
+            }
+
+            String urlConsultar = urlBase.replace("/registar.html", "/consultar.html");
+            if (!urlConsultar.contains("/consultar.html")) {
+                urlConsultar = urlBase.replaceAll("/registar$", "") + "/consultar.html";
+            }
+
+            ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity configSistema =
+                    configuracaoSistemaRepository.findById(1L).orElse(new ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity());
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("schemaVersion", "1.2");
+            payload.put("submissionUUID", java.util.UUID.randomUUID().toString());
+            payload.put("taxRegistrationNumber", "5001636863");
+
+            java.text.SimpleDateFormat isoFormat = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+            isoFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            payload.put("submissionTimeStamp", isoFormat.format(new java.util.Date()));
+
+            // softwareInfo
+            Map<String, Object> softwareInfo = new HashMap<>();
+            Map<String, Object> softwareInfoDetail = new HashMap<>();
+            softwareInfoDetail.put("productId", configSistema.getSistemaNome() != null ? configSistema.getSistemaNome() : "Kwanza ERP");
+            softwareInfoDetail.put("productVersion", configSistema.getSistemaVersao() != null ? configSistema.getSistemaVersao() : "1.0.0");
+            softwareInfoDetail.put("softwareValidationNumber", configSistema.getAgtCertificadoNumero() != null ? configSistema.getAgtCertificadoNumero() : "C_134");
+
+            String jsonSoftwareDetail = toJson(softwareInfoDetail);
+            String jwsSoftwareSignature = ao.co.hzconsultoria.efacturacao.util.JwsUtil.gerarJwsRs256(jsonSoftwareDetail, configSistema.getAgtPrivateKey());
+            softwareInfo.put("softwareInfoDetail", softwareInfoDetail);
+            softwareInfo.put("jwsSoftwareSignature", jwsSoftwareSignature);
+            payload.put("softwareInfo", softwareInfo);
+
+            payload.put("requestID", requestId);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (config.getToken() != null && !config.getToken().trim().isEmpty()) {
+                headers.set("Authorization", "Bearer " + config.getToken());
+            }
+            headers.set("X-AGT-Modo", config.getModo() != null ? config.getModo() : "HOMOLOGACAO");
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+            ResponseEntity<Map> response = restTemplate.exchange(urlConsultar, HttpMethod.POST, request, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map body = response.getBody();
+                String documentStatus = body.containsKey("documentStatus") ? String.valueOf(body.get("documentStatus")) : "VALIDADA";
+                boolean sucesso = "VALIDADA".equalsIgnoreCase(documentStatus) || "VALIDADO".equalsIgnoreCase(documentStatus) || "APROVADA".equalsIgnoreCase(documentStatus);
+                return new AgtResponse(sucesso, requestId, documentStatus, "Consulta efetuada com sucesso: " + documentStatus);
+            }
+            return falha("Resposta da consulta HTTP " + response.getStatusCode());
+        } catch (Exception e) {
+            log.error("[AGT Polling] Erro ao consultar estado da fatura requestID {}: {}", requestId, e.getMessage());
+            return falha("Erro ao consultar estado: " + e.getMessage());
+        }
     }
 }

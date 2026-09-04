@@ -90,12 +90,13 @@ public class SecurityConfig {
 
             .and()
             .csrf()
-                // Endpoints do POS que podem ser chamados por hardware externo (TPA físico)
+                // Endpoints do POS que podem ser chamados por hardware externo (TPA físico) ou PWA
                 .ignoringAntMatchers(
                     "/api/compras", "/api/compras/single",
                     "/api/compras/proforma", "/api/compras/guia",
                     "/finalizarVenda",
                     "/api/vendas-suspensas/**",
+                    "/api/pos/**",
                     "/ativar-licenca",
                     "/setup-inicial/**",
                     "/clientes/api/adicionar",

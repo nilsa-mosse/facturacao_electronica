@@ -1,7 +1,10 @@
-const CACHE_NAME = 'efacturacao-v3';
+const CACHE_NAME = 'efacturacao-v4';
 const urlsToCache = [
   '/',
   '/login',
+  '/pos',
+  '/pos/kds',
+  '/js/pos-offline.js',
   '/css/premium-style.css',
   '/plugins/adminlte/css/adminlte.min.css',
   '/plugins/fontawesome/css/all.min.css',

@@ -113,11 +113,13 @@ public class EfaturacaoApplication {
                     ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT defaultConfig = new ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT();
                     defaultConfig.setEnvioAgtAtivo(true);
                     defaultConfig.setModo("HOMOLOGACAO");
-                    defaultConfig.setUrlApi("https://portaldoparceiro.hml.minfin.gov.ao/api/v1/faturacao-electronica/registar");
+                    defaultConfig.setUrlApi(
+                            "https://portaldoparceiro.hml.minfin.gov.ao/api/v1/faturacao-electronica/registar");
                     defaultConfig.setLimiteDocumentosDiarios(1000);
                     defaultConfig.setDocumentosEnviadosHoje(0);
                     agtConfigRepo.save(defaultConfig);
-                    System.out.println(">>> AGT Compliance: Configuração inicial da AGT (Modo Homologação, Envio Ativo) inicializada com sucesso.");
+                    System.out.println(
+                            ">>> AGT Compliance: Configuração inicial da AGT (Modo Homologação, Envio Ativo) inicializada com sucesso.");
                 }
             } catch (Exception e) {
                 System.err.println(">>> Erro ao verificar/gerar par de chaves RSA 2048: " + e.getMessage());
@@ -185,6 +187,55 @@ public class EfaturacaoApplication {
                 System.out.println(">>> Migração: Tabela 'licencas_geradas' verificada/criada com sucesso.");
             } catch (Exception e) {
                 System.err.println(">>> Erro ao migrar tabela licencas_geradas: " + e.getMessage());
+            }
+
+            // Migração: Criar tabelas para módulo POS, Mesas e KDS
+            try {
+                jdbcTemplate.execute(
+                        "CREATE TABLE IF NOT EXISTS mesas (" +
+                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                "numero_mesa VARCHAR(50) NOT NULL, " +
+                                "zona VARCHAR(100), " +
+                                "capacidade INT DEFAULT 4, " +
+                                "status VARCHAR(50) DEFAULT 'LIVRE', " +
+                                "total_acumulado DECIMAL(19, 2) DEFAULT 0.00, " +
+                                "data_abertura DATETIME NULL, " +
+                                "numero_pessoas INT DEFAULT 1, " +
+                                "empresa_id BIGINT NULL" +
+                                ")");
+                jdbcTemplate.execute(
+                        "CREATE TABLE IF NOT EXISTS pedidos_cozinha (" +
+                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                "numero_pedido VARCHAR(50), " +
+                                "mesa_id BIGINT NULL, " +
+                                "status VARCHAR(50) DEFAULT 'PENDENTE', " +
+                                "data_hora DATETIME NULL, " +
+                                "observacoes VARCHAR(500), " +
+                                "empresa_id BIGINT NULL" +
+                                ")");
+                jdbcTemplate.execute(
+                        "CREATE TABLE IF NOT EXISTS itens_pedido_cozinha (" +
+                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                "pedido_cozinha_id BIGINT NULL, " +
+                                "produto_id BIGINT NULL, " +
+                                "nome_produto VARCHAR(255), " +
+                                "quantidade DECIMAL(19, 2) DEFAULT 1.00, " +
+                                "observacao VARCHAR(255), " +
+                                "status VARCHAR(50) DEFAULT 'PENDENTE'" +
+                                ")");
+                jdbcTemplate.execute(
+                        "CREATE TABLE IF NOT EXISTS configuracoes_pos (" +
+                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                "empresa_id BIGINT UNIQUE, " +
+                                "largura_papel VARCHAR(20) DEFAULT '80mm', " +
+                                "abrir_gaveta_auto BOOLEAN DEFAULT TRUE, " +
+                                "prefixo_balanca VARCHAR(10) DEFAULT '20', " +
+                                "modo_restauração_ativo BOOLEAN DEFAULT TRUE, " +
+                                "atalhos_teclado_json TEXT" +
+                                ")");
+                System.out.println(">>> Migração: Tabelas de POS, Mesas e KDS verificadas/criadas com sucesso.");
+            } catch (Exception e) {
+                System.err.println(">>> Erro ao migrar tabelas POS/Mesas/KDS: " + e.getMessage());
             }
 
             // Migração: Garantir integridade referencial mínima na venda_suspensa

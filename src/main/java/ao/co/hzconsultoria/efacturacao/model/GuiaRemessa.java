@@ -12,6 +12,7 @@ public class GuiaRemessa {
     private Long id;
 
     private String numeroGuia;
+    private String tipoDocumento = "GR"; // GR (Guia Remessa) ou GT (Guia Transporte)
     private LocalDateTime dataEmissao;
     
     @ManyToOne
@@ -55,6 +56,8 @@ public class GuiaRemessa {
     public void setId(Long id) { this.id = id; }
     public String getNumeroGuia() { return numeroGuia; }
     public void setNumeroGuia(String numeroGuia) { this.numeroGuia = numeroGuia; }
+    public String getTipoDocumento() { return tipoDocumento; }
+    public void setTipoDocumento(String tipoDocumento) { this.tipoDocumento = tipoDocumento; }
     public LocalDateTime getDataEmissao() { return dataEmissao; }
     public void setDataEmissao(LocalDateTime dataEmissao) { this.dataEmissao = dataEmissao; }
     public Cliente getCliente() { return cliente; }

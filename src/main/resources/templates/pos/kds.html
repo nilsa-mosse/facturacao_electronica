@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>KDS - Monitor da Cozinha | KwanzaERP</title>
+  <meta th:name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+  <meta th:name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}"/>
+  <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
+  <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
+  <script th:src="@{/plugins/jquery/jquery-3.6.0.min.js}"></script>
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    .kds-header {
+      background: #1e293b;
+      padding: 1rem 2rem;
+      border-bottom: 2px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .kds-card {
+      background: #1e293b;
+      border-radius: 16px;
+      border: 2px solid #334155;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+    .kds-card.status-pendente {
+      border-color: #ef4444;
+    }
+    .kds-card.status-preparacao {
+      border-color: #f59e0b;
+    }
+    .kds-card.status-pronto {
+      border-color: #10b981;
+    }
+    .kds-card-header {
+      padding: 1rem 1.5rem;
+      background: rgba(255,255,255,0.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+    .kds-card-body {
+      padding: 1.5rem;
+    }
+    .kds-item {
+      font-size: 1.2rem;
+      font-weight: 600;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed #334155;
+      display: flex;
+      justify-content: space-between;
+    }
+    .kds-item-obs {
+      font-size: 0.9rem;
+      color: #f87171;
+      font-style: italic;
+    }
+    .kds-btn-action {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 12px;
+      border: none;
+      transition: transform 0.1s;
+    }
+    .kds-btn-action:active {
+      transform: scale(0.97);
+    }
+  </style>
+
+  <script>
+    $.ajaxSetup({
+      beforeSend: function (xhr) {
+        const token = $('meta[name="_csrf"]').attr('content');
+        const header = $('meta[name="_csrf_header"]').attr('content');
+        if (token && header && token !== '') {
+          xhr.setRequestHeader(header, token);
+        }
+      }
+    });
+
+    window.mudarStatus = function(pedidoId, novoStatus) {
+      $.post('/api/pos/kds/' + pedidoId + '/status?status=' + novoStatus, function() {
+        location.reload();
+      }).fail(function(err) {
+        alert("Erro ao atualizar estado do pedido: " + (err.responseText || "Erro de conexão"));
+      });
+    };
+  </script>
+</head>
+<body>
+
+  <header class="kds-header">
+    <div class="d-flex align-items-center gap-3">
+      <i class="fas fa-utensils text-warning fa-2x"></i>
+      <div>
+        <h3 class="m-0 fw-bold">MONITOR DA COZINHA (KDS)</h3>
+        <small class="text-slate-400" th:text="${empresa != null ? empresa.nome : 'KwanzaERP'}">Empresa</small>
+      </div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="badge bg-danger fs-6 px-3 py-2" id="clock">00:00:00</span>
+      <button class="btn btn-outline-light btn-sm" onclick="location.reload()"><i class="fas fa-sync"></i> Atualizar</button>
+    </div>
+  </header>
+
+  <main class="container-fluid p-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4" id="kdsOrdersContainer">
+      <div class="col" th:each="pedido : ${pedidos}">
+        <div class="kds-card" th:classappend="${pedido.status == 'PENDENTE' ? 'status-pendente' : (pedido.status == 'EM_PREPARACAO' ? 'status-preparacao' : 'status-pronto')}">
+          <div class="kds-card-header">
+            <div>
+              <span class="fs-4 fw-bold text-white" th:text="${pedido.numeroPedido}">KDS-001</span>
+              <div class="badge bg-primary fs-6 ms-2" th:text="${pedido.mesa != null ? pedido.mesa.numeroMesa : 'Balcão'}">Mesa 01</div>
+            </div>
+            <span class="badge" th:classappend="${pedido.status == 'PENDENTE' ? 'bg-danger' : (pedido.status == 'EM_PREPARACAO' ? 'bg-warning text-dark' : 'bg-success')}" th:text="${pedido.status}">PENDENTE</span>
+          </div>
+
+          <div class="kds-card-body">
+            <div class="text-slate-400 mb-3 fs-6">
+              <i class="far fa-clock me-1"></i> <span th:text="${#dates.format(pedido.dataHora, 'HH:mm:ss')}">12:30</span>
+            </div>
+
+            <div class="kds-items-list mb-3">
+              <div class="kds-item" th:each="item : ${pedido.itens}">
+                <div>
+                  <span class="text-warning fw-bold me-2" th:text="${item.quantidade + 'x'}">1x</span>
+                  <span th:text="${item.nomeProduto}">Hamburguer Duplo</span>
+                  <div th:if="${item.observacao != null and !item.observacao.isEmpty()}" class="kds-item-obs" th:text="${'Obs: ' + item.observacao}">Obs: Sem cebola</div>
+                </div>
+              </div>
+            </div>
+
+            <div th:if="${pedido.observacoes != null and !pedido.observacoes.isEmpty()}" class="alert alert-dark border-warning p-2 fs-6 mb-3">
+              <i class="fas fa-exclamation-circle text-warning me-1"></i> <span th:text="${pedido.observacoes}">Atenção</span>
+            </div>
+
+            <div class="mt-3">
+              <button th:if="${pedido.status == 'PENDENTE'}" class="btn btn-warning kds-btn-action text-dark" th:onclick="'mudarStatus(' + ${pedido.id} + ', \'EM_PREPARACAO\')'">
+                <i class="fas fa-fire me-2"></i> Iniciar Preparação
+              </button>
+
+              <button th:if="${pedido.status == 'EM_PREPARACAO'}" class="btn btn-success kds-btn-action" th:onclick="'mudarStatus(' + ${pedido.id} + ', \'PRONTO\')'">
+                <i class="fas fa-check-circle me-2"></i> Marcar como Pronto
+              </button>
+
+              <button th:if="${pedido.status == 'PRONTO'}" class="btn btn-outline-success kds-btn-action" th:onclick="'mudarStatus(' + ${pedido.id} + ', \'ENTREGUE\')'">
+                <i class="fas fa-hand-holding me-2"></i> Entregue ao Cliente
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const clockEl = document.getElementById('clock');
+      if (clockEl) clockEl.innerText = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Auto refresh a cada 10 segundos
+    setTimeout(function() {
+      location.reload();
+    }, 10000);
+  </script>
+</body>
+</html>

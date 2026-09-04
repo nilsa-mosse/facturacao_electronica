@@ -42,4 +42,7 @@ public interface FaturaRepository extends JpaRepository<Fatura, Long> {
     java.util.Optional<Fatura> findByNumeroFaturaAndEmpresa_Id(String numeroFatura, Long empresaId);
 
     List<Fatura> findByTipoDocumentoAndEmpresa_IdOrderByDataEmissaoDesc(String tipoDocumento, Long empresaId);
+
+    @Query(value = "SELECT * FROM fatura WHERE enviada_agt = false AND codigo_agt IS NOT NULL AND codigo_agt != '' AND codigo_agt NOT LIKE 'ERRO:%'", nativeQuery = true)
+    List<Fatura> findFaturasPendentesPollingAgt();
 }

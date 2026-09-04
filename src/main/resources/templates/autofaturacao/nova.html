@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper bg-light">
+            <div class="container-fluid px-4 py-4">
+                
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="fw-800 text-dark"><i class="fas fa-file-signature me-2 text-primary"></i> Nova Autofaturação (AF)</h2>
+                        <p class="text-muted">Emitir fatura de compra a fornecedor/particular (Decreto Presidencial n.º 312/18).</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/autofaturacao/salvar}" method="post" id="formAutofatura">
+                    <div class="row g-4">
+                        
+                        <!-- Dados do Fornecedor / Particular -->
+                        <div class="col-md-12">
+                            <div class="card border-0 shadow-sm rounded-12">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-user-tag me-2 text-primary"></i> Identificação do Fornecedor / Particular</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold small">Nome Completo / Denominação Social</label>
+                                            <input type="text" name="nomeCliente" class="form-control shadow-sm" placeholder="Ex: João Manuel (Produtor Local)" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold small">NIF (ou 999999999)</label>
+                                            <input type="text" name="nifCliente" class="form-control shadow-sm" placeholder="999999999" value="999999999" required>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold small">Taxa Retenção Fonte (%)</label>
+                                            <select name="percentualRetencao" class="form-select shadow-sm" id="selectRetencao">
+                                                <option value="6.5" selected>6.5% - Retenção de Serviços / Bens Padrão</option>
+                                                <option value="10.0">10.0% - Outros Serviços / Particulares</option>
+                                                <option value="0.0">0.0% - Isento de Retenção</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold small">Morada / Local de Compra</label>
+                                            <input type="text" name="moradaCliente" class="form-control shadow-sm" placeholder="Ex: Mercado do 30, Viana, Luanda">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold small">Observações Legais</label>
+                                            <input type="text" name="observacoes" class="form-control shadow-sm" value="Emitida nos termos do Artigo 9.º do Decreto Presidencial n.º 312/18">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Itens Adquiridos -->
+                        <div class="col-md-12">
+                            <div class="card border-0 shadow-sm rounded-12">
+                                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-boxes me-2 text-primary"></i> Bens / Artigos Adquiridos</h5>
+                                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="adicionarLinhaItem()">
+                                        <i class="fas fa-plus me-1"></i> Adicionar Artigo
+                                    </button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0" id="tabelaItens">
+                                            <thead class="bg-light small fw-bold text-muted">
+                                                <tr>
+                                                    <th class="ps-4">Descrição do Produto / Bem</th>
+                                                    <th style="width: 150px;">Quantidade</th>
+                                                    <style> .w-200 { width: 200px; } </style>
+                                                    <th class="w-200">Preço Unitário (Kz)</th>
+                                                    <th class="w-200">Subtotal (Kz)</th>
+                                                    <th class="text-center" style="width: 80px;">Acção</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="ps-4">
+                                                        <input type="text" name="itens[0].nomeProduto" class="form-control form-control-sm" placeholder="Ex: Milho em grão (Saco 50kg)" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" name="itens[0].quantidade" class="form-control form-control-sm qtd-input" value="1.00" onchange="calcularTotais()" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" name="itens[0].preco" class="form-control form-control-sm preco-input" value="0.00" onchange="calcularTotais()" required>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" name="itens[0].subtotal" class="form-control form-control-sm subtotal-input bg-light" readonly>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-link text-danger p-0" onclick="removerLinha(this)"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white p-4">
+                                    <div class="row justify-content-end">
+                                        <div class="col-md-5">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="text-muted">Total Ilíquido:</span>
+                                                <span class="fw-bold fs-16" id="lblTotalIliquid">0,00 Kz</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2 text-danger">
+                                                <span>Retenção na Fonte (<span id="lblPercRet">6.5%</span>):</span>
+                                                <span class="fw-bold fs-16" id="lblValorRetencao">0,00 Kz</span>
+                                            </div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between text-success">
+                                                <span class="fw-bold fs-18">Total Líquido a Pagar:</span>
+                                                <span class="fw-bold fs-18" id="lblTotalLiquido">0,00 Kz</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="col-md-12 text-end mb-4">
+                            <a th:href="@{/autofaturacao}" class="btn btn-light border px-4 py-2 me-2">Cancelar</a>
+                            <button type="submit" class="btn btn-primary px-5 py-2 shadow-sm rounded-pill fw-bold">
+                                <i class="fas fa-check-circle me-2"></i> Emitir Autofaturação
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        let itemIndex = 1;
+
+        function adicionarLinhaItem() {
+            const tr = `
+                <tr>
+                    <td class="ps-4">
+                        <input type="text" name="itens[${itemIndex}].nomeProduto" class="form-control form-control-sm" placeholder="Descrição do produto" required>
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="itens[${itemIndex}].quantidade" class="form-control form-control-sm qtd-input" value="1.00" onchange="calcularTotais()" required>
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="itens[${itemIndex}].preco" class="form-control form-control-sm preco-input" value="0.00" onchange="calcularTotais()" required>
+                    </td>
+                    <td>
+                        <input type="number" step="0.01" name="itens[${itemIndex}].subtotal" class="form-control form-control-sm subtotal-input bg-light" readonly>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-link text-danger p-0" onclick="removerLinha(this)"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+            $('#tabelaItens tbody').append(tr);
+            itemIndex++;
+        }
+
+        function removerLinha(btn) {
+            if ($('#tabelaItens tbody tr').length > 1) {
+                $(btn).closest('tr').remove();
+                calcularTotais();
+            }
+        }
+
+        function calcularTotais() {
+            let totalIliquido = 0;
+            $('#tabelaItens tbody tr').each(function() {
+                const qtd = parseFloat($(this).find('.qtd-input').val()) || 0;
+                const preco = parseFloat($(this).find('.preco-input').val()) || 0;
+                const sub = qtd * preco;
+                $(this).find('.subtotal-input').val(sub.toFixed(2));
+                totalIliquido += sub;
+            });
+
+            const percRet = parseFloat($('#selectRetencao').val()) || 0;
+            const valorRet = totalIliquido * (percRet / 100.0);
+            const totalLiquido = totalIliquido - valorRet;
+
+            $('#lblTotalIliquid').text(totalIliquido.toLocaleString('pt-AO', { minimumFractionDigits: 2 }) + ' Kz');
+            $('#lblPercRet').text(percRet + '%');
+            $('#lblValorRetencao').text('- ' + valorRet.toLocaleString('pt-AO', { minimumFractionDigits: 2 }) + ' Kz');
+            $('#lblTotalLiquido').text(totalLiquido.toLocaleString('pt-AO', { minimumFractionDigits: 2 }) + ' Kz');
+        }
+
+        $(document).ready(function() {
+            $('#selectRetencao').change(calcularTotais);
+            calcularTotais();
+        });
+    </script>
+</body>
+</html>

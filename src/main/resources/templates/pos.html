@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="menu :: head"></head>
+<head>
+  <meta th:name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+  <meta th:name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}"/>
+  <th:block th:replace="menu :: head"></th:block>
+</head>
 
 <!-- Custom POS Styles -->
 <style>
@@ -740,6 +744,30 @@
             <div class="container-fluid">
               <div class="sticky-top bg-white py-3 mb-4 dark-mode-bg-fix"
                 style="z-index: 1020; border-radius: 0 0 24px 24px;">
+
+                <!-- Barra Superior de Atalhos e Ferramentas POS -->
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom flex-wrap gap-2">
+                  <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="abrirModalMesas()">
+                      <i class="fas fa-utensils text-warning me-1"></i> [F8] Mesas
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="abrirModalSplitBill()">
+                      <i class="fas fa-calculator text-primary me-1"></i> [F9] Split Bill
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill fw-bold" onclick="PosEngine.pulsarGavetaDinheiro()">
+                      <i class="fas fa-cash-register text-success me-1"></i> [F10] Gaveta
+                    </button>
+                    <a href="/pos/kds" target="_blank" class="btn btn-sm btn-outline-danger rounded-pill fw-bold">
+                      <i class="fas fa-tv me-1"></i> Monitor Cozinha (KDS)
+                    </a>
+                  </div>
+                  <div>
+                    <span id="badgeOfflineCount" class="badge bg-warning text-dark p-2 rounded-pill shadow-sm" style="display:none; cursor:pointer;" onclick="PosEngine.sincronizarVendasOffline()">
+                      <i class="fas fa-wifi-slash me-1"></i> Vendas Offline Pendentes: <span id="offlineVal">0</span>
+                    </span>
+                  </div>
+                </div>
+
                 <div class="search-wrapper mb-3">
                   <i class="fas fa-search search-icon text-indigo-500"></i>
                   <input type="text" id="search" class="form-control" th:placeholder="#{pos.procurar}">
@@ -817,6 +845,23 @@
 
           <!-- Seção de Carrinho -->
           <div class="cart-section">
+            <!-- Banner de Mesa Ativa (Restauração) -->
+            <div id="activeTableBanner" class="alert alert-warning border-warning rounded-4 p-2 mb-3 d-none justify-content-between align-items-center shadow-sm">
+              <div>
+                <i class="fas fa-utensils text-dark me-2"></i>
+                <strong id="activeTableName" class="text-dark fs-6">Mesa 01</strong>
+                <span class="badge bg-dark ms-2" id="activeTablePeople">2 Pessoas</span>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-dark text-warning rounded-pill fw-bold" onclick="enviarPedidoMesaKds()" title="Enviar carrinho para a Cozinha">
+                  <i class="fas fa-paper-plane me-1"></i> Cozinha (KDS)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle p-1 px-2" onclick="desassociarMesa()" title="Desassociar Mesa">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+
             <div class="cart-header d-flex justify-content-between align-items-center">
               <div>
                 <h4 class="fw-bold mb-0 text-slate-800">
@@ -2632,33 +2677,394 @@
         </div>
       </div>
     </div>
-    <!-- MODAL VENDA SUCESSO -->
-    <div class="modal fade" id="modalVendaSucesso" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-          <div class="modal-body text-center p-5">
-            <div class="mb-4">
-              <div class="bg-success-subtle text-success p-3 rounded-circle d-inline-block shadow-sm">
-                <i class="fas fa-check-circle" style="font-size: 4rem;"></i>
-              </div>
-            </div>
-            <h3 class="fw-bold text-dark mb-2" th:text="#{pos.sucesso.titulo}">Venda Concluída!</h3>
-            <p class="text-muted mb-4" th:text="#{pos.sucesso.desc}">O documento foi gerado com sucesso. Pode descarregá-lo no botão abaixo ou continuar para uma nova venda.</p>
-            <div class="d-grid gap-3">
-              <button type="button" id="btnDownloadFatura" onclick="abrirPdfFatura()"
-                class="btn btn-lg btn-primary rounded-pill fw-bold py-3 shadow-sm">
-                <i class="fas fa-file-pdf me-2"></i> <span th:text="#{pos.sucesso.descarregar_doc}">DESCARREGAR DOCUMENTO</span>
+    <!-- MODAL MESAS (RESTAURAÇÃO) -->
+    <div class="modal fade" id="modalMesas" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+          <div class="modal-header bg-dark text-white border-0 d-flex justify-content-between align-items-center">
+            <h5 class="modal-title fw-bold"><i class="fas fa-utensils text-warning me-2"></i> Gestão de Mesas & Atendimento</h5>
+            <div class="d-flex gap-2 align-items-center">
+              <button type="button" class="btn btn-success btn-sm rounded-pill fw-bold px-3" onclick="adicionarNovaMesa()">
+                <i class="fas fa-plus-circle me-1"></i> Nova Mesa
               </button>
-              <button type="button" class="btn btn-outline-secondary rounded-pill fw-bold py-2" data-bs-dismiss="modal"
-                onclick="voltarParaPos()">
-                <span th:text="#{pos.sucesso.fechar_voltar}">FECHAR E VOLTAR AO POS</span>
-              </button>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+          </div>
+          <div class="modal-body p-4" style="background: #f8fafc;">
+            <div class="row row-cols-2 row-cols-md-4 g-3" id="grelhaMesas">
+              <!-- Carregado via JS -->
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Fechar</button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- MODAL OPÇÕES DE MESA OCUPADA -->
+    <div class="modal fade" id="modalOpcoesMesa" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+          <div class="modal-header bg-dark text-white border-0">
+            <h5 class="modal-title fw-bold" id="tituloMesaSelecionada"><i class="fas fa-utensils text-warning me-2"></i> Mesa</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4 text-center">
+            <input type="hidden" id="mesaSelecionadaId">
+            <input type="hidden" id="mesaSelecionadaNumero">
+
+            <div class="mb-4">
+              <span class="badge bg-primary fs-6 px-3 py-2" id="badgePessoasMesa"><i class="fas fa-users me-1"></i> 2 Pessoas</span>
+              <h3 class="fw-bold text-success mt-2" id="totalAcumuladoMesaLabel">0,00 Kz</h3>
+            </div>
+
+            <div class="d-grid gap-3">
+              <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" onclick="associarMesaAoCarrinho()">
+                <i class="fas fa-shopping-cart me-2"></i> Adicionar Produtos no Carrinho POS
+              </button>
+              <button class="btn btn-outline-primary btn-lg rounded-pill fw-bold" onclick="alterarPessoasMesa()">
+                <i class="fas fa-user-plus me-2 text-primary"></i> Alterar / Adicionar Pessoas
+              </button>
+              <button class="btn btn-outline-warning btn-lg rounded-pill text-dark fw-bold" onclick="enviarPedidoMesaKds()">
+                <i class="fas fa-concierge-bell me-2 text-warning"></i> Enviar Carrinho Atual para Cozinha (KDS)
+              </button>
+              <button class="btn btn-outline-info btn-lg rounded-pill text-dark fw-bold" onclick="abrirSplitBillDaMesa()">
+                <i class="fas fa-calculator me-2 text-info"></i> Dividir Conta da Mesa (Split Bill)
+              </button>
+              <button class="btn btn-danger btn-lg rounded-pill fw-bold" onclick="libertarMesaAtual()">
+                <i class="fas fa-door-open me-2"></i> Libertar Mesa (Fechar Atendimento)
+              </button>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL SPLIT BILL (DIVISÃO DE CONTA) -->
+    <div class="modal fade" id="modalSplitBill" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+          <div class="modal-header bg-primary text-white border-0">
+            <h5 class="modal-title fw-bold"><i class="fas fa-calculator me-2"></i> Divisão de Conta (Split Bill)</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body p-4">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Total da Venda / Mesa</label>
+              <div class="input-group">
+                <span class="input-group-text">Kz</span>
+                <input type="number" id="splitTotalInput" class="form-control form-control-lg fw-bold" step="0.01" oninput="executarSplitBill()">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Número de Pessoas</label>
+              <input type="number" id="splitPessoasInput" class="form-control form-control-lg text-center fw-bold" value="2" min="1" oninput="executarSplitBill()" onchange="executarSplitBill()">
+            </div>
+            <div class="card bg-light border-primary p-3 text-center">
+              <span class="text-muted fw-bold">Valor a Pagar por Pessoa:</span>
+              <h2 class="text-primary fw-bold m-0 mt-1" id="splitResultadoLabel">0,00 Kz</h2>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div> <!-- Fim de wrapper -->
+
+  <script th:src="@{/js/pos-offline.js}"></script>
+  <script>
+    $.ajaxSetup({
+      beforeSend: function (xhr) {
+        const token = $('meta[name="_csrf"]').attr('content');
+        const header = $('meta[name="_csrf_header"]').attr('content');
+        if (token && header && token !== '') {
+          xhr.setRequestHeader(header, token);
+        }
+      }
+    });
+
+    // Gerador de Atalhos de Teclado (F1 - F10)
+    document.addEventListener('keydown', function (e) {
+      // Evitar interferência quando a digitar em formulários que necessitem das teclas
+      if (['F1', 'F2', 'F4', 'F7', 'F8', 'F9', 'F10'].includes(e.key)) {
+        e.preventDefault();
+      }
+
+      if (e.key === 'F1') {
+        const inputSearch = document.getElementById('search');
+        if (inputSearch) inputSearch.focus();
+      } else if (e.key === 'F2') {
+        const btnCheckout = document.getElementById('btnOpenCheckout');
+        if (btnCheckout) btnCheckout.click();
+      } else if (e.key === 'F4') {
+        if (typeof clearCart === 'function') clearCart();
+      } else if (e.key === 'F7') {
+        if (typeof suspenderVenda === 'function') suspenderVenda();
+      } else if (e.key === 'F8') {
+        abrirModalMesas();
+      } else if (e.key === 'F9') {
+        abrirModalSplitBill();
+      } else if (e.key === 'F10') {
+        PosEngine.pulsarGavetaDinheiro();
+      }
+    });
+
+    // Interceção de Código de Barras de Balança no Input de Pesquisa
+    document.getElementById('search')?.addEventListener('input', function (e) {
+      const val = e.target.value.trim();
+      if (val.length === 13 && val.startsWith('20')) {
+        const dados = PosEngine.parseCodigoBalanca(val);
+        if (dados && dados.eBalanca) {
+          console.log("Código de balança detetado:", dados);
+          // Procurar produto pelo código e adicionar com a quantidade/peso extraída
+          const prodCard = document.querySelector(`.product-card[data-nome*="${dados.codigoProduto}"]`);
+          if (prodCard) {
+            prodCard.click();
+            e.target.value = '';
+          }
+        }
+      }
+    });
+
+    let mesaAtualObjeto = null;
+    let mesasCacheList = [];
+
+    function definirMesaAtiva(m) {
+      mesaAtualObjeto = m;
+      if (m && m.numeroMesa) {
+        $('#activeTableName').text(m.numeroMesa);
+        $('#activeTablePeople').text((m.numeroPessoas || 1) + ' Pessoas');
+        $('#activeTableBanner').removeClass('d-none').addClass('d-flex');
+      } else {
+        $('#activeTableBanner').addClass('d-none').removeClass('d-flex');
+      }
+    }
+
+    function associarMesaAoCarrinho() {
+      if (mesaAtualObjeto) {
+        definirMesaAtiva(mesaAtualObjeto);
+        const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
+        const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl);
+        if (modalOpcoes) modalOpcoes.hide();
+
+        const modalMesasEl = document.getElementById('modalMesas');
+        const modalMesas = bootstrap.Modal.getInstance(modalMesasEl);
+        if (modalMesas) modalMesas.hide();
+
+        if (window.toastr) toastr.success(`${mesaAtualObjeto.numeroMesa} pronta! Adicione os produtos ao carrinho.`);
+        else alert(`${mesaAtualObjeto.numeroMesa} pronta! Adicione os produtos ao carrinho.`);
+      }
+    }
+
+    function desassociarMesa() {
+      mesaAtualObjeto = null;
+      definirMesaAtiva(null);
+      if (window.toastr) toastr.info("Mesa desassociada do carrinho.");
+    }
+
+    function adicionarNovaMesa() {
+      const proximoNumero = (mesasCacheList ? mesasCacheList.length : 0) + 1;
+      const numSugerido = `Mesa ${proximoNumero < 10 ? '0' + proximoNumero : proximoNumero}`;
+      const numeroMesa = prompt("Digite o nome/número da nova mesa:", numSugerido);
+      if (!numeroMesa || numeroMesa.trim() === '') return;
+
+      const zona = prompt("Digite a zona da mesa (ex: Sala Principal, Esplanada, VIP):", "Sala Principal") || "Sala Principal";
+      const capacidade = prompt("Capacidade de pessoas para esta mesa:", "4") || "4";
+
+      $.post(`/api/pos/mesas/criar?numeroMesa=${encodeURIComponent(numeroMesa.trim())}&zona=${encodeURIComponent(zona.trim())}&capacidade=${parseInt(capacidade)}`, function (novaMesa) {
+        if (window.toastr) toastr.success(`${novaMesa.numeroMesa} criada com sucesso!`);
+        else alert(`${novaMesa.numeroMesa} criada com sucesso!`);
+        abrirModalMesas();
+      }).fail(function (err) {
+        alert("Erro ao criar nova mesa: " + (err.responseText || "Erro desconhecido"));
+      });
+    }
+
+    function abrirModalMesas() {
+      $.get('/api/pos/mesas', function (mesas) {
+        mesasCacheList = mesas || [];
+        const grelha = $('#grelhaMesas');
+        grelha.empty();
+        mesasCacheList.forEach(m => {
+          let statusBg = 'bg-success';
+          if (m.status === 'OCUPADA') statusBg = 'bg-danger';
+          if (m.status === 'CONTA_PEDIDA') statusBg = 'bg-warning text-dark';
+
+          const card = `
+          <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 text-center p-3" style="cursor:pointer;" onclick="selecionarMesaPorId(${m.id})">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge ${statusBg}">${m.status}</span>
+                <small class="text-muted"><i class="fas fa-users"></i> ${m.numeroPessoas || 1}/${m.capacidade}</small>
+              </div>
+              <i class="fas fa-utensils fa-2x text-slate-700 my-2"></i>
+              <h6 class="fw-bold m-0">${m.numeroMesa}</h6>
+              <small class="text-primary fw-bold mt-1">${(m.totalAcumulado || 0).toFixed(2)} Kz</small>
+            </div>
+          </div>`;
+          grelha.append(card);
+        });
+        const modalEl = document.getElementById('modalMesas');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+      });
+    }
+
+    function selecionarMesaPorId(id) {
+      const m = mesasCacheList.find(x => x.id === id);
+      if (m) selecionarMesa(m);
+    }
+
+    function selecionarMesa(m) {
+      mesaAtualObjeto = m;
+      if (m.status === 'LIVRE') {
+        const pessoas = prompt(`Abrir ${m.numeroMesa}. Quantas pessoas na mesa?`, "2");
+        if (pessoas && !isNaN(pessoas)) {
+          $.post(`/api/pos/mesas/${m.id}/abrir?pessoas=${parseInt(pessoas)}`, function (mesaAberta) {
+            definirMesaAtiva(mesaAberta || m);
+            const modalMesasEl = document.getElementById('modalMesas');
+            const modalMesas = bootstrap.Modal.getInstance(modalMesasEl);
+            if (modalMesas) modalMesas.hide();
+
+            if (window.toastr) toastr.success(`${m.numeroMesa} aberta com ${pessoas} pessoas! Adicione os produtos no POS.`);
+            else alert(`${m.numeroMesa} aberta com ${pessoas} pessoas! Adicione os produtos no POS.`);
+          }).fail(function(err) {
+            alert("Erro ao abrir mesa: " + (err.responseText || "Erro de permissão ou conexão"));
+          });
+        }
+      } else {
+        // Abrir Modal de Gestão da Mesa Ocupada
+        $('#mesaSelecionadaId').val(m.id);
+        $('#mesaSelecionadaNumero').val(m.numeroMesa);
+        $('#tituloMesaSelecionada').html(`<i class="fas fa-utensils text-warning me-2"></i> ${m.numeroMesa} (${m.status})`);
+        $('#badgePessoasMesa').html(`<i class="fas fa-users me-1"></i> ${m.numeroPessoas || 1} Pessoas Registadas`);
+        $('#totalAcumuladoMesaLabel').text((m.totalAcumulado || 0).toFixed(2) + ' Kz');
+
+        const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
+        const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl) || new bootstrap.Modal(modalOpcoesEl);
+        modalOpcoes.show();
+      }
+    }
+
+    function alterarPessoasMesa() {
+      if (!mesaAtualObjeto) return;
+      const novasPessoas = prompt(`Alterar número de pessoas em ${mesaAtualObjeto.numeroMesa}:`, mesaAtualObjeto.numeroPessoas || 2);
+      if (novasPessoas && !isNaN(novasPessoas)) {
+        $.post(`/api/pos/mesas/${mesaAtualObjeto.id}/pessoas?pessoas=${parseInt(novasPessoas)}`, function (mesaAtualizada) {
+          definirMesaAtiva(mesaAtualizada);
+          const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
+          const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl);
+          if (modalOpcoes) modalOpcoes.hide();
+
+          const modalMesasEl = document.getElementById('modalMesas');
+          const modalMesas = bootstrap.Modal.getInstance(modalMesasEl);
+          if (modalMesas) modalMesas.hide();
+
+          if (window.toastr) toastr.success(`Número de pessoas em ${mesaAtualizada.numeroMesa} alterado para ${mesaAtualizada.numeroPessoas}!`);
+          else alert(`Número de pessoas em ${mesaAtualizada.numeroMesa} alterado para ${mesaAtualizada.numeroPessoas}!`);
+        }).fail(function(err) {
+          alert("Erro ao atualizar pessoas: " + (err.responseText || "Erro desconhecido"));
+        });
+      }
+    }
+
+    function enviarPedidoMesaKds() {
+      if (!mesaAtualObjeto) return;
+      if (typeof cart === 'undefined' || cart.length === 0) {
+        alert("O carrinho do POS está vazio. Adicione produtos ao carrinho antes de enviar o pedido à cozinha.");
+        return;
+      }
+      const itensDto = cart.map(i => ({
+        produtoId: i.id || i.produtoId,
+        quantidade: i.qtd || i.quantidade || 1,
+        observacao: i.observacao || ""
+      }));
+      const payload = {
+        mesaId: mesaAtualObjeto.id,
+        observacoes: "Pedido lançado via POS para " + mesaAtualObjeto.numeroMesa,
+        itens: itensDto
+      };
+
+      $.ajax({
+        url: '/api/pos/pedidos-cozinha',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success: function () {
+          if (window.toastr) toastr.success(`Pedido enviado com sucesso para a cozinha (KDS)!`);
+          else alert(`Pedido enviado com sucesso para a cozinha (KDS)!`);
+          
+          if (typeof clearCart === 'function') clearCart();
+          else cart = [];
+
+          if (typeof renderCart === 'function') renderCart();
+
+          const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
+          const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl);
+          if (modalOpcoes) modalOpcoes.hide();
+          abrirModalMesas();
+        },
+        error: function(xhr) {
+          alert("Erro ao enviar pedido para a cozinha: " + (xhr.responseText || "Verifique se a sessão ou dados do produto são válidos."));
+        }
+      });
+    }
+
+    function abrirSplitBillDaMesa() {
+      if (!mesaAtualObjeto) return;
+      document.getElementById('splitTotalInput').value = (mesaAtualObjeto.totalAcumulado || 0).toFixed(2);
+      document.getElementById('splitPessoasInput').value = mesaAtualObjeto.numeroPessoas || 2;
+      executarSplitBill();
+      const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
+      const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl);
+      if (modalOpcoes) modalOpcoes.hide();
+      const modal = new bootstrap.Modal(document.getElementById('modalSplitBill'));
+      modal.show();
+    }
+
+    function libertarMesaAtual() {
+      if (!mesaAtualObjeto) return;
+      if (confirm(`Deseja libertar ${mesaAtualObjeto.numeroMesa} e concluir o atendimento?`)) {
+        $.post(`/api/pos/mesas/${mesaAtualObjeto.id}/libertar`, function () {
+          if (window.toastr) toastr.info(`${mesaAtualObjeto.numeroMesa} libertada.`);
+          else alert(`${mesaAtualObjeto.numeroMesa} libertada.`);
+          const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
+          const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl);
+          if (modalOpcoes) modalOpcoes.hide();
+          desassociarMesa();
+        });
+      }
+    }
+
+    function abrirModalSplitBill() {
+      let total = 0;
+      if (typeof cart !== 'undefined' && Array.isArray(cart) && cart.length > 0) {
+        total = cart.reduce((acc, item) => acc + ((item.preco || 0) * (item.qtd || item.quantidade || 1)), 0);
+      }
+      document.getElementById('splitTotalInput').value = total.toFixed(2);
+      document.getElementById('splitPessoasInput').value = 2;
+      executarSplitBill();
+      const modalEl = document.getElementById('modalSplitBill');
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+
+    function executarSplitBill() {
+      const totalVal = document.getElementById('splitTotalInput').value;
+      const total = parseFloat(totalVal) || 0;
+      const pessoas = parseInt(document.getElementById('splitPessoasInput').value) || 1;
+      const qtdPessoas = (pessoas > 0) ? pessoas : 1;
+      const res = Math.round((total / qtdPessoas) * 100.0) / 100.0;
+      document.getElementById('splitResultadoLabel').innerText = res.toFixed(2) + ' Kz';
+    }
+  </script>
   <!-- Drag to Scroll Categories Logic -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {

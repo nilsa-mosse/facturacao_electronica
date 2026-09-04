@@ -39,6 +39,9 @@ public class Produto {
     @Column(name = "preco_compra")
     private Double precoCompra;
 
+    private String codigoIsencao;
+    private String motivoIsencao;
+
 
 
     @com.fasterxml.jackson.annotation.JsonIgnore
@@ -211,6 +214,12 @@ public class Produto {
     public void setPrecoCompra(Double precoCompra) {
         this.precoCompra = precoCompra;
     }
+
+    public String getCodigoIsencao() { return codigoIsencao; }
+    public void setCodigoIsencao(String codigoIsencao) { this.codigoIsencao = codigoIsencao; }
+
+    public String getMotivoIsencao() { return motivoIsencao; }
+    public void setMotivoIsencao(String motivoIsencao) { this.motivoIsencao = motivoIsencao; }
 
     @Transient
     public boolean isPertoDeExpirar() {

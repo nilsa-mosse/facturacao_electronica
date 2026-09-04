@@ -106,7 +106,8 @@ public class GuiaRemessaService {
     @Transactional
     public void salvar(GuiaRemessa guia) {
         if (guia.getDataEmissao() == null) guia.setDataEmissao(LocalDateTime.now());
-        if (guia.getNumeroGuia() == null) guia.setNumeroGuia("GR-" + System.currentTimeMillis());
+        String prefix = "GT".equals(guia.getTipoDocumento()) ? "GT-" : "GR-";
+        if (guia.getNumeroGuia() == null) guia.setNumeroGuia(prefix + System.currentTimeMillis());
         
         // Garantir vínculo bidireccional dos itens
         if (guia.getItens() != null) {
@@ -273,7 +274,8 @@ public class GuiaRemessaService {
 
                 PdfPCell titleCell = new PdfPCell();
                 titleCell.setBorder(0);
-                titleCell.addElement(new Phrase(pdfTranslation.t("pdf.guia.titulo", locale), fontTitle));
+                String tituloGuia = "GT".equalsIgnoreCase(guia.getTipoDocumento()) ? "GUIA DE TRANSPORTE" : pdfTranslation.t("pdf.guia.titulo", locale);
+                titleCell.addElement(new Phrase(tituloGuia, fontTitle));
                 titleCell.addElement(new Paragraph(guia.getNumeroGuia(), fontSubtitle));
                 mainHeader.addCell(titleCell);
 

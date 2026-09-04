@@ -201,6 +201,130 @@ public class FaturaService {
         return faturaSalva;
     }
 
+    /**
+     * Emite um Recibo Autónomo (RC) para quitação/liquidação de Fatura a Crédito (FT).
+     */
+    public Fatura emitirReciboAutonomoRC(Fatura faturaFT, Double valorPago, String formaPagamento, String observacoes) {
+        Fatura recibo = new Fatura();
+        recibo.setFaturaReferencia(faturaFT);
+        recibo.setCompra(faturaFT != null ? faturaFT.getCompra() : null);
+        if (faturaFT != null && faturaFT.getEmpresa() != null) {
+            recibo.setEmpresa(faturaFT.getEmpresa());
+        } else {
+            Long empId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+            if (empId != null) recibo.setEmpresa(empresaRepository.findById(empId).orElse(null));
+        }
+        recibo.setTipoDocumento("RC");
+        recibo.setFormaPagamento(formaPagamento != null ? formaPagamento : "MULTICAIXA");
+        recibo.setObservacoes(observacoes);
+
+        Calendar cal = Calendar.getInstance();
+        int ano = cal.get(Calendar.YEAR);
+        Long empId = recibo.getEmpresa() != null ? recibo.getEmpresa().getId() : 1L;
+        long count = faturaRepository.countByTypeAndYear("RC", ano, empId) + 1;
+        recibo.setNumeroFatura("RC " + ano + "/" + count);
+
+        recibo.setDataEmissao(new Date());
+        recibo.setSystemEntryDate(new Date());
+        recibo.setInvoiceStatus("N");
+        recibo.setTotal(valorPago);
+        recibo.setIva(0.0);
+        recibo.setValorPago(valorPago);
+        recibo.setValorEmAberto(0.0);
+
+        // Assinatura RSA
+        ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        Fatura ultimoRecibo = faturaRepository.findLastByType("RC", empId);
+        recibo.setPreviousHash((ultimoRecibo != null) ? ultimoRecibo.getHash() : "");
+        recibo.setHashControl(String.valueOf(configSistema.getAgtChaveVersao()));
+
+        String dadosAssinar = montarStringAssinatura(recibo);
+        String assinatura = assinarRSA(dadosAssinar, configSistema.getAgtPrivateKey());
+        recibo.setHash(assinatura);
+
+        recibo.setEnviadaAGT(false);
+        recibo.setStatus("PENDENTE");
+
+        Fatura reciboSalvo = faturaRepository.saveAndFlush(recibo);
+        reciboSalvo = processarEnvioAGT(reciboSalvo);
+        reciboSalvo = faturaRepository.saveAndFlush(reciboSalvo);
+
+        // Atualizar a fatura a crédito original (FT)
+        if (faturaFT != null) {
+            double novoValorPago = (faturaFT.getValorPago() != null ? faturaFT.getValorPago() : 0.0) + valorPago;
+            double totalFT = faturaFT.getTotal() != null ? faturaFT.getTotal() : 0.0;
+            double emAberto = Math.max(0.0, totalFT - novoValorPago);
+            faturaFT.setValorPago(novoValorPago);
+            faturaFT.setValorEmAberto(emAberto);
+            if (emAberto <= 0.01) {
+                faturaFT.setStatus("PAGA");
+            } else {
+                faturaFT.setStatus("PARCIALMENTE_PAGA");
+            }
+            faturaRepository.save(faturaFT);
+        }
+
+        gerarPdfReciboPagamentoRC(reciboSalvo, LocaleContextHolder.getLocale());
+        return reciboSalvo;
+    }
+
+    /**
+     * Emite uma Fatura de Auto-faturação (AF) nos termos do Art. 9º do Decreto Presidencial 312/18.
+     */
+    public Fatura emitirAutofaturacao(Compra compra, Double percentualRetencao, String observacoes) {
+        Fatura fatura = new Fatura();
+        fatura.setCompra(compra);
+        if (compra != null && compra.getEmpresa() != null) {
+            fatura.setEmpresa(compra.getEmpresa());
+        }
+        fatura.setTipoDocumento("AF");
+        fatura.setInvoiceStatus("S"); // Auto-faturação perante a AGT / SAF-T
+        fatura.setObservacoes(observacoes);
+
+        Calendar cal = Calendar.getInstance();
+        int ano = cal.get(Calendar.YEAR);
+        Long empId = fatura.getEmpresa() != null ? fatura.getEmpresa().getId() : 1L;
+        long count = faturaRepository.countByTypeAndYear("AF", ano, empId) + 1;
+        fatura.setNumeroFatura("AF " + ano + "/" + count);
+
+        fatura.setDataEmissao(new Date());
+        fatura.setSystemEntryDate(new Date());
+
+        double totalCompra = compra != null && compra.getTotal() != null ? compra.getTotal() : 0.0;
+        double ivaCompra = 0.0; // AF não tem IVA — sujeito a retenção na fonte
+        double percRet = percentualRetencao != null ? percentualRetencao : 6.5; // Ex.: Retenção padrão 6.5%
+        double retencao = totalCompra * (percRet / 100.0);
+
+        fatura.setTotal(totalCompra);
+        fatura.setIva(ivaCompra);
+        fatura.setValorRetencao(retencao);
+        fatura.setValorPago(totalCompra - retencao);
+        fatura.setValorEmAberto(0.0);
+        fatura.setStatus("PAGA");
+
+        // Assinatura RSA
+        ConfiguracaoSistemaEntity configSistema = configuracaoSistemaRepository.findById(1L)
+                .orElse(new ConfiguracaoSistemaEntity());
+        Fatura ultimaAF = faturaRepository.findLastByType("AF", empId);
+        fatura.setPreviousHash((ultimaAF != null) ? ultimaAF.getHash() : "");
+        fatura.setHashControl(String.valueOf(configSistema.getAgtChaveVersao()));
+
+        String dadosAssinar = montarStringAssinatura(fatura);
+        String assinatura = assinarRSA(dadosAssinar, configSistema.getAgtPrivateKey());
+        fatura.setHash(assinatura);
+
+        fatura.setEnviadaAGT(false);
+        fatura.setStatus("PENDENTE");
+
+        Fatura faturaSalva = faturaRepository.saveAndFlush(fatura);
+        faturaSalva = processarEnvioAGT(faturaSalva);
+        faturaSalva = faturaRepository.saveAndFlush(faturaSalva);
+
+        gerarPdfAutofaturacaoAF(faturaSalva, LocaleContextHolder.getLocale());
+        return faturaSalva;
+    }
+
     public Fatura emitirProforma(Compra compra) {
         return emitirDocumento(compra, "FP");
     }
@@ -396,6 +520,14 @@ public class FaturaService {
         gerarPdfFatura(fatura, new Locale("pt"));
     }
 
+    public void gerarPdfReciboPagamentoRC(Fatura fatura, Locale locale) {
+        gerarPdfFatura(fatura, locale);
+    }
+
+    public void gerarPdfAutofaturacaoAF(Fatura fatura, Locale locale) {
+        gerarPdfFatura(fatura, locale);
+    }
+
     public void gerarPdfFatura(Fatura fatura, Locale locale) {
         try {
             // Salva em ./uploads/faturas (pasta externa, acessível via /uploads/faturas/**)
@@ -495,6 +627,8 @@ public class FaturaService {
                     case "FR": tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.fr", locale); break;
                     case "NC": tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.nc", locale); break;
                     case "ND": tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.nd", locale); break;
+                    case "RC": tituloDocumento = "RECIBO DE QUITAÇÃO"; break;
+                    case "AF": tituloDocumento = "FACTURA DE AUTO-FACTURAÇÃO"; break;
                     default:   tituloDocumento = pdfTranslation.t("pdf.fatura.tipo.ft", locale); break;
                 }
 

@@ -80,18 +80,30 @@ public class SaftService {
         faturasNoPeriodo.sort(Comparator.comparing(Fatura::getNumeroFatura, Comparator.nullsLast(String::compareTo)));
 
         // Separação de Documentos por categoria SAF-T AO
-        List<Fatura> salesInvoicesList = new ArrayList<>(); // FT, FR, NC, ND
+        // AF  → SalesInvoices (SelfBillingIndicator=1) — Art. 9º DP 312/18
+        // RC  → Payments (Recibo Autónomo / Quittance)
+        // FT, FR, NC, ND → SalesInvoices normais
+        // FP  → WorkingDocuments
+        // GT  → MovementOfGoods (GuiaRemessa entity, não Fatura — excluído aqui)
+        List<Fatura> salesInvoicesList = new ArrayList<>(); // FT, FR, NC, ND, AF
         List<Fatura> workingDocsList = new ArrayList<>();   // FP (Pró-forma)
-        List<Fatura> paymentsList = new ArrayList<>();      // Payments (Recibos / FR)
+        List<Fatura> paymentsList = new ArrayList<>();      // RC (Recibos Autónomos) e FR
 
         for (Fatura f : faturasNoPeriodo) {
             String tipo = f.getTipoDocumento() != null ? f.getTipoDocumento().toUpperCase() : "FT";
             if ("FP".equals(tipo)) {
                 workingDocsList.add(f);
-            } else {
+            } else if ("RC".equals(tipo)) {
+                // RC vai APENAS para Payments — não é um SalesInvoice
+                paymentsList.add(f);
+            } else if ("AF".equals(tipo)) {
+                // AF vai para SalesInvoices com SelfBillingIndicator=1
                 salesInvoicesList.add(f);
-                // FR ou Faturas Pagas geram entrada em Payments
-                if ("FR".equals(tipo) || "PAGA".equalsIgnoreCase(f.getStatus()) || "PARCIALMENTE_PAGA".equalsIgnoreCase(f.getStatus())) {
+            } else {
+                // FT, FR, NC, ND → SalesInvoices
+                salesInvoicesList.add(f);
+                // FR em estado pago também gera entrada em Payments
+                if ("FR".equals(tipo)) {
                     paymentsList.add(f);
                 }
             }
@@ -341,7 +353,9 @@ public class SaftService {
 
             Element specialRegimes = doc.createElement("SpecialRegimes");
             invoice.appendChild(specialRegimes);
-            appendChild(doc, specialRegimes, "SelfBillingIndicator", "0");
+            // AF (Autofaturação) → SelfBillingIndicator = 1 conforme Art. 9º DP 312/18 e SAF-T AO
+            String selfBilling = "AF".equalsIgnoreCase(tipo) ? "1" : "0";
+            appendChild(doc, specialRegimes, "SelfBillingIndicator", selfBilling);
             appendChild(doc, specialRegimes, "CashVATSchemeIndicator", "0");
             appendChild(doc, specialRegimes, "ThirdPartiesBillingIndicator", "0");
 
@@ -562,25 +576,29 @@ public class SaftService {
         SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
 
         for (Fatura f : pagamentos) {
+            String tipoPag = f.getTipoDocumento() != null ? f.getTipoDocumento().toUpperCase() : "RC";
             double totalVal = f.getTotal() != null ? f.getTotal() : 0.0;
-            BigDecimal grossBD = format2(totalVal);
+            // Para RC com retenção, o valor líquido pago é total - retenção
+            double valorRetencao = f.getValorRetencao() != null ? f.getValorRetencao() : 0.0;
+            double valorLiquido = "RC".equals(tipoPag) && valorRetencao > 0
+                    ? Math.max(0.0, totalVal - valorRetencao)
+                    : totalVal;
+            BigDecimal grossBD = format2(valorLiquido);
             totalCredit = totalCredit.add(grossBD);
 
             Element payment = doc.createElement("Payment");
             payments.appendChild(payment);
 
-            String refNo = "RC " + f.getNumeroFatura();
-            if ("FR".equalsIgnoreCase(f.getTipoDocumento())) {
-                refNo = f.getNumeroFatura();
-            }
-
+            // PaymentRefNo: para RC usa o próprio número, para FR usa o número da fatura
+            String refNo = f.getNumeroFatura() != null ? f.getNumeroFatura() : tipoPag + " " + f.getId();
             appendChild(doc, payment, "PaymentRefNo", refNo);
             appendChild(doc, payment, "Period", sdfPeriod.format(f.getDataEmissao()));
             appendChild(doc, payment, "TransactionDate", sdfDate.format(f.getDataEmissao()));
-            appendChild(doc, payment, "PaymentType", "RC");
+            // PaymentType: RC para Recibo Autónomo, RG para outros (FR)
+            appendChild(doc, payment, "PaymentType", "RC".equals(tipoPag) ? "RC" : "RG");
             appendChild(doc, payment, "SystemEntryDate", sdfTime.format(f.getSystemEntryDate() != null ? f.getSystemEntryDate() : f.getDataEmissao()));
             
-            String custId = (f.getCompra() != null && f.getCompra().getCliente() != null) 
+            String custId = (f.getCompra() != null && f.getCompra().getCliente() != null)
                             ? f.getCompra().getCliente().getId().toString() : "1";
             appendChild(doc, payment, "CustomerID", custId);
 
@@ -588,10 +606,14 @@ public class SaftService {
             Element line = doc.createElement("Line");
             payment.appendChild(line);
             appendChild(doc, line, "LineNumber", "1");
-            
+
+            // SourceDocumentID: referencia a fatura FT original (se RC tem faturaReferencia)
             Element srcDocId = doc.createElement("SourceDocumentID");
             line.appendChild(srcDocId);
-            appendChild(doc, srcDocId, "OriginatingON", f.getNumeroFatura() != null ? f.getNumeroFatura() : "FT " + f.getId());
+            String origemDoc = f.getFaturaReferencia() != null && f.getFaturaReferencia().getNumeroFatura() != null
+                    ? f.getFaturaReferencia().getNumeroFatura()
+                    : (f.getNumeroFatura() != null ? f.getNumeroFatura() : "FT " + f.getId());
+            appendChild(doc, srcDocId, "OriginatingON", origemDoc);
             appendChild(doc, srcDocId, "InvoiceDate", sdfDate.format(f.getDataEmissao()));
 
             appendChild(doc, line, "CreditAmount", grossBD.toString());
@@ -602,6 +624,12 @@ public class SaftService {
             appendChild(doc, totals, "TaxPayable", "0.00");
             appendChild(doc, totals, "NetTotal", grossBD.toString());
             appendChild(doc, totals, "GrossTotal", grossBD.toString());
+            // Para RC com retenção, adicionar campo de Settlement
+            if ("RC".equals(tipoPag) && valorRetencao > 0) {
+                Element settlement = doc.createElement("Settlement");
+                payment.appendChild(settlement);
+                appendChild(doc, settlement, "SettlementAmount", format2(valorRetencao).toString());
+            }
         }
 
         appendChild(doc, payments, "TotalDebit", "0.00");
