@@ -1,12 +1,18 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
 import ao.co.hzconsultoria.efacturacao.model.*;
+import ao.co.hzconsultoria.efacturacao.repository.ClienteRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository;
 import ao.co.hzconsultoria.efacturacao.security.CustomUserDetails;
 import ao.co.hzconsultoria.efacturacao.security.SecurityUtils;
 import ao.co.hzconsultoria.efacturacao.service.PosService;
+import ao.co.hzconsultoria.efacturacao.service.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +29,13 @@ public class PosApiController {
     private ProdutoRepository produtoRepository;
 
     @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
     private EmpresaRepository empresaRepository;
+
+    @Autowired
+    private StockService stockService;
 
     private Empresa getEmpresaAtual() {
         CustomUserDetails user = SecurityUtils.getCurrentUser();
@@ -31,6 +43,135 @@ public class PosApiController {
             return empresaRepository.findById(user.getEmpresaId()).orElse(null);
         }
         return empresaRepository.findAll().stream().findFirst().orElse(null);
+    }
+
+    private Map<String, Object> converterProdutoDto(Produto p, Set<Long> bloqueados) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", p.getId());
+        m.put("nome", p.getNome());
+        m.put("preco", p.getPreco());
+        m.put("codigoBarras", p.getCodigoBarra() != null ? p.getCodigoBarra() : "");
+        m.put("categoriaId", p.getCategoria() != null ? p.getCategoria().getId() : 0);
+        m.put("categoriaNome", p.getCategoria() != null ? p.getCategoria().getNome() : "");
+        m.put("ivaPercentual", p.getIvaPercentual());
+        m.put("imagem", (p.getImagem() != null && !p.getImagem().trim().isEmpty()) ? p.getImagem() : "/dist/img/no-image.png");
+        m.put("disponivel", p.isDisponivel());
+        m.put("quantidadeEstoque", p.getQuantidadeEstoque());
+        m.put("emPromocao", p.isEmPromocao());
+        m.put("bloqueado", bloqueados != null && bloqueados.contains(p.getId()));
+        return m;
+    }
+
+    /**
+     * Pesquisa dinâmica de produtos com filtros e paginação
+     */
+    @GetMapping("/produtos")
+    public ResponseEntity<?> pesquisarProdutos(
+            @RequestParam(value = "categoriaId", required = false) Long categoriaId,
+            @RequestParam(value = "termo", required = false) String termo,
+            @RequestParam(value = "apenasDisponiveis", defaultValue = "false") boolean apenasDisponiveis,
+            @RequestParam(value = "emPromocao", defaultValue = "false") boolean emPromocao,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "32") int size) {
+
+        Empresa e = getEmpresaAtual();
+        Long empresaId = (e != null) ? e.getId() : null;
+
+        if (categoriaId != null && categoriaId == 0) {
+            categoriaId = null;
+        }
+        if (termo != null) {
+            termo = termo.trim();
+            if (termo.isEmpty()) termo = null;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "nome"));
+        Page<Produto> produtosPage = produtoRepository.pesquisarProdutosPos(
+                empresaId, categoriaId, termo, apenasDisponiveis, emPromocao, pageable);
+
+        Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();
+
+        List<Map<String, Object>> itens = new ArrayList<>();
+        for (Produto p : produtosPage.getContent()) {
+            itens.add(converterProdutoDto(p, bloqueados));
+        }
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("produtos", itens);
+        resposta.put("paginaAtual", produtosPage.getNumber());
+        resposta.put("totalPaginas", produtosPage.getTotalPages());
+        resposta.put("totalElementos", produtosPage.getTotalElements());
+        resposta.put("temProxima", produtosPage.hasNext());
+        return ResponseEntity.ok(resposta);
+    }
+
+    /**
+     * Leitura direta de código de barras para leitor físico (hardware scanner)
+     */
+    @GetMapping("/produtos/barcode/{codigo}")
+    public ResponseEntity<?> buscarPorCodigoBarra(@PathVariable("codigo") String codigo) {
+        Empresa e = getEmpresaAtual();
+        Long empresaId = (e != null) ? e.getId() : null;
+        String codigoLimpo = (codigo != null) ? codigo.trim() : "";
+        if (codigoLimpo.isEmpty()) {
+            return ResponseEntity.badRequest().body("Código de barras inválido.");
+        }
+
+        Optional<Produto> prodOpt = produtoRepository.findFirstByCodigoBarraIgnoreCaseAndEmpresa_Id(codigoLimpo, empresaId);
+        if (!prodOpt.isPresent() && empresaId == null) {
+            List<Produto> lista = produtoRepository.findByCodigoBarraIgnoreCaseAndEmpresa_Id(codigoLimpo, null);
+            if (!lista.isEmpty()) {
+                prodOpt = Optional.of(lista.get(0));
+            }
+        }
+
+        if (!prodOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();
+        return ResponseEntity.ok(converterProdutoDto(prodOpt.get(), bloqueados));
+    }
+
+    /**
+     * Pesquisa dinâmica de clientes (para autocomplete e checkout rápido)
+     */
+    @GetMapping("/clientes/search")
+    public ResponseEntity<?> pesquisarClientes(
+            @RequestParam(value = "termo", required = false) String termo,
+            @RequestParam(value = "limit", defaultValue = "20") int limit) {
+        Empresa e = getEmpresaAtual();
+        Long empresaId = (e != null) ? e.getId() : null;
+        String termoLimpo = (termo != null && !termo.trim().isEmpty()) ? termo.trim() : null;
+
+        Pageable pageable = PageRequest.of(0, Math.min(limit, 50));
+        List<Cliente> clientes = clienteRepository.pesquisarClientesPos(empresaId, termoLimpo, pageable);
+
+        List<Map<String, Object>> res = new ArrayList<>();
+        for (Cliente c : clientes) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("id", c.getId());
+            m.put("nome", c.getNome());
+            m.put("nif", c.getNif() != null ? c.getNif() : "999999999");
+            m.put("telefone", c.getTelefone() != null ? c.getTelefone() : "");
+            m.put("email", c.getEmail() != null ? c.getEmail() : "");
+            m.put("endereco", c.getEndereco() != null ? c.getEndereco() : "");
+            res.add(m);
+        }
+        return ResponseEntity.ok(res);
+    }
+
+    /**
+     * Métricas rápidas de apoio à sessão do POS
+     */
+    @GetMapping("/stats")
+    public ResponseEntity<?> getStats() {
+        Empresa e = getEmpresaAtual();
+        Long empresaId = (e != null) ? e.getId() : null;
+        List<Produto> stockBaixo = produtoRepository.findProdutosComStockBaixo(empresaId);
+        Map<String, Object> s = new HashMap<>();
+        s.put("totalStockBaixo", stockBaixo != null ? stockBaixo.size() : 0);
+        return ResponseEntity.ok(s);
     }
 
     /**

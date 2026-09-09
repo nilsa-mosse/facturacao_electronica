@@ -37,6 +37,23 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     List<Produto> findByDataExpiracaoBeforeAndEmPromocaoFalse(java.time.LocalDate date);
 
+    java.util.Optional<Produto> findFirstByCodigoBarraIgnoreCaseAndEmpresa_Id(String codigoBarra, Long empresaId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Produto p WHERE (:empresaId IS NULL OR p.empresa.id = :empresaId) " +
+            "AND (:categoriaId IS NULL OR p.categoria.id = :categoriaId) " +
+            "AND (:termo IS NULL OR (LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) " +
+            "     OR (p.codigoBarra IS NOT NULL AND LOWER(p.codigoBarra) LIKE LOWER(CONCAT('%', :termo, '%'))))) " +
+            "AND (:apenasDisponiveis = false OR ((p.quantidadeEstoque IS NULL OR p.quantidadeEstoque > 0) AND (p.estado IS NULL OR p.estado.id = 1))) " +
+            "AND (:apenasPromocao = false OR p.emPromocao = true)")
+    Page<Produto> pesquisarProdutosPos(
+            @org.springframework.data.repository.query.Param("empresaId") Long empresaId,
+            @org.springframework.data.repository.query.Param("categoriaId") Long categoriaId,
+            @org.springframework.data.repository.query.Param("termo") String termo,
+            @org.springframework.data.repository.query.Param("apenasDisponiveis") boolean apenasDisponiveis,
+            @org.springframework.data.repository.query.Param("apenasPromocao") boolean apenasPromocao,
+            Pageable pageable
+    );
+
     @Override
     @org.springframework.cache.annotation.CacheEvict(value = {"produtos_por_empresa", "produtos_por_categoria"}, allEntries = true)
     <S extends Produto> S save(S entity);

@@ -25,340 +25,357 @@ import java.math.BigDecimal;
 @EnableScheduling
 public class EfaturacaoApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(EfaturacaoApplication.class, args);
-    }
+        public static void main(String[] args) {
+                SpringApplication.run(EfaturacaoApplication.class, args);
+        }
 
-    @Bean
-    public CommandLineRunner initData(UserRepository userRepository,
-            EmpresaRepository empresaRepository,
-            EstabelecimentoRepository estabRepository,
-            ConfiguracaoSistemaRepository configRepo,
-            ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoAGTRepository agtConfigRepo,
-            ImpostoRepository impostoRepository,
-            ao.co.hzconsultoria.efacturacao.repository.ClienteRepository clienteRepository,
-            ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository categoriaRepository,
-            ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository produtoRepository,
-            PasswordEncoder passwordEncoder,
-            JdbcTemplate jdbcTemplate) {
-        return args -> {
-            // Migração de Emergência: Adicionar colunas email e forcar_alteracao_senha a
-            // usuario
-            try {
-                jdbcTemplate.execute(
-                        "ALTER TABLE usuario ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE usuario ADD COLUMN IF NOT EXISTS forcar_alteracao_senha BOOLEAN DEFAULT FALSE");
-                System.out.println(
-                        ">>> Migração: Colunas 'email' e 'forcar_alteracao_senha' em 'usuario' verificadas/adicionadas com sucesso.");
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao tentar migrar tabela usuario: " + e.getMessage());
-            }
+        @Bean
+        public CommandLineRunner initData(UserRepository userRepository,
+                        EmpresaRepository empresaRepository,
+                        EstabelecimentoRepository estabRepository,
+                        ConfiguracaoSistemaRepository configRepo,
+                        ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoAGTRepository agtConfigRepo,
+                        ImpostoRepository impostoRepository,
+                        ao.co.hzconsultoria.efacturacao.repository.ClienteRepository clienteRepository,
+                        ao.co.hzconsultoria.efacturacao.repository.CategoriaRepository categoriaRepository,
+                        ao.co.hzconsultoria.efacturacao.repository.ProdutoRepository produtoRepository,
+                        PasswordEncoder passwordEncoder,
+                        JdbcTemplate jdbcTemplate) {
+                return args -> {
+                        // Migração de Emergência: Adicionar colunas email e forcar_alteracao_senha a
+                        // usuario
+                        try {
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE usuario ADD COLUMN IF NOT EXISTS email VARCHAR(255) NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE usuario ADD COLUMN IF NOT EXISTS forcar_alteracao_senha BOOLEAN DEFAULT FALSE");
+                                System.out.println(
+                                                ">>> Migração: Colunas 'email' e 'forcar_alteracao_senha' em 'usuario' verificadas/adicionadas com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao tentar migrar tabela usuario: " + e.getMessage());
+                        }
 
-            // Migração de Emergência: Adicionar coluna 'exibir_datas_validade' se não
-            // existir
-            try {
-                jdbcTemplate.execute(
-                        "ALTER TABLE configuracao_sistema ADD COLUMN IF NOT EXISTS exibir_datas_validade BOOLEAN DEFAULT TRUE");
-                System.out.println(">>> Migração: Coluna 'exibir_datas_validade' verificada/adicionada com sucesso.");
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao tentar migrar tabela configuracao_sistema: " + e.getMessage());
-            }
+                        // Migração de Emergência: Adicionar coluna 'exibir_datas_validade' se não
+                        // existir
+                        try {
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE configuracao_sistema ADD COLUMN IF NOT EXISTS exibir_datas_validade BOOLEAN DEFAULT TRUE");
+                                System.out.println(
+                                                ">>> Migração: Coluna 'exibir_datas_validade' verificada/adicionada com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao tentar migrar tabela configuracao_sistema: "
+                                                + e.getMessage());
+                        }
 
-            // Migração de Emergência: Adicionar coluna 'data_instalacao' se não existir
-            try {
-                jdbcTemplate.execute(
-                        "ALTER TABLE configuracao_sistema ADD COLUMN IF NOT EXISTS data_instalacao DATETIME NULL");
-                System.out.println(">>> Migração: Coluna 'data_instalacao' verificada/adicionada com sucesso.");
-            } catch (Exception e) {
-                System.err.println(
-                        ">>> Erro ao tentar migrar tabela configuracao_sistema (data_instalacao): " + e.getMessage());
-            }
+                        // Migração de Emergência: Adicionar coluna 'data_instalacao' se não existir
+                        try {
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE configuracao_sistema ADD COLUMN IF NOT EXISTS data_instalacao DATETIME NULL");
+                                System.out.println(
+                                                ">>> Migração: Coluna 'data_instalacao' verificada/adicionada com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(
+                                                ">>> Erro ao tentar migrar tabela configuracao_sistema (data_instalacao): "
+                                                                + e.getMessage());
+                        }
 
-            // Migração: Adicionar colunas de controlo de envio AGT
-            try {
-                jdbcTemplate.execute(
-                        "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS envio_agt_ativo BOOLEAN DEFAULT TRUE");
-                jdbcTemplate.execute(
-                        "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS limite_documentos_diarios INT DEFAULT 0");
-                jdbcTemplate.execute(
-                        "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS documentos_enviados_hoje INT DEFAULT 0");
-                jdbcTemplate.execute("ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS data_ultimo_envio DATE");
-                System.out.println(">>> Migração: Colunas de controlo AGT verificadas/adicionadas com sucesso.");
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao migrar tabela configuracao_agt: " + e.getMessage());
-            }
+                        // Migração: Adicionar colunas de controlo de envio AGT
+                        try {
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS envio_agt_ativo BOOLEAN DEFAULT TRUE");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS limite_documentos_diarios INT DEFAULT 0");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS documentos_enviados_hoje INT DEFAULT 0");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE configuracao_agt ADD COLUMN IF NOT EXISTS data_ultimo_envio DATE");
+                                System.out.println(
+                                                ">>> Migração: Colunas de controlo AGT verificadas/adicionadas com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao migrar tabela configuracao_agt: " + e.getMessage());
+                        }
 
-            // Migração: Garantir que a tabela compra tem as colunas de dados do cliente
-            // Garantir que existe par de chaves RSA de 2048 bits (PEM Base64) configurado
-            // para assinatura AGT
-            try {
-                ConfiguracaoSistemaEntity cfgSys = configRepo.findById(1L).orElseGet(() -> {
-                    ConfiguracaoSistemaEntity newCfg = new ConfiguracaoSistemaEntity();
-                    return configRepo.save(newCfg);
-                });
-                if (cfgSys.getAgtPrivateKey() == null || cfgSys.getAgtPrivateKey().trim().isEmpty() ||
-                        !ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil
-                                .validarChaveRsa2048(cfgSys.getAgtPrivateKey())) {
-                    ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil.KeyPairResult kpr = ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil
-                            .gerarParChavesRsa2048();
-                    cfgSys.setAgtPrivateKey(kpr.getPrivateKeyPem());
-                    cfgSys.setAgtPublicKey(kpr.getPublicKeyPem());
-                    configRepo.save(cfgSys);
-                    System.out.println(
-                            ">>> AGT Compliance: Chave privada/pública RSA de 2048 bits (PEM/Base64) gerada e inicializada com sucesso.");
-                }
+                        // Migração: Garantir que a tabela compra tem as colunas de dados do cliente
+                        // Garantir que existe par de chaves RSA de 2048 bits (PEM Base64) configurado
+                        // para assinatura AGT
+                        try {
+                                ConfiguracaoSistemaEntity cfgSys = configRepo.findById(1L).orElseGet(() -> {
+                                        ConfiguracaoSistemaEntity newCfg = new ConfiguracaoSistemaEntity();
+                                        return configRepo.save(newCfg);
+                                });
+                                if (cfgSys.getAgtPrivateKey() == null || cfgSys.getAgtPrivateKey().trim().isEmpty() ||
+                                                !ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil
+                                                                .validarChaveRsa2048(cfgSys.getAgtPrivateKey())) {
+                                        ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil.KeyPairResult kpr = ao.co.hzconsultoria.efacturacao.util.RsaKeyUtil
+                                                        .gerarParChavesRsa2048();
+                                        cfgSys.setAgtPrivateKey(kpr.getPrivateKeyPem());
+                                        cfgSys.setAgtPublicKey(kpr.getPublicKeyPem());
+                                        configRepo.save(cfgSys);
+                                        System.out.println(
+                                                        ">>> AGT Compliance: Chave privada/pública RSA de 2048 bits (PEM/Base64) gerada e inicializada com sucesso.");
+                                }
 
-                if (agtConfigRepo.count() == 0) {
-                    ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT defaultConfig = new ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT();
-                    defaultConfig.setEnvioAgtAtivo(true);
-                    defaultConfig.setModo("HOMOLOGACAO");
-                    defaultConfig.setUrlApi(
-                            "https://portaldoparceiro.hml.minfin.gov.ao/api/v1/faturacao-electronica/registar");
-                    defaultConfig.setLimiteDocumentosDiarios(1000);
-                    defaultConfig.setDocumentosEnviadosHoje(0);
-                    agtConfigRepo.save(defaultConfig);
-                    System.out.println(
-                            ">>> AGT Compliance: Configuração inicial da AGT (Modo Homologação, Envio Ativo) inicializada com sucesso.");
-                }
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao verificar/gerar par de chaves RSA 2048: " + e.getMessage());
-            }
-            // (nomeCliente, nifCliente, moradaCliente, telefoneCliente, emailCliente)
-            // Estas colunas são essenciais para a propagação dos dados do cliente no POS
-            // para o PDF
-            try {
-                jdbcTemplate.execute(
-                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS nome_cliente VARCHAR(255) NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS nif_cliente VARCHAR(50) NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS morada_cliente VARCHAR(500) NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS telefone_cliente VARCHAR(50) NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS email_cliente VARCHAR(255) NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE compra ADD COLUMN IF NOT EXISTS tipo_documento VARCHAR(10) NULL");
-                System.out.println(
-                        ">>> Migração: Colunas de dados do cliente na tabela 'compra' verificadas/adicionadas com sucesso.");
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao migrar tabela compra (dados cliente): " + e.getMessage());
-            }
+                                if (agtConfigRepo.count() == 0) {
+                                        ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT defaultConfig = new ao.co.hzconsultoria.efacturacao.model.ConfiguracaoAGT();
+                                        defaultConfig.setEnvioAgtAtivo(true);
+                                        defaultConfig.setModo("HOMOLOGACAO");
+                                        defaultConfig.setUrlApi(
+                                                        "https://portaldoparceiro.hml.minfin.gov.ao/api/v1/faturacao-electronica/registar");
+                                        defaultConfig.setLimiteDocumentosDiarios(1000);
+                                        defaultConfig.setDocumentosEnviadosHoje(0);
+                                        agtConfigRepo.save(defaultConfig);
+                                        System.out.println(
+                                                        ">>> AGT Compliance: Configuração inicial da AGT (Modo Homologação, Envio Ativo) inicializada com sucesso.");
+                                }
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao verificar/gerar par de chaves RSA 2048: "
+                                                + e.getMessage());
+                        }
+                        // (nomeCliente, nifCliente, moradaCliente, telefoneCliente, emailCliente)
+                        // Estas colunas são essenciais para a propagação dos dados do cliente no POS
+                        // para o PDF
+                        try {
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE compra ADD COLUMN IF NOT EXISTS nome_cliente VARCHAR(255) NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE compra ADD COLUMN IF NOT EXISTS nif_cliente VARCHAR(50) NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE compra ADD COLUMN IF NOT EXISTS morada_cliente VARCHAR(500) NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE compra ADD COLUMN IF NOT EXISTS telefone_cliente VARCHAR(50) NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE compra ADD COLUMN IF NOT EXISTS email_cliente VARCHAR(255) NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE compra ADD COLUMN IF NOT EXISTS tipo_documento VARCHAR(10) NULL");
+                                System.out.println(
+                                                ">>> Migração: Colunas de dados do cliente na tabela 'compra' verificadas/adicionadas com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(
+                                                ">>> Erro ao migrar tabela compra (dados cliente): " + e.getMessage());
+                        }
 
-            // Migração: Adicionar colunas de operações para Facturas FT
-            try {
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_vencimento DATETIME NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS valor_pago DECIMAL(19, 2) DEFAULT 0.00");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS valor_em_aberto DECIMAL(19, 2) DEFAULT 0.00");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS validada_agt BOOLEAN DEFAULT FALSE");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS impresso BOOLEAN DEFAULT FALSE");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_impressao DATETIME NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_email DATETIME NULL");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS email_enviado BOOLEAN DEFAULT FALSE");
-                jdbcTemplate.execute(
-                        "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS fatura_referencia_id BIGINT NULL");
-                System.out.println(
-                        ">>> Migração: Colunas de operações de facturas (FT) verificadas/adicionadas com sucesso.");
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao migrar tabela fatura: " + e.getMessage());
-            }
-            // Migração: Criar tabela para gestão de licenças
-            try {
-                jdbcTemplate.execute(
-                        "CREATE TABLE IF NOT EXISTS licencas_geradas (" +
-                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                                "machine_id VARCHAR(255), " +
-                                "cliente_nome VARCHAR(255), " +
-                                "chave_gerada VARCHAR(500), " +
-                                "data_emissao TIMESTAMP, " +
-                                "data_expiracao TIMESTAMP, " +
-                                "ativa BOOLEAN DEFAULT TRUE, " +
-                                "observacoes VARCHAR(1000)" +
-                                ")");
-                System.out.println(">>> Migração: Tabela 'licencas_geradas' verificada/criada com sucesso.");
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao migrar tabela licencas_geradas: " + e.getMessage());
-            }
+                        // Migração: Adicionar colunas de operações para Facturas FT
+                        try {
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_vencimento DATETIME NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS valor_pago DECIMAL(19, 2) DEFAULT 0.00");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS valor_em_aberto DECIMAL(19, 2) DEFAULT 0.00");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS validada_agt BOOLEAN DEFAULT FALSE");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS impresso BOOLEAN DEFAULT FALSE");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_impressao DATETIME NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS data_email DATETIME NULL");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS email_enviado BOOLEAN DEFAULT FALSE");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE fatura ADD COLUMN IF NOT EXISTS fatura_referencia_id BIGINT NULL");
+                                System.out.println(
+                                                ">>> Migração: Colunas de operações de facturas (FT) verificadas/adicionadas com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao migrar tabela fatura: " + e.getMessage());
+                        }
+                        // Migração: Criar tabela para gestão de licenças
+                        try {
+                                jdbcTemplate.execute(
+                                                "CREATE TABLE IF NOT EXISTS licencas_geradas (" +
+                                                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "machine_id VARCHAR(255), " +
+                                                                "cliente_nome VARCHAR(255), " +
+                                                                "chave_gerada VARCHAR(500), " +
+                                                                "data_emissao TIMESTAMP, " +
+                                                                "data_expiracao TIMESTAMP, " +
+                                                                "ativa BOOLEAN DEFAULT TRUE, " +
+                                                                "observacoes VARCHAR(1000)" +
+                                                                ")");
+                                System.out.println(
+                                                ">>> Migração: Tabela 'licencas_geradas' verificada/criada com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao migrar tabela licencas_geradas: " + e.getMessage());
+                        }
 
-            // Migração: Criar tabelas para módulo POS, Mesas e KDS
-            try {
-                jdbcTemplate.execute(
-                        "CREATE TABLE IF NOT EXISTS mesas (" +
-                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                                "numero_mesa VARCHAR(50) NOT NULL, " +
-                                "zona VARCHAR(100), " +
-                                "capacidade INT DEFAULT 4, " +
-                                "status VARCHAR(50) DEFAULT 'LIVRE', " +
-                                "total_acumulado DECIMAL(19, 2) DEFAULT 0.00, " +
-                                "data_abertura DATETIME NULL, " +
-                                "numero_pessoas INT DEFAULT 1, " +
-                                "empresa_id BIGINT NULL" +
-                                ")");
-                jdbcTemplate.execute(
-                        "CREATE TABLE IF NOT EXISTS pedidos_cozinha (" +
-                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                                "numero_pedido VARCHAR(50), " +
-                                "mesa_id BIGINT NULL, " +
-                                "status VARCHAR(50) DEFAULT 'PENDENTE', " +
-                                "data_hora DATETIME NULL, " +
-                                "observacoes VARCHAR(500), " +
-                                "empresa_id BIGINT NULL" +
-                                ")");
-                jdbcTemplate.execute(
-                        "CREATE TABLE IF NOT EXISTS itens_pedido_cozinha (" +
-                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                                "pedido_cozinha_id BIGINT NULL, " +
-                                "produto_id BIGINT NULL, " +
-                                "nome_produto VARCHAR(255), " +
-                                "quantidade DECIMAL(19, 2) DEFAULT 1.00, " +
-                                "observacao VARCHAR(255), " +
-                                "status VARCHAR(50) DEFAULT 'PENDENTE'" +
-                                ")");
-                jdbcTemplate.execute(
-                        "CREATE TABLE IF NOT EXISTS configuracoes_pos (" +
-                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                                "empresa_id BIGINT UNIQUE, " +
-                                "largura_papel VARCHAR(20) DEFAULT '80mm', " +
-                                "abrir_gaveta_auto BOOLEAN DEFAULT TRUE, " +
-                                "prefixo_balanca VARCHAR(10) DEFAULT '20', " +
-                                "modo_restauracao_ativo BOOLEAN DEFAULT TRUE, " +
-                                "atalhos_teclado_json TEXT" +
-                                ")");
-                jdbcTemplate.execute(
-                        "ALTER TABLE configuracoes_pos ADD COLUMN IF NOT EXISTS modo_restauracao_ativo BOOLEAN DEFAULT TRUE");
-                System.out.println(">>> Migração: Tabelas de POS, Mesas e KDS verificadas/criadas com sucesso.");
-            } catch (Exception e) {
-                System.err.println(">>> Erro ao migrar tabelas POS/Mesas/KDS: " + e.getMessage());
-            }
+                        // Migração: Criar tabelas para módulo POS, Mesas e KDS
+                        try {
+                                jdbcTemplate.execute(
+                                                "CREATE TABLE IF NOT EXISTS mesas (" +
+                                                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "numero_mesa VARCHAR(50) NOT NULL, " +
+                                                                "zona VARCHAR(100), " +
+                                                                "capacidade INT DEFAULT 4, " +
+                                                                "status VARCHAR(50) DEFAULT 'LIVRE', " +
+                                                                "total_acumulado DECIMAL(19, 2) DEFAULT 0.00, " +
+                                                                "data_abertura DATETIME NULL, " +
+                                                                "numero_pessoas INT DEFAULT 1, " +
+                                                                "empresa_id BIGINT NULL" +
+                                                                ")");
+                                jdbcTemplate.execute(
+                                                "CREATE TABLE IF NOT EXISTS pedidos_cozinha (" +
+                                                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "numero_pedido VARCHAR(50), " +
+                                                                "mesa_id BIGINT NULL, " +
+                                                                "status VARCHAR(50) DEFAULT 'PENDENTE', " +
+                                                                "data_hora DATETIME NULL, " +
+                                                                "observacoes VARCHAR(500), " +
+                                                                "empresa_id BIGINT NULL" +
+                                                                ")");
+                                jdbcTemplate.execute(
+                                                "CREATE TABLE IF NOT EXISTS itens_pedido_cozinha (" +
+                                                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "pedido_cozinha_id BIGINT NULL, " +
+                                                                "produto_id BIGINT NULL, " +
+                                                                "nome_produto VARCHAR(255), " +
+                                                                "quantidade DECIMAL(19, 2) DEFAULT 1.00, " +
+                                                                "observacao VARCHAR(255), " +
+                                                                "status VARCHAR(50) DEFAULT 'PENDENTE'" +
+                                                                ")");
+                                jdbcTemplate.execute(
+                                                "CREATE TABLE IF NOT EXISTS configuracoes_pos (" +
+                                                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "empresa_id BIGINT UNIQUE, " +
+                                                                "largura_papel VARCHAR(20) DEFAULT '80mm', " +
+                                                                "abrir_gaveta_auto BOOLEAN DEFAULT TRUE, " +
+                                                                "prefixo_balanca VARCHAR(10) DEFAULT '20', " +
+                                                                "modo_restauracao_ativo BOOLEAN DEFAULT TRUE, " +
+                                                                "atalhos_teclado_json TEXT" +
+                                                                ")");
+                                jdbcTemplate.execute(
+                                                "ALTER TABLE configuracoes_pos ADD COLUMN IF NOT EXISTS modo_restauracao_ativo BOOLEAN DEFAULT TRUE");
+                                System.out.println(
+                                                ">>> Migração: Tabelas de POS, Mesas e KDS verificadas/criadas com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao migrar tabelas POS/Mesas/KDS: " + e.getMessage());
+                        }
 
-            // Migração: Garantir integridade referencial mínima na venda_suspensa
-            // (corrige valores orphan antes de adicionar a constraint que pode falhar)
-            try {
+                        // Migração: Garantir integridade referencial mínima na venda_suspensa
+                        // (corrige valores orphan antes de adicionar a constraint que pode falhar)
+                        try {
 
-                // Nulificar operador_id que não existe na tabela usuario
-                jdbcTemplate.execute(
-                        "UPDATE venda_suspensa SET operador_id = NULL WHERE operador_id IS NOT NULL AND operador_id NOT IN (SELECT id FROM usuario)");
-                // Tentar adicionar a constraint caso não exista (pode lançar se já criada)
-                try {
-                    jdbcTemplate.execute(
-                            "ALTER TABLE venda_suspensa ADD CONSTRAINT FKk9vklxihqrcl137jwnwmledu6 FOREIGN KEY (operador_id) REFERENCES usuario (id)");
-                    System.out.println(">>> Migração: Constraint FKk9vklxihqrcl137jwnwmledu6 adicionada com sucesso.");
-                } catch (Exception e) {
-                    // Constraint pode já existir ou o banco pode não permitir ADD sem checagem;
-                    // ignorar com log
-                    System.out.println(
-                            ">>> Migração: não foi possível adicionar constraint FKk9vklxihqrcl137jwnwmledu6 (provavelmente já existe): "
-                                    + e.getMessage());
-                }
-            } catch (Exception e) {
-                System.err.println(">>> Migração: falha ao preparar venda_suspensa para constraint: " + e.getMessage());
-            }
+                                // Nulificar operador_id que não existe na tabela usuario
+                                jdbcTemplate.execute(
+                                                "UPDATE venda_suspensa SET operador_id = NULL WHERE operador_id IS NOT NULL AND operador_id NOT IN (SELECT id FROM usuario)");
+                                // Tentar adicionar a constraint caso não exista (pode lançar se já criada)
+                                try {
+                                        jdbcTemplate.execute(
+                                                        "ALTER TABLE venda_suspensa ADD CONSTRAINT FKk9vklxihqrcl137jwnwmledu6 FOREIGN KEY (operador_id) REFERENCES usuario (id)");
+                                        System.out.println(
+                                                        ">>> Migração: Constraint FKk9vklxihqrcl137jwnwmledu6 adicionada com sucesso.");
+                                } catch (Exception e) {
+                                        // Constraint pode já existir ou o banco pode não permitir ADD sem checagem;
+                                        // ignorar com log
+                                        System.out.println(
+                                                        ">>> Migração: não foi possível adicionar constraint FKk9vklxihqrcl137jwnwmledu6 (provavelmente já existe): "
+                                                                        + e.getMessage());
+                                }
+                        } catch (Exception e) {
+                                System.err.println(">>> Migração: falha ao preparar venda_suspensa para constraint: "
+                                                + e.getMessage());
+                        }
 
-            // 1. Garantir que, após instalação, apenas exista o SuperAdmin ativo.
-            // Outros utilizadores serão desactivados/limpos para deixar o sistema limpo
-            // para receber novos dados. Isto evita problemas com FK ao apagar.
-            userRepository.findAll().forEach(user -> {
-                if ("superadmin".equalsIgnoreCase(user.getLogin())) {
-                    // Garantir que o SuperAdmin está activo e com senha resetada
-                    user.setAtivo(true);
-                    user.setTentativasLogin(0);
-                    user.setBloqueadoAte(null);
-                    user.setSenha(passwordEncoder.encode("superadmin@2026"));
-                    userRepository.save(user);
-                } else {
-                    // Desactivar e limpar dados sensíveis/relacionamentos para um sistema limpo
-                    try {
-                        user.setAtivo(false);
-                        user.setTentativasLogin(0);
-                        user.setBloqueadoAte(null);
-                        user.setPermissoes(new HashSet<>());
-                        user.setEstabelecimentos(new HashSet<>());
-                        user.setEmpresa(null);
-                        // opcional: remover password para forçar reset ao criar um novo
-                        user.setSenha(null);
-                        userRepository.save(user);
-                    } catch (Exception ex) {
-                        System.err.println(">>> Aviso: não foi possível limpar/activar utilizador " + user.getLogin()
-                                + ": " + ex.getMessage());
-                    }
-                }
-            });
+                        // 1. Garantir que, após instalação, apenas exista o SuperAdmin ativo.
+                        // Outros utilizadores serão desactivados/limpos para deixar o sistema limpo
+                        // para receber novos dados. Isto evita problemas com FK ao apagar.
+                        userRepository.findAll().forEach(user -> {
+                                if ("superadmin".equalsIgnoreCase(user.getLogin())) {
+                                        // Garantir que o SuperAdmin está activo e com senha resetada
+                                        user.setAtivo(true);
+                                        user.setTentativasLogin(0);
+                                        user.setBloqueadoAte(null);
+                                        user.setSenha(passwordEncoder.encode("superadmin@2026"));
+                                        userRepository.save(user);
+                                } else {
+                                        // Desactivar e limpar dados sensíveis/relacionamentos para um sistema limpo
+                                        try {
+                                                user.setAtivo(false);
+                                                user.setTentativasLogin(0);
+                                                user.setBloqueadoAte(null);
+                                                user.setPermissoes(new HashSet<>());
+                                                user.setEstabelecimentos(new HashSet<>());
+                                                user.setEmpresa(null);
+                                                // opcional: remover password para forçar reset ao criar um novo
+                                                user.setSenha(null);
+                                                userRepository.save(user);
+                                        } catch (Exception ex) {
+                                                System.err.println(
+                                                                ">>> Aviso: não foi possível limpar/activar utilizador "
+                                                                                + user.getLogin()
+                                                                                + ": " + ex.getMessage());
+                                        }
+                                }
+                        });
 
-            // 2. Desbloquear admin se necessário (emergência)
-            Optional<User> adminOpt = userRepository.findByLogin("admin");
-            if (adminOpt.isPresent()) {
-                User existingAdmin = adminOpt.get();
-                boolean changed = false;
+                        // 2. Desbloquear admin se necessário (emergência)
+                        Optional<User> adminOpt = userRepository.findByLogin("admin");
+                        if (adminOpt.isPresent()) {
+                                User existingAdmin = adminOpt.get();
+                                boolean changed = false;
 
-                if (existingAdmin.getTentativasLogin() > 0 || existingAdmin.getBloqueadoAte() != null) {
-                    existingAdmin.setTentativasLogin(0);
-                    existingAdmin.setBloqueadoAte(null);
-                    existingAdmin.setAtivo(true);
-                    changed = true;
-                }
-                // If the stored password doesn't match the default and isn't a valid BCrypt
-                // hash,
-                // reset it to the known default. Use regex to verify real BCrypt format (60
-                // chars).
-                String stored = existingAdmin.getSenha();
-                boolean matchesDefault = (stored != null && passwordEncoder.matches("admin123", stored));
-                boolean isValidBcrypt = false;
-                if (stored != null) {
-                    // BCrypt hash format: $2a$10$<22-char-salt><31-char-hash> total length 60
-                    isValidBcrypt = stored.matches("^\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
-                }
+                                if (existingAdmin.getTentativasLogin() > 0 || existingAdmin.getBloqueadoAte() != null) {
+                                        existingAdmin.setTentativasLogin(0);
+                                        existingAdmin.setBloqueadoAte(null);
+                                        existingAdmin.setAtivo(true);
+                                        changed = true;
+                                }
+                                // If the stored password doesn't match the default and isn't a valid BCrypt
+                                // hash,
+                                // reset it to the known default. Use regex to verify real BCrypt format (60
+                                // chars).
+                                String stored = existingAdmin.getSenha();
+                                boolean matchesDefault = (stored != null
+                                                && passwordEncoder.matches("admin123", stored));
+                                boolean isValidBcrypt = false;
+                                if (stored != null) {
+                                        // BCrypt hash format: $2a$10$<22-char-salt><31-char-hash> total length 60
+                                        isValidBcrypt = stored.matches("^\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}$");
+                                }
 
-                // FORÇAR RESET (Para garantir que admin/admin123 funcione agora)
-                existingAdmin.setSenha(passwordEncoder.encode("admin123"));
-                existingAdmin.setTentativasLogin(0);
-                existingAdmin.setBloqueadoAte(null);
-                existingAdmin.setAtivo(true);
-                changed = true;
+                                // FORÇAR RESET (Para garantir que admin/admin123 funcione agora)
+                                existingAdmin.setSenha(passwordEncoder.encode("admin123"));
+                                existingAdmin.setTentativasLogin(0);
+                                existingAdmin.setBloqueadoAte(null);
+                                existingAdmin.setAtivo(true);
+                                changed = true;
 
-                if (changed) {
-                    userRepository.save(existingAdmin);
-                }
-            }
+                                if (changed) {
+                                        userRepository.save(existingAdmin);
+                                }
+                        }
 
-            // 3. Criar ambiente inicial se não houver utilizadores
-            if (userRepository.count() == 0) {
-                System.out.println("Iniciando instalação limpa: nenhuma empresa cadastrada por padrão.");
-            }
+                        // 3. Criar ambiente inicial se não houver utilizadores
+                        if (userRepository.count() == 0) {
+                                System.out.println(
+                                                "Iniciando instalação limpa: nenhuma empresa cadastrada por padrão.");
+                        }
 
-            // 3.1 Criar ou Resetar SuperAdmin de Sistema
-            Optional<User> superOpt = userRepository.findByLogin("superadmin");
-            if (!superOpt.isPresent()) {
-                System.out.println("Criando SuperAdmin de emergência...");
-                User superAdmin = new User();
-                superAdmin.setLogin("superadmin");
-                superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
-                superAdmin.setNome("Super Administrador");
-                superAdmin.setRole("SUPERADMIN");
-                superAdmin.setEmpresa(null); // Garantir que não está associado a nenhuma empresa
-                superAdmin.setAtivo(true);
-                superAdmin.setPermissoes(new HashSet<>(Arrays.asList(
-                        "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO", "ADMINISTRACAO", "PAINEL_GLOBAL",
-                        "RH")));
-                userRepository.save(superAdmin);
-            } else {
-                // Forçar reset de senha
-                User superAdmin = superOpt.get();
-                superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
-                superAdmin.setEmpresa(null); // Garantir que não está associado a nenhuma empresa
-                superAdmin.setAtivo(true);
-                superAdmin.setTentativasLogin(0);
-                superAdmin.setBloqueadoAte(null);
-                userRepository.save(superAdmin);
-            }
-        };
-    }
+                        // 3.1 Criar ou Resetar SuperAdmin de Sistema
+                        Optional<User> superOpt = userRepository.findByLogin("superadmin");
+                        if (!superOpt.isPresent()) {
+                                System.out.println("Criando SuperAdmin de emergência...");
+                                User superAdmin = new User();
+                                superAdmin.setLogin("superadmin");
+                                superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
+                                superAdmin.setNome("Super Administrador");
+                                superAdmin.setRole("SUPERADMIN");
+                                superAdmin.setEmpresa(null); // Garantir que não está associado a nenhuma empresa
+                                superAdmin.setAtivo(true);
+                                superAdmin.setPermissoes(new HashSet<>(Arrays.asList(
+                                                "DASHBOARD", "VENDAS", "STOCK", "FACTURACAO", "FINANCEIRO",
+                                                "ADMINISTRACAO", "PAINEL_GLOBAL",
+                                                "RH")));
+                                userRepository.save(superAdmin);
+                        } else {
+                                // Forçar reset de senha
+                                User superAdmin = superOpt.get();
+                                superAdmin.setSenha(passwordEncoder.encode("superadmin@2026"));
+                                superAdmin.setEmpresa(null); // Garantir que não está associado a nenhuma empresa
+                                superAdmin.setAtivo(true);
+                                superAdmin.setTentativasLogin(0);
+                                superAdmin.setBloqueadoAte(null);
+                                userRepository.save(superAdmin);
+                        }
+                };
+        }
 }

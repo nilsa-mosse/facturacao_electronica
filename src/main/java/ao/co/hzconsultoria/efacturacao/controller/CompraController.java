@@ -1,6 +1,7 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -77,6 +78,7 @@ public class CompraController {
     @Autowired
     private EmpresaRepository empresaRepository;
 
+    @Transactional(readOnly = true)
     @GetMapping("/pos")
     public String abrirPDV(Model model, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (!caixaService.isCaixaAberto()) {
@@ -91,8 +93,6 @@ public class CompraController {
         } else {
             produtos = produtoRepository.findAll();
         }
-
-        System.out.println("[POS] empresaId=" + empresaId + " produtos.size=" + (produtos != null ? produtos.size() : 0));
 
         List<ao.co.hzconsultoria.efacturacao.model.Categoria> categorias;
         if (empresaId != null) {
@@ -112,9 +112,16 @@ public class CompraController {
         ConfiguracaoPos configPos = posService.obterOuCriarConfiguracaoPos(empresa);
         boolean modoRestauracao = configPos.getModoRestauracaoAtivo();
 
+        List<ao.co.hzconsultoria.efacturacao.model.Cliente> clientes;
+        if (empresaId != null) {
+            clientes = clienteRepository.findByEmpresa_Id(empresaId);
+        } else {
+            clientes = clienteRepository.findAll();
+        }
+
         model.addAttribute("produtos", produtos);
         model.addAttribute("categorias", categorias);
-        model.addAttribute("clientes", clienteRepository.findAll());
+        model.addAttribute("clientes", clientes);
         model.addAttribute("caixaAberto", caixaService.getCaixaAbertoAtual());
         model.addAttribute("modoRestauracao", modoRestauracao);
         java.util.Set<Long> bloqueados = stockService.listarProdutosEmInventarioParcial();

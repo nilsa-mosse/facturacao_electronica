@@ -61,9 +61,9 @@
   }
 
   .dark-mode .search-wrapper .form-control {
-    background: #2c3136;
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(148, 163, 184, 0.15);
     color: white;
-    border-color: #3f474e;
   }
 
   .search-wrapper .form-control:focus {
@@ -71,16 +71,146 @@
     box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
   }
 
-  .search-icon {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #adb5bd;
-    font-size: 1.2rem;
+  .filter-category {
+    transition: all 0.25s ease;
   }
 
-  /* Product Card */
+  .filter-category.active,
+  .filter-category:hover {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    border-color: transparent;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(79, 70, 229, 0.24);
+  }
+
+  .pos-hero {
+    background: linear-gradient(145deg, rgba(79,70,229,0.95), rgba(14,165,233,0.86));
+    border-radius: 26px;
+    padding: 1.4rem 1.5rem 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 20px 40px rgba(79, 70, 229, 0.18);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pos-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.25), transparent 40%);
+    pointer-events: none;
+  }
+
+  .pos-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: rgba(255,255,255,0.16);
+    color: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .pos-hero-title {
+    margin: 0.9rem 0 0.2rem;
+    color: white;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    font-size: clamp(1.5rem, 2vw, 2.2rem);
+  }
+
+  .pos-hero-subtitle {
+    color: rgba(255,255,255,0.82);
+    font-size: 0.92rem;
+    margin: 0;
+  }
+
+  .pos-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .pos-hero-btn {
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    border-radius: 999px;
+    padding: 0.7rem 1rem;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+  }
+
+  .pos-hero-btn:hover {
+    background: rgba(255,255,255,0.16);
+    color: white;
+  }
+
+  .pos-stat-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 0.9rem 1rem;
+    color: white;
+    backdrop-filter: blur(8px);
+    height: 100%;
+    transition: all 0.25s ease;
+  }
+
+  .pos-stat-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.14);
+  }
+
+  .pos-stat-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 0.45rem;
+  }
+
+  .pos-stat-value {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .pos-stat-meta {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    opacity: 0.8;
+  }
+
+  .cart-section {
+    background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,250,252,0.98));
+  }
+
+  .dark-mode .cart-section {
+    background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.98));
+  }
+
+  .dark-mode .pos-hero {
+    background: linear-gradient(145deg, rgba(37,99,235,0.9), rgba(14,165,233,0.72));
+  }
+
+  .dark-mode .search-wrapper .form-control {
+    background: rgba(15, 23, 42, 0.7);
+    border-color: rgba(148, 163, 184, 0.15);
+    color: white;
+  }
+
   .product-card {
     background: #ffffff;
     border-radius: 20px;
@@ -789,6 +919,74 @@
   .text-emerald-500 { color: #10b981 !important; }
   .bg-rose-600 { background-color: #e11d48 !important; }
   .text-rose-500 { color: #f43f5e !important; }
+
+  /* Quick Filter Pills */
+  .quick-filter-btn {
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.8rem;
+    padding: 0.4rem 1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  }
+  .quick-filter-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    transform: translateY(-1px);
+  }
+  .quick-filter-btn.active {
+    background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
+  }
+  .dark-mode .quick-filter-btn {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.1);
+    color: #cbd5e1;
+  }
+  .dark-mode .quick-filter-btn:hover {
+    background: #334155;
+    color: #ffffff;
+  }
+
+  /* Scanner Pulse Badge */
+  .scanner-badge {
+    animation: scannerGlow 2.5s infinite;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+  }
+  @keyframes scannerGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  }
+
+  /* Direct Qty Edit */
+  .qty-count {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 6px;
+    transition: all 0.15s;
+  }
+  .qty-count:hover {
+    background: rgba(99, 102, 241, 0.15);
+    color: #4f46e5;
+  }
+
+  /* Client autocomplete list */
+  .cliente-search-item {
+    cursor: pointer;
+    transition: background 0.15s ease;
+    padding: 10px 16px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .cliente-search-item:hover {
+    background: #eef2ff;
+  }
+  .cliente-search-item:last-child {
+    border-bottom: none;
+  }
 </style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
@@ -831,6 +1029,19 @@
                     <span id="badgeOfflineCount" class="badge bg-warning text-dark p-2 rounded-pill shadow-sm" style="display:none; cursor:pointer;" onclick="PosEngine.sincronizarVendasOffline()">
                       <i class="fas fa-wifi-slash me-1"></i> Vendas Offline Pendentes: <span id="offlineVal">0</span>
                     </span>
+                  </div>
+
+                  <!-- Lado Direito: Scanner Status, Som, Limpar Carrinho -->
+                  <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 fw-bold scanner-badge" title="Leitor de código de barras USB/Bluetooth pronto para leitura direta">
+                      <i class="fas fa-barcode me-1 text-success"></i> Scanner Ativo
+                    </span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold px-3 shadow-sm bg-white" id="btnToggleSomPos" onclick="toggleSomPos()" title="Ativar/Desativar som do caixa">
+                      <i class="fas fa-volume-up text-indigo-600" id="iconSomPos"></i> <span id="textSomPos" class="d-none d-md-inline">Som</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 shadow-sm bg-white" onclick="confirmarLimparCarrinho()" title="Limpar todos os itens do carrinho [F4]">
+                      <i class="fas fa-trash-alt me-1"></i> [F4] Limpar
+                    </button>
                   </div>
 
                  </div>
@@ -951,9 +1162,28 @@
 
                 <!-- VISÃO DE CARDÁPIO & PRODUTOS -->
                 <div id="viewCardapioProdutos" th:classappend="${modoRestauracao ? 'd-none' : ''}">
-                  <div class="search-wrapper mb-3">
-                    <i class="fas fa-search search-icon text-indigo-500"></i>
-                    <input type="text" id="search" class="form-control" th:placeholder="#{pos.procurar}">
+                  <div class="search-wrapper mb-3 position-relative">
+                    <i class="fas fa-barcode search-icon text-indigo-500" style="font-size: 1.25rem;"></i>
+                    <input type="text" id="search" class="form-control ps-5 pe-5 shadow-sm" th:placeholder="#{pos.procurar} + ' (ou passe o código de barras / F2)...'" autocomplete="off">
+                    <button type="button" id="btnClearSearch" class="btn btn-sm btn-link text-muted position-absolute end-0 top-50 translate-middle-y me-3 d-none" style="text-decoration:none;">
+                      <i class="fas fa-times-circle fs-5"></i>
+                    </button>
+                  </div>
+
+                  <!-- Pílulas de Filtros Rápidos -->
+                  <div class="d-flex gap-2 overflow-auto pb-2 hide-scrollbar mb-2 align-items-center flex-wrap" id="quickFilterPills">
+                    <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold quick-filter-btn active" data-filter="TODOS">
+                      <i class="fas fa-th-large me-1"></i> Todos
+                    </button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold quick-filter-btn" data-filter="PROMO">
+                      <i class="fas fa-fire text-warning me-1"></i> Promoções
+                    </button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold quick-filter-btn" data-filter="STOCK">
+                      <i class="fas fa-check-circle text-success me-1"></i> Em Stock
+                    </button>
+                    <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold quick-filter-btn" data-filter="BAIXO">
+                      <i class="fas fa-exclamation-triangle text-danger me-1"></i> Stock Baixo
+                    </button>
                   </div>
 
                   <!-- Categorias Reais -->
@@ -974,6 +1204,8 @@
                         th:style="${produto.disponivel ? 'cursor: pointer;' : ''}" th:data-id="${produto.id}"
                         th:data-nome="${produto.nome}" th:data-preco="${produto.preco}"
                         th:data-iva="${produto.ivaPercentual}"
+                        th:data-barcode="${produto.codigoBarra != null ? produto.codigoBarra : ''}"
+                        th:data-promo="${produto.emPromocao != null ? produto.emPromocao : false}"
                         th:data-stock="${produto.quantidadeEstoque != null ? produto.quantidadeEstoque : ''}"
                         th:attr="data-bloqueado=${produtosBloqueados != null and produtosBloqueados.contains(produto.id)}">
 
@@ -1070,10 +1302,14 @@
             </div>
 
             <div class="cart-footer">
-              <div class="cart-summary mb-4">
+              <div class="cart-summary mb-3">
                 <div class="summary-row">
                   <span class="text-slate-500" th:text="#{pos.total.sem_imposto}">Subtotal</span>
                   <span class="fw-bold text-slate-700" id="totalSemImposto">0.00 Kz</span>
+                </div>
+                <div class="summary-row" id="linhaDescontoPos" style="display: none;">
+                  <span class="text-emerald-600 fw-bold"><i class="fas fa-tag me-1"></i> Desconto</span>
+                  <span class="fw-bold text-emerald-600" id="valorDescontoPos">-0.00 Kz</span>
                 </div>
                 <div class="summary-row">
                   <span class="text-slate-500" th:text="#{pos.iva}">IVA Acumulado</span>
@@ -1085,11 +1321,23 @@
                 </div>
               </div>
 
+              <div class="d-flex gap-2 mb-3">
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill w-100 fw-bold py-2 shadow-sm bg-white" onclick="abrirPromptDesconto()">
+                  <i class="fas fa-percentage text-indigo-500 me-1"></i> <span id="btnDescontoTexto">Adicionar Desconto</span>
+                </button>
+              </div>
+
               <button type="button" id="btnContinuar"
-                class="btn btn-premium-success w-100 py-3 rounded-pill fw-bold text-uppercase letter-spacing-1"
+                class="btn btn-premium-success w-100 py-3 rounded-pill fw-bold text-uppercase letter-spacing-1 shadow"
                 onclick="abrirModalCheckout()">
                 <i class="fas fa-check-circle me-2"></i> <span th:text="#{pos.btn.finalizar_venda}">Finalizar Venda</span>
               </button>
+
+              <div class="text-center mt-2">
+                <small class="text-muted fw-bold" style="font-size: 0.72rem;">
+                  <i class="fas fa-keyboard me-1 text-indigo-400"></i> [F12] Finalizar &bull; [F4] Limpar &bull; [F2] Pesquisar
+                </small>
+              </div>
 
             </div>
           </div>
@@ -1285,7 +1533,18 @@
                         </div>
 
                         <div id="painelClienteExistente">
-                          <select id="selectCliente" class="form-select border-0 shadow-sm py-3 px-4 rounded-4">
+                          <div class="position-relative mb-2">
+                            <div class="input-group">
+                              <span class="input-group-text bg-white border-0 shadow-sm rounded-start-pill ps-3"><i class="fas fa-search text-indigo-500"></i></span>
+                              <input type="text" id="inputPesquisaCliente" class="form-control border-0 shadow-sm py-2 px-3" placeholder="Pesquisar por Nome, NIF ou Telefone..." autocomplete="off">
+                              <button type="button" class="btn btn-outline-primary rounded-end-pill px-3 fw-bold shadow-sm" onclick="selecionarConsumidorFinalDireto()">
+                                <i class="fas fa-user-check me-1"></i> Consumidor Final
+                              </button>
+                            </div>
+                            <div id="dropdownResultadosClientes" class="list-group position-absolute w-100 shadow-lg rounded-4 mt-1 bg-white border overflow-auto d-none" style="max-height: 220px; z-index: 1060;">
+                            </div>
+                          </div>
+                          <select id="selectCliente" class="form-select border-0 shadow-sm py-2 px-3 rounded-3 text-muted small">
                             <option value="" th:text="#{pos.cliente.consumidor_final_option}">-- Consumidor Final (999999999) --</option>
                             <option th:each="c : ${clientes}" th:value="${c.id}"
                               th:text="${c.nome + ' — NIF: ' + c.nif}"></option>
@@ -1460,7 +1719,6 @@
                 </div>
               </div>
             </div>
-          </div>
 
           <!-- Footer do Checkout -->
           <div class="checkout-footer-nav d-flex justify-content-center gap-3 mt-5 pb-5">
@@ -1657,10 +1915,81 @@
     </div>
 
     <!-- JS Logic Refactored -->
-    <!-- JS Logic -->
+    <!-- JS -->
     <script th:src="@{/plugins/sweetalert2/sweetalert2.all.min.js}"></script>
     <script>
       var cart = [];
+      var descontoGlobal = 0; // valor em Kz
+      var descontoPercentual = 0; // valor em %
+
+      // Som e Feedback Sonoro de Caixa Registradora
+      var audioCtx = null;
+      var somAtivo = localStorage.getItem('pos_som_ativo') !== 'false';
+
+      function playBeep(freq, dur) {
+        if (!somAtivo) return;
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq || 880;
+          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (dur || 0.08));
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + (dur || 0.08));
+        } catch (e) {
+          console.debug('Áudio POS:', e);
+        }
+      }
+
+      function toggleSomPos() {
+        somAtivo = !somAtivo;
+        localStorage.setItem('pos_som_ativo', somAtivo);
+        atualizarIconeSom();
+        if (somAtivo) {
+          playBeep(880, 0.08);
+          mostrarToast('success', 'Som do leitor ativado');
+        } else {
+          mostrarToast('info', 'Som do leitor desativado');
+        }
+      }
+      window.toggleSomPos = toggleSomPos;
+
+      function atualizarIconeSom() {
+        var icon = document.getElementById('iconSomPos');
+        if (icon) {
+          if (somAtivo) {
+            icon.className = 'fas fa-volume-up text-indigo-600';
+          } else {
+            icon.className = 'fas fa-volume-mute text-muted';
+          }
+        }
+      }
+
+      function mostrarToast(tipo, msg) {
+        if (window.Swal) {
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2200,
+            timerProgressBar: true
+          });
+          Toast.fire({
+            icon: tipo || 'info',
+            title: msg
+          });
+        }
+      }
+      window.mostrarToast = mostrarToast;
 
       function renderCart() {
         var container = $("#cartItemsList");
@@ -1675,19 +2004,23 @@
           totalIva += itemTotal * (item.ivaPercentual / 100);
           count += item.qtd;
 
+          var obsHtml = item.observacao ? '<div class="badge bg-light text-muted border small mt-1"><i class="fas fa-sticky-note me-1 text-warning"></i>' + item.observacao + '</div>' : '';
+
           var cardHtml =
             '<div class="cart-item-card">' +
-            '<div class="cart-item-info">' +
-            '<h6 class="fw-bold mb-0 text-slate-800 text-truncate" style="max-width: 180px;">' + item.nome + '</h6>' +
+            '<div class="cart-item-info flex-grow-1 me-2">' +
+            '<h6 class="fw-bold mb-0 text-slate-800 text-truncate" style="max-width: 170px;" title="' + item.nome + '">' + item.nome + '</h6>' +
             '<div class="text-indigo-600 fw-bold small mt-1">' + item.preco.toFixed(2) + ' Kz</div>' +
+            obsHtml +
             '</div>' +
-            '<div class="d-flex align-items-center gap-2">' +
+            '<div class="d-flex align-items-center gap-1">' +
+            '<button type="button" class="btn btn-sm btn-light border-0 rounded-circle text-muted" onclick="editarObservacaoItem(' + index + ')" title="Adicionar nota/observação"><i class="fas fa-pencil-alt small"></i></button>' +
             '<div class="cart-item-qty bg-slate-100 p-1 d-flex align-items-center" style="border-radius: 30px;">' +
             '<button class="qty-btn bg-white shadow-sm border-0 rounded-circle" onclick="decreaseQty(' + index + ')"><i class="fas fa-minus"></i></button>' +
-            '<span class="qty-count px-2 fw-bold text-slate-700">' + item.qtd + '</span>' +
+            '<span class="qty-count px-2 fw-bold text-slate-700" onclick="editarQuantidadeDireta(' + index + ')" title="Clique para alterar">' + item.qtd + '</span>' +
             '<button class="qty-btn bg-white shadow-sm border-0 rounded-circle" onclick="increaseQty(' + index + ')"><i class="fas fa-plus"></i></button>' +
             '</div>' +
-            '<button class="btn btn-sm btn-ghost-danger rounded-circle p-2 ms-2" onclick="removeItem(' + index + ')" title="Remover">' +
+            '<button class="btn btn-sm btn-ghost-danger rounded-circle p-2 ms-1" onclick="removeItem(' + index + ')" title="Remover">' +
             '<i class="fas fa-trash-alt"></i>' +
             '</button>' +
             '</div>' +
@@ -1695,11 +2028,160 @@
           container.append(cardHtml);
         });
 
+        // Cálculo de desconto
+        var valorDesconto = 0;
+        if (descontoPercentual > 0) {
+          valorDesconto = subtotal * (descontoPercentual / 100);
+        } else if (descontoGlobal > 0) {
+          valorDesconto = Math.min(descontoGlobal, subtotal);
+        }
+
+        var subtotalComDesconto = Math.max(0, subtotal - valorDesconto);
+        var totalFinal = subtotalComDesconto + totalIva;
+
+        if (valorDesconto > 0) {
+          $("#linhaDescontoPos").show();
+          $("#valorDescontoPos").text("-" + valorDesconto.toFixed(2) + " Kz" + (descontoPercentual > 0 ? " (" + descontoPercentual + "%)" : ""));
+          $("#btnDescontoTexto").text("Desconto (" + (descontoPercentual > 0 ? descontoPercentual + "%" : valorDesconto.toFixed(2) + " Kz") + ")");
+        } else {
+          $("#linhaDescontoPos").hide();
+          $("#btnDescontoTexto").text("Adicionar Desconto");
+        }
+
         $("#cartCountBadge").text(count + " Itens");
         $("#totalSemImposto").text(subtotal.toFixed(2) + " Kz");
         $("#valorIva").text(totalIva.toFixed(2) + " Kz");
-        $("#totalFinal").text((subtotal + totalIva).toFixed(2) + " Kz");
+        $("#totalFinal").text(totalFinal.toFixed(2) + " Kz");
       }
+
+      function editarQuantidadeDireta(index) {
+        var item = cart[index];
+        if (!item) return;
+        var novaQtdStr = prompt("Alterar quantidade de " + item.nome + ":", item.qtd);
+        if (novaQtdStr === null) return;
+        var novaQtd = parseFloat(novaQtdStr.replace(',', '.'));
+        if (isNaN(novaQtd) || novaQtd <= 0) {
+          mostrarToast("warning", "Quantidade inválida.");
+          return;
+        }
+        if (item.stockMax !== undefined && item.stockMax !== Infinity && novaQtd > item.stockMax) {
+          mostrarToast("warning", "Stock máximo disponível: " + item.stockMax);
+          playBeep(220, 0.2);
+          return;
+        }
+        item.qtd = novaQtd;
+        renderCart();
+        mostrarToast("info", "Quantidade atualizada: " + item.nome + " (" + novaQtd + "x)");
+      }
+
+      function editarObservacaoItem(index) {
+        var item = cart[index];
+        if (!item) return;
+        var obs = prompt("Observação para " + item.nome + " (ex: Sem gelo, Bem passado):", item.observacao || '');
+        if (obs !== null) {
+          item.observacao = obs.trim();
+          renderCart();
+        }
+      }
+
+      function abrirPromptDesconto() {
+        if (cart.length === 0) {
+          mostrarToast("info", "Adicione produtos ao carrinho antes de aplicar desconto.");
+          return;
+        }
+        if (window.Swal) {
+          Swal.fire({
+            title: "Desconto Global na Venda",
+            input: "text",
+            inputLabel: "Digite o desconto em % (ex: 10%) ou valor fixo em Kz (ex: 500):",
+            inputValue: descontoPercentual > 0 ? (descontoPercentual + "%") : (descontoGlobal > 0 ? descontoGlobal : ""),
+            showCancelButton: true,
+            confirmButtonColor: "#4f46e5",
+            cancelButtonColor: "#64748b",
+            confirmButtonText: "Aplicar Desconto",
+            cancelButtonText: "Cancelar",
+            showDenyButton: (descontoGlobal > 0 || descontoPercentual > 0),
+            denyButtonText: "Remover Desconto"
+          }).then((res) => {
+            if (res.isConfirmed && res.value) {
+              var val = res.value.trim();
+              if (val.endsWith("%")) {
+                var p = parseFloat(val.replace("%", "").replace(",", "."));
+                if (!isNaN(p) && p >= 0 && p <= 100) {
+                  descontoPercentual = p;
+                  descontoGlobal = 0;
+                  renderCart();
+                  mostrarToast("success", "Desconto de " + p + "% aplicado!");
+                }
+              } else {
+                var v = parseFloat(val.replace(",", "."));
+                if (!isNaN(v) && v >= 0) {
+                  descontoGlobal = v;
+                  descontoPercentual = 0;
+                  renderCart();
+                  mostrarToast("success", "Desconto de " + v.toFixed(2) + " Kz aplicado!");
+                }
+              }
+            } else if (res.isDenied) {
+              descontoGlobal = 0;
+              descontoPercentual = 0;
+              renderCart();
+              mostrarToast("info", "Desconto removido.");
+            }
+          });
+        } else {
+          var val = prompt("Informe o desconto em % (ex: 10%) ou valor (ex: 500):", "");
+          if (val) {
+            if (val.endsWith("%")) {
+              descontoPercentual = parseFloat(val.replace("%", "")) || 0;
+              descontoGlobal = 0;
+            } else {
+              descontoGlobal = parseFloat(val) || 0;
+              descontoPercentual = 0;
+            }
+            renderCart();
+          }
+        }
+      }
+      window.abrirPromptDesconto = abrirPromptDesconto;
+
+      function confirmarLimparCarrinho() {
+        if (cart.length === 0) {
+          mostrarToast("info", "O carrinho já está vazio.");
+          return;
+        }
+        if (window.Swal) {
+          Swal.fire({
+            title: "Limpar Carrinho?",
+            text: "Deseja remover todos os " + cart.length + " produtos do carrinho atual?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#64748b",
+            confirmButtonText: "Sim, Limpar Tudo",
+            cancelButtonText: "Cancelar"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              cart = [];
+              descontoGlobal = 0;
+              descontoPercentual = 0;
+              renderCart();
+              atualizarContadorSuspensas();
+              mostrarToast("info", "Carrinho limpo com sucesso.");
+            }
+          });
+        } else {
+          if (confirm("Deseja limpar todos os itens do carrinho?")) {
+            cart = [];
+            descontoGlobal = 0;
+            descontoPercentual = 0;
+            renderCart();
+            atualizarContadorSuspensas();
+          }
+        }
+      }
+      window.confirmarLimparCarrinho = confirmarLimparCarrinho;
+      window.clearCart = confirmarLimparCarrinho;
 
       function increaseQty(index) {
         var item = cart[index];
@@ -1828,35 +2310,36 @@
         });
 
         var selectedCategoryId = 0;
+        var filtroRapidoAtual = 'TODOS';
 
-        // Handle product click
-        $(document).on('click', '.btn-quick-add', function () {
-          var $btn = $(this);
-          // if this product is blocked by an active PARCIAL inventory, show warning and stop
-          var isBlocked = $btn.attr('data-bloqueado') === 'true' || $btn.data('bloqueado') === true;
-          if (isBlocked) {
-            alert($('#t-msg-produto-bloqueado').text() || 'Atenção: Este produto está em inventário e a venda está temporariamente bloqueada.');
-            return;
+        // Função unificada para adicionar produto ao carrinho (por clique, barcode ou balança)
+        function adicionarProdutoAoCarrinho(produto, quantidadeDesejada) {
+          if (!produto) return false;
+
+          // Verificar bloqueio por inventário parcial
+          if (produto.bloqueado) {
+            mostrarToast('warning', 'Produto em inventário parcial: venda temporariamente bloqueada.');
+            playBeep(220, 0.2);
+            return false;
           }
-          var id = parseInt($btn.data('id'));
-          var nome = $btn.data('nome');
-          var preco = parseFloat($btn.data('preco'));
-          var ivaPercentual = $btn.data('iva') ? parseFloat($btn.data('iva')) : 0;
-          var stockRaw = $btn.attr('data-stock');
 
-          var stockAtual = stockRaw === '' ? Infinity : parseFloat(stockRaw);
+          var id = parseInt(produto.id);
+          var nome = produto.nome;
+          var preco = parseFloat(produto.preco);
+          var ivaPercentual = produto.ivaPercentual ? parseFloat(produto.ivaPercentual) : 0;
+          var stockRaw = produto.quantidadeEstoque;
+          var stockAtual = (stockRaw === '' || stockRaw === null || stockRaw === undefined) ? Infinity : parseFloat(stockRaw);
           if (isNaN(stockAtual)) stockAtual = 0;
 
-          if (stockAtual <= 0) {
-            // Open modal to search availability in visible establishments
+          if (stockAtual <= 0 && produto.disponivel === false) {
             $('#estoqueModalProdutoId').val(id);
             $('#estoqueModalNome').text(nome);
             $('#estoqueModal').modal('show');
-            // trigger search (default: hide zeros)
             fetchDisponibilidade(id, false);
-            return;
+            return false;
           }
 
+          var qtd = (quantidadeDesejada !== undefined && quantidadeDesejada > 0) ? quantidadeDesejada : 1;
           var item = null;
           for (var i = 0; i < cart.length; i++) {
             if (cart[i].id === id) {
@@ -1866,50 +2349,267 @@
           }
 
           if (item) {
-            if (item.qtd + 1 > stockAtual) {
-              alert($('#t-msg-stock-max-atingido').text() || 'Quantidade máxima atingida conforme o stock disponível.');
-              return;
+            if (stockAtual !== Infinity && (item.qtd + qtd > stockAtual)) {
+              mostrarToast('warning', 'Stock máximo disponível (' + stockAtual + ') atingido para ' + nome);
+              playBeep(220, 0.2);
+              return false;
             }
-            item.qtd++;
+            item.qtd += qtd;
           } else {
-            cart.push({ id: id, nome: nome, preco: preco, qtd: 1, ivaPercentual: ivaPercentual, stockMax: stockAtual });
-            // Animate add
+            cart.push({
+              id: id,
+              nome: nome,
+              preco: preco,
+              qtd: qtd,
+              ivaPercentual: ivaPercentual,
+              stockMax: stockAtual,
+              observacao: ''
+            });
+          }
+
+          playBeep(880, 0.08);
+          mostrarToast('success', 'Adicionado: ' + nome + ' (' + (item ? item.qtd : qtd) + 'x)');
+          renderCart();
+          return true;
+        }
+        window.adicionarProdutoAoCarrinho = adicionarProdutoAoCarrinho;
+
+        // Busca e adiciona por código de barras
+        function buscarEAdicionarPorCodigo(codigo, qtd) {
+          if (!codigo) return;
+          var codigoLimpo = codigo.trim();
+
+          // 1. Procurar no DOM atual
+          var $card = $('.product-card[data-barcode="' + codigoLimpo + '"]');
+          if ($card.length === 0) {
+            // Tentar por id exato
+            $card = $('.product-card[data-id="' + codigoLimpo + '"]');
+          }
+
+          if ($card.length > 0) {
+            var prod = {
+              id: $card.data('id'),
+              nome: $card.data('nome'),
+              preco: $card.data('preco'),
+              ivaPercentual: $card.data('iva'),
+              quantidadeEstoque: $card.attr('data-stock'),
+              bloqueado: $card.attr('data-bloqueado') === 'true' || $card.data('bloqueado') === true,
+              disponivel: !$card.hasClass('product-disabled')
+            };
+            adicionarProdutoAoCarrinho(prod, qtd);
+            return;
+          }
+
+          // 2. Buscar no endpoint REST /api/pos/produtos/barcode/{codigo}
+          fetch('/api/pos/produtos/barcode/' + encodeURIComponent(codigoLimpo))
+            .then(function (res) {
+              if (res.ok) return res.json();
+              throw new Error('Não encontrado');
+            })
+            .then(function (prod) {
+              adicionarProdutoAoCarrinho(prod, qtd);
+            })
+            .catch(function () {
+              mostrarToast('warning', 'Código de barras não encontrado: ' + codigoLimpo);
+              playBeep(220, 0.2);
+            });
+        }
+        window.buscarEAdicionarPorCodigo = buscarEAdicionarPorCodigo;
+
+        // Clique no card do produto
+        $(document).on('click', '.btn-quick-add', function () {
+          var $btn = $(this);
+          var prod = {
+            id: $btn.data('id'),
+            nome: $btn.data('nome'),
+            preco: $btn.data('preco'),
+            ivaPercentual: $btn.data('iva'),
+            quantidadeEstoque: $btn.attr('data-stock'),
+            bloqueado: $btn.attr('data-bloqueado') === 'true' || $btn.data('bloqueado') === true,
+            disponivel: !$btn.hasClass('product-disabled')
+          };
+          if (adicionarProdutoAoCarrinho(prod, 1)) {
             var originalHtml = $btn.html();
             $btn.html('<i class="fas fa-check"></i>');
-            setTimeout(function () { $btn.html(originalHtml); }, 1000);
+            setTimeout(function () { $btn.html(originalHtml); }, 800);
           }
-          renderCart();
         });
 
+        // Filtragem inteligente com Debounce
+        var debounceTimer = null;
         function filterProducts() {
-          var searchTerm = $('#search').val().toLowerCase();
+          var searchTerm = $('#search').val().trim().toLowerCase();
 
+          if (searchTerm.length > 0) {
+            $('#btnClearSearch').removeClass('d-none');
+          } else {
+            $('#btnClearSearch').addClass('d-none');
+          }
+
+          var matchesCount = 0;
           $('.product-item').each(function () {
-            var productName = $(this).find('.product-name').text().toLowerCase();
-            var productCategoryId = parseInt($(this).data('category-id'));
+            var $item = $(this);
+            var $card = $item.find('.product-card');
+            var productName = $item.find('.product-name').text().toLowerCase();
+            var barcode = ($card.attr('data-barcode') || '').toLowerCase();
+            var productCategoryId = parseInt($item.data('category-id'));
+            var emPromo = $card.attr('data-promo') === 'true' || $card.data('promo') === true;
+            var stockVal = parseFloat($card.attr('data-stock'));
+            var temStock = isNaN(stockVal) || stockVal > 0;
+            var stockBaixo = !isNaN(stockVal) && stockVal > 0 && stockVal <= 5;
 
-            var matchesSearch = productName.indexOf(searchTerm) !== -1;
+            var matchesSearch = searchTerm === '' || productName.indexOf(searchTerm) !== -1 || barcode.indexOf(searchTerm) !== -1;
             var matchesCategory = (selectedCategoryId === 0 || productCategoryId === selectedCategoryId);
 
-            if (matchesSearch && matchesCategory) {
-              $(this).show();
+            var matchesFiltroRapido = true;
+            if (filtroRapidoAtual === 'PROMO') matchesFiltroRapido = emPromo;
+            else if (filtroRapidoAtual === 'STOCK') matchesFiltroRapido = temStock;
+            else if (filtroRapidoAtual === 'BAIXO') matchesFiltroRapido = stockBaixo;
+
+            if (matchesSearch && matchesCategory && matchesFiltroRapido) {
+              $item.show();
+              matchesCount++;
             } else {
-              $(this).hide();
+              $item.hide();
             }
           });
+
+          // Se a busca local encontrou poucos itens e tem pelo menos 2 caracteres, busca dinamicamente via REST
+          if (searchTerm.length >= 2 && matchesCount < 2) {
+            buscarProdutosRemoto(searchTerm, selectedCategoryId);
+          }
         }
 
-        // Search functionality
-        $('#search').on('input', filterProducts);
+        function buscarProdutosRemoto(termo, catId) {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(function () {
+            var url = '/api/pos/produtos?termo=' + encodeURIComponent(termo) + (catId > 0 ? '&categoriaId=' + catId : '');
+            fetch(url).then(function (res) {
+              if (res.ok) return res.json();
+              return null;
+            }).then(function (data) {
+              if (data && data.produtos && data.produtos.length > 0) {
+                // Adiciona dinamicamente produtos encontrados que ainda não estejam na grelha
+                data.produtos.forEach(function (p) {
+                  if ($('.product-card[data-id="' + p.id + '"]').length === 0) {
+                    var cardHtml =
+                      '<div class="col product-item" data-category-id="' + p.categoriaId + '">' +
+                      '<div class="product-card btn-quick-add active-card" style="cursor:pointer;" ' +
+                      'data-id="' + p.id + '" data-nome="' + p.nome + '" data-preco="' + p.preco + '" ' +
+                      'data-iva="' + (p.ivaPercentual || 0) + '" data-barcode="' + (p.codigoBarras || '') + '" ' +
+                      'data-promo="' + (p.emPromocao ? 'true' : 'false') + '" data-stock="' + (p.quantidadeEstoque != null ? p.quantidadeEstoque : '') + '" ' +
+                      'data-bloqueado="' + (p.bloqueado ? 'true' : 'false') + '">' +
+                      '<div class="product-img-container">' +
+                      '<img src="' + p.imagem + '" class="product-img" alt="Produto">' +
+                      '<div class="btn-quick-add-float"><i class="fas fa-plus"></i></div>' +
+                      '</div>' +
+                      '<div class="product-info">' +
+                      '<div class="product-name text-truncate">' + p.nome + '</div>' +
+                      '<div class="d-flex justify-content-between align-items-center mt-2">' +
+                      '<div class="product-price"><span>' + p.preco.toFixed(2) + '</span> Kz</div>' +
+                      '</div>' +
+                      '</div>' +
+                      '</div>' +
+                      '</div>';
+                    $('#productList').append(cardHtml);
+                  }
+                });
+              }
+            }).catch(function (e) { console.debug('Busca remota ignorada:', e); });
+          }, 300);
+        }
 
-        // Category Filter click
+        // Pesquisa com debounce
+        $('#search').on('input', function () {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(filterProducts, 150);
+        });
+
+        // Limpar pesquisa
+        $('#btnClearSearch').on('click', function () {
+          $('#search').val('').focus();
+          filterProducts();
+        });
+
+        // Pílulas de filtro rápido (Todos, Promoções, Stock, Stock Baixo)
+        $('.quick-filter-btn').on('click', function () {
+          $('.quick-filter-btn').removeClass('active');
+          $(this).addClass('active');
+          filtroRapidoAtual = $(this).data('filter');
+          filterProducts();
+        });
+
+        // Filtro por Categoria
         $('.filter-category').on('click', function () {
-          $('.filter-category').removeClass('btn-primary').addClass('btn-outline-dark');
-          $(this).removeClass('btn-outline-dark').addClass('btn-primary');
+          $('.filter-category').removeClass('btn-primary').addClass('btn-outline-primary bg-white');
+          $(this).removeClass('btn-outline-primary bg-white').addClass('btn-primary');
 
           selectedCategoryId = parseInt($(this).data('category'));
           filterProducts();
         });
+
+        // Pesquisa dinâmica e autocomplete de Clientes no Checkout
+        var timerCliente = null;
+        $('#inputPesquisaCliente').on('input', function () {
+          var termo = $(this).val().trim();
+          var $dropdown = $('#dropdownResultadosClientes');
+          clearTimeout(timerCliente);
+
+          if (termo.length < 1) {
+            $dropdown.addClass('d-none').empty();
+            return;
+          }
+
+          timerCliente = setTimeout(function () {
+            fetch('/api/pos/clientes/search?termo=' + encodeURIComponent(termo))
+              .then(function (res) { return res.ok ? res.json() : []; })
+              .then(function (clientes) {
+                $dropdown.empty();
+                if (!clientes || clientes.length === 0) {
+                  $dropdown.html('<div class="p-3 text-muted text-center small">Nenhum cliente encontrado. <button type="button" class="btn btn-link btn-sm p-0 fw-bold" onclick="toggleClienteMode(\'novo\')">Criar novo?</button></div>');
+                  $dropdown.removeClass('d-none');
+                  return;
+                }
+                clientes.forEach(function (c) {
+                  var itemHtml =
+                    '<a href="javascript:void(0)" class="list-group-item list-group-item-action cliente-search-item" ' +
+                    'onclick="selecionarClientePesquisado(' + c.id + ', \'' + (c.nome.replace(/'/g, "\\'")) + '\', \'' + (c.nif || '999999999') + '\')">' +
+                    '<div class="d-flex justify-content-between align-items-center">' +
+                    '<strong class="text-dark">' + c.nome + '</strong>' +
+                    '<span class="badge bg-light text-dark border">NIF: ' + (c.nif || '999999999') + '</span>' +
+                    '</div>' +
+                    (c.telefone ? '<small class="text-muted d-block"><i class="fas fa-phone me-1"></i>' + c.telefone + '</small>' : '') +
+                    '</a>';
+                  $dropdown.append(itemHtml);
+                });
+                $dropdown.removeClass('d-none');
+              })
+              .catch(function () {
+                $dropdown.addClass('d-none');
+              });
+          }, 200);
+        });
+
+        // Selecionar cliente pesquisado
+        function selecionarClientePesquisado(id, nome, nif) {
+          var $select = $('#selectCliente');
+          if ($select.find('option[value="' + id + '"]').length === 0) {
+            $select.append('<option value="' + id + '">' + nome + ' — NIF: ' + nif + '</option>');
+          }
+          $select.val(id).trigger('change');
+          $('#dropdownResultadosClientes').addClass('d-none').empty();
+          $('#inputPesquisaCliente').val(nome + ' (NIF: ' + nif + ')');
+          mostrarToast('success', 'Cliente selecionado: ' + nome);
+        }
+        window.selecionarClientePesquisado = selecionarClientePesquisado;
+
+        function selecionarConsumidorFinalDireto() {
+          $('#selectCliente').val('').trigger('change');
+          $('#inputPesquisaCliente').val('');
+          $('#dropdownResultadosClientes').addClass('d-none').empty();
+          mostrarToast('info', 'Consumidor Final selecionado.');
+        }
+        window.selecionarConsumidorFinalDireto = selecionarConsumidorFinalDireto;
 
         function processarVenda(url, successMsg, btnId, skipModalClose) {
           if (cart.length === 0) {
@@ -2374,7 +3074,7 @@
             $('#btnClienteNovo').removeClass('btn-light').addClass('btn-primary');
             $('#btnClienteExistente').removeClass('btn-primary').addClass('btn-light');
           }
-        }
+        }        
         window.toggleClienteMode = toggleClienteMode;
 
         function gravarClienteNovoPossivel() {
@@ -3150,21 +3850,24 @@
       }
     });
 
-    // Gerador de Atalhos de Teclado (F1 - F10)
+    // Gerador de Atalhos de Teclado (F1 - F12) e Leitor Global de Código de Barras (Hardware Scanner)
+    var globalBarcodeBuffer = "";
+    var lastBarcodeKeyTime = 0;
+
     document.addEventListener('keydown', function (e) {
-      // Evitar interferência quando a digitar em formulários que necessitem das teclas
-      if (['F1', 'F2', 'F4', 'F7', 'F8', 'F9', 'F10'].includes(e.key)) {
+      // 1. Atalhos de Teclado de Função (F1 - F12)
+      if (['F1', 'F2', 'F4', 'F7', 'F8', 'F9', 'F10', 'F12'].includes(e.key)) {
         e.preventDefault();
       }
 
-      if (e.key === 'F1') {
+      if (e.key === 'F1' || e.key === 'F2') {
         const inputSearch = document.getElementById('search');
-        if (inputSearch) inputSearch.focus();
-      } else if (e.key === 'F2') {
-        const btnCheckout = document.getElementById('btnOpenCheckout');
-        if (btnCheckout) btnCheckout.click();
+        if (inputSearch) {
+          inputSearch.focus();
+          inputSearch.select();
+        }
       } else if (e.key === 'F4') {
-        if (typeof clearCart === 'function') clearCart();
+        confirmarLimparCarrinho();
       } else if (e.key === 'F7') {
         if (typeof suspenderVenda === 'function') suspenderVenda();
       } else if (e.key === 'F8') {
@@ -3173,25 +3876,70 @@
         abrirModalSplitBill();
       } else if (e.key === 'F10') {
         PosEngine.pulsarGavetaDinheiro();
+      } else if (e.key === 'F12') {
+        var btnFinalizar = document.getElementById('btnContinuar');
+        if (btnFinalizar) btnFinalizar.click();
+      }
+
+      // 2. Intercetor Global de Scanner Físico de Código de Barras (USB/Bluetooth)
+      var activeEl = document.activeElement;
+      var isSearch = activeEl && activeEl.id === 'search';
+      var isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+
+      // Se estiver digitando em outro campo (ex: nome do novo cliente, observações), não interceta como leitor
+      if (isInput && !isSearch) {
+        return;
+      }
+
+      var now = Date.now();
+      var timeDiff = now - lastBarcodeKeyTime;
+      lastBarcodeKeyTime = now;
+
+      if (e.key === 'Enter') {
+        var scanned = '';
+        if (isSearch && activeEl.value.trim().length >= 3) {
+          scanned = activeEl.value.trim();
+        } else if (globalBarcodeBuffer.trim().length >= 3) {
+          scanned = globalBarcodeBuffer.trim();
+        }
+
+        if (scanned.length >= 3) {
+          e.preventDefault();
+          processarEntradaCodigoBarras(scanned);
+          globalBarcodeBuffer = '';
+          if (isSearch) {
+            activeEl.value = '';
+            filterProducts();
+          }
+          return;
+        }
+        globalBarcodeBuffer = '';
+        return;
+      }
+
+      // Acumula caracteres imprimíveis do scanner
+      if (e.key.length === 1) {
+        if (timeDiff > 120 && globalBarcodeBuffer.length > 0) {
+          globalBarcodeBuffer = ''; // Reset se foi digitação lenta
+        }
+        globalBarcodeBuffer += e.key;
       }
     });
 
-    // Interceção de Código de Barras de Balança no Input de Pesquisa
-    document.getElementById('search')?.addEventListener('input', function (e) {
-      const val = e.target.value.trim();
-      if (val.length === 13 && val.startsWith('20')) {
+    function processarEntradaCodigoBarras(val) {
+      // 1. Código de balança (EAN-13 iniciado com 20)
+      if (val.length === 13 && val.startsWith('20') && typeof PosEngine !== 'undefined') {
         const dados = PosEngine.parseCodigoBalanca(val);
         if (dados && dados.eBalanca) {
           console.log("Código de balança detetado:", dados);
-          // Procurar produto pelo código e adicionar com a quantidade/peso extraída
-          const prodCard = document.querySelector(`.product-card[data-nome*="${dados.codigoProduto}"]`);
-          if (prodCard) {
-            prodCard.click();
-            e.target.value = '';
-          }
+          buscarEAdicionarPorCodigo(dados.codigoProduto, dados.pesoKg || dados.quantidade);
+          return;
         }
       }
-    });
+
+      // 2. Código de barras normal
+      buscarEAdicionarPorCodigo(val, 1);
+    }
 
     // ── Toggle e Visões do Modo Restauração ─────────────────────────────────────
     let modoRestauracaoAtivo = /*[[${modoRestauracao}]]*/ true;
@@ -3277,7 +4025,7 @@
             <div class="p-4 rounded-4 bg-light d-inline-block">
               <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
               <h6 class="fw-bold text-secondary">Nenhuma mesa encontrada.</h6>
-              <button class="btn btn-sm btn-success rounded-pill mt-2 fw-bold shadow-sm" onclick="adicionarNovaMesa()">
+              <button class="btn btn-sm btn-success rounded-pill mt-2 fw-bold" onclick="adicionarNovaMesa()">
                 <i class="fas fa-plus me-1"></i> Criar Nova Mesa
               </button>
             </div>
@@ -3415,8 +4163,12 @@
         if (pessoas && !isNaN(pessoas)) {
           $.post(`/api/pos/mesas/${m.id}/abrir?pessoas=${parseInt(pessoas)}`, function (mesaAberta) {
             definirMesaAtiva(mesaAberta || m);
-            switchRestauranteView('cardapio');
-            if (window.toastr) toastr.success(`${m.numeroMesa} aberta! Selecione os produtos no cardápio.`);
+            const modalMesasEl = document.getElementById('modalMesas');
+            const modalMesas = bootstrap.Modal.getInstance(modalMesasEl);
+            if (modalMesas) modalMesas.hide();
+
+            if (window.toastr) toastr.success(`${m.numeroMesa} aberta com ${pessoas} pessoas! Adicione os produtos no POS.`);
+            else alert(`${m.numeroMesa} aberta com ${pessoas} pessoas! Adicione os produtos no POS.`);
           }).fail(function(err) {
             alert("Erro ao abrir mesa: " + (err.responseText || "Erro de permissão"));
           });
@@ -3581,9 +4333,11 @@
         $('#badgePessoasMesa').html(`<i class="fas fa-users me-1"></i> ${m.numeroPessoas || 1} Pessoas Registadas`);
         $('#totalAcumuladoMesaLabel').text((m.totalAcumulado || 0).toFixed(2) + ' Kz');
 
-        const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
-        const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl) || new bootstrap.Modal(modalOpcoesEl);
-        modalOpcoes.show();
+        carregarItensDaMesa(m.id);
+
+        const modalEl = document.getElementById('modalOpcoesMesa');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
       }
     }
 
@@ -3660,33 +4414,6 @@
       const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl);
       if (modalOpcoes) modalOpcoes.hide();
       const modal = new bootstrap.Modal(document.getElementById('modalSplitBill'));
-      modal.show();
-    }
-
-    function libertarMesaAtual() {
-      if (!mesaAtualObjeto) return;
-      if (confirm(`Deseja libertar ${mesaAtualObjeto.numeroMesa} e concluir o atendimento?`)) {
-        $.post(`/api/pos/mesas/${mesaAtualObjeto.id}/libertar`, function () {
-          if (window.toastr) toastr.info(`${mesaAtualObjeto.numeroMesa} libertada.`);
-          else alert(`${mesaAtualObjeto.numeroMesa} libertada.`);
-          const modalOpcoesEl = document.getElementById('modalOpcoesMesa');
-          const modalOpcoes = bootstrap.Modal.getInstance(modalOpcoesEl);
-          if (modalOpcoes) modalOpcoes.hide();
-          desassociarMesa();
-        });
-      }
-    }
-
-    function abrirModalSplitBill() {
-      let total = 0;
-      if (typeof cart !== 'undefined' && Array.isArray(cart) && cart.length > 0) {
-        total = cart.reduce((acc, item) => acc + ((item.preco || 0) * (item.qtd || item.quantidade || 1)), 0);
-      }
-      document.getElementById('splitTotalInput').value = total.toFixed(2);
-      document.getElementById('splitPessoasInput').value = 2;
-      executarSplitBill();
-      const modalEl = document.getElementById('modalSplitBill');
-      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
       modal.show();
     }
 
