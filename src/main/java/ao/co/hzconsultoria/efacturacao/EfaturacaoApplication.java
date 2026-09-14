@@ -1,13 +1,11 @@
 package ao.co.hzconsultoria.efacturacao;
 
 import ao.co.hzconsultoria.efacturacao.model.User;
-import ao.co.hzconsultoria.efacturacao.model.Empresa;
 import ao.co.hzconsultoria.efacturacao.repository.UserRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EmpresaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.EstabelecimentoRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ConfiguracaoSistemaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.ImpostoRepository;
-import ao.co.hzconsultoria.efacturacao.model.Imposto;
 import ao.co.hzconsultoria.efacturacao.model.ConfiguracaoSistemaEntity;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +17,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.HashSet;
 import java.util.Arrays;
 import java.util.Optional;
-import java.math.BigDecimal;
 
 @SpringBootApplication
 @EnableScheduling
@@ -306,7 +303,6 @@ public class EfaturacaoApplication {
                                         }
                                 }
                         });
-
                         // 2. Desbloquear admin se necessário (emergência)
                         Optional<User> adminOpt = userRepository.findByLogin("admin");
                         if (adminOpt.isPresent()) {

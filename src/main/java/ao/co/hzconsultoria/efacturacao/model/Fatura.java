@@ -34,6 +34,8 @@ public class Fatura {
     private Date dataEmail;
     private Boolean emailEnviado = false;
     private Double valorRetencao = 0.0; // Imposto retido na fonte (AF / Serviços)
+    private Double desconto = 0.0; // Desconto comercial da fatura
+    private Double descontoPercentual = 0.0;
     private String formaPagamento; // Forma de pagamento (para RC)
     private String observacoes;
 
@@ -128,6 +130,12 @@ public class Fatura {
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
     
+    public Double getDesconto() { return desconto != null ? desconto : 0.0; }
+    public void setDesconto(Double desconto) { this.desconto = desconto; }
+
+    public Double getDescontoPercentual() { return descontoPercentual != null ? descontoPercentual : 0.0; }
+    public void setDescontoPercentual(Double descontoPercentual) { this.descontoPercentual = descontoPercentual; }
+
     public Fatura getFaturaReferencia() { return faturaReferencia; }
     public void setFaturaReferencia(Fatura faturaReferencia) { this.faturaReferencia = faturaReferencia; }
 

@@ -32,15 +32,18 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(licencaInterceptor);
-        registry.addInterceptor(acessoModuloInterceptor);
-        registry.addInterceptor(forcePasswordChangeInterceptor);
+        registry.addInterceptor(licencaInterceptor)
+                .excludePathPatterns("/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**", "/img/**");
+        registry.addInterceptor(acessoModuloInterceptor)
+                .excludePathPatterns("/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**", "/img/**");
+        registry.addInterceptor(forcePasswordChangeInterceptor)
+                .excludePathPatterns("/uploads/**", "/assets/**", "/plugins/**", "/css/**", "/js/**", "/images/**", "/img/**");
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Resolve o caminho absoluto da pasta raiz de uploads
-        // A URL /uploads/** cobre tanto /uploads/logo/ como /uploads/produtos/
+        // A URL /uploads/** cobre tanto /uploads/logo/ como /uploads/produtos/ e /uploads/faturas/
         String uploadsRoot = Paths.get(logoUploadDir)
                 .toAbsolutePath().normalize().getParent().toString()
                 .replace("\\", "/");
@@ -48,6 +51,11 @@ public class WebConfig implements WebMvcConfigurer {
             uploadsRoot += "/";
 
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadsRoot);
+                .addResourceLocations(
+                        "file:" + uploadsRoot,
+                        "file:///" + uploadsRoot,
+                        "file:./uploads/",
+                        "file:uploads/"
+                );
     }
 }

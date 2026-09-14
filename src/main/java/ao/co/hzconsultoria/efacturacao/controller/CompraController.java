@@ -158,10 +158,23 @@ public class CompraController {
         java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
         String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "DOC-" + compraSalva.getId();
 
+        if (!faturas.isEmpty()) {
+            try {
+                faturaService.gerarPdfFatura(faturas.get(0));
+            } catch (Exception e) {
+                System.err.println("Aviso ao regenerar PDF: " + e.getMessage());
+            }
+        }
+
         String pdfFile = "/uploads/faturas/" + numeroDoc + ".pdf";
-        java.util.Map<String, String> response = new java.util.HashMap<>();
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
         response.put("pdfPath", pdfFile);
         response.put("url", pdfFile);
+        if (!faturas.isEmpty()) {
+            response.put("faturaId", faturas.get(0).getId());
+            response.put("numeroFatura", numeroDoc);
+        }
+        response.put("compraId", compraSalva.getId());
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
@@ -230,10 +243,23 @@ public class CompraController {
         java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraSalva);
         String numeroDoc = !faturas.isEmpty() ? faturas.get(0).getNumeroFatura() : "FP-" + compraSalva.getId();
 
+        if (!faturas.isEmpty()) {
+            try {
+                faturaService.gerarPdfFatura(faturas.get(0));
+            } catch (Exception e) {
+                System.err.println("Aviso ao regenerar PDF proforma: " + e.getMessage());
+            }
+        }
+
         String pdfFile = "/uploads/faturas/" + numeroDoc + ".pdf";
-        java.util.Map<String, String> response = new java.util.HashMap<>();
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
         response.put("pdfPath", pdfFile);
         response.put("url", pdfFile);
+        if (!faturas.isEmpty()) {
+            response.put("faturaId", faturas.get(0).getId());
+            response.put("numeroFatura", numeroDoc);
+        }
+        response.put("compraId", compraSalva.getId());
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(response);
     }
 
@@ -332,9 +358,53 @@ public class CompraController {
         return baixarDocumentoDireto("guias", filename);
     }
 
+    @ResponseBody
+    @GetMapping("/api/compras/{id}/pdf")
+    public ResponseEntity<org.springframework.core.io.Resource> baixarPdfPorCompraId(@PathVariable Long id) {
+        java.util.Optional<Compra> compraOpt = compraRepository.findById(id);
+        if (!compraOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        java.util.List<Fatura> faturas = faturaRepository.findByCompra(compraOpt.get());
+        if (faturas.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Fatura fatura = faturas.get(0);
+        try {
+            faturaService.gerarPdfFatura(fatura);
+        } catch (Exception ignored) {
+        }
+        return baixarDocumentoDireto("faturas", fatura.getNumeroFatura() + ".pdf");
+    }
+
     private ResponseEntity<org.springframework.core.io.Resource> baixarDocumentoDireto(String folder, String filename) {
         try {
-            java.io.File file = new java.io.File("src/main/resources/static/" + folder + "/" + filename);
+            // Normalizar filename (remover prefixos de pasta se enviados)
+            String cleanName = filename.replace("\\", "/");
+            if (cleanName.contains("/")) {
+                cleanName = cleanName.substring(cleanName.lastIndexOf("/") + 1);
+            }
+
+            // Tentar múltiplos locais possíveis
+            java.io.File file = new java.io.File("./uploads/" + folder + "/" + filename);
+            if (!file.exists()) {
+                file = new java.io.File("uploads/" + folder + "/" + filename);
+            }
+            if (!file.exists()) {
+                file = new java.io.File("./uploads/" + folder + "/" + cleanName);
+            }
+            if (!file.exists()) {
+                file = new java.io.File("uploads/" + folder + "/" + cleanName);
+            }
+            if (!file.exists()) {
+                file = new java.io.File("src/main/resources/static/uploads/" + folder + "/" + filename);
+            }
+            if (!file.exists()) {
+                file = new java.io.File("src/main/resources/static/" + folder + "/" + filename);
+            }
+            if (!file.exists()) {
+                file = new java.io.File("target/classes/static/uploads/" + folder + "/" + filename);
+            }
             if (!file.exists()) {
                 file = new java.io.File("target/classes/static/" + folder + "/" + filename);
             }
@@ -343,7 +413,7 @@ public class CompraController {
             }
             org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(file.toURI());
             return ResponseEntity.ok()
-                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + cleanName + "\"")
                     .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "application/pdf")
                     .body(resource);
         } catch (java.net.MalformedURLException e) {

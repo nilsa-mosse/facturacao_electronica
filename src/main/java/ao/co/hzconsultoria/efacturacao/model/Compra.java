@@ -44,6 +44,10 @@ public class Compra {
     private Double comissaoMulticaixa; // Valor da taxa (padrão 1.5%)
     private Double valorLiquidoMulticaixa; // Valor líquido que entra na conta
 
+    // Desconto comercial da venda
+    private Double desconto = 0.0;
+    private Double descontoPercentual = 0.0;
+
     // Campos transientes para transporte (Guia de Remessa no POS)
     @Transient
     private String motorista;
@@ -290,6 +294,22 @@ public class Compra {
 
     public void setEmailCliente(String emailCliente) {
         this.emailCliente = emailCliente;
+    }
+
+    public Double getDesconto() {
+        return desconto != null ? desconto : 0.0;
+    }
+
+    public void setDesconto(Double desconto) {
+        this.desconto = desconto;
+    }
+
+    public Double getDescontoPercentual() {
+        return descontoPercentual != null ? descontoPercentual : 0.0;
+    }
+
+    public void setDescontoPercentual(Double descontoPercentual) {
+        this.descontoPercentual = descontoPercentual;
     }
 
     @PreRemove

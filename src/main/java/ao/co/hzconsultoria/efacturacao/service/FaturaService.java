@@ -335,6 +335,23 @@ public class FaturaService {
         if (compra != null && compra.getEmpresa() != null) {
             fatura.setEmpresa(compra.getEmpresa());
         }
+        // Fallback: if empresa still null, resolve from current security context
+        if (fatura.getEmpresa() == null) {
+            Long empresaIdCtx = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+            if (empresaIdCtx != null) {
+                empresaRepository.findById(empresaIdCtx).ifPresent(fatura::setEmpresa);
+            }
+            if (fatura.getEmpresa() == null) {
+                // Last resort: pick the first empresa available
+                empresaRepository.findAll().stream().findFirst().ifPresent(fatura::setEmpresa);
+            }
+            if (fatura.getEmpresa() == null) {
+                throw new IllegalStateException("Não foi possível determinar a empresa para emissão do documento. Verifique a sua sessão ou configuração.");
+            }
+        }
+        if (compra != null && compra.getEmpresa() == null) {
+            compra.setEmpresa(fatura.getEmpresa());
+        }
         fatura.setTipoDocumento(tipo);
 
         // Numeração Sequencial (AGT): CODE YEAR/COUNT
@@ -350,7 +367,10 @@ public class FaturaService {
         // Calcular totais e IVA
         double totalSemImposto = 0;
         double valorIva = 0;
-        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : compra.getItens()) {
+        java.util.List<ao.co.hzconsultoria.efacturacao.model.ItemCompra> itens = (compra != null && compra.getItens() != null)
+                ? compra.getItens()
+                : java.util.Collections.emptyList();
+        for (ao.co.hzconsultoria.efacturacao.model.ItemCompra item : itens) {
             double subtotal = item.getSubtotal() != null ? item.getSubtotal() : 0.0;
             totalSemImposto += subtotal;
             if (item.getIva() != null) {
@@ -362,8 +382,14 @@ public class FaturaService {
             }
         }
 
-        double comissao = compra.getComissaoMulticaixa() != null ? compra.getComissaoMulticaixa() : 0.0;
-        double totalFinal = (totalSemImposto + valorIva) - comissao;
+        double desconto = (compra != null && compra.getDesconto() != null) ? compra.getDesconto() : 0.0;
+        fatura.setDesconto(desconto);
+        if (compra != null && compra.getDescontoPercentual() != null) {
+            fatura.setDescontoPercentual(compra.getDescontoPercentual());
+        }
+
+        double comissao = (compra != null && compra.getComissaoMulticaixa() != null) ? compra.getComissaoMulticaixa() : 0.0;
+        double totalFinal = Math.max(0.0, (totalSemImposto - desconto) + valorIva) - comissao;
 
         fatura.setTotal(totalFinal);
         fatura.setIva(valorIva);
@@ -482,10 +508,15 @@ public class FaturaService {
         SimpleDateFormat sdfTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         DecimalFormat df = new DecimalFormat("0.00");
 
-        return sdfDate.format(f.getDataEmissao()) + ";" +
-                sdfTime.format(f.getSystemEntryDate()) + ";" +
-                f.getNumeroFatura() + ";" +
-                df.format(f.getTotal()).replace(",", ".") + ";" +
+        Date dataEmissao = f.getDataEmissao() != null ? f.getDataEmissao() : new Date();
+        Date systemEntryDate = f.getSystemEntryDate() != null ? f.getSystemEntryDate() : new Date();
+        String numFat = f.getNumeroFatura() != null ? f.getNumeroFatura() : "";
+        double total = f.getTotal() != null ? f.getTotal() : 0.0;
+
+        return sdfDate.format(dataEmissao) + ";" +
+                sdfTime.format(systemEntryDate) + ";" +
+                numFat + ";" +
+                df.format(total).replace(",", ".") + ";" +
                 (f.getPreviousHash() != null ? f.getPreviousHash() : "");
     }
 
@@ -847,9 +878,24 @@ public class FaturaService {
                 if (fatura.getCompra() != null && fatura.getCompra().getComissaoMulticaixa() != null) {
                     comissao = fatura.getCompra().getComissaoMulticaixa();
                 }
-                double totalFinalComLiquido = (subtotalGeral + totalIva) - comissao;
+                double desconto = 0.0;
+                if (fatura.getDesconto() != null && fatura.getDesconto() > 0) {
+                    desconto = fatura.getDesconto();
+                } else if (fatura.getCompra() != null && fatura.getCompra().getDesconto() != null) {
+                    desconto = fatura.getCompra().getDesconto();
+                }
+                double totalFinalComLiquido = Math.max(0.0, (subtotalGeral - desconto) + totalIva) - comissao;
 
                 addModernTotalRow(totalTable, pdfTranslation.t("pdf.fatura.subtotal", locale), df.format(subtotalGeral), normal, normal, null, borderColor);
+                if (desconto > 0) {
+                    Double descPerc = fatura.getDescontoPercentual() != null ? fatura.getDescontoPercentual()
+                            : (fatura.getCompra() != null ? fatura.getCompra().getDescontoPercentual() : null);
+                    String descLabel = "Desconto Comercial";
+                    if (descPerc != null && descPerc > 0) {
+                        descLabel += " (" + df.format(descPerc) + "%)";
+                    }
+                    addModernTotalRow(totalTable, descLabel, "-" + df.format(desconto) + " Kz", normal, normal, null, borderColor);
+                }
                 addModernTotalRow(totalTable, pdfTranslation.t("pdf.fatura.total_iva", locale), df.format(totalIva), normal, normal, null, borderColor);
                 if (comissao > 0) {
                     addModernTotalRow(totalTable, pdfTranslation.t("pdf.fatura.desc_comissao", locale), "-" + df.format(comissao), normal, normal, null,

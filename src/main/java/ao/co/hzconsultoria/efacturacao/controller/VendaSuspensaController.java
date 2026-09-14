@@ -31,33 +31,51 @@ public class VendaSuspensaController {
     public ResponseEntity<?> suspender(@RequestBody Map<String, Object> payload) {
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
         Long userId = SecurityUtils.getCurrentUserId();
-        
+
         System.out.println("Suspender venda - Empresa: " + empresaId + ", Usuário: " + userId);
 
         VendaSuspensa venda = new VendaSuspensa();
-        venda.setClienteNome((String) payload.get("clienteNome"));
+        String cliNome = (String) payload.get("clienteNome");
+        venda.setClienteNome((cliNome != null && !cliNome.trim().isEmpty()) ? cliNome : "Consumidor Final");
         venda.setItensJson((String) payload.get("itensJson"));
-        
-        venda.setEmpresa(empresaRepository.findById(empresaId).orElse(null));
-        venda.setOperador(userRepository.findById(userId).orElse(null));
+
+        if (empresaId != null) {
+            venda.setEmpresa(empresaRepository.findById(empresaId).orElse(null));
+        }
+        if (venda.getEmpresa() == null) {
+            empresaRepository.findAll().stream().findFirst().ifPresent(venda::setEmpresa);
+        }
+
+        if (userId != null) {
+            userRepository.findById(userId).ifPresent(venda::setOperador);
+        }
+        if (venda.getOperador() == null) {
+            userRepository.findByLogin("admin").ifPresent(venda::setOperador);
+        }
 
         VendaSuspensa salva = repository.save(venda);
         System.out.println("Venda suspensa salva com ID: " + salva.getId());
-        
+
         return ResponseEntity.ok().body("Venda suspensa com sucesso!");
     }
 
     @GetMapping
     public List<VendaSuspensa> listar() {
         Long empresaId = SecurityUtils.getCurrentEmpresaId();
-        List<VendaSuspensa> lista = repository.findByEmpresa_IdOrderByDataHoraDesc(empresaId);
-        System.out.println("Listar vendas suspensas - Empresa: " + empresaId + ", Total: " + lista.size());
-        return lista;
+        if (empresaId != null) {
+            List<VendaSuspensa> lista = repository.findByEmpresa_IdOrderByDataHoraDesc(empresaId);
+            if (!lista.isEmpty()) {
+                return lista;
+            }
+        }
+        return repository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "dataHora"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
-        repository.deleteById(id);
+        if (id != null && repository.existsById(id)) {
+            repository.deleteById(id);
+        }
         return ResponseEntity.ok().build();
     }
 }

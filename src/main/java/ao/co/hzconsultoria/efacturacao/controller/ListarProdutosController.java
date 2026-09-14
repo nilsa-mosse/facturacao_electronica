@@ -45,11 +45,11 @@ public class ListarProdutosController {
         Pageable pageable = PageRequest.of(page, 10);
         Page<Produto> produtosPage;
         if (cat != null) {
-            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+            produtosPage = (empresaId == null)
                 ? produtoRepository.findAll(pageable)
                 : produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
         } else {
-            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+            produtosPage = (empresaId == null)
                 ? produtoRepository.findAll(pageable)
                 : produtoRepository.findByEmpresa_Id(empresaId, pageable);
         }
@@ -97,11 +97,11 @@ public class ListarProdutosController {
         Pageable pageable = PageRequest.of(page, 10);
         Page<Produto> produtosPage;
         if (cat != null) {
-            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+            produtosPage = (empresaId == null)
                 ? produtoRepository.findAll(pageable)
                 : produtoRepository.findByCategoria_IdAndEmpresa_Id(cat, empresaId, pageable);
         } else {
-            produtosPage = (empresaId == null && SecurityUtils.isSuperAdmin())
+            produtosPage = (empresaId == null)
                 ? produtoRepository.findAll(pageable)
                 : produtoRepository.findByEmpresa_Id(empresaId, pageable);
         }

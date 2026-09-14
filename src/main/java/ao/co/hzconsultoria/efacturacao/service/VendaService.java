@@ -73,7 +73,16 @@ public class VendaService {
         
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         ao.co.hzconsultoria.efacturacao.model.Empresa empresa = (empresaId != null) ? empresaRepository.findById(empresaId).orElse(null) : null;
+        if (empresa == null && compra.getEmpresa() != null) {
+            empresa = compra.getEmpresa();
+        }
+        if (empresa == null) {
+            empresa = empresaRepository.findAll().stream().findFirst().orElse(null);
+        }
         compra.setEmpresa(empresa);
+        if (empresa != null) {
+            empresaId = empresa.getId();
+        }
 
         // Associar Utilizador Logado
         org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
@@ -94,7 +103,7 @@ public class VendaService {
             if (item.getProdutoId() != null) {
                 produto = produtoRepository.findById(item.getProdutoId()).orElse(null);
             }
-            if (produto == null) {
+            if (produto == null && empresaId != null) {
                 produto = produtoRepository.findByCodigoBarraAndEmpresa_Id(item.getNomeProduto(), empresaId);
             }
 
@@ -102,7 +111,9 @@ public class VendaService {
             if (produto != null && produto.getIvaPercentual() != null) {
                 ivaPercentual = produto.getIvaPercentual();
             }
-            double subtotal = item.getSubtotal();
+            double subtotal = item.getSubtotal() != null ? item.getSubtotal()
+                    : ((item.getPreco() != null && item.getQuantidade() != null) ? item.getPreco() * item.getQuantidade() : 0.0);
+            item.setSubtotal(subtotal);
             double itemIva = 0;
             if (ivaPercentual > 0) {
                 itemIva = subtotal * (ivaPercentual / 100);
@@ -112,7 +123,8 @@ public class VendaService {
             item.setIvaPercentual(ivaPercentual);
             totalSemImposto += subtotal;
         }
-        double totalFinal = totalSemImposto + valorIva;
+        double desconto = compra.getDesconto() != null ? compra.getDesconto() : 0.0;
+        double totalFinal = Math.max(0.0, (totalSemImposto - desconto) + valorIva);
         compra.setTotal(totalFinal);
         compra.setStatus("EMITIDA"); 
         
@@ -177,7 +189,8 @@ public class VendaService {
                 Caixa caixaAberto = caixaService.getCaixaAbertoAtual();
                 if (caixaAberto != null) {
                     Double multicaixa = compraSalva.getValorPagoMulticaixa() != null ? compraSalva.getValorPagoMulticaixa() : 0.0;
-                    Double numerario = compraSalva.getTotal() - multicaixa;
+                    Double totalC = compraSalva.getTotal() != null ? compraSalva.getTotal() : 0.0;
+                    Double numerario = Math.max(0.0, totalC - multicaixa);
                     caixaService.registarVendaNoCaixa(caixaAberto, numerario, multicaixa);
                 }
             } catch (Exception e) {
