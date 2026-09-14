@@ -1829,8 +1829,10 @@
                           </div>
                           <select id="selectCliente" class="form-select border shadow-sm py-2 px-3 rounded-3 text-muted small mt-2">
                             <option value="" th:text="#{pos.cliente.consumidor_final_option}">-- Consumidor Final (999999999) --</option>
-                            <option th:each="c : ${clientes}" th:value="${c.id}"
-                              th:text="${c.nome + ' — NIF: ' + c.nif}"></option>
+                            <option th:each="c : ${clientes}" 
+                                    th:if="${c.nif != '999999999' and !#strings.equalsIgnoreCase(c.nome, 'Consumidor Final')}"
+                                    th:value="${c.id}"
+                                    th:text="${c.nome + ' — NIF: ' + c.nif}"></option>
                           </select>
                         </div>
 
@@ -2611,6 +2613,9 @@
       }
 
       $(document).ready(function () {
+        if (typeof deduplicarSelectClientes === 'function') {
+          deduplicarSelectClientes();
+        }
         // When clicking the red disabled quick-add or the overlay, open availability modal
         $(document).on('click', '.clickable-when-disabled', function (e) {
           var $el = $(this);
@@ -2919,12 +2924,24 @@
         // Selecionar cliente pesquisado
         function selecionarClientePesquisado(id, nome, nif) {
           var $select = $('#selectCliente');
-          if ($select.find('option[value="' + id + '"]').length === 0) {
-            $select.append('<option value="' + id + '">' + nome + ' — NIF: ' + nif + '</option>');
+          var nifFormatado = nif || '999999999';
+          var optionText = nome + ' — NIF: ' + nifFormatado;
+          var found = false;
+
+          $select.find('option').each(function () {
+            if ($(this).val() == id || ($(this).text().trim().toLowerCase() === optionText.toLowerCase() && $(this).val() !== "")) {
+              $(this).val(id);
+              found = true;
+              return false;
+            }
+          });
+
+          if (!found) {
+            $select.append('<option value="' + id + '">' + optionText + '</option>');
           }
           $select.val(id).trigger('change');
           $('#dropdownResultadosClientes').addClass('d-none').empty();
-          $('#inputPesquisaCliente').val(nome + ' (NIF: ' + nif + ')');
+          $('#inputPesquisaCliente').val(nome + ' (NIF: ' + nifFormatado + ')');
           mostrarToast('success', 'Cliente selecionado: ' + nome);
         }
         window.selecionarClientePesquisado = selecionarClientePesquisado;
@@ -3130,6 +3147,30 @@
           });
         }
 
+        // Deduplicar opções do select de clientes
+        function deduplicarSelectClientes() {
+          var vistos = {};
+          $('#selectCliente option').each(function () {
+            var val = $(this).val();
+            var text = $(this).text().trim().replace(/\s+/g, ' ').toLowerCase();
+
+            // Se for Consumidor Final com ID não vazio (veio da BD), remover para não duplicar com o padrão
+            if (val !== "" && (text.indexOf('consumidor final') !== -1 || text.indexOf('999999999') !== -1)) {
+              $(this).remove();
+              return;
+            }
+
+            // Se já foi visto pelo texto, remover opção repetida
+            if (vistos[text]) {
+              $(this).remove();
+            } else {
+              vistos[text] = true;
+            }
+          });
+        }
+        window.deduplicarSelectClientes = deduplicarSelectClientes;
+        deduplicarSelectClientes();
+
         // ---- CHECKOUT VIEW SWITCHING ----
 
         function abrirCheckoutView() {
@@ -3137,6 +3178,9 @@
             alert('O carrinho está vazio. Adicione produtos primeiro.');
             return;
           }
+
+          // Garantir select de clientes limpo e sem repetições
+          deduplicarSelectClientes();
 
           // Reset wizard state
           currentWizardStep = 1;

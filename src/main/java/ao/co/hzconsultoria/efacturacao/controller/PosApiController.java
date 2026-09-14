@@ -148,11 +148,20 @@ public class PosApiController {
         List<Cliente> clientes = clienteRepository.pesquisarClientesPos(empresaId, termoLimpo, pageable);
 
         List<Map<String, Object>> res = new ArrayList<>();
+        Set<String> chavesVistas = new HashSet<>();
         for (Cliente c : clientes) {
+            String nif = (c.getNif() != null && !c.getNif().trim().isEmpty()) ? c.getNif().trim() : "999999999";
+            String nome = (c.getNome() != null) ? c.getNome().trim() : "";
+
+            String chave = (!"999999999".equals(nif)) ? "NIF:" + nif.toUpperCase() : "NOME:" + nome.toUpperCase();
+            if (!chavesVistas.add(chave)) {
+                continue;
+            }
+
             Map<String, Object> m = new HashMap<>();
             m.put("id", c.getId());
             m.put("nome", c.getNome());
-            m.put("nif", c.getNif() != null ? c.getNif() : "999999999");
+            m.put("nif", nif);
             m.put("telefone", c.getTelefone() != null ? c.getTelefone() : "");
             m.put("email", c.getEmail() != null ? c.getEmail() : "");
             m.put("endereco", c.getEndereco() != null ? c.getEndereco() : "");

@@ -1,6 +1,12 @@
 package ao.co.hzconsultoria.efacturacao.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Optional;
+import ao.co.hzconsultoria.efacturacao.model.Cliente;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,12 +118,34 @@ public class CompraController {
         ConfiguracaoPos configPos = posService.obterOuCriarConfiguracaoPos(empresa);
         boolean modoRestauracao = configPos.getModoRestauracaoAtivo();
 
-        List<ao.co.hzconsultoria.efacturacao.model.Cliente> clientes;
+        List<Cliente> rawClientes;
         if (empresaId != null) {
-            clientes = clienteRepository.findByEmpresa_Id(empresaId);
+            rawClientes = clienteRepository.findByEmpresa_Id(empresaId);
         } else {
-            clientes = clienteRepository.findAll();
+            rawClientes = clienteRepository.findAll();
         }
+
+        // Deduplicar clientes e excluir Consumidor Final (já presente como opção inicial no select)
+        Map<String, Cliente> clientesUnicos = new LinkedHashMap<>();
+        if (rawClientes != null) {
+            for (Cliente c : rawClientes) {
+                if (c == null) continue;
+                String nif = c.getNif() != null ? c.getNif().trim() : "";
+                String nome = c.getNome() != null ? c.getNome().trim() : "";
+
+                if ("999999999".equals(nif) || "Consumidor Final".equalsIgnoreCase(nome)) {
+                    continue;
+                }
+
+                String chave = (!nif.isEmpty() && !"999999999".equals(nif))
+                        ? "NIF:" + nif.toUpperCase()
+                        : "NOME:" + nome.toUpperCase() + "|" + (c.getTelefone() != null ? c.getTelefone().trim() : "");
+
+                clientesUnicos.putIfAbsent(chave, c);
+            }
+        }
+        List<Cliente> clientes = new ArrayList<>(clientesUnicos.values());
+        clientes.sort(Comparator.comparing(c -> c.getNome() != null ? c.getNome() : "", String.CASE_INSENSITIVE_ORDER));
 
         model.addAttribute("produtos", produtos);
         model.addAttribute("categorias", categorias);
@@ -322,14 +350,26 @@ public class CompraController {
                 compra.setNifCliente("999999999");
                 compra.setCliente(null);
             } else {
+                String nif = compra.getNifCliente() != null ? compra.getNifCliente().trim() : "999999999";
+                Long empresaId = SecurityUtils.getCurrentEmpresaId();
+                if (!"999999999".equals(nif) && empresaId != null) {
+                    Optional<Cliente> existente = clienteRepository.findByNifAndEmpresa_Id(nif, empresaId);
+                    if (existente.isPresent()) {
+                        Cliente c = existente.get();
+                        compra.setCliente(c);
+                        compra.setNomeCliente(c.getNome());
+                        compra.setNifCliente(c.getNif());
+                        return;
+                    }
+                }
+
                 ao.co.hzconsultoria.efacturacao.model.Cliente novoCliente = new ao.co.hzconsultoria.efacturacao.model.Cliente();
                 novoCliente.setNome(compra.getNomeCliente());
-                novoCliente.setNif(compra.getNifCliente() != null ? compra.getNifCliente() : "999999999");
+                novoCliente.setNif(nif);
                 novoCliente.setEndereco(compra.getMoradaCliente());
                 novoCliente.setTelefone(compra.getTelefoneCliente());
                 novoCliente.setEmail(compra.getEmailCliente());
 
-                Long empresaId = SecurityUtils.getCurrentEmpresaId();
                 if (empresaId != null) {
                     ao.co.hzconsultoria.efacturacao.model.Empresa empresa = new ao.co.hzconsultoria.efacturacao.model.Empresa();
                     empresa.setId(empresaId);
