@@ -8,11 +8,21 @@ import ao.co.hzconsultoria.efacturacao.model.Despesa;
 import ao.co.hzconsultoria.efacturacao.model.ItemCompra;
 import ao.co.hzconsultoria.efacturacao.repository.FaturaRepository;
 import ao.co.hzconsultoria.efacturacao.repository.DespesaRepository;
+import ao.co.hzconsultoria.efacturacao.model.Fatura;
+import ao.co.hzconsultoria.efacturacao.repository.CompraRepository;
+import ao.co.hzconsultoria.efacturacao.service.FaturaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ao.co.hzconsultoria.efacturacao.dto.RecebimentoDashboardDTO.*;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -28,6 +38,12 @@ public class DashboardController {
 
     @Autowired
     private FaturaRepository faturaRepository;
+
+    @Autowired
+    private CompraRepository compraRepository;
+
+    @Autowired
+    private FaturaService faturaService;
 
     @Autowired
     private DespesaRepository despesaRepository;
@@ -299,5 +315,271 @@ public class DashboardController {
         model.addAttribute("devolucoesDoMes", devolucoesDoMes);
 
         return "lucroMensal";
+    }
+
+    @GetMapping("/dashboard/recebimentos")
+    public String recebimentos(
+            @RequestParam(value = "periodo", defaultValue = "mes") String periodo,
+            @RequestParam(value = "dataInicio", required = false) String dataInicioStr,
+            @RequestParam(value = "dataFim", required = false) String dataFimStr,
+            Model model) {
+
+        try {
+            Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+
+            LocalDate hoje = LocalDate.now();
+            LocalDate inicio;
+            LocalDate fim = hoje;
+
+            if ("hoje".equalsIgnoreCase(periodo)) {
+                inicio = hoje;
+                fim = hoje;
+            } else if ("7dias".equalsIgnoreCase(periodo)) {
+                inicio = hoje.minusDays(6);
+                fim = hoje;
+            } else if ("ano".equalsIgnoreCase(periodo)) {
+                inicio = hoje.withDayOfYear(1);
+                fim = hoje;
+            } else if ("todos".equalsIgnoreCase(periodo)) {
+                inicio = null;
+                fim = null;
+            } else if ("custom".equalsIgnoreCase(periodo) || (dataInicioStr != null && dataFimStr != null && !dataInicioStr.trim().isEmpty() && !dataFimStr.trim().isEmpty())) {
+                try {
+                    inicio = LocalDate.parse(dataInicioStr.trim());
+                    fim = LocalDate.parse(dataFimStr.trim());
+                    periodo = "custom";
+                } catch (Exception e) {
+                    inicio = hoje.withDayOfMonth(1);
+                    fim = hoje.withDayOfMonth(hoje.lengthOfMonth());
+                    periodo = "mes";
+                }
+            } else {
+                inicio = hoje.withDayOfMonth(1);
+                fim = hoje.withDayOfMonth(hoje.lengthOfMonth());
+                periodo = "mes";
+            }
+
+            // 1. Resumo dos Indicadores e KPIs
+            RecebimentosResumoDTO resumo = dashboardService.getRecebimentosResumo(empresaId, inicio, fim);
+            model.addAttribute("resumo", resumo != null ? resumo : new RecebimentosResumoDTO());
+
+            // 2. Histórico de Recebimentos (RC e FR)
+            List<RecebimentoItemDTO> recebimentos = dashboardService.getHistoricoRecebimentos(empresaId, inicio, fim);
+            model.addAttribute("recebimentos", recebimentos != null ? recebimentos : java.util.Collections.emptyList());
+
+            // 3. Contas a Receber / Dívidas (FT pendentes)
+            List<ContaReceberDTO> contasReceber = dashboardService.getContasAReceber(empresaId);
+            model.addAttribute("contasReceber", contasReceber != null ? contasReceber : java.util.Collections.emptyList());
+
+            // 4. Aging das Contas a Receber
+            AgingContasReceberDTO aging = dashboardService.getAgingContasReceber(contasReceber != null ? contasReceber : java.util.Collections.emptyList());
+            model.addAttribute("aging", aging != null ? aging : new AgingContasReceberDTO());
+
+            // 5. Distribuição por Métodos de Pagamento
+            List<MetodoPagamentoResumoDTO> metodos = dashboardService.getDistribuicaoMetodosRecebimento(empresaId, inicio, fim);
+            if (metodos == null) metodos = java.util.Collections.emptyList();
+            model.addAttribute("metodosPagamento", metodos);
+
+            // 6. Evolução Diária dos Recebimentos (Últimos 30 dias para o gráfico temporal)
+            Map<String, Object> evolucaoDiaria = dashboardService.getEvolucaoRecebimentosDiarios(empresaId, 30);
+            if (evolucaoDiaria == null) evolucaoDiaria = new java.util.HashMap<>();
+            model.addAttribute("evolucaoDiaria", evolucaoDiaria);
+
+            // 7. Top Clientes Devedores
+            List<ClienteDevedorDTO> topDevedores = dashboardService.getTopClientesDevedores(contasReceber != null ? contasReceber : java.util.Collections.emptyList(), 5);
+            model.addAttribute("topDevedores", topDevedores != null ? topDevedores : java.util.Collections.emptyList());
+
+            // 8. Top Clientes Pagadores
+            List<ClienteRecebimentoDTO> topPagadores = dashboardService.getTopClientesRecebimentos(recebimentos != null ? recebimentos : java.util.Collections.emptyList(), 5);
+            model.addAttribute("topPagadores", topPagadores != null ? topPagadores : java.util.Collections.emptyList());
+
+            // 9. Listas diretas para Chart.js
+            List<String> evolucaoLabels = evolucaoDiaria.containsKey("labels") ? (List<String>) evolucaoDiaria.get("labels") : java.util.Collections.emptyList();
+            List<Double> evolucaoTotais = evolucaoDiaria.containsKey("totais") ? (List<Double>) evolucaoDiaria.get("totais") : java.util.Collections.emptyList();
+            List<String> metodosLabels = new java.util.ArrayList<>();
+            List<Double> metodosValores = new java.util.ArrayList<>();
+            List<String> metodosCores = new java.util.ArrayList<>();
+            for (MetodoPagamentoResumoDTO m : metodos) {
+                metodosLabels.add(m.getLabel() != null ? m.getLabel() : m.getMetodo());
+                metodosValores.add(m.getTotal() != null ? m.getTotal() : 0.0);
+                metodosCores.add(m.getCor() != null ? m.getCor() : "#10b981");
+            }
+
+            model.addAttribute("evolucaoLabels", evolucaoLabels);
+            model.addAttribute("evolucaoTotais", evolucaoTotais);
+            model.addAttribute("metodosLabels", metodosLabels);
+            model.addAttribute("metodosValores", metodosValores);
+            model.addAttribute("metodosCores", metodosCores);
+
+            // Metadados do filtro selecionado
+            model.addAttribute("periodoSelecionado", periodo);
+            model.addAttribute("dataInicioFiltro", inicio != null ? inicio.toString() : "");
+            model.addAttribute("dataFimFiltro", fim != null ? fim.toString() : "");
+
+        } catch (Exception ex) {
+            System.err.println(">>> Erro ao carregar /dashboard/recebimentos: " + ex.getMessage());
+            ex.printStackTrace();
+            model.addAttribute("resumo", new RecebimentosResumoDTO());
+            model.addAttribute("recebimentos", java.util.Collections.emptyList());
+            model.addAttribute("contasReceber", java.util.Collections.emptyList());
+            model.addAttribute("aging", new AgingContasReceberDTO());
+            model.addAttribute("metodosPagamento", java.util.Collections.emptyList());
+            model.addAttribute("topDevedores", java.util.Collections.emptyList());
+            model.addAttribute("topPagadores", java.util.Collections.emptyList());
+            model.addAttribute("evolucaoLabels", java.util.Collections.emptyList());
+            model.addAttribute("evolucaoTotais", java.util.Collections.emptyList());
+            model.addAttribute("metodosLabels", java.util.Collections.emptyList());
+            model.addAttribute("metodosValores", java.util.Collections.emptyList());
+            model.addAttribute("metodosCores", java.util.Collections.emptyList());
+            model.addAttribute("evolucaoDiaria", new java.util.HashMap<>());
+            model.addAttribute("periodoSelecionado", periodo);
+            model.addAttribute("dataInicioFiltro", "");
+            model.addAttribute("dataFimFiltro", "");
+        }
+
+        return "dashboardRecebimentos";
+    }
+
+    @GetMapping({"/dashboard/documentos-pendentes", "/documentos-pendentes"})
+    public String documentosPendentes(
+            @RequestParam(required = false, defaultValue = "agt") String aba,
+            Model model) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+
+        // 1. Facturas da empresa
+        List<Fatura> todasFaturas = (empresaId == null) 
+            ? faturaRepository.findAll() 
+            : faturaRepository.findByEmpresa_Id(empresaId);
+
+        // Facturas Pendentes de Validação / Envio AGT
+        List<Fatura> faturasPendentesAgt = todasFaturas.stream()
+            .filter(f -> "PENDENTE".equalsIgnoreCase(f.getStatus()) 
+                      || (Boolean.FALSE.equals(f.isEnviadaAGT()) && !"VALIDADA".equalsIgnoreCase(f.getStatus()) && !"CANCELADA".equalsIgnoreCase(f.getStatus()) && !"ANULADA".equalsIgnoreCase(f.getStatus())))
+            .sorted((a, b) -> {
+                if (a.getDataEmissao() == null || b.getDataEmissao() == null) return 0;
+                return b.getDataEmissao().compareTo(a.getDataEmissao());
+            })
+            .collect(Collectors.toList());
+
+        // Facturas com Falha de Envio AGT
+        List<Fatura> faturasFalhasAgt = todasFaturas.stream()
+            .filter(f -> "FALHA_ENVIO".equalsIgnoreCase(f.getStatus()) 
+                      || (f.getCodigoAgt() != null && f.getCodigoAgt().startsWith("ERRO:")))
+            .sorted((a, b) -> {
+                if (a.getDataEmissao() == null || b.getDataEmissao() == null) return 0;
+                return b.getDataEmissao().compareTo(a.getDataEmissao());
+            })
+            .collect(Collectors.toList());
+
+        // Evitar duplicados
+        faturasPendentesAgt.removeAll(faturasFalhasAgt);
+
+        double totalValorPendenteAgt = faturasPendentesAgt.stream()
+            .mapToDouble(f -> f.getTotal() != null ? f.getTotal() : 0.0)
+            .sum();
+
+        double totalValorFalhasAgt = faturasFalhasAgt.stream()
+            .mapToDouble(f -> f.getTotal() != null ? f.getTotal() : 0.0)
+            .sum();
+
+        // 2. Facturas Proforma (FP) Pendentes de Conversão
+        List<Compra> todasCompras = (empresaId == null)
+            ? compraRepository.findAll()
+            : compraRepository.findByEmpresa_Id(empresaId);
+
+        List<Compra> proformasPendentes = todasCompras.stream()
+            .filter(c -> "FP".equalsIgnoreCase(c.getTipoDocumento()))
+            .filter(c -> !"CONVERTIDA".equalsIgnoreCase(c.getStatus()) 
+                      && !"CANCELADA".equalsIgnoreCase(c.getStatus())
+                      && !"REJEITADA".equalsIgnoreCase(c.getStatus())
+                      && !"ANULADA".equalsIgnoreCase(c.getStatus()))
+            .sorted((a, b) -> {
+                if (a.getDataCompra() == null || b.getDataCompra() == null) return 0;
+                return b.getDataCompra().compareTo(a.getDataCompra());
+            })
+            .collect(Collectors.toList());
+
+        double totalValorProformas = proformasPendentes.stream()
+            .mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0)
+            .sum();
+
+        // 3. Contas a Receber (FT Emitidas com Saldo em Aberto)
+        List<ContaReceberDTO> contasReceber = dashboardService.getContasAReceber(empresaId);
+        double totalSaldoEmAberto = contasReceber.stream()
+            .mapToDouble(c -> c.getValorEmAberto() != null ? c.getValorEmAberto() : 0.0)
+            .sum();
+
+        long totalGeralPendentes = faturasPendentesAgt.size() + faturasFalhasAgt.size() + proformasPendentes.size();
+
+        model.addAttribute("faturasPendentesAgt", faturasPendentesAgt);
+        model.addAttribute("faturasFalhasAgt", faturasFalhasAgt);
+        model.addAttribute("proformasPendentes", proformasPendentes);
+        model.addAttribute("contasReceber", contasReceber);
+
+        model.addAttribute("qtdPendentesAgt", faturasPendentesAgt.size());
+        model.addAttribute("valorPendentesAgt", totalValorPendenteAgt);
+        model.addAttribute("qtdFalhasAgt", faturasFalhasAgt.size());
+        model.addAttribute("valorFalhasAgt", totalValorFalhasAgt);
+        model.addAttribute("qtdProformas", proformasPendentes.size());
+        model.addAttribute("valorProformas", totalValorProformas);
+        model.addAttribute("qtdContasReceber", contasReceber.size());
+        model.addAttribute("valorContasReceber", totalSaldoEmAberto);
+        model.addAttribute("totalGeralPendentes", totalGeralPendentes);
+
+        model.addAttribute("abaAtiva", aba);
+
+        return "documentosPendentes";
+    }
+
+    @GetMapping("/dashboard/documentos-pendentes/reenviar/{id}")
+    public String reenviarFaturaPendentes(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Fatura fatura = faturaService.reenviarFatura(id);
+            if (fatura != null && fatura.isEnviadaAGT()) {
+                redirectAttributes.addFlashAttribute("mensagemSucesso", "Factura " + (fatura.getNumeroFatura() != null ? fatura.getNumeroFatura() : "") + " reenviada e validada com sucesso na AGT!");
+            } else {
+                redirectAttributes.addFlashAttribute("mensagemErro", "Falha ao reenviar factura para a AGT: " + (fatura != null && fatura.getCodigoAgt() != null ? fatura.getCodigoAgt() : "Aguarde nova tentativa."));
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Erro ao processar reenvio: " + e.getMessage());
+        }
+        return "redirect:/dashboard/documentos-pendentes?aba=agt";
+    }
+
+    @PostMapping("/dashboard/documentos-pendentes/reenviar-todos")
+    public String reenviarTodosPendentes(RedirectAttributes redirectAttributes) {
+        Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        List<Fatura> todasFaturas = (empresaId == null) 
+            ? faturaRepository.findAll() 
+            : faturaRepository.findByEmpresa_Id(empresaId);
+
+        List<Fatura> pendentes = todasFaturas.stream()
+            .filter(f -> "PENDENTE".equalsIgnoreCase(f.getStatus()) 
+                      || "FALHA_ENVIO".equalsIgnoreCase(f.getStatus()) 
+                      || (Boolean.FALSE.equals(f.isEnviadaAGT()) && !"VALIDADA".equalsIgnoreCase(f.getStatus()) && !"CANCELADA".equalsIgnoreCase(f.getStatus()) && !"ANULADA".equalsIgnoreCase(f.getStatus())))
+            .collect(Collectors.toList());
+
+        int sucessos = 0;
+        int falhas = 0;
+        for (Fatura f : pendentes) {
+            try {
+                Fatura res = faturaService.reenviarFatura(f.getId());
+                if (res != null && res.isEnviadaAGT()) sucessos++;
+                else falhas++;
+            } catch (Exception ex) {
+                falhas++;
+            }
+        }
+
+        if (sucessos > 0 && falhas == 0) {
+            redirectAttributes.addFlashAttribute("mensagemSucesso", sucessos + " documento(s) fiscal(is) validado(s) com sucesso na AGT!");
+        } else if (sucessos > 0) {
+            redirectAttributes.addFlashAttribute("mensagemSucesso", sucessos + " validado(s) com sucesso. " + falhas + " documento(s) ainda com falha.");
+        } else if (falhas > 0) {
+            redirectAttributes.addFlashAttribute("mensagemErro", "Não foi possível validar os documentos na AGT (" + falhas + " falha(s)). Verifique a comunicação/credenciais com a AGT.");
+        } else {
+            redirectAttributes.addFlashAttribute("mensagemSucesso", "Nenhum documento pendente para reenviar.");
+        }
+        return "redirect:/dashboard/documentos-pendentes?aba=agt";
     }
 }

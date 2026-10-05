@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+
+    <link rel="stylesheet" th:href="@{/plugins/datatables/css/dataTables.bootstrap5.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/datatables/css/buttons.bootstrap5.min.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ── HERO ──────────────────────────────────────────────── */
+        .dp-hero {
+            background: linear-gradient(135deg, #312e81 0%, #4338ca 45%, #6366f1 100%);
+            border-radius: 24px;
+            padding: 2.2rem 2.4rem 4.5rem;
+            color: white;
+            margin-bottom: -2.8rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(67, 56, 202, 0.28);
+        }
+
+        .dp-hero::before {
+            content: '';
+            position: absolute;
+            top: -70px;
+            right: -70px;
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, .14) 0%, rgba(255, 255, 255, 0) 70%);
+            pointer-events: none;
+        }
+
+        .dp-hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .dp-hero h1 {
+            font-size: 1.95rem;
+            font-weight: 800;
+            margin-bottom: .25rem;
+            letter-spacing: -.5px;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, .18);
+            border: 1px solid rgba(255, 255, 255, .35);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: .35rem .95rem;
+            font-size: .76rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fbbf24;
+            animation: pulse-warning 1.6s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0% {
+                box-shadow: 0 0 0 0 rgba(251, 191, 36, .7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 9px rgba(251, 191, 36, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+            }
+        }
+
+        .realtime-clock {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ── KPI CARDS ─────────────────────────────────────────── */
+        .kpi-row {
+            position: relative;
+            z-index: 10;
+        }
+
+        .kpi-box {
+            background: white;
+            border-radius: 18px;
+            padding: 1.4rem 1.3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .06), 0 1px 3px rgba(0, 0, 0, .04);
+            border: 1px solid rgba(226, 232, 240, .9);
+            transition: transform .22s ease, box-shadow .22s ease;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, .11);
+        }
+
+        .kpi-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3.5px;
+            border-radius: 0 0 18px 18px;
+        }
+
+        .kpi-amber::after {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .kpi-red::after {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+
+        .kpi-blue::after {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        .kpi-teal::after {
+            background: linear-gradient(90deg, #059669, #0d9488);
+        }
+
+        .kpi-icon-wrap {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            margin-bottom: .85rem;
+        }
+
+        .kpi-amber .kpi-icon-wrap {
+            background: rgba(245, 158, 11, .13);
+            color: #d97706;
+        }
+
+        .kpi-red .kpi-icon-wrap {
+            background: rgba(239, 68, 68, .13);
+            color: #dc2626;
+        }
+
+        .kpi-blue .kpi-icon-wrap {
+            background: rgba(59, 130, 246, .13);
+            color: #2563eb;
+        }
+
+        .kpi-teal .kpi-icon-wrap {
+            background: rgba(5, 150, 105, .13);
+            color: #059669;
+        }
+
+        .kpi-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .kpi-title {
+            font-size: .82rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .kpi-sub {
+            font-size: .78rem;
+            color: #94a3b8;
+            margin-top: .35rem;
+        }
+
+        /* ── TABS ──────────────────────────────────────────────── */
+        .custom-nav-tabs {
+            border-bottom: 2px solid #e2e8f0;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .custom-nav-tabs .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: .85rem 1.4rem;
+            font-size: .9rem;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            border-radius: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .2s ease;
+        }
+
+        .custom-nav-tabs .nav-link:hover {
+            color: #4338ca;
+            border-bottom-color: #c7d2fe;
+        }
+
+        .custom-nav-tabs .nav-link.active {
+            color: #4338ca;
+            border-bottom-color: #4338ca;
+            background: transparent;
+            font-weight: 700;
+        }
+
+        .tab-badge {
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        /* ── TABLE CARD ────────────────────────────────────────── */
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .04);
+            overflow: hidden;
+        }
+
+        .table-card-header {
+            padding: 1.25rem 1.6rem;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .table-wrap-custom {
+            padding: 1.2rem 1.4rem;
+            overflow-x: auto;
+        }
+
+        .custom-dp-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        .custom-dp-table thead th {
+            background: #f8fafc;
+            font-size: .74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            color: #475569;
+            padding: 12px 14px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .custom-dp-table tbody td {
+            padding: 13px 14px;
+            font-size: .86rem;
+            color: #1e293b;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .custom-dp-table tbody tr:hover td {
+            background: rgba(248, 250, 252, .8);
+        }
+
+        .badge-doc-ft {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: .8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-doc-fp {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: .8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-status-pendente {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: .76rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-status-falha {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: .76rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-action-resend {
+            background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+            color: white !important;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: .8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 10px rgba(67, 56, 202, .25);
+            transition: all .2s ease;
+            text-decoration: none;
+        }
+
+        .btn-action-resend:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(67, 56, 202, .35);
+            color: white;
+        }
+
+        .btn-action-convert {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white !important;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: .8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 10px rgba(5, 150, 105, .25);
+            transition: all .2s ease;
+            text-decoration: none;
+        }
+
+        .btn-action-convert:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(5, 150, 105, .35);
+            color: white;
+        }
+
+        .client-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .78rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3.5rem 1rem;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 3.5rem;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h5 {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: .35rem;
+        }
+    </style>
+
+    <div class="wrapper">
+        <nav th:replace="menu :: topbar"></nav>
+        <aside th:replace="menu :: sidebar"></aside>
+
+        <div class="content-wrapper p-3 p-md-4">
+
+            <!-- ALERTS -->
+            <div th:if="${mensagemSucesso}"
+                class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-check-circle fs-5 text-success"></i>
+                    <span class="fw-semibold" th:text="${mensagemSucesso}">Operação realizada com sucesso!</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${mensagemErro}"
+                class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-exclamation-triangle fs-5 text-danger"></i>
+                    <span class="fw-semibold" th:text="${mensagemErro}">Ocorreu um erro no processamento.</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- 1. HERO -->
+            <div class="dp-hero">
+                <div class="dp-hero-content">
+                    <div class="row align-items-center g-3">
+                        <div class="col-lg-7">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="live-badge">
+                                    <span class="live-dot"></span>
+                                    Central de Pendências
+                                </span>
+                                <span class="badge bg-white bg-opacity-25 rounded-pill px-3 py-1"
+                                    th:text="${totalGeralPendentes + ' itens a requerer atenção'}">0 itens</span>
+                            </div>
+                            <h1>Documentos Pendentes</h1>
+                            <p class="text-white text-opacity-80 mb-0" style="font-size:.95rem;">
+                                Monitorização centralizada de facturas pendentes de validação na AGT, proformas a
+                                aguardar conversão e créditos em aberto.
+                            </p>
+                        </div>
+
+                        <div class="col-lg-5 text-lg-end">
+                            <div class="realtime-clock" id="realtimeClock">00:00:00</div>
+                            <div class="text-white text-opacity-75 small" id="heroDateStr">--</div>
+                            <div class="d-flex gap-2 justify-content-lg-end mt-3 flex-wrap">
+                                <form th:action="@{/dashboard/documentos-pendentes/reenviar-todos}" method="post"
+                                    class="d-inline"
+                                    onsubmit="return confirm('Deseja tentar reenviar todos os documentos pendentes e com falha para a AGT agora?');">
+                                    <button type="submit"
+                                        class="btn btn-warning btn-sm fw-bold px-3 py-2 rounded-pill shadow-sm text-dark">
+                                        <i class="fas fa-paper-plane me-1"></i> Reenviar Todos p/ AGT
+                                    </button>
+                                </form>
+
+                                <a th:href="@{/pos}"
+                                    class="btn btn-outline-light btn-sm fw-bold px-3 py-2 rounded-pill">
+                                    <i class="fas fa-plus me-1"></i> Novo Documento
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /hero -->
+
+            <!-- 2. KPI ROW -->
+            <div class="row g-3 kpi-row mb-4">
+                <!-- KPI 1: Pendentes AGT -->
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-box kpi-amber" onclick="ativarAba('tab-agt-btn')">
+                        <div class="kpi-icon-wrap">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="kpi-value" th:text="${qtdPendentesAgt}">0</div>
+                        <div class="kpi-title mt-1">Pendentes AGT</div>
+                        <div class="kpi-sub"
+                            th:text="|Total: ${#numbers.formatDecimal(valorPendentesAgt, 1, 'POINT', 2, 'COMMA')} Kz|">
+                            0,00 Kz</div>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Falhas AGT -->
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-box kpi-red" onclick="ativarAba('tab-falhas-btn')">
+                        <div class="kpi-icon-wrap">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="kpi-value text-danger" th:text="${qtdFalhasAgt}">0</div>
+                        <div class="kpi-title mt-1">Falhas de Envio AGT</div>
+                        <div class="kpi-sub"
+                            th:text="|Total: ${#numbers.formatDecimal(valorFalhasAgt, 1, 'POINT', 2, 'COMMA')} Kz|">0,00
+                            Kz</div>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Proformas Pendentes -->
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-box kpi-blue" onclick="ativarAba('tab-proformas-btn')">
+                        <div class="kpi-icon-wrap">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="kpi-value" th:text="${qtdProformas}">0</div>
+                        <div class="kpi-title mt-1">Proformas a Converter</div>
+                        <div class="kpi-sub"
+                            th:text="|Potencial: ${#numbers.formatDecimal(valorProformas, 1, 'POINT', 2, 'COMMA')} Kz|">
+                            0,00 Kz</div>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Contas a Receber -->
+                <div class="col-6 col-xl-3">
+                    <div class="kpi-box kpi-teal" onclick="ativarAba('tab-credito-btn')">
+                        <div class="kpi-icon-wrap">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="kpi-value" th:text="${qtdContasReceber}">0</div>
+                        <div class="kpi-title mt-1">Facturas em Dívida</div>
+                        <div class="kpi-sub"
+                            th:text="|Aberto: ${#numbers.formatDecimal(valorContasReceber, 1, 'POINT', 2, 'COMMA')} Kz|">
+                            0,00 Kz</div>
+                    </div>
+                </div>
+            </div><!-- /kpi-row -->
+
+            <!-- 3. ABAS & TABELAS -->
+            <div class="table-card">
+                <div class="table-card-header">
+                    <!-- Nav Tabs -->
+                    <ul class="nav custom-nav-tabs mb-0 border-0" id="dpTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-agt-btn" data-bs-toggle="tab"
+                                data-bs-target="#tab-agt" type="button" role="tab">
+                                <i class="fas fa-satellite-dish me-1"></i> Facturas Pendentes AGT
+                                <span class="tab-badge bg-warning text-dark ms-1" th:text="${qtdPendentesAgt}">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-falhas-btn" data-bs-toggle="tab"
+                                data-bs-target="#tab-falhas" type="button" role="tab">
+                                <i class="fas fa-exclamation-circle me-1 text-danger"></i> Falhas no Envio
+                                <span class="tab-badge bg-danger text-white ms-1" th:text="${qtdFalhasAgt}">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-proformas-btn" data-bs-toggle="tab"
+                                data-bs-target="#tab-proformas" type="button" role="tab">
+                                <i class="fas fa-file-alt me-1 text-primary"></i> Proformas (FP)
+                                <span class="tab-badge bg-primary text-white ms-1" th:text="${qtdProformas}">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-credito-btn" data-bs-toggle="tab"
+                                data-bs-target="#tab-credito" type="button" role="tab">
+                                <i class="fas fa-wallet me-1 text-success"></i> Crédito / Saldo Aberto
+                                <span class="tab-badge bg-success text-white ms-1"
+                                    th:text="${qtdContasReceber}">0</span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <a th:href="@{/dashboard/recebimentos}"
+                        class="btn btn-outline-secondary btn-sm rounded-pill fw-semibold">
+                        <i class="fas fa-chart-pie me-1"></i> Painel de Recebimentos
+                    </a>
+                </div>
+
+                <!-- Tab Contents -->
+                <div class="tab-content" id="dpTabContent">
+
+                    <!-- ABA 1: FACTURAS PENDENTES AGT -->
+                    <div class="tab-pane fade show active" id="tab-agt" role="tabpanel">
+                        <div class="table-wrap-custom">
+                            <div th:if="${#lists.isEmpty(faturasPendentesAgt)}" class="empty-state">
+                                <i class="fas fa-check-circle text-success" style="font-size:3rem;"></i>
+                                <h5>Nenhuma Factura Pendente na AGT!</h5>
+                                <p class="text-muted small">Todos os seus documentos fiscais foram comunicados e
+                                    processados com sucesso.</p>
+                            </div>
+                            <table th:if="${!#lists.isEmpty(faturasPendentesAgt)}" id="tabelaPendentesAgt"
+                                class="custom-dp-table display nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Documento</th>
+                                        <th>Data Emissão</th>
+                                        <th>Cliente / Contacto</th>
+                                        <th class="text-end">Total</th>
+                                        <th class="text-end">IVA</th>
+                                        <th>Estado AGT</th>
+                                        <th class="text-center" data-orderable="false">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="f : ${faturasPendentesAgt}">
+                                        <td>
+                                            <span class="badge-doc-ft">
+                                                <i class="fas fa-file-invoice"></i> <span th:text="${f.numeroFatura}">FT
+                                                    2026/1</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-semibold text-dark"
+                                                th:text="${f.dataEmissao != null ? #dates.format(f.dataEmissao, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2026</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold"
+                                                th:text="${f.compra != null ? (f.compra.nomeCliente != null ? f.compra.nomeCliente : 'Consumidor Final') : 'Consumidor Final'}">
+                                                Nome Cliente</div>
+                                            <small class="text-muted"
+                                                th:text="|NIF: ${f.compra != null && f.compra.nifCliente != null ? f.compra.nifCliente : 'Consumidor Final'}|">NIF</small>
+                                        </td>
+                                        <td class="text-end fw-bold"
+                                            th:text="|${#numbers.formatDecimal(f.total != null ? f.total : 0.0, 1, 'POINT', 2, 'COMMA')} Kz|">
+                                            0,00 Kz</td>
+                                        <td class="text-end text-muted small"
+                                            th:text="|${#numbers.formatDecimal(f.iva != null ? f.iva : 0.0, 1, 'POINT', 2, 'COMMA')} Kz|">
+                                            0,00 Kz</td>
+                                        <td>
+                                            <span class="badge-status-pendente">
+                                                <i class="fas fa-clock"></i> Pendente Envio
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{'/dashboard/documentos-pendentes/reenviar/' + ${f.id}}"
+                                                class="btn-action-resend">
+                                                <i class="fas fa-paper-plane"></i> Reenviar AGT
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ABA 2: FALHAS NO ENVIO AGT -->
+                    <div class="tab-pane fade" id="tab-falhas" role="tabpanel">
+                        <div class="table-wrap-custom">
+                            <div th:if="${#lists.isEmpty(faturasFalhasAgt)}" class="empty-state">
+                                <i class="fas fa-shield-alt text-success" style="font-size:3rem;"></i>
+                                <h5>Zero Falhas de Comunicação!</h5>
+                                <p class="text-muted small">Nenhum documento fiscal reportou erro de transmissão junto
+                                    da AGT.</p>
+                            </div>
+                            <table th:if="${!#lists.isEmpty(faturasFalhasAgt)}" id="tabelaFalhasAgt"
+                                class="custom-dp-table display nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Documento</th>
+                                        <th>Data Emissão</th>
+                                        <th>Cliente</th>
+                                        <th class="text-end">Total</th>
+                                        <th>Diagnóstico AGT</th>
+                                        <th class="text-center" data-orderable="false">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="f : ${faturasFalhasAgt}">
+                                        <td>
+                                            <span class="badge-doc-ft" style="background:#fee2e2; color:#991b1b;">
+                                                <i class="fas fa-exclamation-triangle"></i> <span
+                                                    th:text="${f.numeroFatura}">FT 2026/1</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-semibold text-dark"
+                                                th:text="${f.dataEmissao != null ? #dates.format(f.dataEmissao, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2026</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold"
+                                                th:text="${f.compra != null && f.compra.nomeCliente != null ? f.compra.nomeCliente : 'Consumidor Final'}">
+                                                Nome Cliente</div>
+                                            <small class="text-muted"
+                                                th:text="|NIF: ${f.compra != null && f.compra.nifCliente != null ? f.compra.nifCliente : 'Consumidor Final'}|">NIF</small>
+                                        </td>
+                                        <td class="text-end fw-bold text-danger"
+                                            th:text="|${#numbers.formatDecimal(f.total != null ? f.total : 0.0, 1, 'POINT', 2, 'COMMA')} Kz|">
+                                            0,00 Kz</td>
+                                        <td>
+                                            <span class="badge-status-falha mb-1">
+                                                <i class="fas fa-times-circle"></i> Falha no Envio
+                                            </span>
+                                            <div class="small text-danger fw-semibold text-truncate"
+                                                style="max-width:280px;"
+                                                th:text="${f.codigoAgt != null ? f.codigoAgt : 'Erro na comunicação com o servidor da AGT'}">
+                                                Erro</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <a th:href="@{'/dashboard/documentos-pendentes/reenviar/' + ${f.id}}"
+                                                class="btn btn-danger btn-sm rounded-pill fw-semibold shadow-sm">
+                                                <i class="fas fa-redo me-1"></i> Tentar Novamente
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ABA 3: PROFORMAS PENDENTES -->
+                    <div class="tab-pane fade" id="tab-proformas" role="tabpanel">
+                        <div class="table-wrap-custom">
+                            <div th:if="${#lists.isEmpty(proformasPendentes)}" class="empty-state">
+                                <i class="fas fa-folder-open text-muted" style="font-size:3rem;"></i>
+                                <h5>Nenhuma Proforma Pendente!</h5>
+                                <p class="text-muted small">Não há facturas proforma a aguardar conversão ou aprovação
+                                    no momento.</p>
+                            </div>
+                            <table th:if="${!#lists.isEmpty(proformasPendentes)}" id="tabelaProformas"
+                                class="custom-dp-table display nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Cód. / Ref.</th>
+                                        <th>Data Emissão</th>
+                                        <th>Cliente</th>
+                                        <th>Itens</th>
+                                        <th class="text-end">Total</th>
+                                        <th>Estado</th>
+                                        <th class="text-center" data-orderable="false">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p : ${proformasPendentes}">
+                                        <td>
+                                            <span class="badge-doc-fp">
+                                                <i class="fas fa-file-invoice-dollar"></i> <span
+                                                    th:text="${'FP #' + p.id}">FP #1</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-semibold text-dark"
+                                                th:text="${p.dataCompra != null ? #temporals.format(p.dataCompra, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2026</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold"
+                                                th:text="${p.nomeCliente != null ? p.nomeCliente : 'Cliente Não Identificado'}">
+                                                Nome Cliente</div>
+                                            <small class="text-muted"
+                                                th:text="|NIF: ${p.nifCliente != null ? p.nifCliente : '-'}|">NIF</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border"
+                                                th:text="${(p.itens != null ? p.itens.size() : 0) + ' artigo(s)'}">0
+                                                artigo(s)</span>
+                                        </td>
+                                        <td class="text-end fw-bold text-primary"
+                                            th:text="|${#numbers.formatDecimal(p.total != null ? p.total : 0.0, 1, 'POINT', 2, 'COMMA')} Kz|">
+                                            0,00 Kz</td>
+                                        <td>
+                                            <span
+                                                class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1"
+                                                th:text="${p.status}">EMITIDA</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-inline-flex gap-2">
+                                                <a th:href="@{'/historico-vendas/proforma/converter/' + ${p.id}}"
+                                                    class="btn-action-convert"
+                                                    onclick="return confirm('Deseja converter esta Factura Proforma numa Factura oficial?');">
+                                                    <i class="fas fa-check"></i> Converter
+                                                </a>
+                                                <a th:href="@{'/historico-vendas/proforma/aprovar/' + ${p.id}}"
+                                                    class="btn btn-sm btn-outline-success rounded-pill fw-semibold"
+                                                    title="Aprovar Proforma">
+                                                    <i class="fas fa-thumbs-up"></i>
+                                                </a>
+                                                <a th:href="@{'/historico-vendas/proforma/duplicar/' + ${p.id}}"
+                                                    class="btn btn-sm btn-outline-secondary rounded-pill fw-semibold"
+                                                    title="Duplicar">
+                                                    <i class="fas fa-copy"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ABA 4: CRÉDITOS EM ABERTO -->
+                    <div class="tab-pane fade" id="tab-credito" role="tabpanel">
+                        <div class="table-wrap-custom">
+                            <div th:if="${#lists.isEmpty(contasReceber)}" class="empty-state">
+                                <i class="fas fa-smile text-success" style="font-size:3rem;"></i>
+                                <h5>Todas as Contas Estão Liquidadas!</h5>
+                                <p class="text-muted small">Não há facturas a crédito com saldo pendente de pagamento.
+                                </p>
+                            </div>
+                            <table th:if="${!#lists.isEmpty(contasReceber)}" id="tabelaCredito"
+                                class="custom-dp-table display nowrap" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Factura</th>
+                                        <th>Vencimento</th>
+                                        <th>Cliente</th>
+                                        <th class="text-end">Total FT</th>
+                                        <th class="text-end">Pago</th>
+                                        <th class="text-end">Saldo Devedor</th>
+                                        <th class="text-center" data-orderable="false">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="c : ${contasReceber}">
+                                        <td>
+                                            <span class="badge-doc-ft">
+                                                <i class="fas fa-file-invoice"></i> <span th:text="${c.numeroFatura}">FT
+                                                    2026/1</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold" th:text="${c.dataVencimentoFormatada}">15/01/2026</div>
+                                            <span th:if="${c.statusVencimento == 'VENCIDA'}"
+                                                class="badge bg-danger rounded-pill">Vencida</span>
+                                            <span th:if="${c.statusVencimento == 'NO_PRAZO'}"
+                                                class="badge bg-success rounded-pill">No Prazo</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold" th:text="${c.nomeCliente}">Nome Cliente</div>
+                                            <small class="text-muted" th:text="|NIF: ${c.nifCliente}|">NIF</small>
+                                        </td>
+                                        <td class="text-end text-muted"
+                                            th:text="|${#numbers.formatDecimal(c.total != null ? c.total : 0.0, 1, 'POINT', 2, 'COMMA')} Kz|">
+                                            0,00 Kz</td>
+                                        <td class="text-end text-success fw-semibold"
+                                            th:text="|${#numbers.formatDecimal(c.valorPago != null ? c.valorPago : 0.0, 1, 'POINT', 2, 'COMMA')} Kz|">
+                                            0,00 Kz</td>
+                                        <td class="text-end fw-bold text-danger"
+                                            th:text="|${#numbers.formatDecimal(c.valorEmAberto != null ? c.valorEmAberto : 0.0, 1, 'POINT', 2, 'COMMA')} Kz|">
+                                            0,00 Kz</td>
+                                        <td class="text-center">
+                                            <a th:href="@{/dashboard/recebimentos}"
+                                                class="btn btn-sm btn-outline-primary rounded-pill fw-semibold">
+                                                <i class="fas fa-hand-holding-usd me-1"></i> Liquidar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div><!-- /tab-content -->
+            </div><!-- /table-card -->
+
+        </div><!-- /content-wrapper -->
+    </div><!-- /wrapper -->
+
+    <!-- Scripts -->
+    <script th:src="@{/plugins/datatables/js/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/dataTables.bootstrap5.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/dataTables.buttons.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/buttons.bootstrap5.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/jszip.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/pdfmake.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/vfs_fonts.js}"></script>
+    <script th:src="@{/plugins/datatables/js/buttons.html5.min.js}"></script>
+    <script th:src="@{/plugins/datatables/js/buttons.print.min.js}"></script>
+
+    <script th:inline="none">
+        $(document).ready(function () {
+            /* 1. RELÓGIO */
+            var months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            var days = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+            function updateClock() {
+                var now = new Date();
+                var clockEl = document.getElementById('realtimeClock');
+                if (clockEl) clockEl.textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+                var heroDateEl = document.getElementById('heroDateStr');
+                if (heroDateEl) heroDateEl.textContent = days[now.getDay()] + ', ' + now.getDate() + ' de ' + months[now.getMonth()] + ' de ' + now.getFullYear();
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            /* 2. DATATABLES CONFIG */
+            var dtConfig = {
+                responsive: true,
+                pageLength: 10,
+                language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-PT.json' },
+                dom: '<"d-flex flex-wrap justify-content-between align-items-center mb-3"Bf>rt<"d-flex flex-wrap justify-content-between align-items-center mt-3"ip>',
+                buttons: [
+                    { extend: 'excelHtml5', text: '<i class="fas fa-file-excel me-1 text-success"></i> Excel', className: 'btn btn-light btn-sm border' },
+                    { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf me-1 text-danger"></i> PDF', className: 'btn btn-light btn-sm border' },
+                    { extend: 'print', text: '<i class="fas fa-print me-1 text-secondary"></i> Imprimir', className: 'btn btn-light btn-sm border' }
+                ]
+            };
+
+            if ($.fn.DataTable) {
+                if ($('#tabelaPendentesAgt').length) {
+                    $('#tabelaPendentesAgt').DataTable(Object.assign({}, dtConfig, { order: [[1, 'desc']] }));
+                }
+                if ($('#tabelaFalhasAgt').length) {
+                    $('#tabelaFalhasAgt').DataTable(Object.assign({}, dtConfig, { order: [[1, 'desc']] }));
+                }
+                if ($('#tabelaProformas').length) {
+                    $('#tabelaProformas').DataTable(Object.assign({}, dtConfig, { order: [[1, 'desc']] }));
+                }
+                if ($('#tabelaCredito').length) {
+                    $('#tabelaCredito').DataTable(Object.assign({}, dtConfig, { order: [[1, 'asc']] }));
+                }
+            }
+        });
+
+        function ativarAba(btnId) {
+            var btn = document.getElementById(btnId);
+            if (btn) {
+                var tabTrigger = new bootstrap.Tab(btn);
+                tabTrigger.show();
+            }
+        }
+    </script>
+
+</body>
+
+</html>
