@@ -7,11 +7,11 @@
   <!-- CSRF Tokens para AJAX -->
   <meta name="_csrf" th:content="${_csrf?.token}" />
   <meta name="_csrf_header" th:content="${_csrf?.headerName}" />
-  <title th:text="${globalSistemaNome + ' - Gestão Inteligente'}">Kwanza ERP - Gestão Inteligente</title>
+  <title th:text="${(globalSistemaNome != null ? globalSistemaNome : 'Kwanza ERP') + ' - Gestão Inteligente'}">Kwanza ERP - Gestão Inteligente</title>
 
   <!-- PWA Manifest & Service Worker -->
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#4338ca">
+  <meta name="theme-color" content="#4f46e5">
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -21,6 +21,11 @@
       });
     }
   </script>
+
+  <!-- Google Fonts: Inter / Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- jQuery -->
   <script th:src="@{/plugins/jquery/jquery-3.6.0.min.js}"></script>
@@ -39,593 +44,1296 @@
   <!-- Custom Premium Style -->
   <link rel="stylesheet" th:href="@{/css/premium-style.css}">
 
-  <style>
-    @keyframes pulse-ring {
-      0% {
-        transform: scale(0.8);
-        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+  <!-- ===================================================================== -->
+  <!-- MOTOR GLOBAL DE TEMA & NAVEGAÇÃO (Executado Universalmente)           -->
+  <!-- ===================================================================== -->
+  <script>
+    // 1. Aplicação Pré-Renderização Ultra-Rápida (Zero Flash Branco)
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('kwanza_app_theme');
+        if (savedTheme === 'dark') {
+          document.documentElement.classList.add('dark-mode');
+        } else if (savedTheme === 'light') {
+          document.documentElement.classList.remove('dark-mode');
+        }
+      } catch (e) {}
+    })();
+
+    // 2. Função Global de Alternância Claro / Escuro com Debounce
+    let _lastThemeToggleTimestamp = 0;
+    window.toggleThemeGlobal = function (e) {
+      if (e) {
+        if (e.preventDefault) e.preventDefault();
+        if (e.stopPropagation) e.stopPropagation();
       }
 
-      70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+      // Evitar cliques múltiplos ou disparos acidentais em menos de 250ms
+      const now = Date.now();
+      if (now - _lastThemeToggleTimestamp < 250) {
+        return;
       }
+      _lastThemeToggleTimestamp = now;
 
-      100% {
-        transform: scale(0.8);
-        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+      try {
+        const isDark = document.body.classList.toggle('dark-mode');
+
+        if (isDark) {
+          document.documentElement.classList.add('dark-mode');
+        } else {
+          document.documentElement.classList.remove('dark-mode');
+        }
+
+        // Sincronizar classes nativas de Navbar do AdminLTE
+        const navbars = document.querySelectorAll('.main-header.navbar');
+        navbars.forEach(function (nav) {
+          if (isDark) {
+            nav.classList.remove('navbar-white', 'navbar-light');
+            nav.classList.add('navbar-dark');
+          } else {
+            nav.classList.remove('navbar-dark');
+            nav.classList.add('navbar-white', 'navbar-light');
+          }
+        });
+
+        // Atualizar ícones de lua / sol
+        const icons = document.querySelectorAll('#iconThemeTopbar, #iconThemePos, .icon-theme-toggle');
+        icons.forEach(function (icon) {
+          if (isDark) {
+            icon.className = 'fas fa-sun text-warning';
+          } else {
+            icon.className = 'fas fa-moon';
+          }
+        });
+
+        // Salvar preferência
+        localStorage.setItem('kwanza_app_theme', isDark ? 'dark' : 'light');
+
+        // Notificar componentes
+        window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: isDark ? 'dark' : 'light' } }));
+      } catch (err) {
+        console.error('Erro ao alternar tema globalmente:', err);
+      }
+    };
+
+    // 3. Confirmação de Logout Elegante
+    window.confirmarLogout = function (formId) {
+      if (confirm('Tem a certeza que deseja terminar a sessão de trabalho?')) {
+        const form = document.getElementById(formId);
+        if (form) form.submit();
+      }
+    };
+
+    // 4. Sincronização Inicial do DOM
+    function applySavedThemeState() {
+      try {
+        const savedTheme = localStorage.getItem('kwanza_app_theme');
+        const isDark = (savedTheme === 'dark');
+
+        if (savedTheme === 'dark') {
+          document.body.classList.add('dark-mode');
+          document.documentElement.classList.add('dark-mode');
+        } else if (savedTheme === 'light') {
+          document.body.classList.remove('dark-mode');
+          document.documentElement.classList.remove('dark-mode');
+        }
+
+        const navbars = document.querySelectorAll('.main-header.navbar');
+        navbars.forEach(function (nav) {
+          if (isDark) {
+            nav.classList.remove('navbar-white', 'navbar-light');
+            nav.classList.add('navbar-dark');
+          } else {
+            nav.classList.remove('navbar-dark');
+            nav.classList.add('navbar-white', 'navbar-light');
+          }
+        });
+
+        const icons = document.querySelectorAll('#iconThemeTopbar, #iconThemePos, .icon-theme-toggle');
+        icons.forEach(function (icon) {
+          if (isDark) {
+            icon.className = 'fas fa-sun text-warning';
+          } else {
+            icon.className = 'fas fa-moon';
+          }
+        });
+      } catch (err) {
+        console.error('Erro ao aplicar tema salvo:', err);
       }
     }
 
-    .badge-pulse {
-      animation: pulse-ring 2s infinite;
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', applySavedThemeState);
+    } else {
+      applySavedThemeState();
+    }
+
+    // 5. Pesquisa Dinâmica em Tempo Real no Menu Lateral
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInput = document.getElementById('sidebarMenuSearch');
+      if (searchInput) {
+        searchInput.addEventListener('input', function () {
+          const query = this.value.toLowerCase().trim();
+          const items = document.querySelectorAll('#sidebarNavMenu > li.nav-item, #sidebarNavMenu > li.nav-header');
+
+          let currentHeader = null;
+          let headerHasVisibleChildren = false;
+
+          items.forEach(function (el) {
+            if (el.classList.contains('nav-header')) {
+              if (currentHeader && !headerHasVisibleChildren && query !== '') {
+                currentHeader.style.display = 'none';
+              }
+              currentHeader = el;
+              headerHasVisibleChildren = false;
+              el.style.display = '';
+            } else if (el.classList.contains('nav-item')) {
+              const text = el.textContent.toLowerCase();
+              if (query === '' || text.indexOf(query) > -1) {
+                el.style.display = '';
+                headerHasVisibleChildren = true;
+                if (query !== '' && el.classList.contains('has-treeview')) {
+                  el.classList.add('menu-open');
+                  const tree = el.querySelector('.nav-treeview');
+                  if (tree) tree.style.display = 'block';
+                }
+              } else {
+                el.style.display = 'none';
+              }
+            }
+          });
+
+          if (currentHeader && !headerHasVisibleChildren && query !== '') {
+            currentHeader.style.display = 'none';
+          }
+        });
+
+        // Atalho '/' para focar a pesquisa
+        document.addEventListener('keydown', function (e) {
+          if (e.key === '/' && document.activeElement !== searchInput && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+          }
+        });
+      }
+    });
+  </script>
+
+  <!-- Global Menu & Navigation Design System -->
+  <style>
+    :root {
+      --app-font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --app-primary: #4f46e5;
+      --app-primary-hover: #4338ca;
+      --app-primary-rgb: 79, 70, 229;
+      --app-rose: #f43f5e;
+      --app-emerald: #10b981;
+      --app-amber: #f59e0b;
+      --sidebar-width: 270px;
+    }
+
+    body {
+      font-family: var(--app-font) !important;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===================================================================== */
+    /* GLOBAL SYSTEM WALLPAPER / BACKGROUND (Harmonioso, Discreto e Elegante) */
+    /* ===================================================================== */
+    .content-wrapper {
+      background-color: #f8fafc !important;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.035) 0px, transparent 45%),
+        radial-gradient(at 100% 0%, rgba(148, 163, 184, 0.04) 0px, transparent 40%),
+        radial-gradient(at 50% 100%, rgba(79, 70, 229, 0.025) 0px, transparent 50%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(241, 245, 249, 0.5) 100%),
+        url('/img/app_bg_subtle.jpg') !important;
+      background-size: cover, cover, cover, cover, cover !important;
+      background-repeat: no-repeat !important;
+      background-position: center center !important;
+      background-attachment: fixed !important;
+      min-height: calc(100vh - 58px) !important;
+      transition: background 0.3s ease;
+    }
+
+    /* Em modo escuro, adapta-se automaticamente mantendo a legibilidade */
+    .dark-mode .content-wrapper {
+      background-color: #0b1120 !important;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.07) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.04) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(30, 41, 59, 0.6) 0px, transparent 50%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(11, 17, 32, 0.95) 100%) !important;
+      background-attachment: fixed !important;
+    }
+
+    /* Garantir que cards e tabelas mantenham fundo sólido e legibilidade 100% */
+    .content-wrapper .card {
+      background: #ffffff;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02) !important;
+    }
+
+    .dark-mode .content-wrapper .card {
+      background: #1e293b !important;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* ===================================================================== */
+    /* TOPBAR MODERNA (Glassmorphism & Quick Actions)                         */
+    /* ===================================================================== */
+    .main-header.navbar {
+      background: rgba(255, 255, 255, 0.85) !important;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+      padding: 0.65rem 1.25rem;
+      transition: all 0.3s ease;
+      z-index: 1030;
+    }
+
+    .dark-mode .main-header.navbar {
+      background: rgba(15, 23, 42, 0.85) !important;
+      border-bottom-color: rgba(51, 65, 85, 0.8) !important;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+    }
+
+    .topbar-btn-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s ease;
+      text-decoration: none !important;
+    }
+
+    .topbar-btn-toggle:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: scale(1.05);
+    }
+
+    .dark-mode .topbar-btn-toggle {
+      background: #1e293b;
+      border-color: #334155;
+      color: #cbd5e1;
+    }
+
+    .topbar-company-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(79, 70, 229, 0.03));
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--app-primary);
+    }
+
+    .dark-mode .topbar-company-pill {
+      background: rgba(79, 70, 229, 0.15);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+    }
+
+    .topbar-quick-pos {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: #ffffff !important;
+      border-radius: 50px;
+      padding: 6px 16px;
+      font-weight: 700;
+      font-size: 0.84rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+      transition: all 0.25s ease;
+      text-decoration: none !important;
+    }
+
+    .topbar-quick-pos:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+    }
+
+    .topbar-theme-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .topbar-theme-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: rotate(15deg);
+    }
+
+    .dark-mode .topbar-theme-btn {
+      background: #1e293b;
+      border-color: #334155;
+      color: #f59e0b;
+    }
+
+    .topbar-user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 12px 4px 6px;
+      border-radius: 50px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      text-decoration: none !important;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .topbar-user-pill:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    .dark-mode .topbar-user-pill {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    .topbar-user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f46e5, #818cf8);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.8rem;
+    }
+
+    /* ===================================================================== */
+    /* SIDEBAR MODERNA (Navegação Suave, Ícones Temáticos e Micro-Interações) */
+    /* ===================================================================== */
+    .main-sidebar {
+      background-color: #ffffff !important;
+      border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.03) !important;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dark-mode .main-sidebar {
+      background-color: #0f172a !important;
+      border-right-color: rgba(51, 65, 85, 0.8) !important;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* Logo Box */
+    .sidebar-brand-box {
+      padding: 1.25rem 1.25rem 1rem 1.25rem;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .dark-mode .sidebar-brand-box {
+      border-bottom-color: rgba(51, 65, 85, 0.8);
+    }
+
+    .sidebar-brand-logo {
+      max-height: 52px;
+      max-width: 180px;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-brand-logo:hover {
+      transform: scale(1.04);
+    }
+
+    /* Live Search no Sidebar */
+    .sidebar-search-container {
+      padding: 1rem 1rem 0.5rem 1rem;
+    }
+
+    .sidebar-search-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-search-box:focus-within {
+      background: #ffffff;
+      border-color: var(--app-primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    .dark-mode .sidebar-search-box {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    .dark-mode .sidebar-search-box:focus-within {
+      border-color: #818cf8;
+      background: #0f172a;
+    }
+
+    .sidebar-search-input {
+      border: none;
+      background: transparent;
+      outline: none;
+      width: 100%;
+      font-size: 0.82rem;
+      color: #0f172a;
+    }
+
+    .dark-mode .sidebar-search-input {
+      color: #f1f5f9;
+    }
+
+    .sidebar-search-input::placeholder {
+      color: #94a3b8;
+    }
+
+    /* Headers de Categoria */
+    .nav-sidebar .nav-header {
+      font-size: 0.68rem !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.08em !important;
+      color: #94a3b8 !important;
+      padding: 1rem 1rem 0.4rem 1rem !important;
+      margin-top: 0.25rem;
+    }
+
+    .dark-mode .nav-sidebar .nav-header {
+      color: #64748b !important;
+    }
+
+    /* Links do Menu */
+    .nav-sidebar .nav-link {
+      border-radius: 12px !important;
+      margin: 2px 8px !important;
+      padding: 8px 12px !important;
+      font-size: 0.86rem !important;
+      font-weight: 600 !important;
+      color: #475569 !important;
+      display: flex !important;
+      align-items: center !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .nav-sidebar .nav-link p {
+      margin-left: 10px !important;
+      margin-bottom: 0 !important;
+      flex-grow: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-sidebar .nav-link i.nav-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      margin-right: 0 !important;
+      transition: all 0.2s ease;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .dark-mode .nav-sidebar .nav-link {
+      color: #cbd5e1 !important;
+    }
+
+    .dark-mode .nav-sidebar .nav-link i.nav-icon {
+      background: #1e293b;
+      color: #94a3b8;
+    }
+
+    /* Hover no Link */
+    .nav-sidebar .nav-link:hover {
+      background-color: #f8fafc !important;
+      color: var(--app-primary) !important;
+      transform: translateX(3px);
+    }
+
+    .nav-sidebar .nav-link:hover i.nav-icon {
+      background: rgba(79, 70, 229, 0.12) !important;
+      color: var(--app-primary) !important;
+    }
+
+    .dark-mode .nav-sidebar .nav-link:hover {
+      background-color: #1e293b !important;
+      color: #818cf8 !important;
+    }
+
+    .dark-mode .nav-sidebar .nav-link:hover i.nav-icon {
+      background: rgba(99, 102, 241, 0.2) !important;
+      color: #a5b4fc !important;
+    }
+
+    /* Item Ativo */
+    .nav-sidebar .nav-link.active {
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(79, 70, 229, 0.05)) !important;
+      color: var(--app-primary) !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(79, 70, 229, 0.2) !important;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08) !important;
+    }
+
+    .nav-sidebar .nav-link.active i.nav-icon {
+      background: var(--app-primary) !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4) !important;
+    }
+
+    .dark-mode .nav-sidebar .nav-link.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.05)) !important;
+      color: #a5b4fc !important;
+      border-color: rgba(99, 102, 241, 0.3) !important;
+    }
+
+    /* Botão POS Especial no Sidebar */
+    .sidebar-pos-launcher {
+      background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+      color: #ffffff !important;
+      border-radius: 14px !important;
+      padding: 10px 14px !important;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
+      margin: 6px 8px 10px 8px !important;
+      transition: all 0.25s ease !important;
+    }
+
+    .sidebar-pos-launcher:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.45) !important;
+      color: #ffffff !important;
+    }
+
+    .sidebar-pos-launcher i.nav-icon {
+      background: rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
+    }
+
+    /* Submenus (Treeview) */
+    .nav-treeview {
+      padding-left: 10px !important;
+      margin-left: 16px !important;
+      border-left: 2px dashed rgba(226, 232, 240, 0.8) !important;
+    }
+
+    .dark-mode .nav-treeview {
+      border-left-color: rgba(51, 65, 85, 0.6) !important;
+    }
+
+    .nav-treeview .nav-link {
+      font-size: 0.82rem !important;
+      padding: 6px 10px !important;
+      margin: 1px 0 !important;
+    }
+
+    .nav-treeview .nav-link i.nav-icon {
+      width: 22px;
+      height: 22px;
+      font-size: 0.78rem;
+    }
+
+    /* Cores Temáticas dos Módulos */
+    .icon-cyan i.nav-icon { background: rgba(6, 182, 212, 0.1); color: #0891b2; }
+    .icon-emerald i.nav-icon { background: rgba(16, 185, 129, 0.1); color: #059669; }
+    .icon-amber i.nav-icon { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .icon-rose i.nav-icon { background: rgba(244, 63, 94, 0.1); color: #e11d48; }
+    .icon-violet i.nav-icon { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+    .icon-indigo i.nav-icon { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
+    .icon-blue i.nav-icon { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+
+    /* Footer da Sidebar com Perfil */
+    .sidebar-user-footer {
+      padding: 12px 14px;
+      margin: 12px 8px 8px 8px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dark-mode .sidebar-user-footer {
+      background: #1e293b;
+      border-color: #334155;
     }
   </style>
 </head>
 
 <body>
-  <!-- Topbar Menu (Responsive Toggle) -->
-  <nav class="main-header navbar navbar-expand navbar-white navbar-light"
-    th:classappend="${globalTema == 'dark' ? 'navbar-dark' : 'navbar-white navbar-light'}" th:fragment="topbar">
-    <ul class="navbar-nav">
+  <!-- ===================================================================== -->
+  <!-- TOPBAR FRAGMENT                                                       -->
+  <!-- ===================================================================== -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light" th:fragment="topbar">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav align-items-center gap-2">
       <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        <a class="topbar-btn-toggle" data-widget="pushmenu" href="#" role="button" title="Minimizar / Expandir Menu">
+          <i class="fas fa-bars"></i>
+        </a>
+      </li>
+
+      <!-- Indicador da Empresa Ativa -->
+      <li class="nav-item d-none d-md-block" th:if="${currentEmpresa != null}">
+        <div class="topbar-company-pill" th:title="'NIF: ' + ${currentEmpresa.nif}">
+          <i class="fas fa-building"></i>
+          <span th:text="${currentEmpresa.nome}">Empresa Ativa</span>
+        </div>
       </li>
     </ul>
 
     <!-- Right navbar links -->
-    <ul class="navbar-nav ms-auto align-items-center">
-      <!-- Language Dropdown -->
-      <li class="nav-item dropdown">
-        <a class="nav-link d-flex align-items-center gap-1" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-          <i class="fas fa-language"></i>
-          <span class="d-none d-md-inline ms-1"
-            th:text="${#locale.language == 'pt' ? 'PT' : (#locale.language == 'en' ? 'EN' : 'FR')}">Idioma</span>
+    <ul class="navbar-nav ms-auto align-items-center gap-2">
+      <!-- Atalho Rápido ao POS -->
+      <li class="nav-item" th:if="${modulo_VENDAS}">
+        <a th:href="@{/pos}" class="topbar-quick-pos" title="Abrir Ponto de Venda [F1]">
+          <i class="fas fa-cash-register"></i>
+          <span class="d-none d-sm-inline">Caixa POS</span>
         </a>
-        <div class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-          <a th:href="@{${#request.requestURI}(lang='pt')}" class="dropdown-item">
-            <span class="me-2">🇵🇹</span> Português
+      </li>
+
+      <!-- Seletor de Idioma -->
+      <li class="nav-item dropdown">
+        <button class="topbar-btn-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Alterar Idioma">
+          <i class="fas fa-globe"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2 rounded-4" style="min-width: 170px;">
+          <a th:href="@{${#request.requestURI}(lang='pt')}" class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
+            <span>🇵🇹</span> Português
           </a>
-          <a th:href="@{${#request.requestURI}(lang='en')}" class="dropdown-item">
-            <span class="me-2">🇺🇸</span> English
+          <a th:href="@{${#request.requestURI}(lang='en')}" class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
+            <span>🇺🇸</span> English
           </a>
-          <a th:href="@{${#request.requestURI}(lang='fr')}" class="dropdown-item">
-            <span class="me-2">🇫🇷</span> Français
+          <a th:href="@{${#request.requestURI}(lang='fr')}" class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
+            <span>🇫🇷</span> Français
           </a>
         </div>
       </li>
 
-      <!-- Logout Option -->
-      <li class="nav-item ms-2">
-        <form th:action="@{/logout}" method="post" id="logoutFormMenu" class="d-none">
-        </form>
-        <a class="nav-link text-danger fw-bold d-flex align-items-center gap-2 px-3" href="javascript:void(0)"
-          onclick="document.getElementById('logoutFormMenu').submit();" th:title="#{menu.sair.tooltip}"
-          title="Sair do Sistema">
-          <i class="fas fa-power-off"></i>
-          <span class="d-none d-sm-inline" th:text="#{menu.sair}">Sair</span>
-        </a>
+      <!-- Toggle Modo Escuro / Claro Dinâmico -->
+      <li class="nav-item">
+        <button type="button" class="topbar-btn-toggle topbar-theme-btn" id="btnToggleThemeTopbar" onclick="toggleThemeGlobal(event)" title="Alternar Modo Claro / Escuro">
+          <i class="fas fa-moon" id="iconThemeTopbar" style="pointer-events: none;"></i>
+        </button>
+      </li>
+
+      <!-- Card do Utilizador Logado com Dropdown -->
+      <li class="nav-item dropdown">
+        <div class="topbar-user-pill" data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="topbar-user-avatar">
+            <span th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
+          </div>
+          <div class="d-none d-md-block text-start leading-tight">
+            <div class="fw-bold text-dark small" style="line-height: 1.1;" th:text="${usuario_NOME ?: 'Utilizador'}">Utilizador</div>
+            <small class="text-muted" style="font-size: 0.68rem;"
+                   th:text="${isSuperAdmin ? 'SuperUtilizador' : (isAdmin ? 'Administrador' : 'Operador')}">Perfil</small>
+          </div>
+          <i class="fas fa-chevron-down text-muted small ms-1"></i>
+        </div>
+
+        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2 rounded-4 mt-2" style="min-width: 220px;">
+          <div class="p-3 border-bottom text-center">
+            <div class="topbar-user-avatar mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.1rem;">
+              <span th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
+            </div>
+            <div class="fw-bold text-dark" th:text="${usuario_NOME ?: 'Utilizador'}">Nome do Utilizador</div>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 mt-1" style="font-size: 0.7rem;"
+                  th:text="${isSuperAdmin ? 'SUPERADMIN' : (isAdmin ? 'ADMINISTRADOR' : 'OPERADOR')}">PERFIL</span>
+          </div>
+          <div class="py-1">
+            <a th:href="@{/configuracoes/geral}" class="dropdown-item rounded-3 py-2 fw-semibold" th:if="${modulo_ADMINISTRACAO}">
+              <i class="fas fa-sliders-h text-muted me-2"></i> Configurações
+            </a>
+            <a th:href="@{/dashboard}" class="dropdown-item rounded-3 py-2 fw-semibold" th:if="${modulo_DASHBOARD}">
+              <i class="fas fa-tachometer-alt text-muted me-2"></i> Dashboard
+            </a>
+          </div>
+          <div class="border-top pt-1">
+            <form th:action="@{/logout}" method="post" id="logoutFormTopbar" class="d-none"></form>
+            <a href="javascript:void(0)" onclick="confirmarLogout('logoutFormTopbar')" class="dropdown-item rounded-3 py-2 text-danger fw-bold">
+              <i class="fas fa-power-off me-2"></i> Terminar Sessão
+            </a>
+          </div>
+        </div>
       </li>
     </ul>
   </nav>
 
-  <!-- Sidebar Menu -->
-  <aside class="main-sidebar elevation-4"
-    th:classappend="${globalTema == 'dark' ? 'sidebar-dark-primary' : 'sidebar-light-primary'}" th:fragment="sidebar">
+  <!-- ===================================================================== -->
+  <!-- SIDEBAR FRAGMENT                                                      -->
+  <!-- ===================================================================== -->
+  <aside class="main-sidebar elevation-0" th:fragment="sidebar">
+    <div class="sidebar d-flex flex-column justify-content-between h-100 p-0">
+      <div>
+        <!-- Logo do Sistema -->
+        <div class="sidebar-brand-box">
+          <a th:href="@{/dashboard}" class="d-inline-flex align-items-center">
+            <img th:src="@{${globalSistemaLogotipo != null ? globalSistemaLogotipo : '/img/logo.png'}}" alt="Logo"
+              class="sidebar-brand-logo"
+              onerror="this.src='/img/logo.png';">
+          </a>
+        </div>
 
-    <div class="sidebar">
-      <!-- Logo do Sistema -->
-      <div class="text-center py-4 border-bottom mb-2" style="border-color: rgba(120, 120, 120, 0.15) !important;">
-        <a th:href="@{/dashboard}" class="d-inline-block">
-          <img th:src="@{${globalSistemaLogotipo != null ? globalSistemaLogotipo : '/img/logo.png'}}" alt="Logo"
-            class="img-fluid"
-            style="max-height: 85px; transition: transform 0.3s ease; filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.08));"
-            onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        </a>
+        <!-- Live Search Dinâmico no Menu -->
+        <div class="sidebar-search-container">
+          <div class="sidebar-search-box">
+            <i class="fas fa-search text-muted small"></i>
+            <input type="text" id="sidebarMenuSearch" class="sidebar-search-input"
+                   placeholder="Pesquisar menus (atalho: /)" autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Lista de Navegação -->
+        <nav class="mt-2 px-1">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="sidebarNavMenu">
+
+            <!-- HOME MODULE (OPERADORES) -->
+            <th:block th:if="${!isAdmin and !isSuperAdmin}">
+              <li class="nav-header" th:text="#{menu.header.geral}">GERAL</li>
+              <li class="nav-item icon-indigo">
+                <a th:href="@{/home}" class="nav-link" th:classappend="${#request.requestURI == '/home'} ? ' active' : ''">
+                  <i class="nav-icon fas fa-home"></i>
+                  <p th:text="#{menu.home}">Página Inicial</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- DASHBOARD MODULE -->
+            <th:block th:if="${modulo_DASHBOARD}">
+              <li class="nav-header" th:text="#{menu.header.painel_controlo}">PAINEL DE CONTROLO</li>
+              <li class="nav-item icon-cyan">
+                <a th:href="@{/dashboard}" class="nav-link" th:classappend="${#request.requestURI == '/dashboard' or #request.requestURI == '/'} ? ' active' : ''">
+                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <p th:text="#{menu.dashboard}">Dashboard</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- VENDAS & OPERAÇÕES -->
+            <th:block th:if="${modulo_VENDAS}">
+              <li class="nav-header" th:text="#{menu.header.vendas_operacoes}">VENDAS & OPERAÇÕES</li>
+
+              <!-- Lançador Especial POS -->
+              <li class="nav-item">
+                <a th:href="@{/pos}" class="nav-link sidebar-pos-launcher" title="Abrir Ponto de Venda [F1]">
+                  <i class="nav-icon fas fa-cash-register"></i>
+                  <p><b th:text="#{menu.vendas.pos}">Ponto de Venda (POS)</b></p>
+                  <span class="badge bg-white text-primary rounded-pill px-2 ms-auto fw-bold" style="font-size: 0.68rem;">ABRIR</span>
+                </a>
+              </li>
+
+              <li class="nav-item icon-emerald" th:if="${isOperador}">
+                <a th:href="@{/caixa/abertura}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/caixa/abertura')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-door-open"></i>
+                  <p th:text="#{menu.vendas.abertura_caixa}">Abertura de Caixa</p>
+                </a>
+              </li>
+              <li class="nav-item icon-rose" th:if="${isOperador}">
+                <a th:href="@{/caixa/fecho}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/caixa/fecho')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-door-closed"></i>
+                  <p th:text="#{menu.vendas.fecho_caixa}">Fecho de Caixa</p>
+                </a>
+              </li>
+              <li class="nav-item icon-indigo" th:if="${isAdmin or isSuperAdmin}">
+                <a th:href="@{/caixa/monitor}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/caixa/monitor')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-desktop"></i>
+                  <p th:text="#{menu.vendas.monitor_caixas}">Monitor de Caixas</p>
+                </a>
+              </li>
+              <li class="nav-item icon-blue">
+                <a th:href="@{/historico-vendas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/historico-vendas')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-history"></i>
+                  <p th:text="#{menu.vendas.historico}">Histórico de Facturas</p>
+                </a>
+              </li>
+              <li class="nav-item icon-rose">
+                <a th:href="@{/devolucoes}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/devolucoes')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-undo"></i>
+                  <p th:text="#{menu.vendas.devolucoes}">Devoluções / Reembolsos</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- GESTÃO DE STOCK -->
+            <th:block th:if="${modulo_STOCK}">
+              <li class="nav-header" th:text="#{menu.header.gestao_stock}">GESTÃO DE STOCK</li>
+              <li class="nav-item has-treeview icon-amber"
+                  th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI.startsWith('/cadastroProduto') or #request.requestURI.startsWith('/stock/saldos') or #request.requestURI.startsWith('/categorias') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' menu-open' : ''">
+                <a href="#" class="nav-link"
+                   th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI.startsWith('/cadastroProduto') or #request.requestURI.startsWith('/stock/saldos') or #request.requestURI.startsWith('/categorias') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-boxes"></i>
+                  <p>
+                    <span th:text="#{menu.stock.produtos_servicos}">Artigos & Serviços</span>
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/produtos/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/produtos')} ? ' active' : ''">
+                      <i class="fas fa-list nav-icon"></i>
+                      <p th:text="#{menu.produtos.lista}">Lista de Produtos</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/cadastroProduto}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/cadastroProduto')} ? ' active' : ''">
+                      <i class="fas fa-plus nav-icon"></i>
+                      <p th:text="#{menu.produtos.adicionar}">Novo Produto</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/stock/saldos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/saldos')} ? ' active' : ''">
+                      <i class="fas fa-warehouse nav-icon"></i>
+                      <p th:text="#{menu.stock.saldos}">Saldos de Stock</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/categorias/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/categorias')} ? ' active' : ''">
+                      <i class="fas fa-tags nav-icon"></i>
+                      <p th:text="#{menu.produtos.categorias}">Categorias</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/gestao-inventarios}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
+                      <i class="fas fa-clipboard-check nav-icon"></i>
+                      <p th:text="#{menu.stock.gestao_inventarios}">Gestão de Inventários</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item has-treeview icon-blue"
+                  th:classappend="${#request.requestURI.startsWith('/stock/entrada') or #request.requestURI.startsWith('/stock/saida') or #request.requestURI.startsWith('/stock/ajuste')} ? ' menu-open' : ''">
+                <a href="#" class="nav-link"
+                   th:classappend="${#request.requestURI.startsWith('/stock/entrada') or #request.requestURI.startsWith('/stock/saida') or #request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-exchange-alt"></i>
+                  <p>
+                    <span th:text="#{menu.stock.movimentacoes}">Movimentações</span>
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/stock/entrada}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/entrada')} ? ' active' : ''">
+                      <i class="fas fa-sign-in-alt nav-icon"></i>
+                      <p th:text="#{menu.inventario.entradas}">Entradas</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/stock/saida}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/saida')} ? ' active' : ''">
+                      <i class="fas fa-sign-out-alt nav-icon"></i>
+                      <p th:text="#{menu.inventario.saidas}">Saídas</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/stock/ajuste}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''">
+                      <i class="fas fa-tools nav-icon"></i>
+                      <p th:text="#{menu.inventario.ajustes}">Ajustes de Stock</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/stock/historico}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/historico')} ? ' active' : ''">
+                      <i class="fas fa-history nav-icon"></i>
+                      <p>Histórico de Movimentos</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <li class="nav-item icon-rose">
+                <a th:href="@{/stock/alertas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/alertas')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-exclamation-triangle"></i>
+                  <p>
+                    <span th:text="#{menu.stock.alertas_ruptura}">Alertas de Ruptura</span>
+                    <span class="right badge bg-danger rounded-pill" th:text="#{menu.stock.badge_baixo}">ALERTA</span>
+                  </p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- ENTIDADES (CLIENTES & FORNECEDORES) -->
+            <th:block th:if="${modulo_ENTIDADES}">
+              <li class="nav-header" th:text="#{menu.header.entidades}">ENTIDADES & PARCEIROS</li>
+              <li class="nav-item icon-indigo">
+                <a th:href="@{/clientes/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/clientes')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-users"></i>
+                  <p th:text="#{menu.clientes}">Clientes</p>
+                </a>
+              </li>
+              <li class="nav-item icon-cyan">
+                <a th:href="@{/fornecedores/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/fornecedores')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-truck"></i>
+                  <p th:text="#{menu.fornecedores}">Fornecedores</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- FACTURAÇÃO & FISCAL -->
+            <th:block th:if="${modulo_FACTURACAO}">
+              <li class="nav-header" th:text="#{menu.header.facturacao_fiscal}">FACTURAÇÃO & FISCAL</li>
+              <li class="nav-item icon-blue">
+                <a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link">
+                  <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                  <p th:text="#{menu.facturacao.emitidas}">Facturas Emitidas</p>
+                </a>
+              </li>
+              <li class="nav-item icon-emerald">
+                <a th:href="@{/guias/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/guias')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-map-marked-alt"></i>
+                  <p th:text="#{menu.facturacao.guias}">Guias de Remessa</p>
+                </a>
+              </li>
+              <li class="nav-item icon-rose">
+                <a th:href="@{/notas/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/notas')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-sticky-note"></i>
+                  <p th:text="#{menu.facturacao.notas}">Notas de Crédito / Débito</p>
+                </a>
+              </li>
+              <li class="nav-item icon-violet">
+                <a th:href="@{/autofaturacao}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/autofaturacao')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-file-signature"></i>
+                  <p>Autofaturação (AF)</p>
+                </a>
+              </li>
+              <li class="nav-item has-treeview icon-indigo"
+                  th:classappend="${#request.requestURI.startsWith('/factura-eletronica') or #request.requestURI.startsWith('/configuracoes/saft')} ? ' menu-open' : ''">
+                <a href="#" class="nav-link"
+                   th:classappend="${#request.requestURI.startsWith('/factura-eletronica') or #request.requestURI.startsWith('/configuracoes/saft')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-shield-alt"></i>
+                  <p>
+                    <span th:text="#{menu.facturacao.gestao_agt_saft}">Gestão AGT & SAF-T</span>
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/factura-eletronica/estado}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/factura-eletronica')} ? ' active' : ''">
+                      <i class="fas fa-satellite-dish nav-icon"></i>
+                      <p th:text="#{menu.facturacao.estado}">Estado de Comunicação</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/saft}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/saft')} ? ' active' : ''">
+                      <i class="fas fa-file-export nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.saft}">Exportar SAF-T (AO)</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
+                      <i class="fas fa-gavel nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </th:block>
+
+            <!-- FINANCEIRO -->
+            <th:block th:if="${modulo_FINANCEIRO}">
+              <li class="nav-header" th:text="#{menu.header.financeiro}">FINANCEIRO & TESOURARIA</li>
+              <li class="nav-item icon-amber">
+                <a th:href="@{/despesas/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-receipt"></i>
+                  <p th:text="#{menu.despesas}">Gestão de Despesas</p>
+                </a>
+              </li>
+              <li class="nav-item icon-emerald">
+                <a th:href="@{/financeiro/fluxo-caixa}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/financeiro/fluxo-caixa')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-chart-area"></i>
+                  <p th:text="#{menu.fluxo_caixa}">Fluxo de Caixa</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- RECURSOS HUMANOS (RH) -->
+            <th:block th:if="${modulo_RH}">
+              <li class="nav-header" th:text="#{menu.header.rh}">RECURSOS HUMANOS (RH)</li>
+              <li class="nav-item icon-cyan">
+                <a th:href="@{/rh/colaboradores}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/colaboradores')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-user-tie"></i>
+                  <p th:text="#{menu.rh.colaboradores}">Colaboradores</p>
+                </a>
+              </li>
+              <li class="nav-item icon-emerald">
+                <a th:href="@{/rh/processamento}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/processamento')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-calculator"></i>
+                  <p th:text="#{menu.rh.folhas_vencimento}">Folhas de Vencimento</p>
+                </a>
+              </li>
+              <li class="nav-item icon-indigo">
+                <a th:href="@{/rh/departamentos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/departamentos')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-sitemap"></i>
+                  <p th:text="#{menu.rh.departamentos}">Departamentos</p>
+                </a>
+              </li>
+              <li class="nav-item icon-amber">
+                <a th:href="@{/rh/subsidios}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/subsidios')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-hand-holding-usd"></i>
+                  <p th:text="#{menu.rh.tipos_subsidio}">Tipos de Subsídio</p>
+                </a>
+              </li>
+              <li class="nav-item icon-blue">
+                <a th:href="@{/rh/parametros}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/parametros')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-sliders-h"></i>
+                  <p th:text="#{menu.rh.parametros}">Parâmetros</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- ADMINISTRAÇÃO -->
+            <th:block th:if="${modulo_ADMINISTRACAO}">
+              <li class="nav-header" th:text="#{menu.header.administracao}">ADMINISTRAÇÃO</li>
+
+              <!-- Definições do Sistema -->
+              <li class="nav-item has-treeview icon-indigo"
+                  th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/empresa')} ? ' menu-open' : ''">
+                <a href="#" class="nav-link"
+                   th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-cogs"></i>
+                  <p>
+                    <span th:text="#{menu.admin.definicoes_sistema}">Definições Sistema</span>
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/geral}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/geral')} ? ' active' : ''">
+                      <i class="fas fa-sliders-h nav-icon"></i>
+                      <p th:text="#{menu.admin.parametros_avancados}">Parâmetros Avançados</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/empresa}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''">
+                      <i class="fas fa-id-card nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.empresa}">Dados da Empresa</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- Gestão de Utilizadores -->
+              <li class="nav-item has-treeview icon-cyan"
+                  th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' menu-open' : ''">
+                <a href="#" class="nav-link"
+                   th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-users-cog"></i>
+                  <p>
+                    <span th:text="#{menu.admin.gestao_utilizadores}">Gestão Utilizadores</span>
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/utilizadores}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores')} ? ' active' : ''">
+                      <i class="fas fa-users nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.utilizadores}">Utilizadores e Perfis</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
+                      <i class="fas fa-user-shield nav-icon"></i>
+                      <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- Gestão Tributária (AGT) -->
+              <li class="nav-item has-treeview icon-amber"
+                th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/fiscais/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal'))} ? ' menu-open' : ''">
+                <a href="#" class="nav-link"
+                  th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/fiscais/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal'))} ? ' active' : ''">
+                  <i class="nav-icon fas fa-landmark"></i>
+                  <p>
+                    <span th:text="#{menu.admin.gestao_tributaria}">Gestão Tributária</span>
+                    <i class="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
+                      <i class="fas fa-shield-alt nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.agt}">Configurações AGT</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/impostos')} ? ' active' : ''">
+                      <i class="fas fa-percent nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.fiscais.impostos}">Impostos (IVA/Selo)</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
+                      <i class="fas fa-hand-holding-usd nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.fiscais.taxas}">Taxas Adicionais</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/moedas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
+                      <i class="fas fa-coins nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.moedas}">Moedas e Câmbio</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/series}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
+                      <i class="fas fa-list-ol nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.series}">Séries de Faturação</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
+                      <i class="fas fa-gavel nav-icon"></i>
+                      <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- Itens Avançados Opcionais -->
+              <li class="nav-item icon-blue" th:if="${modulo_ADMINISTRACAO_SERVIDOR}">
+                <a th:href="@{/configuracoes/geral(tab='servidor')}" class="nav-link">
+                  <i class="fas fa-server nav-icon"></i>
+                  <p th:text="#{menu.admin.servidor_rede}">Servidor e Rede</p>
+                </a>
+              </li>
+              <li class="nav-item icon-indigo" th:if="${modulo_ADMINISTRACAO_EMAIL}">
+                <a th:href="@{/configuracoes/geral(tab='email')}" class="nav-link">
+                  <i class="fas fa-envelope-open-text nav-icon"></i>
+                  <p th:text="#{menu.admin.configuracao_email}">Configuração de Email</p>
+                </a>
+              </li>
+              <li class="nav-item icon-cyan" th:if="${modulo_ADMINISTRACAO_BANCO_DADOS}">
+                <a th:href="@{/configuracoes/geral(tab='banco-dados')}" class="nav-link">
+                  <i class="fas fa-database nav-icon"></i>
+                  <p th:text="#{menu.admin.base_dados}">Base de Dados</p>
+                </a>
+              </li>
+              <li class="nav-item icon-emerald" th:if="${modulo_ADMINISTRACAO_STORAGE}">
+                <a th:href="@{/configuracoes/geral(tab='storage')}" class="nav-link">
+                  <i class="fas fa-hdd nav-icon"></i>
+                  <p th:text="#{menu.admin.armazenamento}">Armazenamento (Storage)</p>
+                </a>
+              </li>
+              <li class="nav-item icon-rose" th:if="${modulo_ADMINISTRACAO_SEGURANCA}">
+                <a th:href="@{/configuracoes/geral(tab='seguranca')}" class="nav-link">
+                  <i class="fas fa-lock nav-icon"></i>
+                  <p th:text="#{menu.admin.seguranca_logs}">Segurança e Logs</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- CONTROLO DE ACESSO (ADMIN fora do módulo global) -->
+            <th:block th:if="${isAdmin and !isSuperAdmin}">
+              <li class="nav-header" th:text="#{menu.header.gestao_acessos}">GESTÃO DE ACESSOS</li>
+              <li class="nav-item icon-indigo">
+                <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-user-shield"></i>
+                  <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
+                </a>
+              </li>
+            </th:block>
+
+            <!-- SUPER ADMIN SECTION (SAAS) -->
+            <th:block th:if="${modulo_PAINEL_GLOBAL}">
+              <li class="nav-header text-warning" th:text="#{menu.header.painel_global}">PAINEL GLOBAL (SaaS)</li>
+              <li class="nav-item icon-amber">
+                <a th:href="@{/superadmin/dashboard}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/dashboard')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-globe"></i>
+                  <p th:text="#{menu.saas.gestao_empresas}">Gestão de Empresas</p>
+                </a>
+              </li>
+              <li class="nav-item icon-indigo">
+                <a th:href="@{/superadmin/usuarios}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/usuarios')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-user-shield"></i>
+                  <p th:text="#{menu.saas.admins_globais}">Admins Globais</p>
+                </a>
+              </li>
+              <li class="nav-item icon-amber">
+                <a th:href="@{/superadmin/licenca/gerador}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/licenca')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-key"></i>
+                  <p th:text="#{menu.saas.gerador_licencas}">Gerador de Licenças</p>
+                </a>
+              </li>
+              <li class="nav-item icon-cyan">
+                <a th:href="@{/superadmin/planos-pagamento}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
+                  <i class="nav-icon fas fa-crown"></i>
+                  <p th:text="#{menu.saas.planos_pagamento}">Planos de Pagamento</p>
+                </a>
+              </li>
+            </th:block>
+          </ul>
+        </nav>
       </div>
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- HOME MODULE (OPERATORS AND USERS) -->
-          <th:block th:if="${!isAdmin and !isSuperAdmin}">
-            <li class="nav-header" th:text="#{menu.header.geral}">GERAL</li>
-            <li class="nav-item">
-              <a th:href="@{/home}" class="nav-link">
-                <i class="nav-icon fas fa-home"></i>
-                <p th:text="#{menu.home}">Página Inicial</p>
-              </a>
-            </li>
-          </th:block>
 
-          <!-- DASHBOARD MODULE -->
-          <th:block th:if="${modulo_DASHBOARD}">
-            <li class="nav-header module-dashboard-header" th:text="#{menu.header.painel_controlo}">PAINEL DE CONTROLO
-            </li>
-            <li class="nav-item module-dashboard-item">
-              <a th:href="@{/dashboard}" class="nav-link">
-                <i class="nav-icon fas fa-tachometer-alt"></i>
-                <p th:text="#{menu.dashboard}">Dashboard</p>
-              </a>
-            </li>
-            <!-- 
-            <li class="nav-item">
-              <a th:href="@{/dashboard/estatisticas}" class="nav-link">
-                <i class="nav-icon fas fa-chart-line"></i>
-                <p th:text="#{menu.dashboard.estatisticas}">Estatísticas</p>
-              </a>
-            </li>
-            -->
-          </th:block>
-
-          <!-- SALES MODULE -->
-          <th:block th:if="${modulo_VENDAS}">
-            <li class="nav-header module-vendas-header" th:text="#{menu.header.vendas_operacoes}">VENDAS & OPERAÇÕES
-            </li>
-            <li class="nav-item module-vendas-item">
-              <a th:href="@{/pos}" class="nav-link bg-primary shadow-sm mb-1">
-                <i class="nav-icon fas fa-cash-register"></i>
-                <p><b th:text="#{menu.vendas.pos}">Ponto de Venda (POS)</b></p>
-              </a>
-            </li>
-            <li class="nav-item module-vendas-item" th:if="${isOperador}">
-              <a th:href="@{/caixa/abertura}" class="nav-link">
-                <i class="nav-icon fas fa-door-open"></i>
-                <p th:text="#{menu.vendas.abertura_caixa}">Abertura de Caixa</p>
-              </a>
-            </li>
-            <li class="nav-item module-vendas-item" th:if="${isOperador}">
-              <a th:href="@{/caixa/fecho}" class="nav-link">
-                <i class="nav-icon fas fa-door-closed"></i>
-                <p th:text="#{menu.vendas.fecho_caixa}">Fecho de Caixa</p>
-              </a>
-            </li>
-            <li class="nav-item module-vendas-item" th:if="${isAdmin or isSuperAdmin}">
-              <a th:href="@{/caixa/monitor}" class="nav-link">
-                <i class="nav-icon fas fa-desktop"></i>
-                <p th:text="#{menu.vendas.monitor_caixas}">Monitor de Caixas</p>
-              </a>
-            </li>
-            <li class="nav-item module-vendas-item">
-              <a th:href="@{/historico-vendas}" class="nav-link">
-                <i class="nav-icon fas fa-history"></i>
-                <p th:text="#{menu.vendas.historico}">Histórico de Vendas</p>
-              </a>
-            </li>
-            <li class="nav-item module-vendas-item">
-              <a th:href="@{/devolucoes}" class="nav-link">
-                <i class="nav-icon fas fa-undo"></i>
-                <p th:text="#{menu.vendas.devolucoes}">Devoluções / Reembolsos</p>
-              </a>
-            </li>
-          </th:block>
-
-          <!-- INVENTORY MODULE -->
-          <th:block th:if="${modulo_STOCK}">
-            <li class="nav-header module-stock-header" th:text="#{menu.header.gestao_stock}">GESTÃO DE STOCK</li>
-            <li class="nav-item has-treeview module-stock-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-boxes"></i>
-                <p>
-                  <span th:text="#{menu.stock.produtos_servicos}">Produtos & Serviços</span>
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a th:href="@{/produtos/listar}" class="nav-link">
-                    <i class="fas fa-list nav-icon"></i>
-                    <p th:text="#{menu.produtos.lista}">Lista de Produtos</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/cadastroProduto}" class="nav-link">
-                    <i class="fas fa-plus nav-icon"></i>
-                    <p th:text="#{menu.produtos.adicionar}">Novo Produto</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/stock/saldos}" class="nav-link">
-                    <i class="fas fa-warehouse nav-icon"></i>
-                    <p th:text="#{menu.stock.saldos}">Saldos de Stock</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/categorias/listar}" class="nav-link">
-                    <i class="fas fa-tags nav-icon"></i>
-                    <p th:text="#{menu.produtos.categorias}">Categorias</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/gestao-inventarios}" class="nav-link">
-                    <i class="fas fa-clipboard-check nav-icon"></i>
-                    <p th:text="#{menu.stock.gestao_inventarios}">Gestão de Inventários</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li class="nav-item has-treeview module-stock-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-exchange-alt"></i>
-                <p>
-                  <span th:text="#{menu.stock.movimentacoes}">Movimentações</span>
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a th:href="@{/stock/entrada}" class="nav-link">
-                    <i class="fas fa-sign-in-alt nav-icon"></i>
-                    <p th:text="#{menu.inventario.entradas}">Entradas</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/stock/saida}" class="nav-link">
-                    <i class="fas fa-sign-out-alt nav-icon"></i>
-                    <p th:text="#{menu.inventario.saidas}">Saídas</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/stock/ajuste}" class="nav-link">
-                    <i class="fas fa-tools nav-icon"></i>
-                    <p th:text="#{menu.inventario.ajustes}">Ajustes de Stock</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li class="nav-item module-stock-item">
-              <a th:href="@{/stock/alertas}" class="nav-link text-danger">
-                <i class="nav-icon fas fa-exclamation-triangle"></i>
-                <p>
-                  <span th:text="#{menu.stock.alertas_ruptura}">Alertas de Ruptura</span>
-                  <span class="right badge bg-danger" th:text="#{menu.stock.badge_baixo}">STOCK BAIXO</span>
-                </p>
-              </a>
-            </li>
-          </th:block>
-
-          <!-- ENTITIES MODULE -->
-          <th:block th:if="${modulo_ENTIDADES}">
-            <li class="nav-header module-entidades-header" th:text="#{menu.header.entidades}">ENTIDADES</li>
-            <li class="nav-item module-entidades-item">
-              <a th:href="@{/clientes/listar}" class="nav-link">
-                <i class="nav-icon fas fa-users"></i>
-                <p th:text="#{menu.clientes}">Clientes</p>
-              </a>
-            </li>
-            <li class="nav-item module-entidades-item">
-              <a th:href="@{/fornecedores/listar}" class="nav-link">
-                <i class="nav-icon fas fa-truck"></i>
-                <p th:text="#{menu.fornecedores}">Fornecedores</p>
-              </a>
-            </li>
-          </th:block>
-
-          <!-- BILLING MODULE -->
-          <th:block th:if="${modulo_FACTURACAO}">
-            <li class="nav-header module-facturacao-header" th:text="#{menu.header.facturacao_fiscal}">FACTURAÇÃO &
-              FISCAL</li>
-            <li class="nav-item module-facturacao-item">
-              <a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link">
-                <i class="nav-icon fas fa-file-invoice-dollar"></i>
-                <p th:text="#{menu.facturacao.emitidas}">Facturas Emitidas</p>
-              </a>
-            </li>
-            <li class="nav-item module-facturacao-item">
-              <a th:href="@{/guias/listar}" class="nav-link">
-                <i class="nav-icon fas fa-map-marked-alt"></i>
-                <p th:text="#{menu.facturacao.guias}">Guias de Remessa</p>
-              </a>
-            </li>
-            <li class="nav-item module-facturacao-item">
-              <a th:href="@{/notas/listar}" class="nav-link">
-                <i class="nav-icon fas fa-sticky-note"></i>
-                <p th:text="#{menu.facturacao.notas}">Notas de Crédito / Débito</p>
-              </a>
-            </li>
-            <li class="nav-item module-facturacao-item">
-              <a th:href="@{/autofaturacao}" class="nav-link">
-                <i class="nav-icon fas fa-file-signature"></i>
-                <p>Autofaturação (AF)</p>
-              </a>
-            </li>
-            <li class="nav-item has-treeview module-facturacao-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-shield-alt"></i>
-                <p>
-                  <span th:text="#{menu.facturacao.gestao_agt_saft}">Gestão AGT & SAF-T</span>
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a th:href="@{/factura-eletronica/estado}" class="nav-link">
-                    <i class="fas fa-satellite-dish nav-icon"></i>
-                    <p th:text="#{menu.facturacao.estado}">Estado de Comunicação</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/saft}" class="nav-link">
-                    <i class="fas fa-file-export nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.saft}">Exportar SAF-T (AO)</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link">
-                    <i class="fas fa-gavel nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-          </th:block>
-
-          <!-- FINANCIAL MODULE -->
-          <th:block th:if="${modulo_FINANCEIRO}">
-            <li class="nav-header module-financeiro-header" th:text="#{menu.header.financeiro}">FINANCEIRO</li>
-            <li class="nav-item module-financeiro-item">
-              <a th:href="@{/despesas/listar}" class="nav-link">
-                <i class="nav-icon fas fa-receipt"></i>
-                <p th:text="#{menu.despesas}">Gestão de Despesas</p>
-              </a>
-            </li>
-            <li class="nav-item module-financeiro-item">
-              <a th:href="@{/financeiro/fluxo-caixa}" class="nav-link">
-                <i class="nav-icon fas fa-chart-area"></i>
-                <p th:text="#{menu.fluxo_caixa}">Fluxo de Caixa</p>
-              </a>
-            </li>
-          </th:block>
-
-          <!-- RECURSOS HUMANOS (RH) MODULE -->
-          <th:block th:if="${modulo_RH}">
-            <li class="nav-header module-rh-header" th:text="#{menu.header.rh}">RECURSOS HUMANOS (RH)</li>
-            <li class="nav-item module-rh-item">
-              <a th:href="@{/rh/colaboradores}" class="nav-link">
-                <i class="nav-icon fas fa-user-tie"></i>
-                <p th:text="#{menu.rh.colaboradores}">Colaboradores</p>
-              </a>
-            </li>
-            <li class="nav-item module-rh-item">
-              <a th:href="@{/rh/processamento}" class="nav-link">
-                <i class="nav-icon fas fa-calculator"></i>
-                <p th:text="#{menu.rh.folhas_vencimento}">Folhas de Vencimento</p>
-              </a>
-            </li>
-            <li class="nav-item module-rh-item">
-              <a th:href="@{/rh/departamentos}" class="nav-link">
-                <i class="nav-icon fas fa-sitemap"></i>
-                <p th:text="#{menu.rh.departamentos}">Departamentos</p>
-              </a>
-            </li>
-            <li class="nav-item module-rh-item">
-              <a th:href="@{/rh/subsidios}" class="nav-link">
-                <i class="nav-icon fas fa-hand-holding-usd"></i>
-                <p th:text="#{menu.rh.tipos_subsidio}">Tipos de Subsídio</p>
-              </a>
-            </li>
-            <li class="nav-item module-rh-item">
-              <a th:href="@{/rh/parametros}" class="nav-link">
-                <i class="nav-icon fas fa-sliders-h"></i>
-                <p th:text="#{menu.rh.parametros}">Parâmetros</p>
-              </a>
-            </li>
-          </th:block>
-
-          <!-- CONFIGURATIONS MODULE -->
-          <th:block th:if="${modulo_ADMINISTRACAO}">
-            <li class="nav-header module-administracao-header" th:text="#{menu.header.administracao}">ADMINISTRAÇÃO</li>
-
-            <!-- Group: Definições do Sistema -->
-            <li class="nav-item has-treeview module-administracao-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-cogs"></i>
-                <p>
-                  <span th:text="#{menu.admin.definicoes_sistema}">Definições Sistema</span>
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/geral}" class="nav-link">
-                    <i class="fas fa-sliders-h nav-icon"></i>
-                    <p th:text="#{menu.admin.parametros_avancados}">Parâmetros Avançados</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/empresa}" class="nav-link">
-                    <i class="fas fa-id-card nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.empresa}">Dados da Empresa</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <!-- Group: Gestão de Utilizadores -->
-            <li class="nav-item has-treeview module-administracao-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-users-cog"></i>
-                <p>
-                  <span th:text="#{menu.admin.gestao_utilizadores}">Gestão Utilizadores</span>
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/utilizadores}" class="nav-link">
-                    <i class="fas fa-users nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.utilizadores}">Utilizadores e Perfis</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link">
-                    <i class="fas fa-user-shield nav-icon text-info"></i>
-                    <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <!-- Group: Gestão Tributária (AGT) with fiscal/config items -->
-            <li class="nav-item has-treeview module-administracao-item"
-              th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/fiscais/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal'))} ? ' menu-open' : ''">
-              <a href="#" class="nav-link"
-                th:classappend="${(#request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/fiscais/impostos') or #request.requestURI.startsWith('/configuracoes/fiscais/taxas') or #request.requestURI.startsWith('/configuracoes/moedas') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal'))} ? ' active' : ''">
-                <i class="nav-icon fas fa-landmark"></i>
-                <p>
-                  <span th:text="#{menu.admin.gestao_tributaria}">Gestão Tributária</span>
-                  <i class="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"
-                    th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
-                    <i class="fas fa-shield-alt nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.agt}">Configurações AGT</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"
-                    th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/impostos')} ? ' active' : ''">
-                    <i class="fas fa-percent nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.fiscais.impostos}">Impostos (IVA/Selo)</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link"
-                    th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
-                    <i class="fas fa-hand-holding-usd nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.fiscais.taxas}">Taxas Adicionais</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/moedas}" class="nav-link"
-                    th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
-                    <i class="fas fa-coins nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.moedas}">Moedas e Câmbio</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/series}" class="nav-link"
-                    th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
-                    <i class="fas fa-list-ol nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.series}">Séries de Faturação</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"
-                    th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
-                    <i class="fas fa-gavel nav-icon"></i>
-                    <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
-            <!-- Optional advanced items preserved with conditional flags -->
-            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SERVIDOR}">
-              <a th:href="@{/configuracoes/geral(tab='servidor')}" class="nav-link">
-                <i class="fas fa-server nav-icon"></i>
-                <p th:text="#{menu.admin.servidor_rede}">Servidor e Rede</p>
-              </a>
-            </li>
-            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_EMAIL}">
-              <a th:href="@{/configuracoes/geral(tab='email')}" class="nav-link">
-                <i class="fas fa-envelope-open-text nav-icon"></i>
-                <p th:text="#{menu.admin.configuracao_email}">Configuração de Email</p>
-              </a>
-            </li>
-            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_BANCO_DADOS}">
-              <a th:href="@{/configuracoes/geral(tab='banco-dados')}" class="nav-link">
-                <i class="fas fa-database nav-icon"></i>
-                <p th:text="#{menu.admin.base_dados}">Base de Dados</p>
-              </a>
-            </li>
-            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_STORAGE}">
-              <a th:href="@{/configuracoes/geral(tab='storage')}" class="nav-link">
-                <i class="fas fa-hdd nav-icon"></i>
-                <p th:text="#{menu.admin.armazenamento}">Armazenamento (Storage)</p>
-              </a>
-            </li>
-            <li class="nav-item" th:if="${modulo_ADMINISTRACAO_SEGURANCA}">
-              <a th:href="@{/configuracoes/geral(tab='seguranca')}" class="nav-link">
-                <i class="fas fa-lock nav-icon"></i>
-                <p th:text="#{menu.admin.seguranca_logs}">Segurança e Logs</p>
-              </a>
-            </li>
-          </th:block>
-          <!-- CONTROLO DE ACESSO (Visível para ADMIN, fora do módulo ADMINISTRACAO) -->
-          <th:block th:if="${isAdmin and !isSuperAdmin}">
-            <li class="nav-header module-administracao-header" th:text="#{menu.header.gestao_acessos}">GESTÃO DE ACESSOS
-            </li>
-            <li class="nav-item module-administracao-item">
-              <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link">
-                <i class="nav-icon fas fa-user-shield text-info"></i>
-                <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
-              </a>
-            </li>
-          </th:block>
-
-          <!-- SUPER ADMIN SECTION -->
-          <th:block th:if="${modulo_PAINEL_GLOBAL}">
-            <li class="nav-header text-warning module-saas-header" th:text="#{menu.header.painel_global}">PAINEL GLOBAL
-              (SaaS)</li>
-            <li class="nav-item module-saas-item">
-              <a th:href="@{/superadmin/dashboard}" class="nav-link bg-warning text-dark">
-                <i class="nav-icon fas fa-globe"></i>
-                <p th:text="#{menu.saas.gestao_empresas}">Gestão de Empresas</p>
-              </a>
-            </li>
-            <li class="nav-item module-saas-item">
-              <a th:href="@{/superadmin/usuarios}" class="nav-link bg-warning text-dark mt-1">
-                <i class="nav-icon fas fa-user-shield"></i>
-                <p th:text="#{menu.saas.admins_globais}">Admins Globais</p>
-              </a>
-            </li>
-            <!--
-            <li class="nav-item module-saas-item">
-              <a th:href="@{/superadmin/configuracoes}" class="nav-link bg-warning text-dark mt-1">
-                <i class="nav-icon fas fa-cogs"></i>
-                <p>Configurações SaaS</p>
-              </a>
-            </li>    -->
-            <li class="nav-item module-saas-item">
-              <a th:href="@{/superadmin/licenca/gerador}" class="nav-link bg-dark text-warning mt-1">
-                <i class="nav-icon fas fa-key"></i>
-                <p th:text="#{menu.saas.gerador_licencas}">Gerador de Licenças</p>
-              </a>
-            </li>
-            <li class="nav-item module-saas-item">
-              <a th:href="@{/superadmin/planos-pagamento}" class="nav-link bg-dark text-warning mt-1"
-                th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
-                <i class="nav-icon fas fa-crown"></i>
-                <p th:text="#{menu.saas.planos_pagamento}">Planos de Pagamento</p>
-              </a>
-            </li>
-          </th:block>
-
-          <li class="nav-header" th:text="#{menu.header.sistema}">SISTEMA</li>
-          <li class="nav-item">
-            <a href="javascript:void(0)" class="nav-link text-danger"
-              onclick="document.getElementById('logoutFormSidebar').submit();">
-              <i class="nav-icon fas fa-power-off"></i>
-              <p th:text="#{menu.terminar_sessao}">Terminar Sessão</p>
-            </a>
-            <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none">
-            </form>
-          </li>
-        </ul>
-
-      </nav>
+      <!-- Footer do Sidebar com Card do Utilizador e Botão Sair -->
+      <div class="sidebar-user-footer shadow-sm">
+        <div class="d-flex align-items-center gap-2 overflow-hidden">
+          <div class="topbar-user-avatar flex-shrink-0" style="width: 32px; height: 32px; font-size: 0.8rem;">
+            <span th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
+          </div>
+          <div class="overflow-hidden">
+            <div class="fw-bold text-dark small text-truncate" style="line-height: 1.1;" th:text="${usuario_NOME ?: 'Utilizador'}">Utilizador</div>
+            <div class="text-success small d-flex align-items-center gap-1" style="font-size: 0.65rem;">
+              <span class="badge-pulse bg-success rounded-circle d-inline-block" style="width: 6px; height: 6px;"></span>
+              <span>Online</span>
+            </div>
+          </div>
+        </div>
+        <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none"></form>
+        <button type="button" class="btn btn-sm btn-light border-0 text-danger rounded-circle p-2"
+                onclick="confirmarLogout('logoutFormSidebar')" title="Terminar Sessão">
+          <i class="fas fa-power-off"></i>
+        </button>
+      </div>
     </div>
   </aside>
 
-  <!-- Footer fragment (reusable) -->
-  <footer th:fragment="footer" class="main-footer bg-white border-0 py-3">
-    <div class="container-fluid px-4">
-      <div class="float-right d-none d-sm-inline" th:text="${globalSistemaNome + ' v' + globalSistemaVersao}">Kwanza ERP
-        v2.0</div>
-      <strong>Copyright &copy; 2024 <a href="#">HZ Consultoria</a>.</strong> <span
-        th:text="#{footer.direitos_reservados}">Todos os direitos reservados.</span>
+  <!-- ===================================================================== -->
+  <!-- FOOTER FRAGMENT                                                       -->
+  <!-- ===================================================================== -->
+  <footer th:fragment="footer" class="main-footer bg-white border-0 py-3 text-muted small">
+    <div class="container-fluid px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <strong>Copyright &copy; <span th:text="${#dates.year(#dates.createNow())}">2026</span> <a href="#" class="text-primary text-decoration-none fw-bold">HZ Consultoria</a>.</strong>
+        <span th:text="#{footer.direitos_reservados}">Todos os direitos reservados.</span>
+      </div>
+      <div class="d-none d-sm-inline">
+        <span class="badge bg-light text-muted border rounded-pill px-2.5 py-1">
+          <i class="fas fa-check-shield text-success me-1"></i> <span th:text="${(globalSistemaNome != null ? globalSistemaNome : 'Kwanza ERP') + ' v' + (globalSistemaVersao != null ? globalSistemaVersao : '2.0')}">Kwanza ERP v2.0</span>
+        </span>
+      </div>
     </div>
   </footer>
 </body>

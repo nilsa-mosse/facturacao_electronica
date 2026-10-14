@@ -29,26 +29,29 @@ public class StockController {
     private ProdutoRepository produtoRepository;
 
     @GetMapping("/entrada")
-    public String formEntrada(Model model) {
+    public String formEntrada(@RequestParam(required = false) Long produtoId, Model model) {
         model.addAttribute("tipo", "ENTRA");
         model.addAttribute("titulo", "Entrada de Stock");
         model.addAttribute("produtos", produtoRepository.findAll());
+        model.addAttribute("selectedProdutoId", produtoId);
         return "movimentoStock";
     }
 
     @GetMapping("/saida")
-    public String formSaida(Model model) {
+    public String formSaida(@RequestParam(required = false) Long produtoId, Model model) {
         model.addAttribute("tipo", "SAIDA");
         model.addAttribute("titulo", "Saída de Stock");
         model.addAttribute("produtos", produtoRepository.findAll());
+        model.addAttribute("selectedProdutoId", produtoId);
         return "movimentoStock";
     }
 
     @GetMapping("/ajuste")
-    public String formAjuste(Model model) {
+    public String formAjuste(@RequestParam(required = false) Long produtoId, Model model) {
         model.addAttribute("tipo", "AJUSTE");
         model.addAttribute("titulo", "Ajuste de Stock");
         model.addAttribute("produtos", produtoRepository.findAll());
+        model.addAttribute("selectedProdutoId", produtoId);
         return "movimentoStock";
     }
 

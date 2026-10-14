@@ -1,323 +1,1049 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${titulo} + ' - Kwanza ERP'">Movimento de Stock</title>
-    <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
-    <style>
-        :root {
-            --primary: #4361ee;
-            --success: #2ec4b6;
-            --warning: #ffb703;
-            --danger: #ef233c;
-            --dark: #1a1c23;
-            --bg: #ffffff;
-            --glass: rgba(255, 255, 255, 0.8);
-        }
-        
-        body { 
-            background: var(--bg); 
-            font-family: 'Outfit', sans-serif; 
-            color: var(--dark);
-            min-height: 100vh;
-        }
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
 
-        .main-wrapper {
-            padding: 40px 0;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
+<head th:replace="menu :: head"></head>
 
-        /* Dynamic Theme Colors */
-        .theme-ENTRA { --current: #4361ee; --current-soft: rgba(67, 97, 238, 0.1); }
-        .theme-SAIDA { --current: #ef233c; --current-soft: rgba(239, 35, 60, 0.1); }
-        .theme-AJUSTE { --current: #ffb703; --current-soft: rgba(255, 183, 3, 0.1); }
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+  <nav th:replace="menu :: topbar"></nav>
+  <aside th:replace="menu :: sidebar"></aside>
 
-        .glass-card {
-            background: white;
-            border-radius: 24px;
-            border: none;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.04);
-            overflow: hidden;
-            display: flex;
-        }
+  <div class="content-wrapper">
 
-        .side-info {
-            width: 350px;
-            background: linear-gradient(135deg, var(--current) 0%, #1a1c23 150%);
-            padding: 40px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .form-content {
-            flex: 1;
-            padding: 50px;
-        }
-
-        .step-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            color: #4a5568;
-        }
-
-        .input-premium {
-            border-radius: 12px;
-            border: 2px solid #edf2f7;
-            padding: 12px 18px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #f8fafc;
-        }
-
-        .input-premium:focus {
-            border-color: var(--current);
-            background: white;
-            box-shadow: 0 0 0 4px var(--current-soft);
-            outline: none;
-        }
-
-        /* Modern Dropzone for Files */
-        .file-dropzone {
-            border: 2px dashed #cbd5e1;
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8fafc;
-            position: relative;
-        }
-
-        .file-dropzone:hover {
-            border-color: var(--current);
-            background: var(--current-soft);
-        }
-
-        .file-dropzone input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0; left: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .btn-submit {
-            background: var(--current);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: all 0.3s;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--current-soft);
-            color: white;
-            filter: brightness(1.1);
-        }
-
-        .product-meta {
-            background: rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-
-        .icon-box {
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--current);
-            font-size: 1.5rem;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        @media (max-width: 992px) {
-            .glass-card { flex-direction: column; }
-            .side-info { width: 100%; padding: 30px; }
-        }
-    </style>
-</head>
-<body th:class="'theme-' + ${tipo}">
-    <div class="main-wrapper">
-        <div class="glass-card">
-            <!-- Side Informative Panel -->
-            <div class="side-info">
-                <div>
-                    <span class="step-badge" th:text="#{stock.gestao}">Gestão de Inventário</span>
-                    <div class="icon-box mt-4">
-                        <i th:class="${tipo == 'ENTRA' ? 'fas fa-arrow-down-left' : (tipo == 'SAIDA' ? 'fas fa-arrow-up-right' : 'fas fa-sliders-h')}"></i>
-                    </div>
-                    <h1 class="fw-800" th:text="${titulo}">Movimento</h1>
-                    <p class="opacity-75" th:text="#{stock.mov.desc}">Registe com precisão a alteração física de stock para manter a sua empresa auditável e eficiente.</p>
-                    
-                    <div class="product-meta" id="stockPreview" style="display: none;">
-                        <small class="text-uppercase fw-bold opacity-75 d-block mb-3" th:text="#{stock.impacto}">Impacto no Inventário</small>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span th:text="#{stock.atual}">Stock Atual:</span>
-                            <span class="fw-800" id="currentStock">0.00</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center p-2 rounded-3" style="background: rgba(255,255,255,0.15);">
-                            <span class="small" th:text="#{stock.apos_operacao}">Após Operação:</span>
-                            <span class="fw-900 fs-5" id="futureStock">0.00</span>
-                        </div>
-                    </div>
+    <!-- Page Header -->
+    <section class="content-header pb-2 pt-3">
+      <div class="container-fluid">
+        <div class="row align-items-center g-3">
+          <div class="col-lg-7">
+            <div class="d-flex align-items-center gap-3">
+              <div class="sk-header-icon-box shadow-sm"
+                   th:classappend="${tipo == 'ENTRA' ? 'sk-icon-bg-emerald' : (tipo == 'SAIDA' ? 'sk-icon-bg-rose' : 'sk-icon-bg-amber')}">
+                <i th:class="${tipo == 'ENTRA' ? 'fas fa-arrow-circle-down text-emerald' : (tipo == 'SAIDA' ? 'fas fa-arrow-circle-up text-rose' : 'fas fa-sliders-h text-amber')}"></i>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                  <span class="badge sk-badge-module-stock">
+                    <i class="fas fa-layer-group me-1"></i> Gestão de Inventário
+                  </span>
+                  <span class="badge"
+                        th:classappend="${tipo == 'ENTRA' ? 'sk-badge-pill-emerald' : (tipo == 'SAIDA' ? 'sk-badge-pill-rose' : 'sk-badge-pill-amber')}"
+                        th:text="${tipo == 'ENTRA' ? 'Operação de Entrada' : (tipo == 'SAIDA' ? 'Operação de Saída' : 'Ajuste de Balanço')}">
+                    Operação
+                  </span>
                 </div>
-                
-                <div class="mt-auto">
-                    <div class="d-flex align-items-center gap-2 opacity-75">
-                        <i class="fas fa-shield-alt"></i>
-                        <small th:text="#{stock.ambiente_seguro}">Ambiente Seguro & Auditado</small>
-                    </div>
-                </div>
+                <h1 class="sk-page-title mb-0" th:text="${titulo}">Movimento de Stock</h1>
+                <p class="text-muted small mb-0 mt-1" th:if="${tipo == 'ENTRA'}">Registo de compras, receção de mercadorias de fornecedores e reposição de armazém.</p>
+                <p class="text-muted small mb-0 mt-1" th:if="${tipo == 'SAIDA'}">Registo de quebras, transferências, perdas, consumo interno e baixas de inventário.</p>
+                <p class="text-muted small mb-0 mt-1" th:if="${tipo == 'AJUSTE'}">Reconciliação e acerto de stock com base em contagem física periódica ou auditoria.</p>
+              </div>
             </div>
+          </div>
 
-            <!-- Form Area -->
-            <div class="form-content">
-                <form th:action="@{/stock/movimentar}" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="tipo" th:value="${tipo}">
-                    
-                    <div class="mb-4">
-                        <label class="form-label" th:text="#{stock.select_produto}">Qual o produto a movimentar?</label>
-                        <select name="produtoId" class="form-select input-premium" required onchange="updatePreview(this)">
-                            <option value="" disabled selected>Seleccione um artigo...</option>
-                            <option th:each="prod : ${produtos}" 
-                                    th:value="${prod.id}" 
-                                    th:data-stock="${prod.quantidadeEstoque}"
-                                    th:text="${prod.nome}"></option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-12" th:if="${tipo == 'ENTRA' or tipo == 'SAIDA'}">
-                        <label class="form-label" th:text="${tipo == 'ENTRA' ? 'Origem (Fornecedor)' : 'Destino (Cliente/Motivo)'}">Origem/Destino</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-transparent border-0 pe-0"><i th:class="${tipo == 'ENTRA' ? 'fas fa-truck' : 'fas fa-shipping-fast'} + ' text-muted'"></i></span>
-                            <input type="text" name="origem" class="form-control input-premium border-0" th:placeholder="${tipo == 'ENTRA' ? 'Nome do fornecedor' : 'Nome do destino ou cliente'}">
-                        </div>
-                    </div>
-
-                    <div class="row g-4 mb-4">
-                        <div th:classappend="${tipo == 'ENTRA' ? 'col-md-4' : 'col-md-6'}" class="col-md-6">
-                            <label class="form-label">Quantidade</label>
-                            <input type="number" name="quantidade" id="qtyInput" class="form-control input-premium" step="any" min="0.01" placeholder="0.00" required oninput="calcTotal()">
-                        </div>
-                        <div class="col-md-4" th:if="${tipo == 'ENTRA'}">
-                            <label class="form-label">Preço Unitário (Custo)</label>
-                            <input type="number" name="precoCusto" id="priceInput" class="form-control input-premium" step="any" min="0" placeholder="0.00" oninput="calcTotal()">
-                        </div>
-                        <div th:classappend="${tipo == 'ENTRA' ? 'col-md-4' : 'col-md-6'}" class="col-md-6">
-                            <label class="form-label" th:text="${tipo == 'ENTRA' ? 'Nº Documento' : 'Referência'}">Referência</label>
-                            <input type="text" name="referencia" class="form-control input-premium" placeholder="ex: doc-123">
-                        </div>
-                    </div>
-
-                    <!-- Valor Total Real-time (Apenas Entradas) -->
-                    <div th:if="${tipo == 'ENTRA'}" class="mb-4 p-3 rounded-4 d-flex justify-content-between align-items-center" style="background: rgba(67, 97, 238, 0.05); border: 1px solid rgba(67, 97, 238, 0.1);">
-                        <div>
-                            <span class="d-block small text-muted text-uppercase fw-bold">Investimento Total</span>
-                            <h4 class="mb-0 fw-800 text-primary" id="totalPreview">0,00 Kz</h4>
-                        </div>
-                        <i class="fas fa-calculator text-primary opacity-25 fa-2x"></i>
-                    </div>
-
-                    <div class="col-md-12" th:if="${tipo == 'ENTRA' or tipo == 'SAIDA'}">
-                        <label class="form-label" th:text="${tipo == 'ENTRA' ? 'Comprovativo / Factura' : 'Documento de Saída / Guia'}">Documento</label>
-                        <div class="file-dropzone" id="dropzone">
-                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-muted"></i>
-                            <p class="mb-0 fw-600">Arraste ou clique para anexar</p>
-                            <small class="text-muted">Formatos aceites: PDF, JPG, PNG</small>
-                            <input type="file" name="documento" id="fileInput" accept=".pdf,.jpg,.png" onchange="updateFileName(this)">
-                        </div>
-                        <div id="fileSelected" class="mt-2 text-success small fw-bold" style="display: none;">
-                            <i class="fas fa-check-circle me-1"></i> Ficheiro seleccionado: <span id="fileName"></span>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label">Motivo ou Observações</label>
-                        <textarea name="motivo" class="form-control input-premium" rows="3" placeholder="Ex: Entrada por reposição de inventário..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-submit shadow">
-                        Confirmar Operação <i class="fas fa-arrow-right ms-2 mt-1"></i>
-                    </button>
-                    
-                    <div class="text-center mt-3">
-                        <a th:href="@{/stock/historico}" class="text-muted small text-decoration-none hover-link">
-                           <i class="fas fa-times me-1"></i> Cancelar e Voltar
-                        </a>
-                    </div>
-                </form>
+          <!-- Quick Navigation Tabs -->
+          <div class="col-lg-5 text-lg-end">
+            <div class="d-inline-flex gap-2 flex-wrap justify-content-lg-end align-items-center">
+              <a th:href="@{/stock/entrada(produtoId=${selectedProdutoId})}"
+                 class="btn sk-nav-pill" th:classappend="${tipo == 'ENTRA' ? 'active-emerald' : ''}">
+                <i class="fas fa-arrow-circle-down me-1"></i> Entrada
+              </a>
+              <a th:href="@{/stock/saida(produtoId=${selectedProdutoId})}"
+                 class="btn sk-nav-pill" th:classappend="${tipo == 'SAIDA' ? 'active-rose' : ''}">
+                <i class="fas fa-arrow-circle-up me-1"></i> Saída
+              </a>
+              <a th:href="@{/stock/ajuste(produtoId=${selectedProdutoId})}"
+                 class="btn sk-nav-pill" th:classappend="${tipo == 'AJUSTE' ? 'active-amber' : ''}">
+                <i class="fas fa-sliders-h me-1"></i> Ajuste
+              </a>
+              <a th:href="@{/stock/saldos}" class="btn sk-nav-pill-ghost" title="Consultar todos os saldos">
+                <i class="fas fa-boxes me-1"></i> Saldos
+              </a>
+              <a th:href="@{/stock/historico}" class="btn sk-nav-pill-ghost" title="Ver Histórico Completo">
+                <i class="fas fa-history me-1"></i> Histórico
+              </a>
             </div>
+          </div>
         </div>
-    </div>
+      </div>
+    </section>
 
-    <script th:inline="javascript">
-        function updatePreview(select) {
-            const stock = select.options[select.selectedIndex].getAttribute('data-stock');
-            const preview = document.getElementById('stockPreview');
-            const currentStock = document.getElementById('currentStock');
-            
-            if (stock !== null) {
-                currentStock.textContent = parseFloat(stock).toFixed(2);
-                preview.style.display = 'block';
-                calcTotal(); // Update future stock immediately
-            }
+    <!-- Main Content -->
+    <section class="content pt-2 pb-5">
+      <div class="container-fluid">
+
+        <!-- Flash Messages -->
+        <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle fa-lg me-3 text-success"></i>
+            <div>
+              <strong class="d-block">Operação Concluída com Sucesso!</strong>
+              <span th:text="${mensagemSucesso}"></span>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-lg me-3 text-danger"></i>
+            <div>
+              <strong class="d-block">Erro no Movimento de Stock!</strong>
+              <span th:text="${mensagemErro}"></span>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row g-4">
+          <!-- LEFT COLUMN: The Interactive Movement Form -->
+          <div class="col-xl-8 col-lg-7">
+            <div class="sk-form-card shadow-sm">
+              <form th:action="@{/stock/movimentar}" method="POST" enctype="multipart/form-data" id="formMovimento" onsubmit="return validarSubmissao(event)">
+                <input type="hidden" name="tipo" id="tipoMovimento" th:value="${tipo}">
+
+                <!-- STEP 1: Seleção do Artigo -->
+                <div class="sk-form-section mb-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="sk-step-number" th:classappend="${tipo == 'ENTRA' ? 'step-emerald' : (tipo == 'SAIDA' ? 'step-rose' : 'step-amber')}">1</span>
+                      <h5 class="sk-section-title mb-0">Seleção do Artigo / Mercadoria</h5>
+                    </div>
+                    <span class="sk-field-required text-muted small"><i class="fas fa-asterisk text-danger me-1" style="font-size: 0.6rem;"></i>Obrigatório</span>
+                  </div>
+
+                  <div class="mb-3">
+                    <div class="sk-searchable-select-wrapper">
+                      <div class="sk-filter-input-box mb-2">
+                        <i class="fas fa-search text-muted"></i>
+                        <input type="text" id="filtroProdutoInput" class="sk-clean-input" placeholder="Filtrar por nome, código de barras ou categoria..." onkeyup="filtrarOpcoesProdutos()">
+                      </div>
+                      <select name="produtoId" id="produtoSelect" class="form-select sk-select-premium" required onchange="aoSelecionarProduto(this)">
+                        <option value="" disabled th:selected="${selectedProdutoId == null}">Selecione o produto a movimentar...</option>
+                        <option th:each="prod : ${produtos}"
+                                th:value="${prod.id}"
+                                th:data-nome="${prod.nome}"
+                                th:data-stock="${prod.quantidadeEstoque != null ? prod.quantidadeEstoque : 0.0}"
+                                th:data-preco="${prod.preco}"
+                                th:data-precocusto="${prod.precoCompra != null ? prod.precoCompra : prod.preco}"
+                                th:data-codigo="${prod.codigoBarra != null ? prod.codigoBarra : ''}"
+                                th:data-unidade="${prod.unidadeMedida != null ? prod.unidadeMedida : 'un'}"
+                                th:data-categoria="${prod.categoria != null ? prod.categoria.nome : 'Sem Categoria'}"
+                                th:selected="${selectedProdutoId != null and selectedProdutoId == prod.id}"
+                                th:text="${prod.nome + ' (Stock Atual: ' + #numbers.formatDecimal(prod.quantidadeEstoque != null ? prod.quantidadeEstoque : 0.0, 1, 'POINT', 2, 'COMMA') + ' ' + (prod.unidadeMedida != null ? prod.unidadeMedida : 'un') + ' | ' + #numbers.formatDecimal(prod.preco, 1, 'POINT', 2, 'COMMA') + ' Kz)'}">
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 2: Detalhes da Movimentação -->
+                <div class="sk-form-section mb-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="sk-step-number" th:classappend="${tipo == 'ENTRA' ? 'step-emerald' : (tipo == 'SAIDA' ? 'step-rose' : 'step-amber')}">2</span>
+                      <h5 class="sk-section-title mb-0">Parâmetros do Movimento</h5>
+                    </div>
+                  </div>
+
+                  <!-- Campos específicos de ENTRADA -->
+                  <div th:if="${tipo == 'ENTRA'}" class="row g-3 mb-3">
+                    <div class="col-md-6">
+                      <label class="sk-label">Fornecedor / Origem da Mercadoria</label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon"><i class="fas fa-truck text-emerald"></i></span>
+                        <input type="text" name="origem" class="form-control sk-input-field" placeholder="Ex: Fornecedor ABC, Distribuidora Lda...">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="sk-label">Nº Fatura de Compra / Guia de Remessa</label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon"><i class="fas fa-file-invoice text-emerald"></i></span>
+                        <input type="text" name="referencia" class="form-control sk-input-field" placeholder="Ex: FT 2026/0491, GR-1029...">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Campos específicos de SAÍDA -->
+                  <div th:if="${tipo == 'SAIDA'}" class="row g-3 mb-3">
+                    <div class="col-md-6">
+                      <label class="sk-label">Destino / Beneficiário da Saída</label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon"><i class="fas fa-building text-rose"></i></span>
+                        <input type="text" name="origem" class="form-control sk-input-field" placeholder="Ex: Armazém Secundário, Refeitório, Cliente Especial...">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="sk-label">Nº Documento / Requisição Interna</label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon"><i class="fas fa-receipt text-rose"></i></span>
+                        <input type="text" name="referencia" class="form-control sk-input-field" placeholder="Ex: REQ-2026/088, GUIA-33...">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Campos específicos de AJUSTE -->
+                  <div th:if="${tipo == 'AJUSTE'}" class="row g-3 mb-3">
+                    <div class="col-md-6">
+                      <label class="sk-label">Origem do Ajuste / Responsável</label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon"><i class="fas fa-user-check text-amber"></i></span>
+                        <input type="text" name="origem" class="form-control sk-input-field" placeholder="Ex: Auditoria Interna, Gerente de Armazém...">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="sk-label">Nº Folha de Inventário / Referência</label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon"><i class="fas fa-clipboard-check text-amber"></i></span>
+                        <input type="text" name="referencia" class="form-control sk-input-field" placeholder="Ex: INV-2026-Q1, ACERTO-12...">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Linha de Quantidade e Valores -->
+                  <div class="row g-3 align-items-center">
+                    <div th:classappend="${tipo == 'ENTRA' ? 'col-md-6' : 'col-md-12'}">
+                      <label class="sk-label" id="labelQuantidade">
+                        <span th:if="${tipo == 'ENTRA'}">Quantidade a Adicionar ao Stock <span class="text-danger">*</span></span>
+                        <span th:if="${tipo == 'SAIDA'}">Quantidade a Retirar do Stock <span class="text-danger">*</span></span>
+                        <span th:if="${tipo == 'AJUSTE'}">Nova Quantidade Contada / Stock Real Aferido <span class="text-danger">*</span></span>
+                      </label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon">
+                          <i th:class="${tipo == 'ENTRA' ? 'fas fa-plus-circle text-emerald' : (tipo == 'SAIDA' ? 'fas fa-minus-circle text-rose' : 'fas fa-bullseye text-amber')}"></i>
+                        </span>
+                        <input type="number" name="quantidade" id="quantidadeInput" class="form-control sk-input-field fw-bold"
+                               step="any" min="0.00" placeholder="0.00" required oninput="calcularImpacto()">
+                      </div>
+                      <small class="text-muted d-block mt-1" th:if="${tipo == 'AJUSTE'}">
+                        <i class="fas fa-info-circle me-1 text-primary"></i> Indique a contagem física real. O sistema calculará a diferença automaticamente.
+                      </small>
+                    </div>
+
+                    <div class="col-md-6" th:if="${tipo == 'ENTRA'}">
+                      <label class="sk-label">Preço de Custo Unitário (Kz)</label>
+                      <div class="sk-input-group">
+                        <span class="sk-input-icon"><i class="fas fa-coins text-emerald"></i></span>
+                        <input type="number" name="precoCusto" id="precoCustoInput" class="form-control sk-input-field"
+                               step="any" min="0" placeholder="0.00" oninput="calcularImpacto()">
+                      </div>
+                      <small class="text-muted d-block mt-1">Preço unitário de aquisição nesta entrada.</small>
+                    </div>
+                  </div>
+
+                  <!-- Banner Informativo Realtime para ENTRADA (Custo Total Estimado) -->
+                  <div th:if="${tipo == 'ENTRA'}" id="bannerInvestimento" class="sk-realtime-banner sk-banner-emerald mt-3 d-none">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="sk-banner-icon"><i class="fas fa-calculator"></i></div>
+                        <div>
+                          <div class="sk-banner-label">Investimento Total na Compra</div>
+                          <div class="sk-banner-value" id="investimentoTotalTxt">0,00 Kz</div>
+                        </div>
+                      </div>
+                      <div class="text-end text-muted small">
+                        <span>Qtd: <strong id="resumoQtdTxt">0</strong> × Preço Custo: <strong id="resumoPrecoTxt">0,00 Kz</strong></span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Banner de Alerta para SAÍDA se quantidade exceder stock -->
+                  <div th:if="${tipo == 'SAIDA'}" id="alertaStockInsuficiente" class="sk-realtime-banner sk-banner-rose mt-3 d-none">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="sk-banner-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                      <div>
+                        <div class="sk-banner-label fw-bold">Aviso de Stock Insuficiente</div>
+                        <div class="small">A quantidade solicitada para saída excede o stock atual deste artigo em armazém. O saldo ficará negativo.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Banner de Variação para AJUSTE -->
+                  <div th:if="${tipo == 'AJUSTE'}" id="bannerAjusteVariavel" class="sk-realtime-banner sk-banner-amber mt-3 d-none">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="sk-banner-icon"><i class="fas fa-balance-scale"></i></div>
+                        <div>
+                          <div class="sk-banner-label">Variação de Inventário Calculada</div>
+                          <div class="sk-banner-value" id="ajusteVariavelTxt">0.00 un</div>
+                        </div>
+                      </div>
+                      <span id="ajusteTipoPill" class="badge bg-secondary">Neutro</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 3: Motivo e Observações -->
+                <div class="sk-form-section mb-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="sk-step-number" th:classappend="${tipo == 'ENTRA' ? 'step-emerald' : (tipo == 'SAIDA' ? 'step-rose' : 'step-amber')}">3</span>
+                      <h5 class="sk-section-title mb-0">Justificação / Motivo Operacional</h5>
+                    </div>
+                    <span class="sk-field-required text-muted small"><i class="fas fa-asterisk text-danger me-1" style="font-size: 0.6rem;"></i>Obrigatório</span>
+                  </div>
+
+                  <div class="mb-3">
+                    <!-- Motivos predefinidos rápidos -->
+                    <div class="d-flex gap-1 flex-wrap mb-2">
+                      <small class="text-muted w-100 mb-1 fw-bold">Sugestões rápidas:</small>
+                      <th:block th:if="${tipo == 'ENTRA'}">
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Compra a Fornecedor / Reposição de Stock')">Compra a Fornecedor</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Devolução de Cliente')">Devolução de Cliente</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Transferência Recebida de Outro Armazém')">Transferência de Armazém</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Produção Própria / Fabrico')">Produção Própria</button>
+                      </th:block>
+                      <th:block th:if="${tipo == 'SAIDA'}">
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Avaria / Produto Danificado no Manuseamento')">Avaria / Dano</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Prazo de Validade Expirado')">Validade Expirada</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Consumo Interno / Oferta Promocional')">Consumo Interno</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Transferência Expedida para Outro Armazém')">Transferência Externa</button>
+                      </th:block>
+                      <th:block th:if="${tipo == 'AJUSTE'}">
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Contagem Física do Balanço Periódico')">Contagem Periódica</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Rectificação de Falha de Lançamento Anterior')">Rectificação de Lançamento</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Perda / Quebra Identificada em Auditoria')">Perda / Quebra</button>
+                        <button type="button" class="btn btn-sm sk-quick-tag" onclick="preencherMotivo('Sobra Identificada em Contagem')">Sobra de Stock</button>
+                      </th:block>
+                    </div>
+
+                    <textarea name="motivo" id="motivoTextarea" class="form-control sk-textarea" rows="3" required
+                              th:placeholder="${tipo == 'ENTRA' ? 'Descreva os detalhes da receção da mercadoria...' : (tipo == 'SAIDA' ? 'Justifique o motivo da retirada ou baixa do artigo...' : 'Descreva as razões e o contexto do acerto de stock...')}"></textarea>
+                  </div>
+                </div>
+
+                <!-- STEP 4: Comprovativo Documental (Upload) -->
+                <div class="sk-form-section mb-4">
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="sk-step-number" th:classappend="${tipo == 'ENTRA' ? 'step-emerald' : (tipo == 'SAIDA' ? 'step-rose' : 'step-amber')}">4</span>
+                      <h5 class="sk-section-title mb-0">Comprovativo Digital / Anexo</h5>
+                    </div>
+                    <span class="text-muted small">Opcional</span>
+                  </div>
+
+                  <div class="sk-file-dropzone" id="dropzoneArea" onclick="document.getElementById('documentoInput').click()">
+                    <input type="file" name="documento" id="documentoInput" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" onchange="aoSelecionarFicheiro(this)">
+                    <div class="sk-dropzone-inner text-center py-4">
+                      <div class="sk-dropzone-icon mb-2">
+                        <i class="fas fa-cloud-upload-alt fa-2x text-muted"></i>
+                      </div>
+                      <h6 class="fw-bold mb-1">Arraste ou clique para anexar documento</h6>
+                      <p class="text-muted small mb-0">Formatos aceites: PDF, JPG, JPEG ou PNG (máx. 10MB)</p>
+                    </div>
+                  </div>
+
+                  <div id="ficheiroPreview" class="sk-file-preview-card mt-2 d-none">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="d-flex align-items-center gap-3">
+                        <i class="fas fa-file-pdf fa-2x text-danger" id="fileTypeIcon"></i>
+                        <div>
+                          <div class="fw-bold" id="fileNameTxt">documento.pdf</div>
+                          <small class="text-muted" id="fileSizeTxt">0 KB</small>
+                        </div>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle" onclick="removerFicheiro(event)" title="Remover anexo">
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Submit & Cancel Actions -->
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top">
+                  <a th:href="@{/stock/saldos}" class="btn sk-btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Cancelar e Voltar
+                  </a>
+                  <button type="submit" id="btnSubmit" class="btn sk-btn-submit"
+                          th:classappend="${tipo == 'ENTRA' ? 'btn-submit-emerald' : (tipo == 'SAIDA' ? 'btn-submit-rose' : 'btn-submit-amber')}">
+                    <span id="btnSubmitText">
+                      <i th:class="${tipo == 'ENTRA' ? 'fas fa-check-circle me-2' : (tipo == 'SAIDA' ? 'fas fa-arrow-circle-up me-2' : 'fas fa-check-double me-2')}"></i>
+                      <span th:text="${tipo == 'ENTRA' ? 'Confirmar Entrada de Stock' : (tipo == 'SAIDA' ? 'Confirmar Saída de Stock' : 'Gravar Ajuste de Inventário')}">Confirmar</span>
+                    </span>
+                    <span id="btnSubmitSpinner" class="spinner-border spinner-border-sm me-2 d-none" role="status"></span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Dynamic Live Impact & Audit Preview Panel -->
+          <div class="col-xl-4 col-lg-5">
+            <div class="sk-preview-sticky">
+
+              <!-- Active Simulation Card -->
+              <div class="sk-preview-card shadow-sm mb-4">
+                <div class="sk-preview-header">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-microchip text-primary"></i>
+                    <h5 class="fw-bold mb-0" style="font-size: 0.98rem;">Simulador em Tempo Real</h5>
+                  </div>
+                  <span class="badge sk-badge-live">
+                    <i class="fas fa-circle me-1" style="font-size: 0.45rem;"></i> Auditável
+                  </span>
+                </div>
+
+                <div class="sk-preview-body">
+                  <!-- Empty State (When no product is selected) -->
+                  <div id="simuladorVazio" class="text-center py-5">
+                    <div class="sk-empty-pulse mb-3">
+                      <i class="fas fa-box-open fa-2x text-muted"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">Nenhum Artigo Selecionado</h6>
+                    <p class="text-muted small mb-0 px-3">Selecione um artigo no formulário à esquerda para simular a variação e impacto do stock.</p>
+                  </div>
+
+                  <!-- Active Product State -->
+                  <div id="simuladorAtivo" class="d-none">
+                    <!-- Product Info Box -->
+                    <div class="sk-prod-info-box mb-4">
+                      <div class="d-flex align-items-start gap-3">
+                        <div class="sk-prod-avatar">
+                          <i class="fas fa-box"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <h6 class="fw-bold text-dark mb-1" id="simNomeProd">Nome do Produto</h6>
+                          <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                            <span class="sk-tag-pill" id="simCatProd"><i class="fas fa-folder me-1"></i> Geral</span>
+                            <span class="sk-tag-pill" id="simCodigoProd"><i class="fas fa-barcode me-1"></i> —</span>
+                          </div>
+                          <div class="small text-muted">
+                            Preço de Venda: <strong class="text-dark" id="simPrecoVendaProd">0,00 Kz</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Flow of Stock Progression -->
+                    <div class="sk-stock-flow mb-4">
+                      <!-- 1. Stock Atual -->
+                      <div class="sk-flow-item">
+                        <div class="sk-flow-label">Stock Físico Atual</div>
+                        <div class="sk-flow-val fw-bold" id="simStockAtual">0.00 un</div>
+                      </div>
+
+                      <!-- Transition Arrow & Operation Tag -->
+                      <div class="sk-flow-divider">
+                        <div class="sk-flow-badge"
+                             th:classappend="${tipo == 'ENTRA' ? 'badge-emerald' : (tipo == 'SAIDA' ? 'badge-rose' : 'badge-amber')}">
+                          <i th:class="${tipo == 'ENTRA' ? 'fas fa-plus' : (tipo == 'SAIDA' ? 'fas fa-minus' : 'fas fa-exchange-alt')}"></i>
+                          <span id="simOperacaoTag" th:text="${tipo == 'ENTRA' ? 'Entrada (+0.00)' : (tipo == 'SAIDA' ? 'Saída (-0.00)' : 'Ajuste para 0.00')}">Op</span>
+                        </div>
+                      </div>
+
+                      <!-- 2. Stock Projetado Final -->
+                      <div class="sk-flow-item sk-flow-final" id="simCardFinal">
+                        <div class="sk-flow-label">Stock Final Projetado</div>
+                        <div class="sk-flow-val-large fw-800" id="simStockFinal">0.00 un</div>
+                        <div class="mt-1">
+                          <span class="badge" id="simStatusFinalBadge">Normal</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Additional Details for ENTRADA: Financial Impact -->
+                    <div th:if="${tipo == 'ENTRA'}" class="sk-meta-row p-3 rounded-3 mb-3" style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15);">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <span class="small text-muted">Custo Estimado da Entrada:</span>
+                        <strong class="text-emerald" id="simCustoEntradaTxt">0,00 Kz</strong>
+                      </div>
+                    </div>
+
+                    <!-- Quick Audit Notes -->
+                    <div class="sk-audit-checklist p-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                      <div class="small fw-bold text-dark mb-2"><i class="fas fa-shield-alt text-primary me-2"></i>Segurança & Rastreabilidade</div>
+                      <ul class="list-unstyled mb-0 small text-muted">
+                        <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Operação assinada com carimbo de data/hora</li>
+                        <li class="mb-1"><i class="fas fa-check text-success me-2"></i>Registo sincronizado com estabelecimento principal</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Histórico imutável para auditoria SAF-T AO</li>
+                      </ul>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Helper Card -->
+              <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="sk-help-icon">
+                    <i class="fas fa-lightbulb text-warning"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">Dica Operacional</h6>
+                    <p class="text-muted small mb-0" th:if="${tipo == 'ENTRA'}">Anexe sempre o PDF da fatura do fornecedor para que possa ser consultada a qualquer momento no histórico.</p>
+                    <p class="text-muted small mb-0" th:if="${tipo == 'SAIDA'}">Em caso de quebra ou avaria, tire uma foto do produto e anexe como comprovativo visual.</p>
+                    <p class="text-muted small mb-0" th:if="${tipo == 'AJUSTE'}">Recomenda-se realizar ajustes com pelo menos duas testemunhas ou responsável de inventário presente.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <footer th:replace="menu :: footer"></footer>
+</div>
+
+<!-- Estilos Customizados Ultra-Modernos -->
+<style>
+  :root {
+    --sk-emerald: #10b981;
+    --sk-emerald-dark: #059669;
+    --sk-rose: #f43f5e;
+    --sk-rose-dark: #e11d48;
+    --sk-amber: #f59e0b;
+    --sk-amber-dark: #d97706;
+    --sk-indigo: #4f46e5;
+  }
+
+  .text-emerald { color: var(--sk-emerald) !important; }
+  .text-rose { color: var(--sk-rose) !important; }
+  .text-amber { color: var(--sk-amber) !important; }
+
+  /* Header Box */
+  .sk-header-icon-box {
+    width: 52px; height: 52px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+  }
+  .sk-icon-bg-emerald { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); }
+  .sk-icon-bg-rose { background: rgba(244,63,94,0.12); border: 1px solid rgba(244,63,94,0.25); }
+  .sk-icon-bg-amber { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); }
+
+  .sk-page-title { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.03em; color: #0f172a; }
+  .dark-mode .sk-page-title { color: #f1f5f9; }
+
+  .sk-badge-module-stock { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; }
+  .sk-badge-pill-emerald { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); border-radius: 50px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; }
+  .sk-badge-pill-rose { background: rgba(244,63,94,0.1); color: #f43f5e; border: 1px solid rgba(244,63,94,0.2); border-radius: 50px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; }
+  .sk-badge-pill-amber { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); border-radius: 50px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; }
+  .sk-badge-live { background: rgba(79,70,229,0.08); color: #4f46e5; border: 1px solid rgba(79,70,229,0.15); padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 600; }
+
+  /* Navigation Pills */
+  .sk-nav-pill {
+    border-radius: 50px; padding: 6px 16px; font-size: 0.82rem; font-weight: 700;
+    background: #fff; border: 1px solid #e2e8f0; color: #64748b;
+    text-decoration: none !important; transition: all 0.2s ease;
+  }
+  .dark-mode .sk-nav-pill { background: #1e293b; border-color: #334155; color: #94a3b8; }
+  .sk-nav-pill:hover { transform: translateY(-2px); color: #0f172a; }
+  .dark-mode .sk-nav-pill:hover { color: #f1f5f9; }
+
+  .sk-nav-pill.active-emerald { background: linear-gradient(135deg, #10b981, #059669); color: #fff !important; border-color: transparent; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+  .sk-nav-pill.active-rose { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff !important; border-color: transparent; box-shadow: 0 4px 12px rgba(244,63,94,0.3); }
+  .sk-nav-pill.active-amber { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff !important; border-color: transparent; box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+
+  .sk-nav-pill-ghost {
+    border-radius: 50px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600;
+    background: transparent; border: 1px dashed #cbd5e1; color: #64748b;
+    text-decoration: none !important; transition: all 0.2s ease;
+  }
+  .sk-nav-pill-ghost:hover { background: #f1f5f9; color: #0f172a; border-style: solid; }
+  .dark-mode .sk-nav-pill-ghost { border-color: #475569; color: #94a3b8; }
+  .dark-mode .sk-nav-pill-ghost:hover { background: #1e293b; color: #f1f5f9; }
+
+  /* Main Form Card */
+  .sk-form-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 2.25rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.3s ease;
+  }
+  .dark-mode .sk-form-card {
+    background: #1e293b;
+    border-color: #334155;
+  }
+
+  /* Form Sections & Step Badges */
+  .sk-form-section {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .dark-mode .sk-form-section { border-color: #334155; }
+  .sk-form-section:last-of-type { border-bottom: none; }
+
+  .sk-step-number {
+    width: 26px; height: 26px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 800; color: #fff;
+  }
+  .step-emerald { background: var(--sk-emerald); }
+  .step-rose { background: var(--sk-rose); }
+  .step-amber { background: var(--sk-amber); }
+
+  .sk-section-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; letter-spacing: -0.01em; }
+  .dark-mode .sk-section-title { color: #f1f5f9; }
+
+  /* Input fields & Groups */
+  .sk-label { font-size: 0.84rem; font-weight: 700; color: #475569; margin-bottom: 0.4rem; display: block; }
+  .dark-mode .sk-label { color: #94a3b8; }
+
+  .sk-input-group {
+    display: flex; align-items: center;
+    background: #f8fafc; border: 1.5px solid #e2e8f0;
+    border-radius: 14px; overflow: hidden; transition: all 0.2s ease;
+  }
+  .dark-mode .sk-input-group { background: #0f172a; border-color: #334155; }
+  .sk-input-group:focus-within {
+    border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); background: #ffffff;
+  }
+  .dark-mode .sk-input-group:focus-within { background: #0f172a; }
+
+  .sk-input-icon {
+    padding: 0 14px; font-size: 0.95rem; color: #94a3b8;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .sk-input-field {
+    border: none !important; outline: none !important; background: transparent !important;
+    padding: 10px 14px 10px 0; font-size: 0.92rem; font-weight: 500; color: #0f172a;
+    width: 100%; box-shadow: none !important;
+  }
+  .dark-mode .sk-input-field { color: #f1f5f9 !important; }
+
+  /* Filter input inside searchable wrapper */
+  .sk-filter-input-box {
+    display: flex; align-items: center; gap: 8px;
+    background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 6px 12px; font-size: 0.82rem;
+  }
+  .dark-mode .sk-filter-input-box { background: #0f172a; border-color: #334155; }
+  .sk-clean-input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.82rem; color: inherit; }
+
+  .sk-select-premium {
+    border-radius: 14px; border: 1.5px solid #e2e8f0;
+    padding: 12px 16px; font-size: 0.92rem; font-weight: 600;
+    background-color: #f8fafc; color: #0f172a;
+    transition: all 0.2s ease;
+  }
+  .dark-mode .sk-select-premium { background-color: #0f172a; border-color: #334155; color: #f1f5f9; }
+  .sk-select-premium:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); background-color: #fff; }
+
+  .sk-textarea {
+    border-radius: 14px; border: 1.5px solid #e2e8f0;
+    padding: 12px 16px; font-size: 0.9rem; background: #f8fafc; color: #0f172a;
+    resize: vertical; transition: all 0.2s ease;
+  }
+  .dark-mode .sk-textarea { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+  .sk-textarea:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); background: #fff; }
+
+  /* Quick Suggestion Tags */
+  .sk-quick-tag {
+    background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569;
+    border-radius: 50px; font-size: 0.75rem; font-weight: 600; padding: 3px 10px;
+    transition: all 0.2s ease;
+  }
+  .sk-quick-tag:hover { background: #e2e8f0; color: #0f172a; }
+  .dark-mode .sk-quick-tag { background: #334155; border-color: #475569; color: #cbd5e1; }
+  .dark-mode .sk-quick-tag:hover { background: #475569; color: #fff; }
+
+  /* Realtime Banners */
+  .sk-realtime-banner {
+    border-radius: 16px; padding: 14px 18px;
+    animation: fadeIn 0.3s ease;
+  }
+  .sk-banner-emerald { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+  .sk-banner-rose { background: rgba(244,63,94,0.08); border: 1px solid rgba(244,63,94,0.25); color: #be123c; }
+  .sk-banner-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); }
+
+  .sk-banner-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .sk-banner-emerald .sk-banner-icon { background: rgba(16,185,129,0.15); color: #10b981; }
+  .sk-banner-rose .sk-banner-icon { background: rgba(244,63,94,0.15); color: #f43f5e; }
+  .sk-banner-amber .sk-banner-icon { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+  .sk-banner-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
+  .sk-banner-value { font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+  .dark-mode .sk-banner-value { color: #f1f5f9; }
+
+  /* Drag & Drop File Zone */
+  .sk-file-dropzone {
+    border: 2px dashed #cbd5e1; border-radius: 18px;
+    background: #f8fafc; cursor: pointer; transition: all 0.25s ease;
+  }
+  .dark-mode .sk-file-dropzone { background: #0f172a; border-color: #334155; }
+  .sk-file-dropzone:hover { border-color: #4f46e5; background: rgba(79,70,229,0.03); }
+
+  .sk-file-preview-card {
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 14px; padding: 12px 16px;
+  }
+  .dark-mode .sk-file-preview-card { background: #0f172a; border-color: #334155; }
+
+  /* Action Buttons */
+  .sk-btn-secondary {
+    border-radius: 14px; background: transparent; border: 1.5px solid #e2e8f0;
+    color: #64748b; font-weight: 700; font-size: 0.9rem; padding: 10px 20px;
+    text-decoration: none !important; transition: all 0.2s ease;
+  }
+  .sk-btn-secondary:hover { background: #f1f5f9; color: #0f172a; }
+  .dark-mode .sk-btn-secondary { border-color: #334155; color: #94a3b8; }
+  .dark-mode .sk-btn-secondary:hover { background: #334155; color: #f1f5f9; }
+
+  .sk-btn-submit {
+    border-radius: 14px; border: none; color: #fff !important;
+    font-weight: 700; font-size: 0.95rem; padding: 12px 28px;
+    transition: all 0.25s ease; box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  }
+  .btn-submit-emerald { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 6px 18px rgba(16,185,129,0.3); }
+  .btn-submit-rose { background: linear-gradient(135deg, #f43f5e, #e11d48); box-shadow: 0 6px 18px rgba(244,63,94,0.3); }
+  .btn-submit-amber { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 6px 18px rgba(245,158,11,0.3); }
+  .sk-btn-submit:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+  /* RIGHT COLUMN: Sticky Preview Card */
+  .sk-preview-sticky { position: sticky; top: 80px; }
+
+  .sk-preview-card {
+    background: #ffffff; border-radius: 24px;
+    border: 1px solid rgba(226, 232, 240, 0.8); overflow: hidden;
+  }
+  .dark-mode .sk-preview-card { background: #1e293b; border-color: #334155; }
+
+  .sk-preview-header {
+    padding: 1.25rem 1.5rem; background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;
+  }
+  .dark-mode .sk-preview-header { background: #0f172a; border-color: #334155; }
+
+  .sk-preview-body { padding: 1.5rem; }
+
+  .sk-empty-pulse {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto; animation: pulse 2s infinite;
+  }
+  .dark-mode .sk-empty-pulse { background: #0f172a; }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79,70,229,0.2); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(79,70,229,0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(79,70,229,0); }
+  }
+
+  /* Product Info Box */
+  .sk-prod-info-box {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 16px; padding: 14px;
+  }
+  .dark-mode .sk-prod-info-box { background: #0f172a; border-color: #334155; }
+
+  .sk-prod-avatar {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(79,70,229,0.1); color: #4f46e5;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  }
+
+  .sk-tag-pill {
+    background: #e2e8f0; color: #475569; border-radius: 6px;
+    padding: 2px 8px; font-size: 0.72rem; font-weight: 700;
+  }
+  .dark-mode .sk-tag-pill { background: #334155; color: #cbd5e1; }
+
+  /* Stock Flow Visualizer */
+  .sk-stock-flow {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .sk-flow-item {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 14px; padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .dark-mode .sk-flow-item { background: #0f172a; border-color: #334155; }
+
+  .sk-flow-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
+  .sk-flow-val { font-size: 1.15rem; color: #0f172a; }
+  .dark-mode .sk-flow-val { color: #f1f5f9; }
+
+  .sk-flow-divider { text-align: center; margin: -2px 0; z-index: 2; }
+  .sk-flow-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 12px; border-radius: 50px; font-size: 0.74rem; font-weight: 700;
+  }
+  .sk-flow-badge.badge-emerald { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+  .sk-flow-badge.badge-rose { background: rgba(244,63,94,0.15); color: #f43f5e; border: 1px solid rgba(244,63,94,0.3); }
+  .sk-flow-badge.badge-amber { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+
+  .sk-flow-final {
+    background: #ffffff; border: 2px solid #4f46e5;
+    flex-direction: column; align-items: center; text-align: center;
+    padding: 16px; box-shadow: 0 4px 16px -2px rgba(79,70,229,0.12);
+  }
+  .dark-mode .sk-flow-final { background: #0f172a; }
+
+  .sk-flow-val-large { font-size: 1.85rem; color: #4f46e5; line-height: 1.1; margin-top: 4px; }
+
+  .sk-help-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: rgba(245,158,11,0.12); display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+</style>
+
+<!-- Lógica Dinâmica em JavaScript -->
+<script th:inline="javascript">
+  const TIPO_MOVIMENTO = /*[[${tipo}]]*/ 'ENTRA';
+  let produtoAtual = null;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const select = document.getElementById('produtoSelect');
+    if (select && select.value) {
+      aoSelecionarProduto(select);
+    }
+  });
+
+  // Filtrar opções do Select em tempo real com o input de busca
+  function filtrarOpcoesProdutos() {
+    const termo = document.getElementById('filtroProdutoInput').value.toLowerCase().trim();
+    const select = document.getElementById('produtoSelect');
+    const options = select.options;
+
+    for (let i = 1; i < options.length; i++) {
+      const opt = options[i];
+      const texto = opt.text.toLowerCase();
+      const codigo = (opt.dataset.codigo || '').toLowerCase();
+      const match = termo === '' || texto.includes(termo) || codigo.includes(termo);
+      opt.style.display = match ? '' : 'none';
+    }
+  }
+
+  // Preencher motivo com tags de sugestão rápida
+  function preencherMotivo(texto) {
+    const textarea = document.getElementById('motivoTextarea');
+    textarea.value = texto;
+    textarea.focus();
+  }
+
+  // Ao selecionar um produto no dropdown
+  function aoSelecionarProduto(selectElem) {
+    const opt = selectElem.options[selectElem.selectedIndex];
+    if (!opt || !opt.value) {
+      produtoAtual = null;
+      document.getElementById('simuladorVazio').classList.remove('d-none');
+      document.getElementById('simuladorAtivo').classList.add('d-none');
+      return;
+    }
+
+    produtoAtual = {
+      id: opt.value,
+      nome: opt.dataset.nome || opt.text,
+      stockAtual: parseFloat(opt.dataset.stock) || 0,
+      preco: parseFloat(opt.dataset.preco) || 0,
+      precoCusto: parseFloat(opt.dataset.precocusto) || 0,
+      codigo: opt.dataset.codigo || '—',
+      unidade: opt.dataset.unidade || 'un',
+      categoria: opt.dataset.categoria || 'Geral'
+    };
+
+    // Preencher campos auxiliares se aplicável
+    const precoCustoInput = document.getElementById('precoCustoInput');
+    if (precoCustoInput && (!precoCustoInput.value || parseFloat(precoCustoInput.value) === 0)) {
+      precoCustoInput.value = produtoAtual.precoCusto.toFixed(2);
+    }
+
+    // Atualizar UI do Simulador
+    document.getElementById('simNomeProd').textContent = produtoAtual.nome;
+    document.getElementById('simCatProd').innerHTML = '<i class="fas fa-folder me-1"></i> ' + produtoAtual.categoria;
+    document.getElementById('simCodigoProd').innerHTML = '<i class="fas fa-barcode me-1"></i> ' + produtoAtual.codigo;
+    document.getElementById('simPrecoVendaProd').textContent = formatarMoeda(produtoAtual.preco);
+    document.getElementById('simStockAtual').textContent = produtoAtual.stockAtual.toFixed(2) + ' ' + produtoAtual.unidade;
+
+    document.getElementById('simuladorVazio').classList.add('d-none');
+    document.getElementById('simuladorAtivo').classList.remove('d-none');
+
+    calcularImpacto();
+  }
+
+  // Recalcular projeção de stock e valores em tempo real
+  function calcularImpacto() {
+    if (!produtoAtual) return;
+
+    const qty = parseFloat(document.getElementById('quantidadeInput').value) || 0;
+    const current = produtoAtual.stockAtual;
+    let finalStock = current;
+
+    if (TIPO_MOVIMENTO === 'ENTRA') {
+      finalStock = current + qty;
+      document.getElementById('simOperacaoTag').textContent = 'Entrada (+' + qty.toFixed(2) + ' ' + produtoAtual.unidade + ')';
+
+      // Cálculo financeiro
+      const precoCusto = parseFloat(document.getElementById('precoCustoInput').value) || 0;
+      const totalInv = qty * precoCusto;
+      const banner = document.getElementById('bannerInvestimento');
+      if (banner) {
+        if (qty > 0 && precoCusto > 0) {
+          banner.classList.remove('d-none');
+          document.getElementById('investimentoTotalTxt').textContent = formatarMoeda(totalInv);
+          document.getElementById('resumoQtdTxt').textContent = qty.toFixed(2) + ' ' + produtoAtual.unidade;
+          document.getElementById('resumoPrecoTxt').textContent = formatarMoeda(precoCusto);
+        } else {
+          banner.classList.add('d-none');
         }
+      }
+      const simCusto = document.getElementById('simCustoEntradaTxt');
+      if (simCusto) {
+        simCusto.textContent = formatarMoeda(totalInv);
+      }
 
-        function calcTotal() {
-            const qty = parseFloat(document.getElementById('qtyInput').value) || 0;
-            const price = document.getElementById('priceInput') ? parseFloat(document.getElementById('priceInput').value) || 0 : 0;
-            const current = parseFloat(document.getElementById('currentStock').textContent) || 0;
-            const tipo = /*[[${tipo}]]*/ 'ENTRA';
-            
-            // Financial Total
-            const total = qty * price;
-            const totalPreview = document.getElementById('totalPreview');
-            if (totalPreview) {
-                totalPreview.textContent = total.toLocaleString('pt-AO', { style: 'currency', currency: 'AOA' }).replace('Kz', '') + ' Kz';
-            }
+    } else if (TIPO_MOVIMENTO === 'SAIDA') {
+      finalStock = current - qty;
+      document.getElementById('simOperacaoTag').textContent = 'Saída (-' + qty.toFixed(2) + ' ' + produtoAtual.unidade + ')';
 
-            // Inventory Future Preview
-            const futureStockElem = document.getElementById('futureStock');
-            if (futureStockElem) {
-                let future = current;
-                if (tipo === 'ENTRA') future = current + qty;
-                else if (tipo === 'SAIDA') future = current - qty;
-                else if (tipo === 'AJUSTE') future = qty;
-                
-                futureStockElem.textContent = future.toFixed(2);
-                
-                // Visual feedback if negative
-                if (future < 0) futureStockElem.classList.add('text-danger');
-                else futureStockElem.classList.remove('text-danger');
-            }
+      // Alerta se exceder stock disponível
+      const alerta = document.getElementById('alertaStockInsuficiente');
+      if (alerta) {
+        if (qty > current) {
+          alerta.classList.remove('d-none');
+        } else {
+          alerta.classList.add('d-none');
         }
-    </script>
+      }
+
+    } else if (TIPO_MOVIMENTO === 'AJUSTE') {
+      finalStock = qty; // No ajuste, a quantidade digitada é o novo stock real apurado
+      const diff = finalStock - current;
+      const bannerAjuste = document.getElementById('bannerAjusteVariavel');
+      const ajusteVariavelTxt = document.getElementById('ajusteVariavelTxt');
+      const ajusteTipoPill = document.getElementById('ajusteTipoPill');
+
+      if (bannerAjuste && ajusteVariavelTxt && ajusteTipoPill) {
+        bannerAjuste.classList.remove('d-none');
+        if (diff > 0) {
+          ajusteVariavelTxt.textContent = '+' + diff.toFixed(2) + ' ' + produtoAtual.unidade;
+          ajusteVariavelTxt.className = 'sk-banner-value text-emerald';
+          ajusteTipoPill.className = 'badge bg-success';
+          ajusteTipoPill.textContent = 'Excesso / Sobra (+)';
+          document.getElementById('simOperacaoTag').textContent = 'Ajuste (+' + diff.toFixed(2) + ')';
+        } else if (diff < 0) {
+          ajusteVariavelTxt.textContent = diff.toFixed(2) + ' ' + produtoAtual.unidade;
+          ajusteVariavelTxt.className = 'sk-banner-value text-rose';
+          ajusteTipoPill.className = 'badge bg-danger';
+          ajusteTipoPill.textContent = 'Quebra / Perda (-)';
+          document.getElementById('simOperacaoTag').textContent = 'Ajuste (' + diff.toFixed(2) + ')';
+        } else {
+          ajusteVariavelTxt.textContent = '0.00 ' + produtoAtual.unidade;
+          ajusteVariavelTxt.className = 'sk-banner-value text-muted';
+          ajusteTipoPill.className = 'badge bg-secondary';
+          ajusteTipoPill.textContent = 'Sem Alteração';
+          document.getElementById('simOperacaoTag').textContent = 'Sem Variação';
+        }
+      }
+    }
+
+    // Atualizar visor final no simulador
+    const finalElem = document.getElementById('simStockFinal');
+    finalElem.textContent = finalStock.toFixed(2) + ' ' + produtoAtual.unidade;
+
+    const statusBadge = document.getElementById('simStatusFinalBadge');
+    if (finalStock <= 0) {
+      statusBadge.className = 'badge bg-danger';
+      statusBadge.textContent = 'Esgotado / Negativo';
+      finalElem.className = 'sk-flow-val-large fw-800 text-rose';
+    } else if (finalStock <= 5) {
+      statusBadge.className = 'badge bg-warning text-dark';
+      statusBadge.textContent = 'Stock Crítico / Baixo';
+      finalElem.className = 'sk-flow-val-large fw-800 text-amber';
+    } else {
+      statusBadge.className = 'badge bg-success';
+      statusBadge.textContent = 'Stock Disponível';
+      finalElem.className = 'sk-flow-val-large fw-800 text-emerald';
+    }
+  }
+
+  // Manipulação de Upload de Ficheiro
+  function aoSelecionarFicheiro(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      document.getElementById('fileNameTxt').textContent = file.name;
+      document.getElementById('fileSizeTxt').textContent = (file.size / 1024).toFixed(1) + ' KB';
+      
+      const icon = document.getElementById('fileTypeIcon');
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        icon.className = 'fas fa-file-pdf fa-2x text-danger';
+      } else {
+        icon.className = 'fas fa-file-image fa-2x text-primary';
+      }
+
+      document.getElementById('dropzoneArea').classList.add('d-none');
+      document.getElementById('ficheiroPreview').classList.remove('d-none');
+    }
+  }
+
+  function removerFicheiro(e) {
+    if (e) e.stopPropagation();
+    document.getElementById('documentoInput').value = '';
+    document.getElementById('ficheiroPreview').classList.add('d-none');
+    document.getElementById('dropzoneArea').classList.remove('d-none');
+  }
+
+  // Drag and drop listeners
+  const dropzone = document.getElementById('dropzoneArea');
+  if (dropzone) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dropzone.style.borderColor = '#4f46e5';
+        dropzone.style.background = 'rgba(79,70,229,0.08)';
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault(); e.stopPropagation();
+        dropzone.style.borderColor = '';
+        dropzone.style.background = '';
+      }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length > 0) {
+        document.getElementById('documentoInput').files = files;
+        aoSelecionarFicheiro(document.getElementById('documentoInput'));
+      }
+    }, false);
+  }
+
+  // Validação da Submissão do Formulário
+  function validarSubmissao(event) {
+    const select = document.getElementById('produtoSelect');
+    if (!select.value) {
+      alert('Por favor selecione um produto para movimentar.');
+      select.focus();
+      return false;
+    }
+
+    const qty = parseFloat(document.getElementById('quantidadeInput').value);
+    if (isNaN(qty) || qty < 0) {
+      alert('Por favor insira uma quantidade válida.');
+      document.getElementById('quantidadeInput').focus();
+      return false;
+    }
+
+    if ((TIPO_MOVIMENTO === 'ENTRA' || TIPO_MOVIMENTO === 'SAIDA') && qty <= 0) {
+      alert('A quantidade para entrada ou saída deve ser superior a zero.');
+      document.getElementById('quantidadeInput').focus();
+      return false;
+    }
+
+    // Feedback visual no botão de submissão
+    const btn = document.getElementById('btnSubmit');
+    const btnText = document.getElementById('btnSubmitText');
+    const spinner = document.getElementById('btnSubmitSpinner');
+    btn.disabled = true;
+    btnText.textContent = 'A processar movimento...';
+    spinner.classList.remove('d-none');
+    return true;
+  }
+
+  function formatarMoeda(val) {
+    return (val || 0).toLocaleString('pt-AO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Kz';
+  }
+</script>
+
 </body>
 </html>

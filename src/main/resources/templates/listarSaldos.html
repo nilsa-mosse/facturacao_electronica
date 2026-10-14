@@ -1,344 +1,357 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Saldos por Produto - Kwanza ERP</title>
-    <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3f37c9;
-            --success: #059669;
-            --danger: #dc2626;
-            --dark: #1e293b;
-            --bg: #f4f7fe;
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.5);
-        }
-        
-        body { 
-            background: var(--bg); 
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(67, 97, 238, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(76, 201, 240, 0.1) 0px, transparent 50%);
-            font-family: 'Outfit', sans-serif; 
-            color: var(--dark);
-            min-height: 100vh;
-            padding: 40px 20px;
-            overflow-x: hidden;
-        }
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
 
-        .premium-container {
-            max-width: 1300px;
-            margin: 0 auto;
-            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateY(30px);
-        }
+<head th:replace="menu :: head"></head>
 
-        @keyframes slideUpFade {
-            to { opacity: 1; transform: translateY(0); }
-        }
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+  <nav th:replace="menu :: topbar"></nav>
+  <aside th:replace="menu :: sidebar"></aside>
 
-        .header-section { 
-            margin-bottom: 40px; 
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-        }
-        
-        .title-area h1 {
-            font-weight: 800;
-            letter-spacing: -2px;
-            font-size: 3.5rem;
-            color: var(--dark);
-            text-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            margin: 0;
-        }
-        
-        .title-area h1 span {
-            background: linear-gradient(135deg, var(--primary), #4cc9f0);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+  <div class="content-wrapper">
 
-        .balance-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
-            padding: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Decorative blobs behind card */
-        .balance-card::before {
-            content: '';
-            position: absolute;
-            top: -50px; right: -50px;
-            width: 200px; height: 200px;
-            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), transparent);
-            border-radius: 50%;
-            z-index: -1;
-        }
-
-        .search-bar {
-            background: white;
-            border-radius: 16px;
-            padding: 18px 25px;
-            border: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 35px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
-            transition: all 0.3s ease;
-        }
-
-        .search-bar:focus-within {
-            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .search-bar input {
-            border: none;
-            outline: none;
-            width: 100%;
-            font-weight: 500;
-            font-size: 1.1rem;
-            color: var(--dark);
-            background: transparent;
-        }
-
-        .search-bar i {
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
-        .table {
-            border-collapse: separate;
-            border-spacing: 0 12px;
-            margin-top: -12px;
-        }
-
-        .table thead th {
-            border: none;
-            color: #64748b;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            padding: 10px 25px;
-        }
-
-        .table tbody tr td {
-            background: white;
-            border: none;
-            padding: 22px 25px;
-            vertical-align: middle;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .table tbody tr {
-            position: relative;
-        }
-
-        /* Hover Effect for Rows */
-        .table tbody tr:hover td { 
-            transform: scale(1.01); 
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08); 
-            z-index: 10; 
-            cursor: default;
-        }
-
-        .table tbody tr td:first-child { 
-            border-top-left-radius: 20px; 
-            border-bottom-left-radius: 20px; 
-        }
-        
-        .table tbody tr td:last-child { 
-            border-top-right-radius: 20px; 
-            border-bottom-right-radius: 20px; 
-        }
-
-        .qty-badge {
-            background: #f1f5f9;
-            padding: 8px 18px;
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 1.1rem;
-            color: var(--dark);
-            display: inline-block;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        .qty-low { 
-            background: linear-gradient(135deg, #fecaca, #fca5a5); 
-            color: #991b1b; 
-            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.15);
-        }
-        
-        .qty-ok { 
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0); 
-            color: #065f46; 
-            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
-        }
-
-        .btn-back {
-            background: white;
-            color: var(--dark);
-            border-radius: 14px;
-            padding: 12px 24px;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex; align-items: center; gap: 10px;
-            border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            font-size: 0.95rem;
-        }
-        
-        .btn-back:hover { 
-            background: var(--primary); 
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2); 
-        }
-
-        /* Sold out row styling */
-        .row-out-of-stock td {
-            background: #fffafa !important;
-        }
-        
-        .row-out-of-stock td:first-child::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 10%;
-            height: 80%;
-            width: 4px;
-            background: var(--danger);
-            border-radius: 0 4px 4px 0;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 800;
-            font-size: 0.75rem;
-            padding: 8px 14px;
-            border-radius: 10px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .status-unavailable {
-            background: rgba(220, 38, 38, 0.1);
-            color: var(--danger);
-            border: 1px solid rgba(220, 38, 38, 0.2);
-        }
-
-        .status-available {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-    </style>
-</head>
-<body>
-    <div class="premium-container">
-        <div class="header-section">
-            <div class="title-area">
-                <a th:href="@{/dashboard}" class="btn-back mb-4"><i class="fas fa-arrow-left"></i> <span th:text="#{vendas.voltar_dashboard}">Voltar ao Dashboard</span></a>
-                <h1 class="mb-2"><span th:text="#{saldos.titulo}">Saldos de Inventário</span></h1>
-                <p class="text-muted fw-600 mb-0" style="font-size: 1.1rem;" th:text="#{saldos.subtitulo}">Monitorização consolidada e em tempo-real do stock de produtos e mercadorias.</p>
+    <!-- Page Header -->
+    <section class="content-header pb-0 pt-3">
+      <div class="container-fluid">
+        <div class="row align-items-center g-3">
+          <div class="col-md-8">
+            <div class="d-flex align-items-center gap-3">
+              <div class="sk-header-icon-box shadow-sm">
+                <i class="fas fa-boxes sk-icon-emerald-text"></i>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge sk-badge-module-stock">
+                    <i class="fas fa-layer-group me-1"></i> Gestão de Inventário
+                  </span>
+                  <span class="badge sk-badge-live">
+                    <i class="fas fa-circle me-1" style="font-size: 0.55rem;"></i> Tempo Real
+                  </span>
+                </div>
+                <h1 class="sk-page-title mb-0" th:text="#{saldos.titulo}">Saldos de Inventário</h1>
+                <p class="text-muted small mb-0 mt-1" th:text="#{saldos.subtitulo}">Monitorização consolidada e em tempo-real do stock de produtos e mercadorias.</p>
+              </div>
             </div>
-            <div class="d-none d-md-block">
-                <i class="fas fa-boxes text-primary" style="font-size: 4rem; opacity: 0.1;"></i>
+          </div>
+          <div class="col-md-4 text-md-end">
+            <div class="d-inline-flex gap-2 flex-wrap justify-content-md-end">
+              <a th:href="@{/stock/entrada}" class="btn sk-btn-stock-entrada shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="fas fa-arrow-circle-down"></i><span>Entrada</span>
+              </a>
+              <a th:href="@{/stock/saida}" class="btn sk-btn-stock-saida shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="fas fa-arrow-circle-up"></i><span>Saída</span>
+              </a>
+              <a th:href="@{/stock/ajuste}" class="btn sk-btn-stock-ajuste shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="fas fa-sliders-h"></i><span>Ajuste</span>
+              </a>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="content pt-3">
+      <div class="container-fluid">
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label">Total de Artigos</div>
+                  <div class="sk-kpi-value" id="kpiTotal">0</div>
+                  <div class="sk-kpi-sub">produtos registados</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-indigo"><i class="fas fa-boxes"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card" onclick="filterByStatus('disponivel')" style="cursor: pointer;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label">Disponíveis</div>
+                  <div class="sk-kpi-value sk-text-emerald" id="kpiDisp">0</div>
+                  <div class="sk-kpi-sub">com stock suficiente</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-emerald"><i class="fas fa-check-circle"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card" onclick="filterByStatus('esgotado')" style="cursor: pointer;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label">Esgotados</div>
+                  <div class="sk-kpi-value sk-text-rose" id="kpiEsgotado">0</div>
+                  <div class="sk-kpi-sub">sem stock disponível</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-rose"><i class="fas fa-exclamation-triangle"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label">Valor de Inventário</div>
+                  <div class="sk-kpi-value sk-text-amber" id="kpiValor">0 Kz</div>
+                  <div class="sk-kpi-sub">valor estimado total</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-amber"><i class="fas fa-coins"></i></div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="balance-card">
-            <div class="search-bar">
-                <i class="fas fa-search text-muted"></i>
-                <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Pesquisar por nome, código ou descrição...">
+        <!-- Main Card -->
+        <div class="card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+          <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3 bg-white border-bottom" style="padding: 1rem 1.5rem;">
+            <div class="d-flex align-items-center gap-3">
+              <div class="sk-card-icon-box">
+                <i class="fas fa-table" style="color: #4f46e5; font-size: 0.9rem;"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark" style="font-size: 1rem;">Tabela de Saldos</div>
+                <small class="text-muted">Consulte, pesquise e filtre por produto</small>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <div class="d-flex gap-1">
+                <button type="button" class="sk-filter-pill active" onclick="filterByStatus('todos')" id="pill-todos">Todos</button>
+                <button type="button" class="sk-filter-pill sk-pill-ok" onclick="filterByStatus('disponivel')" id="pill-disponivel">Disponíveis</button>
+                <button type="button" class="sk-filter-pill sk-pill-danger" onclick="filterByStatus('esgotado')" id="pill-esgotado">Esgotados</button>
+              </div>
+              <div class="sk-search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="sk-search-input" placeholder="Pesquisar produto..." oninput="filterProducts()">
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body p-0">
+            <div th:if="${mensagemSucesso}" class="alert alert-success alert-dismissible mx-4 mt-3 rounded-3 border-0" role="alert">
+              <i class="fas fa-check-circle me-2"></i><span th:text="${mensagemSucesso}"></span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${mensagemErro}" class="alert alert-danger alert-dismissible mx-4 mt-3 rounded-3 border-0" role="alert">
+              <i class="fas fa-exclamation-circle me-2"></i><span th:text="${mensagemErro}"></span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
 
             <div class="table-responsive">
-                <table class="table align-middle" id="productTable">
-                    <thead>
-                        <tr>
-                            <th th:text="#{saldos.col.identificacao}">Identificação</th>
-                            <th th:text="#{categorias.col.categoria}">Categoria</th>
-                            <th th:text="#{saldos.col.preco_unit}">Preço Unit.</th>
-                            <th class="text-center" th:text="#{saldos.col.stock_atual}">Stock Atual</th>
-                            <th th:text="#{vendas.col.estado}">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="produto : ${produtos}" 
-                            th:classappend="${!produto.disponivel ? 'row-out-of-stock' : ''}">
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-icon" style="width: 40px; height: 40px; background: #eff6ff; color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-tag"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-800" th:text="${produto.nome}">Produto</div>
-                                        <div class="small text-muted fw-600" th:text="${produto.codigoBarra}">000000</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="badge bg-light text-dark fw-700 px-2 py-1" th:text="${produto.categoria != null ? produto.categoria.nome : 'Sem Categoria'}">Geral</span>
-                            </td>
-                            <td class="fw-700" th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</td>
-                            <td class="text-center">
-                                <span th:class="'qty-badge ' + (${!produto.disponivel} ? 'qty-low' : 'qty-ok')"
-                                      th:text="${produto.quantidadeEstoque}">0</span>
-                            </td>
-                            <td>
-                                <div th:if="${!produto.disponivel}" class="status-badge status-unavailable">
-                                    <i class="fas fa-lock"></i> <span th:text="#{saldos.status.esgotado}">ESGOTADO</span>
-                                </div>
-                                <div th:if="${produto.disponivel}" class="status-badge status-available">
-                                    <i class="fas fa-check-circle"></i> <span th:text="#{saldos.status.disponivel}">DISPONÍVEL</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+              <table class="table sk-table align-middle mb-0" id="productTable">
+                <thead class="sk-table-head">
+                  <tr>
+                    <th style="padding-left: 1.75rem;" th:text="#{saldos.col.identificacao}">Identificação</th>
+                    <th th:text="#{categorias.col.categoria}">Categoria</th>
+                    <th th:text="#{saldos.col.preco_unit}">Preço Unit.</th>
+                    <th class="text-center" th:text="#{saldos.col.stock_atual}">Stock Atual</th>
+                    <th th:text="#{vendas.col.estado}">Estado</th>
+                    <th class="text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="produto : ${produtos}"
+                      th:classappend="${!produto.disponivel ? 'sk-row-esgotado' : ''}"
+                      th:data-status="${produto.disponivel ? 'disponivel' : 'esgotado'}"
+                      th:data-qty="${produto.quantidadeEstoque}"
+                      th:data-valor="${produto.preco * produto.quantidadeEstoque}">
+                    <td style="padding-left: 1.75rem;">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="sk-product-icon-box"><i class="fas fa-tag"></i></div>
+                        <div>
+                          <div class="fw-bold text-dark" th:text="${produto.nome}">Produto</div>
+                          <div class="small text-muted mt-1">
+                            <i class="fas fa-barcode" style="font-size: 0.65rem; margin-right: 3px;"></i>
+                            <span th:text="${produto.codigoBarra ?: '—'}">000000</span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="sk-cat-badge" th:text="${produto.categoria != null ? produto.categoria.nome : 'Sem Categoria'}">Geral</span>
+                    </td>
+                    <td>
+                      <span class="fw-bold" th:text="${#numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+                    </td>
+                    <td class="text-center">
+                      <span th:class="'sk-qty-badge ' + (${!produto.disponivel} ? 'sk-qty-low' : 'sk-qty-ok')"
+                            th:text="${#numbers.formatDecimal(produto.quantidadeEstoque, 1, 'POINT', 2, 'COMMA')}">0</span>
+                    </td>
+                    <td>
+                      <div th:if="${!produto.disponivel}" class="sk-status-badge sk-status-esgotado">
+                        <i class="fas fa-times-circle"></i><span th:text="#{saldos.status.esgotado}">ESGOTADO</span>
+                      </div>
+                      <div th:if="${produto.disponivel}" class="sk-status-badge sk-status-ok">
+                        <i class="fas fa-check-circle"></i><span th:text="#{saldos.status.disponivel}">DISPONÍVEL</span>
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <div class="d-flex justify-content-center gap-1">
+                        <a th:href="@{/stock/entrada(produtoId=${produto.id})}" class="btn sk-action-btn sk-action-btn-green" title="Entrada de Stock"><i class="fas fa-arrow-circle-down"></i></a>
+                        <a th:href="@{/stock/saida(produtoId=${produto.id})}" class="btn sk-action-btn sk-action-btn-red" title="Saída de Stock"><i class="fas fa-arrow-circle-up"></i></a>
+                        <a th:href="@{/stock/ajuste(produtoId=${produto.id})}" class="btn sk-action-btn sk-action-btn-amber" title="Ajuste de Stock"><i class="fas fa-sliders-h"></i></a>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+
+            <div id="emptyState" class="text-center py-5 d-none">
+              <div class="sk-empty-icon mb-3"><i class="fas fa-search-minus"></i></div>
+              <h5 class="fw-bold">Nenhum produto encontrado</h5>
+              <p class="text-muted small mb-0">Tente ajustar o termo de pesquisa ou o filtro aplicado.</p>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top" style="background: #fafbfc;">
+              <small class="text-muted"><span id="visibleCount">0</span> de <span id="totalCount">0</span> artigos visíveis</small>
+              <a th:href="@{/stock/historico}" class="sk-btn-ghost">
+                <i class="fas fa-history me-1"></i> Ver Histórico de Movimentos
+              </a>
+            </div>
+          </div>
         </div>
-    </div>
 
-    <script>
-        function filterProducts() {
-            const input = document.getElementById("searchInput");
-            const filter = input.value.toLowerCase();
-            const table = document.getElementById("productTable");
-            const tr = table.getElementsByTagName("tr");
+      </div>
+    </section>
+  </div>
 
-            for (let i = 1; i < tr.length; i++) {
-                const td = tr[i].getElementsByTagName("td")[0];
-                if (td) {
-                    const txtValue = td.textContent || td.innerText;
-                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
-                        tr[i].style.display = "none";
-                    }
-                }
-            }
-        }
-    </script>
+  <footer th:replace="menu :: footer"></footer>
+</div>
+
+<style>
+  .sk-header-icon-box { width: 52px; height: 52px; border-radius: 16px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; }
+  .sk-icon-emerald-text { color: #10b981; }
+  .sk-page-title { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; color: #0f172a; }
+  .dark-mode .sk-page-title { color: #f1f5f9; }
+  .sk-badge-module-stock { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; }
+  .sk-badge-live { background: rgba(79,70,229,0.08); color: #4f46e5; border: 1px solid rgba(79,70,229,0.15); padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 600; }
+
+  .sk-btn-stock-entrada { background: linear-gradient(135deg, #10b981, #059669); color: #fff !important; border: none; border-radius: 50px; padding: 7px 18px; font-weight: 700; font-size: 0.84rem; transition: all 0.25s ease; text-decoration: none !important; }
+  .sk-btn-stock-saida { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff !important; border: none; border-radius: 50px; padding: 7px 18px; font-weight: 700; font-size: 0.84rem; transition: all 0.25s ease; text-decoration: none !important; }
+  .sk-btn-stock-ajuste { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff !important; border: none; border-radius: 50px; padding: 7px 18px; font-weight: 700; font-size: 0.84rem; transition: all 0.25s ease; text-decoration: none !important; }
+  .sk-btn-stock-entrada:hover, .sk-btn-stock-saida:hover, .sk-btn-stock-ajuste:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+  .sk-kpi-card { border-radius: 20px; border: 1px solid #f1f5f9; padding: 1.25rem 1.4rem; background: #fff; box-shadow: 0 4px 16px -4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+  .sk-kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px -6px rgba(0,0,0,0.1); }
+  .dark-mode .sk-kpi-card { background: #1e293b; border-color: #334155; }
+  .sk-kpi-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.35rem; }
+  .sk-kpi-value { font-size: 1.85rem; font-weight: 800; color: #0f172a; line-height: 1; }
+  .dark-mode .sk-kpi-value { color: #f1f5f9; }
+  .sk-kpi-sub { font-size: 0.75rem; color: #94a3b8; margin-top: 0.3rem; }
+  .sk-kpi-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .sk-icon-indigo { background: rgba(79,70,229,0.1); color: #4f46e5; }
+  .sk-icon-emerald { background: rgba(16,185,129,0.1); color: #10b981; }
+  .sk-icon-rose { background: rgba(244,63,94,0.1); color: #f43f5e; }
+  .sk-icon-amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
+  .sk-text-emerald { color: #10b981 !important; }
+  .sk-text-rose { color: #f43f5e !important; }
+  .sk-text-amber { color: #f59e0b !important; }
+
+  .sk-card-icon-box { width: 36px; height: 36px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; }
+  .dark-mode .sk-card-icon-box { background: #0f172a; }
+
+  .sk-search-box { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 7px 14px; min-width: 200px; transition: all 0.2s ease; }
+  .sk-search-box:focus-within { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); background: #fff; }
+  .sk-search-box i { color: #94a3b8; font-size: 0.85rem; }
+  .sk-search-input { border: none; outline: none; background: transparent; font-size: 0.88rem; font-weight: 500; color: #0f172a; width: 100%; }
+  .dark-mode .sk-search-box { background: #0f172a; border-color: #334155; }
+  .dark-mode .sk-search-input { color: #f1f5f9; }
+
+  .sk-filter-pill { border: 1px solid #e2e8f0; background: #fff; color: #64748b; border-radius: 50px; padding: 5px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+  .sk-filter-pill.active, .sk-filter-pill:hover { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .sk-filter-pill.sk-pill-ok.active { background: #10b981; border-color: #10b981; }
+  .sk-filter-pill.sk-pill-danger.active { background: #f43f5e; border-color: #f43f5e; }
+
+  .sk-table-head th { background: #f8fafc; color: #94a3b8; font-size: 0.73rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.8rem 1rem; border-top: none; border-bottom: 1px solid #f1f5f9; }
+  .dark-mode .sk-table-head th { background: #0f172a; color: #475569; border-color: #1e293b; }
+  .sk-table tbody tr { transition: background 0.15s ease; }
+  .sk-table tbody tr:hover td { background: #fafbff !important; }
+  .dark-mode .sk-table tbody tr:hover td { background: rgba(30,41,59,0.6) !important; }
+  .sk-table tbody td { padding: 0.9rem 1rem; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+  .dark-mode .sk-table tbody td { border-color: #1e293b; background: transparent; }
+  .sk-row-esgotado td { background: #fff8f8 !important; }
+  .dark-mode .sk-row-esgotado td { background: rgba(244,63,94,0.04) !important; }
+
+  .sk-product-icon-box { width: 40px; height: 40px; border-radius: 12px; background: rgba(79,70,229,0.08); color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
+  .sk-cat-badge { background: #f1f5f9; color: #475569; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+  .dark-mode .sk-cat-badge { background: #334155; color: #94a3b8; }
+
+  .sk-qty-badge { display: inline-block; padding: 5px 14px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; min-width: 58px; text-align: center; }
+  .sk-qty-ok { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; box-shadow: 0 2px 8px rgba(16,185,129,0.15); }
+  .sk-qty-low { background: linear-gradient(135deg, #fecaca, #fca5a5); color: #991b1b; box-shadow: 0 2px 8px rgba(244,63,94,0.15); }
+
+  .sk-status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .sk-status-ok { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+  .sk-status-esgotado { background: rgba(244,63,94,0.1); color: #f43f5e; border: 1px solid rgba(244,63,94,0.2); }
+
+  .sk-action-btn { width: 32px; height: 32px; padding: 0 !important; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; border: none !important; transition: all 0.2s ease; }
+  .sk-action-btn:hover { transform: scale(1.12); }
+  .sk-action-btn-green { background: rgba(16,185,129,0.1); color: #10b981; }
+  .sk-action-btn-green:hover { background: #10b981; color: #fff; }
+  .sk-action-btn-red { background: rgba(244,63,94,0.1); color: #f43f5e; }
+  .sk-action-btn-red:hover { background: #f43f5e; color: #fff; }
+  .sk-action-btn-amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
+  .sk-action-btn-amber:hover { background: #f59e0b; color: #fff; }
+
+  .sk-btn-ghost { background: transparent; border: 1px solid #e2e8f0; color: #64748b; border-radius: 10px; font-weight: 600; font-size: 0.8rem; padding: 5px 12px; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; }
+  .sk-btn-ghost:hover { background: #f1f5f9; color: #0f172a; }
+  .sk-empty-icon { width: 72px; height: 72px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 1.75rem; color: #94a3b8; }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const rows = document.querySelectorAll('#productTable tbody tr');
+    let total = 0, disponivel = 0, esgotado = 0, valorTotal = 0;
+    rows.forEach(function(row) {
+      total++;
+      const status = row.dataset.status;
+      const valor = parseFloat(row.dataset.valor) || 0;
+      if (status === 'disponivel') disponivel++;
+      else esgotado++;
+      valorTotal += valor;
+    });
+    document.getElementById('kpiTotal').textContent = total;
+    document.getElementById('kpiDisp').textContent = disponivel;
+    document.getElementById('kpiEsgotado').textContent = esgotado;
+    document.getElementById('kpiValor').textContent = valorTotal.toLocaleString('pt-AO', { maximumFractionDigits: 0 }) + ' Kz';
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('visibleCount').textContent = total;
+  });
+
+  function filterByStatus(status) {
+    document.querySelectorAll('.sk-filter-pill').forEach(function(p) { p.classList.remove('active'); });
+    var pill = document.getElementById('pill-' + status);
+    if (pill) pill.classList.add('active');
+    var rows = document.querySelectorAll('#productTable tbody tr');
+    var visible = 0;
+    rows.forEach(function(row) {
+      var show = (status === 'todos' || row.dataset.status === status);
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('visibleCount').textContent = visible;
+    document.getElementById('emptyState').classList.toggle('d-none', visible > 0);
+  }
+
+  function filterProducts() {
+    var q = document.getElementById('searchInput').value.toLowerCase().trim();
+    var rows = document.querySelectorAll('#productTable tbody tr');
+    var visible = 0;
+    rows.forEach(function(row) {
+      var text = row.textContent.toLowerCase();
+      var show = (q === '' || text.indexOf(q) > -1);
+      row.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('visibleCount').textContent = visible;
+    document.getElementById('emptyState').classList.toggle('d-none', visible > 0);
+  }
+</script>
+
 </body>
 </html>

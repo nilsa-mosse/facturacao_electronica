@@ -1,491 +1,386 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Movimentações de Inventário - Kwanza ERP</title>
-    <link rel="stylesheet" th:href="@{/plugins/fontawesome/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/plugins/bootstrap/css/bootstrap.min.css}">
-    <style>
-        :root {
-            --primary: #4361ee;
-            --primary-soft: rgba(67, 97, 238, 0.08);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --dark: #0f172a;
-            --bg: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.75);
-            --card-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
-        
-        body { 
-            background: var(--bg); 
-            background-image: radial-gradient(at 0% 0%, hsla(231,100%,94%,1) 0, transparent 50%), 
-                              radial-gradient(at 50% 0%, hsla(225,100%,94%,1) 0, transparent 50%);
-            font-family: 'Outfit', sans-serif; 
-            color: var(--dark);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
 
-        .premium-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            animation: fadeIn 0.8s ease-out;
-        }
+<head th:replace="menu :: head"></head>
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+  <nav th:replace="menu :: topbar"></nav>
+  <aside th:replace="menu :: sidebar"></aside>
 
-        .dashboard-header {
-            margin-bottom: 50px;
-        }
+  <div class="content-wrapper">
 
-        .title-accent {
-            background: linear-gradient(135deg, var(--primary), #7c3aed);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        /* KPI Cards Premium */
-        .kpi-card {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 28px;
-            padding: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: var(--card-shadow);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .kpi-card:hover { 
-            transform: translateY(-10px) scale(1.02); 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-            border-color: var(--primary);
-        }
-
-        .kpi-icon-box {
-            width: 60px;
-            height: 60px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin-bottom: 24px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Grid System for History */
-        .premium-table-container {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 32px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            overflow: hidden;
-            padding: 10px;
-        }
-
-        .table-responsive-custom {
-            border-radius: 24px;
-            overflow: hidden;
-        }
-
-        .table {
-            margin-bottom: 0;
-            border-collapse: separate;
-            border-spacing: 0 8px;
-            background: transparent;
-        }
-
-        .table thead th {
-            background: transparent;
-            color: #64748b;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            padding: 20px 25px;
-            border: none;
-        }
-
-        .table tbody tr {
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .table tbody td {
-            background: white;
-            padding: 22px 25px;
-            vertical-align: middle;
-            border: none;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-
-        .table tbody tr td:first-child { border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
-        .table tbody tr td:last-child { border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
-
-        .table tbody tr:hover td {
-            background: #f1f5f9;
-            transform: scale(1.002);
-        }
-
-        /* Badges */
-        .type-badge {
-            padding: 10px 18px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-        }
-        
-        .badge-ENTRA { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .badge-SAIDA { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .badge-AJUSTE { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-
-        .product-avatar {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-            color: var(--primary);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        /* Controls */
-        .controls-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .segmented-control {
-            background: rgba(226, 232, 240, 0.5);
-            padding: 6px;
-            border-radius: 18px;
-            display: flex;
-            gap: 4px;
-        }
-
-        .segment-btn {
-            padding: 10px 24px;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            color: #64748b;
-            transition: all 0.3s;
-            border: none;
-            background: transparent;
-        }
-
-        .segment-btn.active {
-            background: white;
-            color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .search-container {
-            position: relative;
-            flex-grow: 1;
-            max-width: 450px;
-        }
-
-        .search-input {
-            width: 100%;
-            background: white;
-            border: 2px solid transparent;
-            border-radius: 18px;
-            padding: 14px 20px 14px 50px;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            transition: all 0.3s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 10px 15px -3px rgba(67, 97, 238, 0.15);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 1.1rem;
-        }
-
-        .btn-premium {
-            background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
-            color: white;
-            border-radius: 18px;
-            padding: 14px 32px;
-            font-weight: 700;
-            border: none;
-            transition: all 0.3s;
-            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.25);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-premium:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.35);
-            color: white;
-        }
-
-        .doc-chip {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s;
-        }
-
-        .doc-chip:hover {
-            background: var(--primary-soft);
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        @media (max-width: 768px) {
-            .controls-row { flex-direction: column; align-items: stretch; }
-            .search-container { max-width: 100%; }
-        }
-    </style>
-
-</head>
-<body>
-    <div class="premium-container">
-        <!-- Header -->
-        <div class="dashboard-header d-flex justify-content-between align-items-end">
-            <div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-3">
-                        <li class="breadcrumb-item small"><a href="#" class="text-decoration-none text-muted fw-800">INVENTÁRIO</a></li>
-                        <li class="breadcrumb-item small active fw-800 text-primary">HISTÓRICO</li>
-                    </ol>
-                </nav>
-                <h1 class="fw-900 mb-2" style="letter-spacing: -2px; font-size: 3.5rem; color: var(--dark);">
-                    Rastreio de <span class="title-accent">Fluxo</span>
-                </h1>
-                <p class="text-muted fw-500 fs-5 mb-0" th:text="#{stock.fluxo.desc}">Gestão auditável e analítica de ativos em tempo real.</p>
+    <!-- Page Header -->
+    <section class="content-header pb-0 pt-3">
+      <div class="container-fluid">
+        <div class="row align-items-center g-3">
+          <div class="col-lg-7">
+            <div class="d-flex align-items-center gap-3">
+              <div class="sk-header-icon-box shadow-sm">
+                <i class="fas fa-history text-primary"></i>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge sk-badge-module-stock">
+                    <i class="fas fa-layer-group me-1"></i> Gestão de Inventário
+                  </span>
+                  <span class="badge sk-badge-live">
+                    <i class="fas fa-shield-alt me-1"></i> Trilha de Auditoria
+                  </span>
+                </div>
+                <h1 class="sk-page-title mb-0" th:text="#{stock.historico.titulo}">Histórico de Movimentos</h1>
+                <p class="text-muted small mb-0 mt-1">Registo cronológico e auditável de todas as entradas, saídas e ajustes de inventário.</p>
+              </div>
             </div>
-            <div>
-                <a th:href="@{/stock/entrada}" class="btn-premium">
-                    <i class="fas fa-plus-circle"></i> REGISTAR MOVIMENTO
+          </div>
+          <div class="col-lg-5 text-lg-end">
+            <div class="d-inline-flex gap-2 flex-wrap justify-content-lg-end align-items-center">
+              <a th:href="@{/stock/entrada}" class="btn sk-btn-stock-entrada shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="fas fa-arrow-circle-down"></i><span>Nova Entrada</span>
+              </a>
+              <a th:href="@{/stock/saida}" class="btn sk-btn-stock-saida shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="fas fa-arrow-circle-up"></i><span>Nova Saída</span>
+              </a>
+              <a th:href="@{/stock/ajuste}" class="btn sk-btn-stock-ajuste shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="fas fa-sliders-h"></i><span>Novo Ajuste</span>
+              </a>
+              <a th:href="@{/stock/saldos}" class="btn sk-btn-ghost shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="fas fa-boxes"></i><span>Ver Saldos</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="content pt-3">
+      <div class="container-fluid">
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card" onclick="filtrarTabela('todos')" style="cursor: pointer;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label" th:text="#{stock.todos}">Total de Registos</div>
+                  <div class="sk-kpi-value text-primary" id="kpiTotal" th:text="${#lists.size(movimentos)}">0</div>
+                  <div class="sk-kpi-sub">movimentos registados</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-indigo"><i class="fas fa-exchange-alt"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card" onclick="filtrarTabela('ENTRA')" style="cursor: pointer;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label" th:text="#{stock.entradas}">Entradas</div>
+                  <div class="sk-kpi-value sk-text-emerald" id="kpiEntradas" th:text="${#lists.size(movimentos.?[tipo == 'ENTRA'])}">0</div>
+                  <div class="sk-kpi-sub">compras e reposições</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-emerald"><i class="fas fa-arrow-circle-down"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card" onclick="filtrarTabela('SAIDA')" style="cursor: pointer;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label" th:text="#{stock.saidas}">Saídas</div>
+                  <div class="sk-kpi-value sk-text-rose" id="kpiSaidas" th:text="${#lists.size(movimentos.?[tipo == 'SAIDA'])}">0</div>
+                  <div class="sk-kpi-sub">baixas, perdas e avarias</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-rose"><i class="fas fa-arrow-circle-up"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="sk-kpi-card" onclick="filtrarTabela('AJUSTE')" style="cursor: pointer;">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="sk-kpi-label" th:text="#{stock.ajustes}">Ajustes</div>
+                  <div class="sk-kpi-value sk-text-amber" id="kpiAjustes" th:text="${#lists.size(movimentos.?[tipo == 'AJUSTE'])}">0</div>
+                  <div class="sk-kpi-sub">balanço e contagem física</div>
+                </div>
+                <div class="sk-kpi-icon-box sk-icon-amber"><i class="fas fa-sliders-h"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+          <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3 bg-white border-bottom" style="padding: 1rem 1.5rem;">
+            <div class="d-flex align-items-center gap-3">
+              <div class="sk-card-icon-box">
+                <i class="fas fa-list-alt" style="color: #4f46e5; font-size: 0.95rem;"></i>
+              </div>
+              <div>
+                <div class="fw-bold text-dark" style="font-size: 1rem;">Registo de Movimentos</div>
+                <small class="text-muted">Consulte detalhadamente os fluxos e faça download de comprovativos</small>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <div class="d-flex gap-1">
+                <button type="button" class="sk-filter-pill active" onclick="filtrarTabela('todos', this)" id="pill-todos">Todos</button>
+                <button type="button" class="sk-filter-pill sk-pill-ok" onclick="filtrarTabela('ENTRA', this)" id="pill-ENTRA">Entradas</button>
+                <button type="button" class="sk-filter-pill sk-pill-danger" onclick="filtrarTabela('SAIDA', this)" id="pill-SAIDA">Saídas</button>
+                <button type="button" class="sk-filter-pill sk-pill-amber" onclick="filtrarTabela('AJUSTE', this)" id="pill-AJUSTE">Ajustes</button>
+              </div>
+              <div class="sk-search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="sk-search-input" placeholder="Pesquisar por artigo, ref..." oninput="pesquisar(this)">
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table sk-table align-middle mb-0" id="tabelaEstoque">
+                <thead class="sk-table-head">
+                  <tr>
+                    <th style="padding-left: 1.75rem;">Registo Temporal</th>
+                    <th>Artigo & Identificação</th>
+                    <th class="text-center">Natureza</th>
+                    <th class="text-center">Quantidade</th>
+                    <th>Logística / Referência</th>
+                    <th>Observações / Justificação</th>
+                    <th class="text-center">Comprovativo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="mov : ${movimentos}" th:data-tipo="${mov.tipo}">
+                    <td style="padding-left: 1.75rem;">
+                      <div class="fw-bold text-dark" th:text="${#temporals.format(mov.dataMovimento, 'dd/MM/yyyy')}">01/01/2026</div>
+                      <div class="small text-muted">
+                        <i class="far fa-clock me-1" style="font-size: 0.65rem;"></i>
+                        <span th:text="${#temporals.format(mov.dataMovimento, 'HH:mm:ss')}">12:00:00</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="sk-prod-avatar">
+                          <i class="fas fa-box"></i>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark" th:text="${mov.produto != null ? mov.produto.nome : '—'}">Artigo</div>
+                          <div class="small text-muted">
+                            <span class="sk-cat-badge" th:text="${mov.produto != null && mov.produto.categoria != null ? mov.produto.categoria.nome : 'Sem Categoria'}">Geral</span>
+                            <span th:if="${mov.produto != null && mov.produto.codigoBarra != null}" class="ms-1" style="font-size: 0.72rem;">
+                              <i class="fas fa-barcode me-1"></i><span th:text="${mov.produto.codigoBarra}">0000</span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <span th:class="'sk-status-badge ' + (${mov.tipo == 'ENTRA'} ? 'sk-status-ok' : (${mov.tipo == 'SAIDA'} ? 'sk-status-esgotado' : 'sk-status-ajuste'))">
+                        <i th:class="${mov.tipo == 'ENTRA' ? 'fas fa-arrow-down' : (mov.tipo == 'SAIDA' ? 'fas fa-arrow-up' : 'fas fa-sliders-h')}"></i>
+                        <span th:text="${mov.tipo == 'ENTRA' ? 'ENTRADA' : (mov.tipo == 'SAIDA' ? 'SAÍDA' : 'AJUSTE')}">ENTRA</span>
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <div class="fw-800 fs-5"
+                           th:classappend="${mov.tipo == 'ENTRA' ? 'text-emerald' : (mov.tipo == 'SAIDA' ? 'text-rose' : 'text-amber')}"
+                           th:text="${(mov.tipo == 'ENTRA' ? '+' : (mov.tipo == 'SAIDA' ? '-' : '')) + #numbers.formatDecimal(mov.quantidade, 1, 'POINT', 2, 'COMMA')}">
+                        0.00
+                      </div>
+                      <small class="text-muted fw-bold" style="font-size: 0.68rem;" th:text="${mov.produto != null && mov.produto.unidadeMedida != null ? mov.produto.unidadeMedida : 'unidades'}">un</small>
+                    </td>
+                    <td>
+                      <div th:if="${mov.origem != null and !#strings.isEmpty(mov.origem)}" class="fw-bold text-dark small mb-1">
+                        <i class="fas fa-building me-1 text-primary opacity-50"></i>
+                        <span th:text="${mov.origem}">Fornecedor</span>
+                      </div>
+                      <div th:if="${mov.documentoReferencia != null and !#strings.isEmpty(mov.documentoReferencia)}">
+                        <span class="badge bg-light text-dark border fw-bold" th:text="${mov.documentoReferencia}">DOC-001</span>
+                      </div>
+                      <div th:if="${mov.origem == null and mov.documentoReferencia == null}" class="text-muted small italic">—</div>
+                    </td>
+                    <td>
+                      <div class="small text-muted" style="max-width: 280px; line-height: 1.35;" th:text="${mov.motivo ?: '—'}">Motivo da operação</div>
+                    </td>
+                    <td class="text-center">
+                      <a th:if="${mov.documentoBlob != null}" th:href="@{/stock/documento/{id}(id=${mov.id})}" target="_blank"
+                         class="btn btn-sm sk-doc-chip" title="Descarregar comprovativo anexo">
+                        <i class="fas fa-file-download text-primary me-1"></i>
+                        <span>Anexo</span>
+                      </a>
+                      <span th:if="${mov.documentoBlob == null}" class="text-muted small">—</span>
+                    </td>
+                  </tr>
+
+                  <tr th:if="${#lists.isEmpty(movimentos)}" id="linhaVazia">
+                    <td colspan="7" class="text-center py-5">
+                      <div class="sk-empty-icon mb-3"><i class="fas fa-boxes"></i></div>
+                      <h5 class="fw-bold">Nenhum movimento registado</h5>
+                      <p class="text-muted small mb-3">Ainda não foi registado qualquer movimento de inventário.</p>
+                      <a th:href="@{/stock/entrada}" class="btn sk-btn-stock-entrada d-inline-flex align-items-center gap-2">
+                        <i class="fas fa-plus"></i> Registar Primeira Entrada
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div id="emptySearchState" class="text-center py-5 d-none">
+              <div class="sk-empty-icon mb-3"><i class="fas fa-search-minus"></i></div>
+              <h5 class="fw-bold">Nenhum registo encontrado</h5>
+              <p class="text-muted small mb-0">Tente ajustar o termo de pesquisa ou o filtro aplicado.</p>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top" style="background: #fafbfc;">
+              <small class="text-muted"><span id="visibleCount" th:text="${#lists.size(movimentos)}">0</span> movimentos visíveis</small>
+              <div class="d-flex gap-2">
+                <a th:href="@{/stock/saldos}" class="sk-btn-ghost">
+                  <i class="fas fa-warehouse me-1"></i> Ver Tabela de Saldos
                 </a>
+              </div>
             </div>
+          </div>
         </div>
 
-        <!-- KPI Row -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-3">
-                <div class="kpi-card">
-                    <div>
-                        <div class="kpi-icon-box" style="background: rgba(67, 97, 238, 0.1); color: var(--primary);">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;" th:text="#{stock.volume_total}">Volume Total</h6>
-                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--dark);" th:text="${#lists.size(movimentos)}">0</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="kpi-card">
-                    <div>
-                        <div class="kpi-icon-box" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
-                            <i class="fas fa-arrow-down-long"></i>
-                        </div>
-                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;" th:text="#{stock.entradas}">Entradas</h6>
-                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--success);" th:text="${#lists.size(movimentos.?[tipo == 'ENTRA'])}">0</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="kpi-card">
-                    <div>
-                        <div class="kpi-icon-box" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
-                            <i class="fas fa-arrow-up-long"></i>
-                        </div>
-                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;" th:text="#{stock.saidas}">Saídas</h6>
-                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--danger);" th:text="${#lists.size(movimentos.?[tipo == 'SAIDA'])}">0</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="kpi-card">
-                    <div>
-                        <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
-                            <i class="fas fa-sliders-h"></i>
-                        </div>
-                        <h6 class="fw-800 text-muted text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 1px;" th:text="#{stock.ajustes}">Ajustes</h6>
-                        <h2 class="fw-900 mb-0" style="font-size: 2.2rem; color: var(--warning);" th:text="${#lists.size(movimentos.?[tipo == 'AJUSTE'])}">0</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
+    </section>
+  </div>
 
-        <!-- Controls -->
-        <div class="controls-row">
-            <div class="segmented-control">
-                <button class="segment-btn active" onclick="filtrarTabela('todos', this)">Todos Movimentos</button>
-                <button class="segment-btn" onclick="filtrarTabela('ENTRA', this)">Entradas</button>
-                <button class="segment-btn" onclick="filtrarTabela('SAIDA', this)">Saídas</button>
-                <button class="segment-btn" onclick="filtrarTabela('AJUSTE', this)">Ajustes</button>
-            </div>
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Pesquisar por produto, código ou referência..." onkeyup="pesquisar(this)">
-            </div>
-        </div>
+  <footer th:replace="menu :: footer"></footer>
+</div>
 
-        <!-- Table Container -->
-        <div class="premium-table-container">
-            <div class="table-responsive-custom">
-                <table class="table" id="tabelaEstoque">
-                    <thead>
-                        <tr>
-                            <th>Registo Temporal</th>
-                            <th>Artigo & Identificação</th>
-                            <th>Natureza</th>
-                            <th>Quantidade</th>
-                            <th>Logística / Referência</th>
-                            <th>Observações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="mov : ${movimentos}" th:data-tipo="${mov.tipo}">
-                            <td>
-                                <div class="fw-700 color-dark" th:text="${#temporals.format(mov.dataMovimento, 'dd MMM yyyy')}"></div>
-                                <div class="small text-muted fw-600" th:text="${#temporals.format(mov.dataMovimento, 'HH:mm:ss')}"></div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-avatar">
-                                        <i class="fas fa-box-open"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-800 text-dark" style="font-size: 1.05rem;" th:text="${mov.produto.nome}"></div>
-                                        <div class="small text-muted fw-700" th:text="'SKU-' + ${mov.produto.id}"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span th:class="'type-badge badge-' + ${mov.tipo}">
-                                    <i th:class="${mov.tipo == 'ENTRA' ? 'fas fa-arrow-down' : (mov.tipo == 'SAIDA' ? 'fas fa-arrow-up' : 'fas fa-exchange-alt')}"></i>
-                                    <span th:text="${mov.tipo}"></span>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="fw-900" style="font-size: 1.2rem;" th:text="${mov.quantidade}"></div>
-                                <div class="small text-muted fw-600">UNIDADES</div>
-                            </td>
-                            <td>
-                                <div th:if="${mov.origem != null}" class="fw-700 text-dark mb-1">
-                                    <i class="fas fa-warehouse me-2 text-primary opacity-50"></i>
-                                    <span th:text="${mov.origem}"></span>
-                                </div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span th:if="${mov.documentoReferencia != null}" class="badge bg-light text-dark border fw-bold p-2" th:text="${mov.documentoReferencia}"></span>
-                                    
-                                    <a th:if="${mov.documentoBlob != null}" th:href="@{/stock/documento/{id}(id=${mov.id})}" target="_blank" class="doc-chip">
-                                        <i class="fas fa-file-download"></i>
-                                        <span>Anexo</span>
-                                    </a>
-                                </div>
-                                <div th:if="${mov.origem == null && mov.documentoReferencia == null && mov.documentoBlob == null}" class="text-muted small italic">S/ Ref Doc</div>
-                            </td>
-                            <td>
-                                <div class="small text-muted fw-500" style="max-width: 250px; line-height: 1.4;" th:text="${mov.motivo}"></div>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(movimentos)}">
-                            <td colspan="6" class="text-center py-5" style="background: white !important;">
-                                <div class="py-5">
-                                    <i class="fas fa-layer-group fa-4x mb-4 opacity-20" style="color: var(--primary);"></i>
-                                    <h3 class="fw-800 text-muted">Histórico Vazio</h3>
-                                    <p class="text-muted">Ainda não foram registados movimentos no inventário.</p>
-                                    <a th:href="@{/stock/entrada}" class="btn-premium mt-3">PRODUZIR PRIMEIRO REGISTO</a>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+<style>
+  :root {
+    --sk-emerald: #10b981;
+    --sk-rose: #f43f5e;
+    --sk-amber: #f59e0b;
+    --sk-indigo: #4f46e5;
+  }
 
+  .text-emerald { color: var(--sk-emerald) !important; }
+  .text-rose { color: var(--sk-rose) !important; }
+  .text-amber { color: var(--sk-amber) !important; }
 
-    <script th:inline="javascript">
-        function filtrarTabela(tipo, element) {
-            // Update segmented control
-            document.querySelectorAll('.segment-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
+  .sk-header-icon-box { width: 52px; height: 52px; border-radius: 16px; background: rgba(79,70,229,0.1); border: 1px solid rgba(79,70,229,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; }
+  .sk-page-title { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em; color: #0f172a; }
+  .dark-mode .sk-page-title { color: #f1f5f9; }
+  .sk-badge-module-stock { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; }
+  .sk-badge-live { background: rgba(79,70,229,0.08); color: #4f46e5; border: 1px solid rgba(79,70,229,0.15); padding: 4px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 600; }
 
-            // Filter rows with transition
-            const rows = document.querySelectorAll('#tabelaEstoque tbody tr');
-            rows.forEach(row => {
-                if (tipo === 'todos' || row.getAttribute('data-tipo') === tipo) {
-                    row.style.display = '';
-                    row.style.opacity = '0';
-                    setTimeout(() => {
-                        row.style.transition = 'opacity 0.4s ease';
-                        row.style.opacity = '1';
-                    }, 50);
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
+  .sk-btn-stock-entrada { background: linear-gradient(135deg, #10b981, #059669); color: #fff !important; border: none; border-radius: 50px; padding: 7px 18px; font-weight: 700; font-size: 0.84rem; transition: all 0.25s ease; text-decoration: none !important; }
+  .sk-btn-stock-saida { background: linear-gradient(135deg, #f43f5e, #e11d48); color: #fff !important; border: none; border-radius: 50px; padding: 7px 18px; font-weight: 700; font-size: 0.84rem; transition: all 0.25s ease; text-decoration: none !important; }
+  .sk-btn-stock-ajuste { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff !important; border: none; border-radius: 50px; padding: 7px 18px; font-weight: 700; font-size: 0.84rem; transition: all 0.25s ease; text-decoration: none !important; }
+  .sk-btn-stock-entrada:hover, .sk-btn-stock-saida:hover, .sk-btn-stock-ajuste:hover { transform: translateY(-2px); filter: brightness(1.08); }
 
-        function pesquisar(input) {
-            const filter = input.value.toLowerCase();
-            const rows = document.querySelectorAll('#tabelaEstoque tbody tr');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(filter)) {
-                    row.style.display = '';
-                    row.style.opacity = '1';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-    </script>
-    </div>
+  .sk-kpi-card { border-radius: 20px; border: 1px solid #f1f5f9; padding: 1.25rem 1.4rem; background: #fff; box-shadow: 0 4px 16px -4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+  .sk-kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px -6px rgba(0,0,0,0.1); }
+  .dark-mode .sk-kpi-card { background: #1e293b; border-color: #334155; }
+  .sk-kpi-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.35rem; }
+  .sk-kpi-value { font-size: 1.85rem; font-weight: 800; color: #0f172a; line-height: 1; }
+  .dark-mode .sk-kpi-value { color: #f1f5f9; }
+  .sk-kpi-sub { font-size: 0.75rem; color: #94a3b8; margin-top: 0.3rem; }
+  .sk-kpi-icon-box { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .sk-icon-indigo { background: rgba(79,70,229,0.1); color: #4f46e5; }
+  .sk-icon-emerald { background: rgba(16,185,129,0.1); color: #10b981; }
+  .sk-icon-rose { background: rgba(244,63,94,0.1); color: #f43f5e; }
+  .sk-icon-amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
+  .sk-text-emerald { color: #10b981 !important; }
+  .sk-text-rose { color: #f43f5e !important; }
+  .sk-text-amber { color: #f59e0b !important; }
+
+  .sk-card-icon-box { width: 36px; height: 36px; border-radius: 10px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; }
+  .dark-mode .sk-card-icon-box { background: #0f172a; }
+
+  .sk-search-box { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 7px 14px; min-width: 220px; transition: all 0.2s ease; }
+  .sk-search-box:focus-within { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); background: #fff; }
+  .sk-search-box i { color: #94a3b8; font-size: 0.85rem; }
+  .sk-search-input { border: none; outline: none; background: transparent; font-size: 0.88rem; font-weight: 500; color: #0f172a; width: 100%; }
+  .dark-mode .sk-search-box { background: #0f172a; border-color: #334155; }
+  .dark-mode .sk-search-input { color: #f1f5f9; }
+
+  .sk-filter-pill { border: 1px solid #e2e8f0; background: #fff; color: #64748b; border-radius: 50px; padding: 5px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+  .sk-filter-pill.active, .sk-filter-pill:hover { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .sk-filter-pill.sk-pill-ok.active { background: #10b981; border-color: #10b981; }
+  .sk-filter-pill.sk-pill-danger.active { background: #f43f5e; border-color: #f43f5e; }
+  .sk-filter-pill.sk-pill-amber.active { background: #f59e0b; border-color: #f59e0b; }
+
+  .sk-table-head th { background: #f8fafc; color: #94a3b8; font-size: 0.73rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.8rem 1rem; border-top: none; border-bottom: 1px solid #f1f5f9; }
+  .dark-mode .sk-table-head th { background: #0f172a; color: #475569; border-color: #1e293b; }
+  .sk-table tbody tr { transition: background 0.15s ease; }
+  .sk-table tbody tr:hover td { background: #fafbff !important; }
+  .dark-mode .sk-table tbody tr:hover td { background: rgba(30,41,59,0.6) !important; }
+  .sk-table tbody td { padding: 0.9rem 1rem; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+  .dark-mode .sk-table tbody td { border-color: #1e293b; background: transparent; }
+
+  .sk-prod-avatar { width: 40px; height: 40px; border-radius: 12px; background: rgba(79,70,229,0.08); color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .sk-cat-badge { background: #f1f5f9; color: #475569; border-radius: 8px; padding: 3px 8px; font-size: 0.72rem; font-weight: 700; display: inline-block; }
+  .dark-mode .sk-cat-badge { background: #334155; color: #cbd5e1; }
+
+  .sk-status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 10px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .sk-status-ok { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+  .sk-status-esgotado { background: rgba(244,63,94,0.1); color: #f43f5e; border: 1px solid rgba(244,63,94,0.2); }
+  .sk-status-ajuste { background: rgba(245,158,11,0.1); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+
+  .sk-doc-chip {
+    background: #f1f5f9; border: 1px solid #e2e8f0; color: #475569;
+    border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700;
+    text-decoration: none !important; transition: all 0.2s ease;
+  }
+  .sk-doc-chip:hover { background: #4f46e5; color: #fff !important; border-color: #4f46e5; }
+  .sk-doc-chip:hover i { color: #fff !important; }
+
+  .sk-btn-ghost { background: transparent; border: 1px solid #e2e8f0; color: #64748b; border-radius: 10px; font-weight: 600; font-size: 0.8rem; padding: 5px 12px; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; }
+  .sk-btn-ghost:hover { background: #f1f5f9; color: #0f172a; }
+  .dark-mode .sk-btn-ghost { border-color: #334155; color: #94a3b8; }
+  .dark-mode .sk-btn-ghost:hover { background: #334155; color: #f1f5f9; }
+
+  .sk-empty-icon { width: 72px; height: 72px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 1.75rem; color: #94a3b8; }
+  .dark-mode .sk-empty-icon { background: #0f172a; }
+</style>
+
+<script>
+  function filtrarTabela(tipo, btnElem) {
+    document.querySelectorAll('.sk-filter-pill').forEach(function(p) { p.classList.remove('active'); });
+    var pill = btnElem || document.getElementById('pill-' + tipo);
+    if (pill) pill.classList.add('active');
+
+    var rows = document.querySelectorAll('#tabelaEstoque tbody tr[data-tipo]');
+    var visible = 0;
+    rows.forEach(function(row) {
+      var rowTipo = row.getAttribute('data-tipo');
+      var match = (tipo === 'todos' || rowTipo === tipo);
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+
+    document.getElementById('visibleCount').textContent = visible;
+    var emptySearch = document.getElementById('emptySearchState');
+    if (emptySearch) emptySearch.classList.toggle('d-none', visible > 0);
+  }
+
+  function pesquisar(input) {
+    var termo = input.value.toLowerCase().trim();
+    var activePill = document.querySelector('.sk-filter-pill.active');
+    var activeTipo = activePill ? (activePill.id.replace('pill-', '')) : 'todos';
+
+    var rows = document.querySelectorAll('#tabelaEstoque tbody tr[data-tipo]');
+    var visible = 0;
+    rows.forEach(function(row) {
+      var rowTipo = row.getAttribute('data-tipo');
+      var text = row.textContent.toLowerCase();
+      var tipoMatch = (activeTipo === 'todos' || rowTipo === activeTipo);
+      var textMatch = (termo === '' || text.includes(termo));
+      var match = tipoMatch && textMatch;
+
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+
+    document.getElementById('visibleCount').textContent = visible;
+    var emptySearch = document.getElementById('emptySearchState');
+    if (emptySearch) emptySearch.classList.toggle('d-none', visible > 0);
+  }
+</script>
+
 </body>
 </html>

@@ -339,8 +339,24 @@
             }
         };
 
+        document.getElementById('invoiceNumber').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('btnSearchInvoice').click();
+            }
+        });
+
         document.getElementById('btnAddManual').onclick = () => addRow();
-        window.onload = () => { if (itemsList.children.length === 0) addRow(); };
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const faturaParam = urlParams.get('fatura') || urlParams.get('numero');
+            if (faturaParam) {
+                document.getElementById('invoiceNumber').value = faturaParam;
+                document.getElementById('btnSearchInvoice').click();
+            } else {
+                if (itemsList.children.length === 0) addRow();
+            }
+        };
     </script>
 </body>
 </html>

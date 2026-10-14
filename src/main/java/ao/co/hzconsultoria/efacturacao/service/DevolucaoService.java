@@ -43,67 +43,91 @@ public class DevolucaoService {
 
     @Transactional
     public Devolucao registrarDevolucao(Devolucao devolucao, Long empresaId, Long usuarioId) {
-        devolucao.setEmpresa(empresaRepository.findById(empresaId).orElse(null));
-        devolucao.setUsuario(userRepository.findById(usuarioId).orElse(null));
+        if (empresaId != null) {
+            devolucao.setEmpresa(empresaRepository.findById(empresaId).orElse(null));
+        }
+        if (usuarioId != null) {
+            devolucao.setUsuario(userRepository.findById(usuarioId).orElse(null));
+        }
         devolucao.setDataDevolucao(LocalDateTime.now());
         
+        // Resolver a fatura completa se foi enviado apenas o ID
+        if (devolucao.getFatura() != null && devolucao.getFatura().getId() != null) {
+            devolucao.setFatura(faturaRepository.findById(devolucao.getFatura().getId()).orElse(null));
+        } else {
+            devolucao.setFatura(null);
+        }
+
         String tipoNota = devolucao.getTipoNota();
 
-        List<Estabelecimento> estabelecimentos = estabelecimentoRepository.findByEmpresa_Id(empresaId);
-        if (estabelecimentos.isEmpty()) {
-            throw new RuntimeException("Nenhum estabelecimento encontrado para a empresa.");
+        List<Estabelecimento> estabelecimentos = (empresaId != null) ? estabelecimentoRepository.findByEmpresa_Id(empresaId) : null;
+        Estabelecimento principal = null;
+        if (estabelecimentos != null && !estabelecimentos.isEmpty()) {
+            principal = estabelecimentos.get(0);
+        } else {
+            principal = estabelecimentoRepository.findAll().stream().findFirst().orElse(null);
         }
-        Estabelecimento principal = estabelecimentos.get(0);
 
         double total = 0;
         double totalIva = 0;
         if (devolucao.getItens() != null) {
             for (ItemDevolucao item : devolucao.getItens()) {
+                if (item.getProduto() == null || item.getProduto().getId() == null) {
+                    continue;
+                }
                 item.setDevolucao(devolucao);
                 
                 // Buscar dados reais do produto para o IVA
                 Produto pFull = produtoRepository.findById(item.getProduto().getId()).orElse(item.getProduto());
-                double percIva = pFull.getIvaPercentual() != null ? pFull.getIvaPercentual() : 0.0;
-                double valorIva = (item.getPreco() * item.getQuantidade()) * (percIva / 100);
+                double percIva = (item.getIvaPercentual() != null) ? item.getIvaPercentual() : (pFull.getIvaPercentual() != null ? pFull.getIvaPercentual() : 0.0);
+                double preco = (item.getPreco() != null) ? item.getPreco() : (pFull.getPreco() != null ? pFull.getPreco() : 0.0);
+                int qtd = (item.getQuantidade() != null && item.getQuantidade() > 0) ? item.getQuantidade() : 1;
                 
+                item.setPreco(preco);
+                item.setQuantidade(qtd);
                 item.setIvaPercentual(percIva);
-                item.setIvaValor(valorIva);
-                item.setSubtotal(item.getPreco() * item.getQuantidade());
+
+                double subtotal = preco * qtd;
+                double valorIva = subtotal * (percIva / 100);
                 
-                total += item.getSubtotal();
+                item.setSubtotal(subtotal);
+                item.setIvaValor(valorIva);
+                
+                total += subtotal;
                 totalIva += valorIva;
 
-                // Ajustar Estoque
-                Estoque estoque = estoqueRepository.findByProdutoAndEstabelecimento(item.getProduto(), principal)
-                        .orElseGet(() -> {
-                            Estoque novoEstoque = new Estoque();
-                            novoEstoque.setProduto(item.getProduto());
-                            novoEstoque.setEstabelecimento(principal);
-                            novoEstoque.setQuantidade(0.0);
-                            return novoEstoque;
-                        });
-                
-                double qtdAjuste = item.getQuantidade();
-                if ("ND".equals(tipoNota)) {
-                    estoque.setQuantidade(estoque.getQuantidade() - qtdAjuste);
-                } else {
-                    estoque.setQuantidade(estoque.getQuantidade() + qtdAjuste);
-                }
-                estoque.setUpdatedAt(LocalDateTime.now());
-                estoqueRepository.save(estoque);
-
-                // ACTUALIZAR TAMBÉM O RESUMO NO PRODUTO (BUSCANDO COMPLETO PARA EVITAR SOBREPOSIÇÃO DE NULLS)
-                if (item.getProduto() != null && item.getProduto().getId() != null) {
-                    Produto p = produtoRepository.findById(item.getProduto().getId()).orElse(null);
-                    if (p != null) {
-                        double qAtual = p.getQuantidadeEstoque() != null ? p.getQuantidadeEstoque() : 0.0;
-                        if ("ND".equals(tipoNota)) {
-                            p.setQuantidadeEstoque(qAtual - qtdAjuste);
-                        } else {
-                            p.setQuantidadeEstoque(qAtual + qtdAjuste);
-                        }
-                        produtoRepository.save(p);
+                // Ajustar Estoque apenas se houver estabelecimento
+                if (principal != null) {
+                    final Estabelecimento estabFinal = principal;
+                    Estoque estoque = estoqueRepository.findByProdutoAndEstabelecimento(item.getProduto(), estabFinal)
+                            .orElseGet(() -> {
+                                Estoque novoEstoque = new Estoque();
+                                novoEstoque.setProduto(item.getProduto());
+                                novoEstoque.setEstabelecimento(estabFinal);
+                                novoEstoque.setQuantidade(0.0);
+                                return novoEstoque;
+                            });
+                    
+                    double qtdAjuste = qtd;
+                    if ("ND".equals(tipoNota)) {
+                        estoque.setQuantidade(estoque.getQuantidade() - qtdAjuste);
+                    } else {
+                        estoque.setQuantidade(estoque.getQuantidade() + qtdAjuste);
                     }
+                    estoque.setUpdatedAt(LocalDateTime.now());
+                    estoqueRepository.save(estoque);
+                }
+
+                // ACTUALIZAR TAMBÉM O RESUMO NO PRODUTO
+                Produto p = produtoRepository.findById(item.getProduto().getId()).orElse(null);
+                if (p != null) {
+                    double qAtual = p.getQuantidadeEstoque() != null ? p.getQuantidadeEstoque() : 0.0;
+                    if ("ND".equals(tipoNota)) {
+                        p.setQuantidadeEstoque(qAtual - qtd);
+                    } else {
+                        p.setQuantidadeEstoque(qAtual + qtd);
+                    }
+                    produtoRepository.save(p);
                 }
             }
         }
@@ -114,12 +138,17 @@ public class DevolucaoService {
 
         // GERAR NOTA DE CRÉDITO OU NOTA DE DÉBITO (DOCUMENTO FISCAL)
         if (salva.getFatura() != null) {
-            Fatura nc = faturaService.emitirNota(salva, tipoNota);
-            salva.setNotaCredito(nc);
-            devolucaoRepository.save(salva);
-            
-            // AGORA SIM, com o vínculo salvo no banco, geramos o PDF
-            faturaService.gerarPdfFatura(nc, LocaleContextHolder.getLocale());
+            try {
+                Fatura nc = faturaService.emitirNota(salva, tipoNota);
+                salva.setNotaCredito(nc);
+                devolucaoRepository.save(salva);
+                
+                // Gerar o PDF
+                faturaService.gerarPdfFatura(nc, LocaleContextHolder.getLocale());
+            } catch (Exception ex) {
+                org.slf4j.LoggerFactory.getLogger(DevolucaoService.class)
+                    .error("Erro ao emitir documento fiscal para devolução {}: {}", salva.getId(), ex.getMessage(), ex);
+            }
         }
 
         return salva;
@@ -127,8 +156,10 @@ public class DevolucaoService {
 
     public Devolucao buscarPorId(Long id, Long empresaId) {
         Devolucao devolucao = devolucaoRepository.findById(id).orElse(null);
-        if (devolucao != null && devolucao.getEmpresa().getId().equals(empresaId)) {
-            return devolucao;
+        if (devolucao != null) {
+            if (empresaId == null || (devolucao.getEmpresa() != null && devolucao.getEmpresa().getId().equals(empresaId))) {
+                return devolucao;
+            }
         }
         return null;
     }
