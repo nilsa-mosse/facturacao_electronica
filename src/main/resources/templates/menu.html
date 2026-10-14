@@ -7,7 +7,8 @@
   <!-- CSRF Tokens para AJAX -->
   <meta name="_csrf" th:content="${_csrf?.token}" />
   <meta name="_csrf_header" th:content="${_csrf?.headerName}" />
-  <title th:text="${(globalSistemaNome != null ? globalSistemaNome : 'Kwanza ERP') + ' - Gestão Inteligente'}">Kwanza ERP - Gestão Inteligente</title>
+  <title th:text="${(globalSistemaNome != null ? globalSistemaNome : 'Kwanza ERP') + ' - Gestão Inteligente'}">Kwanza
+    ERP - Gestão Inteligente</title>
 
   <!-- PWA Manifest & Service Worker -->
   <link rel="manifest" href="/manifest.json">
@@ -25,7 +26,9 @@
   <!-- Google Fonts: Inter / Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
 
   <!-- jQuery -->
   <script th:src="@{/plugins/jquery/jquery-3.6.0.min.js}"></script>
@@ -57,7 +60,7 @@
         } else if (savedTheme === 'light') {
           document.documentElement.classList.remove('dark-mode');
         }
-      } catch (e) {}
+      } catch (e) { }
     })();
 
     // 2. Função Global de Alternância Claro / Escuro com Debounce
@@ -243,7 +246,7 @@
     /* ===================================================================== */
     .content-wrapper {
       background-color: #f8fafc !important;
-      background-image: 
+      background-image:
         radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.035) 0px, transparent 45%),
         radial-gradient(at 100% 0%, rgba(148, 163, 184, 0.04) 0px, transparent 40%),
         radial-gradient(at 50% 100%, rgba(79, 70, 229, 0.025) 0px, transparent 50%),
@@ -260,7 +263,7 @@
     /* Em modo escuro, adapta-se automaticamente mantendo a legibilidade */
     .dark-mode .content-wrapper {
       background-color: #0b1120 !important;
-      background-image: 
+      background-image:
         radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.07) 0px, transparent 50%),
         radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.04) 0px, transparent 50%),
         radial-gradient(at 50% 100%, rgba(30, 41, 59, 0.6) 0px, transparent 50%),
@@ -666,13 +669,40 @@
     }
 
     /* Cores Temáticas dos Módulos */
-    .icon-cyan i.nav-icon { background: rgba(6, 182, 212, 0.1); color: #0891b2; }
-    .icon-emerald i.nav-icon { background: rgba(16, 185, 129, 0.1); color: #059669; }
-    .icon-amber i.nav-icon { background: rgba(245, 158, 11, 0.1); color: #d97706; }
-    .icon-rose i.nav-icon { background: rgba(244, 63, 94, 0.1); color: #e11d48; }
-    .icon-violet i.nav-icon { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
-    .icon-indigo i.nav-icon { background: rgba(79, 70, 229, 0.1); color: #4f46e5; }
-    .icon-blue i.nav-icon { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+    .icon-cyan i.nav-icon {
+      background: rgba(6, 182, 212, 0.1);
+      color: #0891b2;
+    }
+
+    .icon-emerald i.nav-icon {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+    }
+
+    .icon-amber i.nav-icon {
+      background: rgba(245, 158, 11, 0.1);
+      color: #d97706;
+    }
+
+    .icon-rose i.nav-icon {
+      background: rgba(244, 63, 94, 0.1);
+      color: #e11d48;
+    }
+
+    .icon-violet i.nav-icon {
+      background: rgba(139, 92, 246, 0.1);
+      color: #7c3aed;
+    }
+
+    .icon-indigo i.nav-icon {
+      background: rgba(79, 70, 229, 0.1);
+      color: #4f46e5;
+    }
+
+    .icon-blue i.nav-icon {
+      background: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+    }
 
     /* Footer da Sidebar com Perfil */
     .sidebar-user-footer {
@@ -731,13 +761,16 @@
           <i class="fas fa-globe"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2 rounded-4" style="min-width: 170px;">
-          <a th:href="@{${#request.requestURI}(lang='pt')}" class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
+          <a th:href="@{${#request.requestURI}(lang='pt')}"
+            class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
             <span>🇵🇹</span> Português
           </a>
-          <a th:href="@{${#request.requestURI}(lang='en')}" class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
+          <a th:href="@{${#request.requestURI}(lang='en')}"
+            class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
             <span>🇺🇸</span> English
           </a>
-          <a th:href="@{${#request.requestURI}(lang='fr')}" class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
+          <a th:href="@{${#request.requestURI}(lang='fr')}"
+            class="dropdown-item rounded-3 py-2 fw-semibold d-flex align-items-center gap-2">
             <span>🇫🇷</span> Français
           </a>
         </div>
@@ -745,7 +778,8 @@
 
       <!-- Toggle Modo Escuro / Claro Dinâmico -->
       <li class="nav-item">
-        <button type="button" class="topbar-btn-toggle topbar-theme-btn" id="btnToggleThemeTopbar" onclick="toggleThemeGlobal(event)" title="Alternar Modo Claro / Escuro">
+        <button type="button" class="topbar-btn-toggle topbar-theme-btn" id="btnToggleThemeTopbar"
+          onclick="toggleThemeGlobal(event)" title="Alternar Modo Claro / Escuro">
           <i class="fas fa-moon" id="iconThemeTopbar" style="pointer-events: none;"></i>
         </button>
       </li>
@@ -754,12 +788,14 @@
       <li class="nav-item dropdown">
         <div class="topbar-user-pill" data-bs-toggle="dropdown" aria-expanded="false">
           <div class="topbar-user-avatar">
-            <span th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
+            <span
+              th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
           </div>
           <div class="d-none d-md-block text-start leading-tight">
-            <div class="fw-bold text-dark small" style="line-height: 1.1;" th:text="${usuario_NOME ?: 'Utilizador'}">Utilizador</div>
+            <div class="fw-bold text-dark small" style="line-height: 1.1;" th:text="${usuario_NOME ?: 'Utilizador'}">
+              Utilizador</div>
             <small class="text-muted" style="font-size: 0.68rem;"
-                   th:text="${isSuperAdmin ? 'SuperUtilizador' : (isAdmin ? 'Administrador' : 'Operador')}">Perfil</small>
+              th:text="${isSuperAdmin ? 'SuperUtilizador' : (isAdmin ? 'Administrador' : 'Operador')}">Perfil</small>
           </div>
           <i class="fas fa-chevron-down text-muted small ms-1"></i>
         </div>
@@ -767,14 +803,17 @@
         <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2 rounded-4 mt-2" style="min-width: 220px;">
           <div class="p-3 border-bottom text-center">
             <div class="topbar-user-avatar mx-auto mb-2" style="width: 44px; height: 44px; font-size: 1.1rem;">
-              <span th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
+              <span
+                th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
             </div>
             <div class="fw-bold text-dark" th:text="${usuario_NOME ?: 'Utilizador'}">Nome do Utilizador</div>
-            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 mt-1" style="font-size: 0.7rem;"
-                  th:text="${isSuperAdmin ? 'SUPERADMIN' : (isAdmin ? 'ADMINISTRADOR' : 'OPERADOR')}">PERFIL</span>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 mt-1"
+              style="font-size: 0.7rem;"
+              th:text="${isSuperAdmin ? 'SUPERADMIN' : (isAdmin ? 'ADMINISTRADOR' : 'OPERADOR')}">PERFIL</span>
           </div>
           <div class="py-1">
-            <a th:href="@{/configuracoes/geral}" class="dropdown-item rounded-3 py-2 fw-semibold" th:if="${modulo_ADMINISTRACAO}">
+            <a th:href="@{/configuracoes/geral}" class="dropdown-item rounded-3 py-2 fw-semibold"
+              th:if="${modulo_ADMINISTRACAO}">
               <i class="fas fa-sliders-h text-muted me-2"></i> Configurações
             </a>
             <a th:href="@{/dashboard}" class="dropdown-item rounded-3 py-2 fw-semibold" th:if="${modulo_DASHBOARD}">
@@ -783,7 +822,8 @@
           </div>
           <div class="border-top pt-1">
             <form th:action="@{/logout}" method="post" id="logoutFormTopbar" class="d-none"></form>
-            <a href="javascript:void(0)" onclick="confirmarLogout('logoutFormTopbar')" class="dropdown-item rounded-3 py-2 text-danger fw-bold">
+            <a href="javascript:void(0)" onclick="confirmarLogout('logoutFormTopbar')"
+              class="dropdown-item rounded-3 py-2 text-danger fw-bold">
               <i class="fas fa-power-off me-2"></i> Terminar Sessão
             </a>
           </div>
@@ -802,8 +842,7 @@
         <div class="sidebar-brand-box">
           <a th:href="@{/dashboard}" class="d-inline-flex align-items-center">
             <img th:src="@{${globalSistemaLogotipo != null ? globalSistemaLogotipo : '/img/logo.png'}}" alt="Logo"
-              class="sidebar-brand-logo"
-              onerror="this.src='/img/logo.png';">
+              class="sidebar-brand-logo" onerror="this.src='/img/logo.png';">
           </a>
         </div>
 
@@ -812,19 +851,21 @@
           <div class="sidebar-search-box">
             <i class="fas fa-search text-muted small"></i>
             <input type="text" id="sidebarMenuSearch" class="sidebar-search-input"
-                   placeholder="Pesquisar menus (atalho: /)" autocomplete="off">
+              placeholder="Pesquisar menus (atalho: /)" autocomplete="off">
           </div>
         </div>
 
         <!-- Lista de Navegação -->
         <nav class="mt-2 px-1">
-          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" id="sidebarNavMenu">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false"
+            id="sidebarNavMenu">
 
             <!-- HOME MODULE (OPERADORES) -->
             <th:block th:if="${!isAdmin and !isSuperAdmin}">
               <li class="nav-header" th:text="#{menu.header.geral}">GERAL</li>
               <li class="nav-item icon-indigo">
-                <a th:href="@{/home}" class="nav-link" th:classappend="${#request.requestURI == '/home'} ? ' active' : ''">
+                <a th:href="@{/home}" class="nav-link"
+                  th:classappend="${#request.requestURI == '/home'} ? ' active' : ''">
                   <i class="nav-icon fas fa-home"></i>
                   <p th:text="#{menu.home}">Página Inicial</p>
                 </a>
@@ -835,7 +876,8 @@
             <th:block th:if="${modulo_DASHBOARD}">
               <li class="nav-header" th:text="#{menu.header.painel_controlo}">PAINEL DE CONTROLO</li>
               <li class="nav-item icon-cyan">
-                <a th:href="@{/dashboard}" class="nav-link" th:classappend="${#request.requestURI == '/dashboard' or #request.requestURI == '/'} ? ' active' : ''">
+                <a th:href="@{/dashboard}" class="nav-link"
+                  th:classappend="${#request.requestURI == '/dashboard' or #request.requestURI == '/'} ? ' active' : ''">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p th:text="#{menu.dashboard}">Dashboard</p>
                 </a>
@@ -851,36 +893,42 @@
                 <a th:href="@{/pos}" class="nav-link sidebar-pos-launcher" title="Abrir Ponto de Venda [F1]">
                   <i class="nav-icon fas fa-cash-register"></i>
                   <p><b th:text="#{menu.vendas.pos}">Ponto de Venda (POS)</b></p>
-                  <span class="badge bg-white text-primary rounded-pill px-2 ms-auto fw-bold" style="font-size: 0.68rem;">ABRIR</span>
+                  <span class="badge bg-white text-primary rounded-pill px-2 ms-auto fw-bold"
+                    style="font-size: 0.68rem;">ABRIR</span>
                 </a>
               </li>
 
               <li class="nav-item icon-emerald" th:if="${isOperador}">
-                <a th:href="@{/caixa/abertura}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/caixa/abertura')} ? ' active' : ''">
+                <a th:href="@{/caixa/abertura}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/caixa/abertura')} ? ' active' : ''">
                   <i class="nav-icon fas fa-door-open"></i>
                   <p th:text="#{menu.vendas.abertura_caixa}">Abertura de Caixa</p>
                 </a>
               </li>
               <li class="nav-item icon-rose" th:if="${isOperador}">
-                <a th:href="@{/caixa/fecho}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/caixa/fecho')} ? ' active' : ''">
+                <a th:href="@{/caixa/fecho}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/caixa/fecho')} ? ' active' : ''">
                   <i class="nav-icon fas fa-door-closed"></i>
                   <p th:text="#{menu.vendas.fecho_caixa}">Fecho de Caixa</p>
                 </a>
               </li>
               <li class="nav-item icon-indigo" th:if="${isAdmin or isSuperAdmin}">
-                <a th:href="@{/caixa/monitor}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/caixa/monitor')} ? ' active' : ''">
+                <a th:href="@{/caixa/monitor}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/caixa/monitor')} ? ' active' : ''">
                   <i class="nav-icon fas fa-desktop"></i>
                   <p th:text="#{menu.vendas.monitor_caixas}">Monitor de Caixas</p>
                 </a>
               </li>
               <li class="nav-item icon-blue">
-                <a th:href="@{/historico-vendas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/historico-vendas')} ? ' active' : ''">
+                <a th:href="@{/historico-vendas}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/historico-vendas')} ? ' active' : ''">
                   <i class="nav-icon fas fa-history"></i>
                   <p th:text="#{menu.vendas.historico}">Histórico de Facturas</p>
                 </a>
               </li>
               <li class="nav-item icon-rose">
-                <a th:href="@{/devolucoes}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/devolucoes')} ? ' active' : ''">
+                <a th:href="@{/devolucoes}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/devolucoes')} ? ' active' : ''">
                   <i class="nav-icon fas fa-undo"></i>
                   <p th:text="#{menu.vendas.devolucoes}">Devoluções / Reembolsos</p>
                 </a>
@@ -891,9 +939,9 @@
             <th:block th:if="${modulo_STOCK}">
               <li class="nav-header" th:text="#{menu.header.gestao_stock}">GESTÃO DE STOCK</li>
               <li class="nav-item has-treeview icon-amber"
-                  th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI.startsWith('/cadastroProduto') or #request.requestURI.startsWith('/stock/saldos') or #request.requestURI.startsWith('/categorias') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' menu-open' : ''">
+                th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI.startsWith('/cadastroProduto') or #request.requestURI.startsWith('/stock/saldos') or #request.requestURI.startsWith('/categorias') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' menu-open' : ''">
                 <a href="#" class="nav-link"
-                   th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI.startsWith('/cadastroProduto') or #request.requestURI.startsWith('/stock/saldos') or #request.requestURI.startsWith('/categorias') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
+                  th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI.startsWith('/cadastroProduto') or #request.requestURI.startsWith('/stock/saldos') or #request.requestURI.startsWith('/categorias') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
                   <i class="nav-icon fas fa-boxes"></i>
                   <p>
                     <span th:text="#{menu.stock.produtos_servicos}">Artigos & Serviços</span>
@@ -902,31 +950,36 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a th:href="@{/produtos/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/produtos')} ? ' active' : ''">
+                    <a th:href="@{/produtos/listar}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/produtos')} ? ' active' : ''">
                       <i class="fas fa-list nav-icon"></i>
                       <p th:text="#{menu.produtos.lista}">Lista de Produtos</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/cadastroProduto}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/cadastroProduto')} ? ' active' : ''">
+                    <a th:href="@{/cadastroProduto}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/cadastroProduto')} ? ' active' : ''">
                       <i class="fas fa-plus nav-icon"></i>
                       <p th:text="#{menu.produtos.adicionar}">Novo Produto</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/stock/saldos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/saldos')} ? ' active' : ''">
+                    <a th:href="@{/stock/saldos}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/stock/saldos')} ? ' active' : ''">
                       <i class="fas fa-warehouse nav-icon"></i>
                       <p th:text="#{menu.stock.saldos}">Saldos de Stock</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/categorias/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/categorias')} ? ' active' : ''">
+                    <a th:href="@{/categorias/listar}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/categorias')} ? ' active' : ''">
                       <i class="fas fa-tags nav-icon"></i>
                       <p th:text="#{menu.produtos.categorias}">Categorias</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/gestao-inventarios}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
+                    <a th:href="@{/gestao-inventarios}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
                       <i class="fas fa-clipboard-check nav-icon"></i>
                       <p th:text="#{menu.stock.gestao_inventarios}">Gestão de Inventários</p>
                     </a>
@@ -935,9 +988,9 @@
               </li>
 
               <li class="nav-item has-treeview icon-blue"
-                  th:classappend="${#request.requestURI.startsWith('/stock/entrada') or #request.requestURI.startsWith('/stock/saida') or #request.requestURI.startsWith('/stock/ajuste')} ? ' menu-open' : ''">
+                th:classappend="${#request.requestURI.startsWith('/stock/entrada') or #request.requestURI.startsWith('/stock/saida') or #request.requestURI.startsWith('/stock/ajuste')} ? ' menu-open' : ''">
                 <a href="#" class="nav-link"
-                   th:classappend="${#request.requestURI.startsWith('/stock/entrada') or #request.requestURI.startsWith('/stock/saida') or #request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''">
+                  th:classappend="${#request.requestURI.startsWith('/stock/entrada') or #request.requestURI.startsWith('/stock/saida') or #request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''">
                   <i class="nav-icon fas fa-exchange-alt"></i>
                   <p>
                     <span th:text="#{menu.stock.movimentacoes}">Movimentações</span>
@@ -946,25 +999,29 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a th:href="@{/stock/entrada}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/entrada')} ? ' active' : ''">
+                    <a th:href="@{/stock/entrada}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/stock/entrada')} ? ' active' : ''">
                       <i class="fas fa-sign-in-alt nav-icon"></i>
                       <p th:text="#{menu.inventario.entradas}">Entradas</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/stock/saida}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/saida')} ? ' active' : ''">
+                    <a th:href="@{/stock/saida}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/stock/saida')} ? ' active' : ''">
                       <i class="fas fa-sign-out-alt nav-icon"></i>
                       <p th:text="#{menu.inventario.saidas}">Saídas</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/stock/ajuste}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''">
+                    <a th:href="@{/stock/ajuste}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''">
                       <i class="fas fa-tools nav-icon"></i>
                       <p th:text="#{menu.inventario.ajustes}">Ajustes de Stock</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/stock/historico}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/historico')} ? ' active' : ''">
+                    <a th:href="@{/stock/historico}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/stock/historico')} ? ' active' : ''">
                       <i class="fas fa-history nav-icon"></i>
                       <p>Histórico de Movimentos</p>
                     </a>
@@ -973,7 +1030,8 @@
               </li>
 
               <li class="nav-item icon-rose">
-                <a th:href="@{/stock/alertas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/stock/alertas')} ? ' active' : ''">
+                <a th:href="@{/stock/alertas}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/stock/alertas')} ? ' active' : ''">
                   <i class="nav-icon fas fa-exclamation-triangle"></i>
                   <p>
                     <span th:text="#{menu.stock.alertas_ruptura}">Alertas de Ruptura</span>
@@ -987,13 +1045,15 @@
             <th:block th:if="${modulo_ENTIDADES}">
               <li class="nav-header" th:text="#{menu.header.entidades}">ENTIDADES & PARCEIROS</li>
               <li class="nav-item icon-indigo">
-                <a th:href="@{/clientes/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/clientes')} ? ' active' : ''">
+                <a th:href="@{/clientes/listar}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/clientes')} ? ' active' : ''">
                   <i class="nav-icon fas fa-users"></i>
                   <p th:text="#{menu.clientes}">Clientes</p>
                 </a>
               </li>
               <li class="nav-item icon-cyan">
-                <a th:href="@{/fornecedores/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/fornecedores')} ? ' active' : ''">
+                <a th:href="@{/fornecedores/listar}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/fornecedores')} ? ' active' : ''">
                   <i class="nav-icon fas fa-truck"></i>
                   <p th:text="#{menu.fornecedores}">Fornecedores</p>
                 </a>
@@ -1010,27 +1070,30 @@
                 </a>
               </li>
               <li class="nav-item icon-emerald">
-                <a th:href="@{/guias/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/guias')} ? ' active' : ''">
+                <a th:href="@{/guias/listar}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/guias')} ? ' active' : ''">
                   <i class="nav-icon fas fa-map-marked-alt"></i>
                   <p th:text="#{menu.facturacao.guias}">Guias de Remessa</p>
                 </a>
               </li>
               <li class="nav-item icon-rose">
-                <a th:href="@{/notas/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/notas')} ? ' active' : ''">
+                <a th:href="@{/notas/listar}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/notas')} ? ' active' : ''">
                   <i class="nav-icon fas fa-sticky-note"></i>
                   <p th:text="#{menu.facturacao.notas}">Notas de Crédito / Débito</p>
                 </a>
               </li>
               <li class="nav-item icon-violet">
-                <a th:href="@{/autofaturacao}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/autofaturacao')} ? ' active' : ''">
+                <a th:href="@{/autofaturacao}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/autofaturacao')} ? ' active' : ''">
                   <i class="nav-icon fas fa-file-signature"></i>
                   <p>Autofaturação (AF)</p>
                 </a>
               </li>
               <li class="nav-item has-treeview icon-indigo"
-                  th:classappend="${#request.requestURI.startsWith('/factura-eletronica') or #request.requestURI.startsWith('/configuracoes/saft')} ? ' menu-open' : ''">
+                th:classappend="${#request.requestURI.startsWith('/factura-eletronica') or #request.requestURI.startsWith('/configuracoes/saft')} ? ' menu-open' : ''">
                 <a href="#" class="nav-link"
-                   th:classappend="${#request.requestURI.startsWith('/factura-eletronica') or #request.requestURI.startsWith('/configuracoes/saft')} ? ' active' : ''">
+                  th:classappend="${#request.requestURI.startsWith('/factura-eletronica') or #request.requestURI.startsWith('/configuracoes/saft')} ? ' active' : ''">
                   <i class="nav-icon fas fa-shield-alt"></i>
                   <p>
                     <span th:text="#{menu.facturacao.gestao_agt_saft}">Gestão AGT & SAF-T</span>
@@ -1039,19 +1102,22 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a th:href="@{/factura-eletronica/estado}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/factura-eletronica')} ? ' active' : ''">
+                    <a th:href="@{/factura-eletronica/estado}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/factura-eletronica')} ? ' active' : ''">
                       <i class="fas fa-satellite-dish nav-icon"></i>
                       <p th:text="#{menu.facturacao.estado}">Estado de Comunicação</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/saft}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/saft')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/saft}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/saft')} ? ' active' : ''">
                       <i class="fas fa-file-export nav-icon"></i>
                       <p th:text="#{menu.configuracoes.saft}">Exportar SAF-T (AO)</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
                       <i class="fas fa-gavel nav-icon"></i>
                       <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
                     </a>
@@ -1064,13 +1130,15 @@
             <th:block th:if="${modulo_FINANCEIRO}">
               <li class="nav-header" th:text="#{menu.header.financeiro}">FINANCEIRO & TESOURARIA</li>
               <li class="nav-item icon-amber">
-                <a th:href="@{/despesas/listar}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' active' : ''">
+                <a th:href="@{/despesas/listar}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' active' : ''">
                   <i class="nav-icon fas fa-receipt"></i>
                   <p th:text="#{menu.despesas}">Gestão de Despesas</p>
                 </a>
               </li>
               <li class="nav-item icon-emerald">
-                <a th:href="@{/financeiro/fluxo-caixa}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/financeiro/fluxo-caixa')} ? ' active' : ''">
+                <a th:href="@{/financeiro/fluxo-caixa}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/financeiro/fluxo-caixa')} ? ' active' : ''">
                   <i class="nav-icon fas fa-chart-area"></i>
                   <p th:text="#{menu.fluxo_caixa}">Fluxo de Caixa</p>
                 </a>
@@ -1081,31 +1149,36 @@
             <th:block th:if="${modulo_RH}">
               <li class="nav-header" th:text="#{menu.header.rh}">RECURSOS HUMANOS (RH)</li>
               <li class="nav-item icon-cyan">
-                <a th:href="@{/rh/colaboradores}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/colaboradores')} ? ' active' : ''">
+                <a th:href="@{/rh/colaboradores}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/rh/colaboradores')} ? ' active' : ''">
                   <i class="nav-icon fas fa-user-tie"></i>
                   <p th:text="#{menu.rh.colaboradores}">Colaboradores</p>
                 </a>
               </li>
               <li class="nav-item icon-emerald">
-                <a th:href="@{/rh/processamento}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/processamento')} ? ' active' : ''">
+                <a th:href="@{/rh/processamento}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/rh/processamento')} ? ' active' : ''">
                   <i class="nav-icon fas fa-calculator"></i>
                   <p th:text="#{menu.rh.folhas_vencimento}">Folhas de Vencimento</p>
                 </a>
               </li>
               <li class="nav-item icon-indigo">
-                <a th:href="@{/rh/departamentos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/departamentos')} ? ' active' : ''">
+                <a th:href="@{/rh/departamentos}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/rh/departamentos')} ? ' active' : ''">
                   <i class="nav-icon fas fa-sitemap"></i>
                   <p th:text="#{menu.rh.departamentos}">Departamentos</p>
                 </a>
               </li>
               <li class="nav-item icon-amber">
-                <a th:href="@{/rh/subsidios}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/subsidios')} ? ' active' : ''">
+                <a th:href="@{/rh/subsidios}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/rh/subsidios')} ? ' active' : ''">
                   <i class="nav-icon fas fa-hand-holding-usd"></i>
                   <p th:text="#{menu.rh.tipos_subsidio}">Tipos de Subsídio</p>
                 </a>
               </li>
               <li class="nav-item icon-blue">
-                <a th:href="@{/rh/parametros}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh/parametros')} ? ' active' : ''">
+                <a th:href="@{/rh/parametros}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/rh/parametros')} ? ' active' : ''">
                   <i class="nav-icon fas fa-sliders-h"></i>
                   <p th:text="#{menu.rh.parametros}">Parâmetros</p>
                 </a>
@@ -1118,9 +1191,9 @@
 
               <!-- Definições do Sistema -->
               <li class="nav-item has-treeview icon-indigo"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/empresa')} ? ' menu-open' : ''">
+                th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/empresa')} ? ' menu-open' : ''">
                 <a href="#" class="nav-link"
-                   th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''">
+                  th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''">
                   <i class="nav-icon fas fa-cogs"></i>
                   <p>
                     <span th:text="#{menu.admin.definicoes_sistema}">Definições Sistema</span>
@@ -1129,13 +1202,15 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/geral}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/geral')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/geral}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/geral')} ? ' active' : ''">
                       <i class="fas fa-sliders-h nav-icon"></i>
                       <p th:text="#{menu.admin.parametros_avancados}">Parâmetros Avançados</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/empresa}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/empresa}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''">
                       <i class="fas fa-id-card nav-icon"></i>
                       <p th:text="#{menu.configuracoes.empresa}">Dados da Empresa</p>
                     </a>
@@ -1145,9 +1220,9 @@
 
               <!-- Gestão de Utilizadores -->
               <li class="nav-item has-treeview icon-cyan"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' menu-open' : ''">
+                th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' menu-open' : ''">
                 <a href="#" class="nav-link"
-                   th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
+                  th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
                   <i class="nav-icon fas fa-users-cog"></i>
                   <p>
                     <span th:text="#{menu.admin.gestao_utilizadores}">Gestão Utilizadores</span>
@@ -1156,13 +1231,15 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/utilizadores}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/utilizadores}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores')} ? ' active' : ''">
                       <i class="fas fa-users nav-icon"></i>
                       <p th:text="#{menu.configuracoes.utilizadores}">Utilizadores e Perfis</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
                       <i class="fas fa-user-shield nav-icon"></i>
                       <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
                     </a>
@@ -1183,37 +1260,43 @@
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/comunicacao-agt')} ? ' active' : ''">
                       <i class="fas fa-shield-alt nav-icon"></i>
                       <p th:text="#{menu.configuracoes.agt}">Configurações AGT</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/impostos')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/impostos')} ? ' active' : ''">
                       <i class="fas fa-percent nav-icon"></i>
                       <p th:text="#{menu.configuracoes.fiscais.impostos}">Impostos (IVA/Selo)</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/fiscais/taxas}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/taxas')} ? ' active' : ''">
                       <i class="fas fa-hand-holding-usd nav-icon"></i>
                       <p th:text="#{menu.configuracoes.fiscais.taxas}">Taxas Adicionais</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/moedas}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/moedas}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
                       <i class="fas fa-coins nav-icon"></i>
                       <p th:text="#{menu.configuracoes.moedas}">Moedas e Câmbio</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/series}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/series}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''">
                       <i class="fas fa-list-ol nav-icon"></i>
                       <p th:text="#{menu.configuracoes.series}">Séries de Faturação</p>
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
+                    <a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"
+                      th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais/regime-fiscal')} ? ' active' : ''">
                       <i class="fas fa-gavel nav-icon"></i>
                       <p th:text="#{menu.configuracoes.fiscais.regime_fiscal}">Regime Fiscal</p>
                     </a>
@@ -1258,7 +1341,8 @@
             <th:block th:if="${isAdmin and !isSuperAdmin}">
               <li class="nav-header" th:text="#{menu.header.gestao_acessos}">GESTÃO DE ACESSOS</li>
               <li class="nav-item icon-indigo">
-                <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
+                <a th:href="@{/configuracoes/controlo-acesso}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
                   <i class="nav-icon fas fa-user-shield"></i>
                   <p th:text="#{menu.admin.controlo_acesso}">Controlo de Acesso</p>
                 </a>
@@ -1269,25 +1353,29 @@
             <th:block th:if="${modulo_PAINEL_GLOBAL}">
               <li class="nav-header text-warning" th:text="#{menu.header.painel_global}">PAINEL GLOBAL (SaaS)</li>
               <li class="nav-item icon-amber">
-                <a th:href="@{/superadmin/dashboard}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/dashboard')} ? ' active' : ''">
+                <a th:href="@{/superadmin/dashboard}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/superadmin/dashboard')} ? ' active' : ''">
                   <i class="nav-icon fas fa-globe"></i>
                   <p th:text="#{menu.saas.gestao_empresas}">Gestão de Empresas</p>
                 </a>
               </li>
               <li class="nav-item icon-indigo">
-                <a th:href="@{/superadmin/usuarios}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/usuarios')} ? ' active' : ''">
+                <a th:href="@{/superadmin/usuarios}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/superadmin/usuarios')} ? ' active' : ''">
                   <i class="nav-icon fas fa-user-shield"></i>
                   <p th:text="#{menu.saas.admins_globais}">Admins Globais</p>
                 </a>
               </li>
               <li class="nav-item icon-amber">
-                <a th:href="@{/superadmin/licenca/gerador}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/licenca')} ? ' active' : ''">
+                <a th:href="@{/superadmin/licenca/gerador}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/superadmin/licenca')} ? ' active' : ''">
                   <i class="nav-icon fas fa-key"></i>
                   <p th:text="#{menu.saas.gerador_licencas}">Gerador de Licenças</p>
                 </a>
               </li>
               <li class="nav-item icon-cyan">
-                <a th:href="@{/superadmin/planos-pagamento}" class="nav-link" th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
+                <a th:href="@{/superadmin/planos-pagamento}" class="nav-link"
+                  th:classappend="${#request.requestURI.startsWith('/superadmin/planos-pagamento')} ? ' active' : ''">
                   <i class="nav-icon fas fa-crown"></i>
                   <p th:text="#{menu.saas.planos_pagamento}">Planos de Pagamento</p>
                 </a>
@@ -1301,23 +1389,26 @@
       <div class="sidebar-user-footer shadow-sm">
         <div class="d-flex align-items-center gap-2 overflow-hidden">
           <div class="topbar-user-avatar flex-shrink-0" style="width: 32px; height: 32px; font-size: 0.8rem;">
-            <span th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
+            <span
+              th:text="${usuario_NOME != null and !usuario_NOME.isEmpty() ? usuario_NOME.substring(0,1).toUpperCase() : 'U'}">U</span>
           </div>
           <div class="overflow-hidden">
-            <div class="fw-bold text-dark small text-truncate" style="line-height: 1.1;" th:text="${usuario_NOME ?: 'Utilizador'}">Utilizador</div>
+            <div class="fw-bold text-dark small text-truncate" style="line-height: 1.1;"
+              th:text="${usuario_NOME ?: 'Utilizador'}">Utilizador</div>
             <div class="text-success small d-flex align-items-center gap-1" style="font-size: 0.65rem;">
-              <span class="badge-pulse bg-success rounded-circle d-inline-block" style="width: 6px; height: 6px;"></span>
+              <span class="badge-pulse bg-success rounded-circle d-inline-block"
+                style="width: 6px; height: 6px;"></span>
               <span>Online</span>
             </div>
           </div>
         </div>
         <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none"></form>
         <button type="button" class="btn btn-sm btn-light border-0 text-danger rounded-circle p-2"
-                onclick="confirmarLogout('logoutFormSidebar')" title="Terminar Sessão">
+          onclick="confirmarLogout('logoutFormSidebar')" title="Terminar Sessão">
           <i class="fas fa-power-off"></i>
         </button>
       </div>
-=======
+      =======
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="true">
 
@@ -2255,7 +2346,7 @@
           </li>
         </ul>
       </nav>
->>>>>>> 61eb1d50f002d3d7ce2415410a3ec6717cfe6174
+      >>>>>>> 61eb1d50f002d3d7ce2415410a3ec6717cfe6174
     </div>
   </aside>
 
@@ -2265,12 +2356,15 @@
   <footer th:fragment="footer" class="main-footer bg-white border-0 py-3 text-muted small">
     <div class="container-fluid px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
       <div>
-        <strong>Copyright &copy; <span th:text="${#dates.year(#dates.createNow())}">2026</span> <a href="#" class="text-primary text-decoration-none fw-bold">HZ Consultoria</a>.</strong>
+        <strong>Copyright &copy; <span th:text="${#dates.year(#dates.createNow())}">2026</span> <a href="#"
+            class="text-primary text-decoration-none fw-bold">HZ Consultoria</a>.</strong>
         <span th:text="#{footer.direitos_reservados}">Todos os direitos reservados.</span>
       </div>
       <div class="d-none d-sm-inline">
         <span class="badge bg-light text-muted border rounded-pill px-2.5 py-1">
-          <i class="fas fa-check-shield text-success me-1"></i> <span th:text="${(globalSistemaNome != null ? globalSistemaNome : 'Kwanza ERP') + ' v' + (globalSistemaVersao != null ? globalSistemaVersao : '2.0')}">Kwanza ERP v2.0</span>
+          <i class="fas fa-check-shield text-success me-1"></i> <span
+            th:text="${(globalSistemaNome != null ? globalSistemaNome : 'Kwanza ERP') + ' v' + (globalSistemaVersao != null ? globalSistemaVersao : '2.0')}">Kwanza
+            ERP v2.0</span>
         </span>
       </div>
     </div>
