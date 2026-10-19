@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+
+    <!-- Topbar & Sidebar -->
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+
+        <!-- Content Header -->
+        <section class="content-header pb-2 pt-3">
+            <div class="container-fluid">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-7">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary p-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
+                                <i class="fab fa-facebook-f"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem;">
+                                        <i class="fas fa-bullhorn me-1"></i> Marketing Digital
+                                    </span>
+                                    <span class="badge rounded-pill" th:classappend="${fbConfig.ativo ? 'bg-success' : 'bg-secondary'}" style="font-size: 0.72rem;">
+                                        <i class="fas" th:classappend="${fbConfig.ativo ? 'fa-check-circle' : 'fa-times-circle'}"></i>
+                                        <span th:text="${fbConfig.ativo ? 'Integração Activa' : 'Integração Inactiva'}">Estado</span>
+                                    </span>
+                                </div>
+                                <h1 class="mb-0 fw-bold fs-4">Marketing no Facebook</h1>
+                                <p class="text-muted small mb-0 mt-0.5">Publique produtos e promoções directamente na sua página do Facebook para atrair mais clientes.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 text-md-end">
+                        <div class="d-inline-flex gap-2 flex-wrap justify-content-md-end">
+                            <form th:action="@{/marketing/facebook/publicar-promocoes}" method="post" class="d-inline">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn btn-warning rounded-pill px-3 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2"
+                                        th:disabled="${!fbConfig.ativo or #lists.isEmpty(produtosEmPromocao)}"
+                                        title="Publica todos os produtos em promoção no Facebook">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Publicar Promoções Agora</span>
+                                </button>
+                            </form>
+                            <a th:href="@{/marketing/facebook/config}" class="btn btn-outline-primary bg-white rounded-pill px-3 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-cog"></i>
+                                <span>Configuração API</span>
+                            </a>
+                            <a th:href="@{/marketing/facebook/historico}" class="btn btn-outline-secondary bg-white rounded-pill px-3 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-history"></i>
+                                <span>Histórico</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <section class="content">
+            <div class="container-fluid">
+
+                <!-- Feedback Alerts -->
+                <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><span th:text="${sucesso}">Sucesso</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i><span th:text="${erro}">Erro</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${aviso}" class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i><span th:text="${aviso}">Aviso</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Alert de Configuração Pendente -->
+                <div th:if="${!fbConfig.ativo or fbConfig.pageAccessToken == null or fbConfig.pageAccessToken.isEmpty()}"
+                     class="alert alert-info border-0 shadow-sm d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="fas fa-info-circle fs-3 text-info"></i>
+                        <div>
+                            <strong class="d-block">Integração com Facebook ainda não configurada</strong>
+                            <span class="small">Configure o Token de Acesso e o ID da Página para activar as publicações automáticas e manuais.</span>
+                        </div>
+                    </div>
+                    <a th:href="@{/marketing/facebook/config}" class="btn btn-info btn-sm rounded-pill fw-bold px-3">
+                        <i class="fas fa-arrow-right me-1"></i> Ir para Configurações
+                    </a>
+                </div>
+
+                <!-- KPI Cards Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-3 d-flex align-items-center gap-3">
+                                <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="fab fa-facebook"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <span class="text-muted small fw-semibold text-uppercase d-block text-truncate">Página Facebook</span>
+                                    <h5 class="fw-bold mb-0 text-truncate" th:text="${fbConfig.pageName != null and !fbConfig.pageName.isEmpty() ? fbConfig.pageName : (fbConfig.pageId != null ? 'ID: ' + fbConfig.pageId : 'Não vinculada')}">Minha Página</h5>
+                                    <span class="small" th:classappend="${fbConfig.ativo ? 'text-success' : 'text-muted'}" th:text="${fbConfig.ativo ? 'Conectada & Activa' : 'Desactivada'}">Estado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-3 d-flex align-items-center gap-3">
+                                <div class="rounded-3 bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-semibold text-uppercase d-block">Publicações Hoje</span>
+                                    <h5 class="fw-bold mb-0">
+                                        <span th:text="${fbConfig.publicacoesHoje}">0</span>
+                                        <small class="text-muted fw-normal" style="font-size: 0.8rem;" th:text="'/ ' + ${fbConfig.maxPublicacoesPorDia} + ' máx'">/ 5 máx</small>
+                                    </h5>
+                                    <span class="small text-muted" th:text="${totalSucessoHoje} + ' com sucesso hoje'">0 com sucesso</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-3 d-flex align-items-center gap-3">
+                                <div class="rounded-3 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="fas fa-check-double"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-semibold text-uppercase d-block">Total Publicado</span>
+                                    <h5 class="fw-bold mb-0 text-success" th:text="${fbConfig.totalPublicacoesSucesso}">0</h5>
+                                    <span class="small text-muted" th:text="${fbConfig.totalPublicacoesFalha} + ' falhas registadas'">0 falhas</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-3 d-flex align-items-center gap-3">
+                                <div class="rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; font-size: 1.3rem;">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <div>
+                                    <span class="text-muted small fw-semibold text-uppercase d-block">Em Promoção</span>
+                                    <h5 class="fw-bold mb-0 text-warning" th:text="${#lists.size(produtosEmPromocao)}">0</h5>
+                                    <span class="small text-muted">Prontos para divulgação</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left: Compositor Rápido & Catálogo de Produtos -->
+                    <div class="col-lg-8">
+
+                        <!-- Compositor Rápido de Mensagem -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3 border-bottom">
+                                <h5 class="card-title fw-bold mb-0 text-dark">
+                                    <i class="fas fa-edit text-primary me-2"></i>Publicação Rápida na Página
+                                </h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Escreva o anúncio ou novidade para os seus seguidores:</label>
+                                    <textarea id="mensagemPersonalizada" class="form-control" rows="3"
+                                              placeholder="Ex: 🎉 Grande novidade! Chegou um novo lote de produtos à nossa loja. Venha conferir ou ligue para 9XX XXX XXX!"></textarea>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <small class="text-muted" id="contadorChars">0 / 63206 caracteres</small>
+                                        <small class="text-muted">Publicação directa na cronologia da página</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
+                                    <div th:if="${!fbConfig.ativo}" class="text-warning-emphasis small bg-warning bg-opacity-10 border border-warning rounded-3 px-3 py-1.5 d-flex align-items-center gap-2">
+                                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                                        <span>A integração está desactivada. <a th:href="@{/marketing/facebook/config}" class="fw-bold text-dark text-decoration-underline">Active a integração nas Configurações</a> para habilitar o botão.</span>
+                                    </div>
+                                    <div th:if="${fbConfig.ativo}"></div>
+                                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+                                            onclick="publicarMensagem()"
+                                            th:disabled="${!fbConfig.ativo}"
+                                            th:title="${!fbConfig.ativo ? 'Active a integração nas Configurações para publicar' : 'Publicar agora no Facebook'}">
+                                        <i class="fas fa-paper-plane me-2"></i>Publicar Mensagem
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Catálogo de Produtos para Publicação Manual -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div>
+                                    <h5 class="card-title fw-bold mb-0 text-dark">
+                                        <i class="fas fa-boxes text-primary me-2"></i>Catálogo de Artigos Disponíveis
+                                    </h5>
+                                    <span class="text-muted small">Clique no botão para publicar um produto específico no Facebook</span>
+                                </div>
+                                <div>
+                                    <input type="text" id="filtroProdutoInput" class="form-control form-control-sm rounded-pill"
+                                           placeholder="Pesquisar produto..." style="width: 200px;">
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+                                    <table class="table table-hover align-middle mb-0" id="tabelaProdutos">
+                                        <thead class="bg-light sticky-top">
+                                            <tr>
+                                                <th style="width: 50px;">Img</th>
+                                                <th>Produto</th>
+                                                <th>Preço</th>
+                                                <th>Stock</th>
+                                                <th class="text-center" style="width: 220px;">Acção Facebook</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:if="${#lists.isEmpty(produtos)}">
+                                                <td colspan="5" class="text-center py-4 text-muted">
+                                                    <i class="fas fa-box-open fs-3 d-block mb-2 text-muted"></i>
+                                                    Nenhum produto cadastrado nesta empresa.
+                                                </td>
+                                            </tr>
+                                            <tr th:each="p : ${produtos}" class="linha-produto" th:data-nome="${#strings.toLowerCase(p.nome)}">
+                                                <td>
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-muted" style="width: 38px; height: 38px; overflow: hidden;">
+                                                        <i class="fas fa-image" th:if="${p.imagem == null and p.imagemBlob == null}"></i>
+                                                        <img th:if="${p.imagem != null}" th:src="${p.imagem}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'" />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-bold text-dark" th:text="${p.nome}">Nome do Produto</div>
+                                                    <div class="d-flex gap-1 align-items-center mt-0.5">
+                                                        <span class="badge bg-warning text-dark rounded-pill" style="font-size: 0.68rem;" th:if="${p.emPromocao}">
+                                                            <i class="fas fa-fire me-1"></i>PROMOÇÃO
+                                                        </span>
+                                                        <span class="text-muted small" th:if="${p.categoria != null}" th:text="${p.categoria.nome}">Categoria</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="fw-bold text-primary" th:text="${#numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</div>
+                                                    <small class="text-muted text-decoration-line-through" th:if="${p.emPromocao and p.precoOriginal != null}"
+                                                           th:text="${#numbers.formatDecimal(p.precoOriginal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge rounded-pill"
+                                                          th:classappend="${p.quantidadeEstoque != null and p.quantidadeEstoque > 5 ? 'bg-light text-dark border' : 'bg-danger'}"
+                                                          th:text="${p.quantidadeEstoque != null ? p.quantidadeEstoque.intValue() + ' un.' : '0 un.'}">0 un.</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button type="button" class="btn btn-outline-primary rounded-pill px-2.5 py-1 fw-bold"
+                                                                th:onclick="'publicarProduto(' + ${p.id} + ', \'PRODUTO\', this)'"
+                                                                th:disabled="${!fbConfig.ativo}"
+                                                                title="Publicar na Página Facebook">
+                                                            <i class="fab fa-facebook me-1"></i> Publicar
+                                                        </button>
+                                                        <button type="button" class="btn btn-warning rounded-pill px-2.5 py-1 fw-bold ms-1"
+                                                                th:if="${p.emPromocao}"
+                                                                th:onclick="'publicarProduto(' + ${p.id} + ', \'PROMOCAO\', this)'"
+                                                                th:disabled="${!fbConfig.ativo}"
+                                                                title="Publicar com template promocional">
+                                                            <i class="fas fa-fire me-1"></i> Promoção
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right: Estado das Automações & Últimos Posts -->
+                    <div class="col-lg-4">
+
+                        <!-- Card de Automações Agendadas -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3 border-bottom">
+                                <h6 class="card-title fw-bold mb-0 text-dark">
+                                    <i class="fas fa-clock text-primary me-2"></i>Agendamentos Automáticos
+                                </h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <ul class="list-group list-group-flush small">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0">
+                                        <div>
+                                            <i class="fas fa-sun text-warning me-2"></i><strong>09:00</strong> — Promoções Matinais
+                                        </div>
+                                        <span class="badge rounded-pill" th:classappend="${fbConfig.publicarPromocoesAuto ? 'bg-success' : 'bg-light text-muted border'}">
+                                            <span th:text="${fbConfig.publicarPromocoesAuto ? 'Activo' : 'Desligado'}">Estado</span>
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0">
+                                        <div>
+                                            <i class="fas fa-box-open text-danger me-2"></i><strong>12:00</strong> — Alerta de Stock Baixo
+                                        </div>
+                                        <span class="badge rounded-pill" th:classappend="${fbConfig.publicarStockBaixo ? 'bg-success' : 'bg-light text-muted border'}">
+                                            <span th:text="${fbConfig.publicarStockBaixo ? 'Activo' : 'Desligado'}">Estado</span>
+                                        </span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0">
+                                        <div>
+                                            <i class="fas fa-moon text-indigo me-2"></i><strong>18:00</strong> — Promoções Fim do Dia
+                                        </div>
+                                        <span class="badge rounded-pill" th:classappend="${fbConfig.publicarPromocoesAuto ? 'bg-success' : 'bg-light text-muted border'}">
+                                            <span th:text="${fbConfig.publicarPromocoesAuto ? 'Activo' : 'Desligado'}">Estado</span>
+                                        </span>
+                                    </li>
+                                </ul>
+
+                                <div class="mt-3 pt-3 border-top">
+                                    <div class="small text-muted mb-2">
+                                        <i class="fas fa-shield-alt text-primary me-1"></i>
+                                        Anti-Spam: Máximo <strong><span th:text="${fbConfig.maxPublicacoesPorDia}">5</span> publicações/dia</strong>.
+                                    </div>
+                                    <a th:href="@{/marketing/facebook/config}" class="btn btn-sm btn-outline-primary w-100 rounded-pill">
+                                        <i class="fas fa-sliders-h me-1"></i> Ajustar Regras de Automação
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card de Histórico Recente -->
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                                <h6 class="card-title fw-bold mb-0 text-dark">
+                                    <i class="fas fa-history text-secondary me-2"></i>Últimas Publicações
+                                </h6>
+                                <a th:href="@{/marketing/facebook/historico}" class="small text-primary fw-bold text-decoration-none">Ver todas</a>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="list-group list-group-flush" th:if="${!#lists.isEmpty(historico)}">
+                                    <div th:each="h, iterStat : ${historico}" th:if="${iterStat.index < 5}"
+                                         class="list-group-item px-3 py-2.5">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="badge rounded-pill"
+                                                  th:classappend="${h.status == 'SUCESSO' ? 'bg-success' : 'bg-danger'}"
+                                                  style="font-size: 0.68rem;" th:text="${h.status}">SUCESSO</span>
+                                            <small class="text-muted" th:text="${#temporals.format(h.dataPublicacao, 'dd/MM HH:mm')}">Data</small>
+                                        </div>
+                                        <p class="mb-1 small fw-semibold text-truncate text-dark" th:text="${h.mensagem}">Mensagem do post</p>
+                                        <div class="small text-muted d-flex justify-content-between align-items-center">
+                                            <span th:text="${h.tipoPublicacao}">TIPO</span>
+                                            <span th:if="${h.facebookPostId != null}" class="text-primary font-monospace" style="font-size: 0.72rem;">ID: <span th:text="${#strings.substring(h.facebookPostId, 0, #strings.length(h.facebookPostId) > 12 ? 12 : #strings.length(h.facebookPostId))}"></span>...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div th:if="${#lists.isEmpty(historico)}" class="p-4 text-center text-muted small">
+                                    <i class="fas fa-newspaper fs-3 d-block mb-2 text-muted"></i>
+                                    Ainda não foram realizadas publicações no Facebook.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div><!-- /.container-fluid -->
+        </section><!-- /.content -->
+
+    </div><!-- /.content-wrapper -->
+
+    <footer th:replace="menu :: footer"></footer>
+</div><!-- /.wrapper -->
+
+<!-- Toast de Notificação -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+    <div id="liveToastFb" class="toast align-items-center border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i id="toastIcon" class="fas fa-check-circle fs-5 text-success"></i>
+                <div>
+                    <strong id="toastTitulo" class="d-block">Publicado com sucesso</strong>
+                    <span id="toastCorpo" class="small text-muted">A sua publicação já está visível na página.</span>
+                </div>
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Contador de caracteres
+    const msgArea = document.getElementById('mensagemPersonalizada');
+    const contador = document.getElementById('contadorChars');
+    if (msgArea && contador) {
+        msgArea.addEventListener('input', () => {
+            contador.textContent = msgArea.value.length + ' / 63206 caracteres';
+        });
+    }
+
+    // Filtro em tempo real de produtos
+    const filtroInput = document.getElementById('filtroProdutoInput');
+    if (filtroInput) {
+        filtroInput.addEventListener('keyup', () => {
+            const termo = filtroInput.value.toLowerCase().trim();
+            document.querySelectorAll('.linha-produto').forEach(tr => {
+                const nome = tr.getAttribute('data-nome') || '';
+                tr.style.display = nome.includes(termo) ? '' : 'none';
+            });
+        });
+    }
+
+    // Obter CSRF
+    function getCsrfToken() {
+        const input = document.querySelector('input[name="_csrf"]');
+        if (input && input.value) return input.value;
+
+        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        if (match) return decodeURIComponent(match[1]);
+
+        const meta = document.querySelector('meta[name="_csrf"]');
+        if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
+
+        return '';
+    }
+
+    function getCsrfHeader() {
+        const meta = document.querySelector('meta[name="_csrf_header"]');
+        if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
+        return 'X-CSRF-TOKEN';
+    }
+
+    function mostrarToast(sucesso, titulo, mensagem) {
+        const toastEl = document.getElementById('liveToastFb');
+        const icon = document.getElementById('toastIcon');
+        const tTitulo = document.getElementById('toastTitulo');
+        const tCorpo = document.getElementById('toastCorpo');
+
+        if (sucesso) {
+            icon.className = 'fas fa-check-circle fs-5 text-success';
+            tTitulo.textContent = titulo || 'Sucesso';
+            tTitulo.className = 'd-block text-success';
+        } else {
+            icon.className = 'fas fa-times-circle fs-5 text-danger';
+            tTitulo.textContent = titulo || 'Erro';
+            tTitulo.className = 'd-block text-danger';
+        }
+        tCorpo.textContent = mensagem || '';
+
+        const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+        toast.show();
+    }
+
+    // Publicar Produto Manualmente
+    function publicarProduto(produtoId, tipo, btn) {
+        if (!confirm('Deseja publicar este produto na página do Facebook agora?')) return;
+
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+
+        const headers = { 'Accept': 'application/json' };
+        if (csrfToken) {
+            headers[csrfHeader] = csrfToken;
+            headers['X-CSRF-TOKEN'] = csrfToken;
+            headers['X-XSRF-TOKEN'] = csrfToken;
+        }
+
+        fetch('/marketing/facebook/publicar/' + produtoId + '?tipo=' + tipo, {
+            method: 'POST',
+            headers: headers
+        })
+        .then(async r => {
+            const text = await r.text();
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                if (r.status === 401 || r.redirected || text.includes('login')) {
+                    throw new Error('Sessão expirada. Recarregue a página e tente novamente.');
+                }
+                throw new Error('Erro do servidor (' + r.status + '). Reinicie a aplicação no Eclipse.');
+            }
+        })
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            if (data.sucesso) {
+                mostrarToast(true, '✅ Publicado com sucesso!', data.mensagem);
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                mostrarToast(false, '❌ Falha ao publicar', data.mensagem);
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+            mostrarToast(false, 'Erro ao publicar', err.message);
+        });
+    }
+
+    // Publicar Mensagem Personalizada
+    function publicarMensagem() {
+        const mensagem = document.getElementById('mensagemPersonalizada').value.trim();
+        if (!mensagem) {
+            mostrarToast(false, 'Campo vazio', 'Por favor escreva uma mensagem antes de publicar.');
+            return;
+        }
+
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+        if (csrfToken) {
+            headers[csrfHeader] = csrfToken;
+            headers['X-CSRF-TOKEN'] = csrfToken;
+            headers['X-XSRF-TOKEN'] = csrfToken;
+        }
+
+        fetch('/marketing/facebook/mensagem', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ mensagem: mensagem })
+        })
+        .then(async r => {
+            const text = await r.text();
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                if (r.status === 401 || r.redirected || text.includes('login')) {
+                    throw new Error('Sessão expirada. Recarregue a página e tente novamente.');
+                }
+                throw new Error('Erro do servidor (' + r.status + '). Reinicie a aplicação no Eclipse.');
+            }
+        })
+        .then(data => {
+            if (data.sucesso) {
+                mostrarToast(true, '✅ Mensagem publicada no Facebook!', data.mensagem);
+                document.getElementById('mensagemPersonalizada').value = '';
+                contador.textContent = '0 / 63206 caracteres';
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                mostrarToast(false, '❌ Erro na publicação', data.mensagem);
+            }
+        })
+        .catch(err => mostrarToast(false, 'Erro ao publicar', err.message));
+    }
+</script>
+
+</body>
+</html>

@@ -100,7 +100,8 @@ public class SecurityConfig {
                     "/ativar-licenca",
                     "/setup-inicial/**",
                     "/clientes/api/adicionar",
-                    "/ia/**"
+                    "/ia/**",
+                    "/marketing/facebook/**"
                 )
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 

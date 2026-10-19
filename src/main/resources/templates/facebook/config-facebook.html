@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="menu :: head"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
+<div class="wrapper">
+
+    <!-- Topbar & Sidebar -->
+    <nav th:replace="menu :: topbar"></nav>
+    <aside th:replace="menu :: sidebar"></aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+
+        <!-- Content Header -->
+        <section class="content-header pb-2 pt-3">
+            <div class="container-fluid">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-7">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary p-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
+                                <i class="fab fa-facebook-f"></i>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem;">
+                                        <i class="fas fa-cog me-1"></i> Definições
+                                    </span>
+                                </div>
+                                <h1 class="mb-0 fw-bold fs-4">Configuração do Facebook</h1>
+                                <p class="text-muted small mb-0 mt-0.5">Configure o token de acesso da Graph API e as regras de publicação automática da sua empresa.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 text-md-end">
+                        <a th:href="@{/marketing/facebook}" class="btn btn-outline-secondary bg-white rounded-pill px-3.5 py-2 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Voltar ao Painel</span>
+                        </a>
+                    </div>
+                </div>
+                <ol class="breadcrumb mt-2 mb-0">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/marketing/facebook}">Marketing Facebook</a></li>
+                    <li class="breadcrumb-item active">Configuração</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <section class="content">
+            <div class="container-fluid">
+
+                <!-- Feedback Alerts -->
+                <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><span th:text="${sucesso}">Sucesso</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i><span th:text="${erro}">Erro</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <form th:action="@{/marketing/facebook/config}" th:object="${fbConfig}" method="post" id="formConfigFb">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                    <div class="row">
+                        <!-- Coluna Esquerda: Credenciais e Conexão -->
+                        <div class="col-lg-7">
+
+                            <!-- Card 1: Credenciais Graph API -->
+                            <div class="card card-outline card-primary shadow-sm mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="card-title fw-bold mb-0 text-dark">
+                                        <i class="fab fa-facebook text-primary me-2"></i>Credenciais da Graph API (Meta for Developers)
+                                    </h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="alert alert-light border small text-muted mb-4">
+                                        <i class="fas fa-info-circle text-primary me-1"></i>
+                                        Para obter o seu <strong>Page Access Token</strong> e o <strong>Page ID</strong>, crie uma aplicação no
+                                        <a href="https://developers.facebook.com" target="_blank" class="fw-bold text-decoration-none">Meta for Developers</a>
+                                        e gere um token com as permissões: <code>pages_manage_posts</code>, <code>pages_read_engagement</code> e <code>publish_to_groups</code>.
+                                    </div>
+
+                                    <!-- Switch Activo Geral -->
+                                    <div class="form-check form-switch mb-4 p-3 bg-light rounded-3 border">
+                                        <input class="form-check-input ms-0 me-3" type="checkbox" role="switch" id="ativo" th:field="*{ativo}" style="width: 45px; height: 22px;">
+                                        <label class="form-check-label fw-bold" for="ativo">
+                                            Activar Integração com Facebook
+                                            <span class="d-block small text-muted fw-normal">Habilita o envio de posts manuais e os agendamentos automáticos para a sua página.</span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Page Access Token -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-dark">Page Access Token <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control font-monospace" id="pageAccessToken" th:field="*{pageAccessToken}"
+                                                   placeholder="EAA..." required>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="toggleTokenVisibility()">
+                                                <i class="fas fa-eye" id="toggleIcon"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">Token de longa duração com permissão para publicar em nome da página.</small>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <!-- Page ID -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-dark">ID da Página Facebook <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control font-monospace" id="pageId" th:field="*{pageId}"
+                                                   placeholder="Ex: 109283746501928" required>
+                                            <small class="text-muted">Encontra o ID na secção 'Sobre' da página.</small>
+                                        </div>
+                                        <!-- Page Name -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-dark">Nome da Página (opcional)</label>
+                                            <input type="text" class="form-control" th:field="*{pageName}"
+                                                   placeholder="Ex: Minha Loja Luanda">
+                                            <small class="text-muted">Apenas para identificação interna no sistema.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">App ID (opcional)</label>
+                                            <input type="text" class="form-control form-control-sm" th:field="*{appId}" placeholder="ID da App Meta">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small text-muted">App Secret (opcional)</label>
+                                            <input type="password" class="form-control form-control-sm" th:field="*{appSecret}" placeholder="Chave secreta da App">
+                                        </div>
+                                    </div>
+
+                                    <!-- Botão Testar Conexão -->
+                                    <div class="pt-3 border-top d-flex align-items-center gap-3">
+                                        <button type="button" class="btn btn-outline-primary rounded-pill px-4 fw-bold" onclick="testarConexao()">
+                                            <i class="fas fa-plug me-2"></i>Testar Conexão Agora
+                                        </button>
+                                        <span class="small text-muted">Valida se o token e o ID da página têm permissão activa de escrita.</span>
+                                    </div>
+
+                                    <!-- Resultado do Teste -->
+                                    <div id="testeResultado" class="mt-3" style="display: none;"></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Coluna Direita: Regras Automáticas & Templates -->
+                        <div class="col-lg-5">
+
+                            <!-- Card 2: Automação -->
+                            <div class="card card-outline card-info shadow-sm mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="card-title fw-bold mb-0 text-dark">
+                                        <i class="fas fa-robot text-info me-2"></i>Regras de Publicação Automática
+                                    </h5>
+                                </div>
+                                <div class="card-body p-4">
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="publicarPromocoesAuto" th:field="*{publicarPromocoesAuto}">
+                                        <label class="form-check-label fw-bold text-dark" for="publicarPromocoesAuto">
+                                            Publicar Promoções Automaticamente
+                                            <span class="d-block small text-muted fw-normal">Executa às 09:00 e às 18:00 para produtos marcados como 'Em Promoção'.</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="publicarStockBaixo" th:field="*{publicarStockBaixo}">
+                                        <label class="form-check-label fw-bold text-dark" for="publicarStockBaixo">
+                                            Publicar Alerta de Stock Baixo
+                                            <span class="d-block small text-muted fw-normal">Executa às 12:00 para produtos com stock reduzido (gatilho de urgência).</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-4">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="publicarNovosProdutos" th:field="*{publicarNovosProdutos}">
+                                        <label class="form-check-label fw-bold text-dark" for="publicarNovosProdutos">
+                                            Publicar Novos Artigos ao Cadastrar
+                                            <span class="d-block small text-muted fw-normal">Envia automaticamente um anúncio sempre que um produto novo é guardado.</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-dark">Limite Máximo de Posts / Dia</label>
+                                        <input type="number" class="form-control" th:field="*{maxPublicacoesPorDia}" min="1" max="20" style="max-width: 140px;">
+                                        <small class="text-muted">Protecção anti-bloqueio contra regras de spam do Facebook (recomendado: 3 a 5).</small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Modelos de Mensagem -->
+                            <div class="card card-outline card-warning shadow-sm mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="card-title fw-bold mb-0 text-dark">
+                                        <i class="fas fa-file-alt text-warning me-2"></i>Modelos de Mensagem
+                                    </h5>
+                                </div>
+                                <div class="card-body p-4">
+
+                                    <!-- Template Produto -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-dark small">Template Padrão de Produto</label>
+                                        <textarea class="form-control small" rows="3" th:field="*{templateMensagemProduto}" id="tplProduto"></textarea>
+                                        <div class="mt-1 d-flex gap-1 flex-wrap">
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{nome}')">{nome}</span>
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{preco}')">{preco}</span>
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{descricao}')">{descricao}</span>
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{categoria}')">{categoria}</span>
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{stock}')">{stock}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Template Promoção -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-dark small">Template de Promoção Especial</label>
+                                        <textarea class="form-control small" rows="3" th:field="*{templateMensagemPromocao}" id="tplPromo"></textarea>
+                                        <div class="mt-1 d-flex gap-1 flex-wrap">
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{nome}')">{nome}</span>
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{preco}')">{preco}</span>
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{preco_original}')">{preco_original}</span>
+                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{descricao}')">{descricao}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hashtags -->
+                                    <div class="mb-2">
+                                        <label class="form-label fw-bold text-dark small">Hashtags Adicionais</label>
+                                        <input type="text" class="form-control form-control-sm" th:field="*{hashtags}" placeholder="#Angola #Luanda #Compras">
+                                        <small class="text-muted">Adicionadas automaticamente no rodapé de cada post.</small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Bottom Bar com Botão Salvar -->
+                    <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm mb-4">
+                        <span class="text-muted small">As alterações terão efeito imediato para os próximos agendamentos.</span>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/marketing/facebook}" class="btn btn-outline-secondary rounded-pill px-4">Cancelar</a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
+                                <i class="fas fa-save me-2"></i>Guardar Configurações
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div><!-- /.container-fluid -->
+        </section><!-- /.content -->
+
+    </div><!-- /.content-wrapper -->
+
+    <footer th:replace="menu :: footer"></footer>
+</div><!-- /.wrapper -->
+
+<script>
+    function toggleTokenVisibility() {
+        const input = document.getElementById('pageAccessToken');
+        const icon = document.getElementById('toggleIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    function inserirTag(textareaId, tag) {
+        const area = document.getElementById(textareaId);
+        if (!area) return;
+        const start = area.selectionStart;
+        const end = area.selectionEnd;
+        const text = area.value;
+        area.value = text.substring(0, start) + tag + text.substring(end);
+        area.focus();
+        area.selectionStart = area.selectionEnd = start + tag.length;
+    }
+
+    function getCsrfToken() {
+        const input = document.querySelector('input[name="_csrf"]');
+        if (input && input.value) return input.value;
+
+        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        if (match) return decodeURIComponent(match[1]);
+
+        const meta = document.querySelector('meta[name="_csrf"]');
+        if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
+
+        return '';
+    }
+
+    function getCsrfHeader() {
+        const meta = document.querySelector('meta[name="_csrf_header"]');
+        if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
+        return 'X-CSRF-TOKEN';
+    }
+
+    function testarConexao() {
+        const token = document.getElementById('pageAccessToken').value.trim();
+        const pageId = document.getElementById('pageId').value.trim();
+        const resultDiv = document.getElementById('testeResultado');
+
+        if (!token || !pageId) {
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="alert alert-warning py-2 small mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Preencha o Token de Acesso e o ID da Página antes de testar.</div>';
+            return;
+        }
+
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<div class="alert alert-info py-2 small mb-0"><span class="spinner-border spinner-border-sm me-2"></span>A testar ligação com a API do Facebook...</div>';
+
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+        if (csrfToken) {
+            headers[csrfHeader] = csrfToken;
+            headers['X-CSRF-TOKEN'] = csrfToken;
+            headers['X-XSRF-TOKEN'] = csrfToken;
+        }
+
+        // Tentar primeiramente via POST
+        fetch('/marketing/facebook/testar', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ pageAccessToken: token, pageId: pageId })
+        })
+        .then(async r => {
+            const text = await r.text();
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                // Se retornou HTML (ex: 403 CSRF ou redirect), executar fallback via GET
+                const params = new URLSearchParams({ pageAccessToken: token, pageId: pageId });
+                const rGet = await fetch('/marketing/facebook/testar?' + params.toString(), {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const textGet = await rGet.text();
+                try {
+                    return JSON.parse(textGet);
+                } catch(e2) {
+                    if (r.status === 401 || r.redirected || text.includes('login')) {
+                        throw new Error('Sessão expirada. Recarregue a página ou faça login novamente.');
+                    }
+                    if (r.status === 403) {
+                        throw new Error('Acesso negado (403). Por favor reinicie o servidor para aplicar a configuração de segurança.');
+                    }
+                    throw new Error('O servidor respondeu com formato inválido (' + r.status + '). Reinicie a aplicação no Eclipse.');
+                }
+            }
+        })
+        .then(data => {
+            if (data.sucesso) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success py-2.5 small mb-0 shadow-sm">
+                        <i class="fas fa-check-circle me-2"></i><strong>${data.mensagem}</strong>
+                        ${data.fanCount ? '<br><span class="text-muted ms-4">Seguidores da Página: <strong>' + data.fanCount + '</strong></span>' : ''}
+                    </div>`;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger py-2.5 small mb-0 shadow-sm">
+                        <i class="fas fa-times-circle me-2"></i>${data.mensagem}
+                    </div>`;
+            }
+        })
+        .catch(err => {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger py-2.5 small mb-0 shadow-sm">
+                    <i class="fas fa-exclamation-triangle me-2"></i>${err.message}
+                </div>`;
+        });
+    }
+</script>
+
+</body>
+</html>

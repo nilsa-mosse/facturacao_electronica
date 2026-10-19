@@ -1041,6 +1041,43 @@
               </li>
             </th:block>
 
+            <!-- MARKETING DIGITAL (FACEBOOK) -->
+            <li class="nav-header" th:text="#{menu.header.marketing}">MARKETING DIGITAL</li>
+            <li class="nav-item has-treeview icon-blue"
+              th:classappend="${#request.requestURI.startsWith('/marketing/facebook')} ? ' menu-open' : ''">
+              <a href="#" class="nav-link"
+                th:classappend="${#request.requestURI.startsWith('/marketing/facebook')} ? ' active' : ''">
+                <i class="nav-icon fab fa-facebook"></i>
+                <p>
+                  <span th:text="#{menu.marketing.facebook}">Marketing Facebook</span>
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a th:href="@{/marketing/facebook}" class="nav-link"
+                    th:classappend="${#request.requestURI == '/marketing/facebook' or #request.requestURI == '/marketing/facebook/'} ? ' active' : ''">
+                    <i class="fas fa-bullhorn nav-icon"></i>
+                    <p th:text="#{menu.marketing.painel}">Painel & Publicações</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/marketing/facebook/config}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/marketing/facebook/config')} ? ' active' : ''">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <p th:text="#{menu.marketing.configuracao}">Configuração API</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a th:href="@{/marketing/facebook/historico}" class="nav-link"
+                    th:classappend="${#request.requestURI.startsWith('/marketing/facebook/historico')} ? ' active' : ''">
+                    <i class="fas fa-history nav-icon"></i>
+                    <p th:text="#{menu.marketing.historico}">Histórico de Posts</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+
             <!-- ENTIDADES (CLIENTES & FORNECEDORES) -->
             <th:block th:if="${modulo_ENTIDADES}">
               <li class="nav-header" th:text="#{menu.header.entidades}">ENTIDADES & PARCEIROS</li>
@@ -1408,946 +1445,913 @@
           <i class="fas fa-power-off"></i>
         </button>
       </div>
-      =======
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="true">
-
-          <!-- HOME (Operadores e Utilizadores) -->
-          <li class="nav-item" th:if="${!isAdmin and !isSuperAdmin}">
-            <a th:href="@{/home}" class="nav-link" th:classappend="${#request.requestURI == '/home'} ? ' active' : ''">
-              <i class="nav-icon fas fa-home text-secondary"></i>
-              <p th:text="#{menu.home}">Página Inicial</p>
-            </a>
-          </li>
-
-          <!-- 1. DASHBOARD -->
-          <li class="nav-item has-treeview module-dashboard-item" th:if="${modulo_DASHBOARD != false}"
-            th:classappend="${#request.requestURI == '/dashboard' or #request.requestURI.startsWith('/dashboard/')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI == '/dashboard' or #request.requestURI.startsWith('/dashboard/')} ? ' active' : ''">
-              <i class="nav-icon fas fa-chart-pie text-primary"></i>
-              <p>1. DASHBOARD <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/dashboard}" class="nav-link"
-                  th:classappend="${#request.requestURI == '/dashboard'} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Visão Geral</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/dashboard/recebimentos')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Recebimentos</p>
-                </a></li>
-
-              <li class="nav-item"><a th:href="@{/dashboard/documentos-pendentes}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/dashboard/documentos-pendentes') or #request.requestURI.startsWith('/documentos-pendentes')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Documentos Pendentes</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 2. VENDAS -->
-          <li class="nav-item has-treeview module-vendas-item" th:if="${modulo_VENDAS != false}"
-            th:classappend="${(#request.requestURI.startsWith('/pos') or #request.requestURI.startsWith('/guias') or #request.requestURI.startsWith('/notas') or #request.requestURI.startsWith('/devolucoes') or #request.requestURI.startsWith('/caixa')) and !#request.requestURI.startsWith('/dashboard')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${(#request.requestURI.startsWith('/pos') or #request.requestURI.startsWith('/guias') or #request.requestURI.startsWith('/notas') or #request.requestURI.startsWith('/devolucoes') or #request.requestURI.startsWith('/caixa')) and !#request.requestURI.startsWith('/dashboard')} ? ' active' : ''">
-              <i class="nav-icon fas fa-shopping-cart text-success"></i>
-              <p>2. VENDAS <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/pos}" class="nav-link"
-                  th:classappend="${#request.requestURI == '/pos'} ? ' active' : ''"><i
-                    class="fas fa-cash-register nav-icon text-primary"></i>
-                  <p><b>Ponto de Venda (PDV)</b></p>
-                </a></li>
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link"><i class="far fa-file-alt nav-icon"></i>
-                  <p>Nova Factura <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FR')}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Factura-Recibo</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Factura</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FS')}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Factura Simplificada</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FP')}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Factura Proforma</p>
-                    </a></li>
-                </ul>
-              </li>
-              <li class="nav-item"><a th:href="@{/guias/listar}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/guias')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Guia de Remessa</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/notas/listar(tipo='NC')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Nota de Crédito</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/notas/listar(tipo='ND')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Nota de Débito</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas(tipo='RC')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Recibos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/devolucoes}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/devolucoes')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Devoluções</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/documentos-pendentes}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/dashboard/documentos-pendentes') or #request.requestURI.startsWith('/documentos-pendentes')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Documentos Pendentes</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"
-                  th:classappend="${#request.requestURI == '/historico-vendas'} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Histórico de Vendas</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 3. PRODUTOS E SERVIÇOS -->
-          <li class="nav-item has-treeview module-stock-item" th:if="${modulo_STOCK != false}"
-            th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI == '/cadastroProduto' or #request.requestURI.startsWith('/categorias')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI == '/cadastroProduto' or #request.requestURI.startsWith('/categorias')} ? ' active' : ''">
-              <i class="nav-icon fas fa-boxes text-warning"></i>
-              <p>3. PRODUTOS E SERVIÇOS <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link"><i class="fas fa-box-open nav-icon"></i>
-                  <p>Produtos <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item"><a th:href="@{/cadastroProduto}" class="nav-link"
-                      th:classappend="${#request.requestURI == '/cadastroProduto'} ? ' active' : ''"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Novo Produto</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"
-                      th:classappend="${#request.requestURI == '/produtos/listar'} ? ' active' : ''"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Consultar Produtos</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Editar Produto</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Importar Produtos</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Exportar Produtos</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/produtos/listar(inactivos='true')}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Inactivar Produto</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Histórico de Alterações</p>
-                    </a></li>
-                </ul>
-              </li>
-              <li class="nav-item"><a th:href="@{/produtos/listar(tipo='SERVICO')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Serviços</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/categorias/listar}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/categorias')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Categorias</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Marcas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Unidades de Medida</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Preços</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Tabelas de Preços</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Impostos / IVA</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Produtos Compostos</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 4. STOCK -->
-          <li class="nav-item has-treeview module-stock-item" th:if="${modulo_STOCK != false}"
-            th:classappend="${#request.requestURI.startsWith('/stock') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/stock') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
-              <i class="nav-icon fas fa-warehouse text-info"></i>
-              <p>4. STOCK <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"
-                  th:classappend="${#request.requestURI == '/stock/saldos'} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Inventário</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Existências</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/entrada}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/stock/entrada')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Entrada de Stock</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/saida}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/stock/saida')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Saída de Stock</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/movimentos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Transferência</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/ajuste}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Ajustamento de Stock</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/gestao-inventarios}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Inventário Físico</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/alertas}" class="nav-link text-danger"><i
-                    class="fas fa-exclamation-triangle nav-icon"></i>
-                  <p>Stock Mínimo <span class="right badge bg-danger">!</span></p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/movimentos}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/stock/movimentos')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Movimentos de Stock</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Armazéns</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Relatórios de Stock</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 5. CLIENTES -->
-          <li class="nav-item has-treeview module-entidades-item" th:if="${modulo_ENTIDADES != false}"
-            th:classappend="${#request.requestURI.startsWith('/clientes')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/clientes')} ? ' active' : ''">
-              <i class="nav-icon fas fa-users text-teal"></i>
-              <p>5. CLIENTES <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/clientes/listar}" class="nav-link"
-                  th:classappend="${#request.requestURI == '/clientes/listar'} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Clientes</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/clientes/adicionar}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/clientes/adicionar')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Novo Cliente</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/clientes/listar(tipo='PARTICULAR')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Clientes Particulares</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/clientes/listar(tipo='EMPRESA')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Empresas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/clientes/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Clientes a Crédito</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/clientes/historico}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Conta Corrente</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Dívidas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Recebimentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/clientes/historico}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/clientes/historico')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Histórico do Cliente</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 6. FORNECEDORES -->
-          <li class="nav-item has-treeview module-entidades-item" th:if="${modulo_ENTIDADES != false}"
-            th:classappend="${#request.requestURI.startsWith('/fornecedores')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/fornecedores')} ? ' active' : ''">
-              <i class="nav-icon fas fa-truck text-indigo"></i>
-              <p>6. FORNECEDORES <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/fornecedores/listar}" class="nav-link"
-                  th:classappend="${#request.requestURI == '/fornecedores/listar'} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Fornecedores</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/fornecedores/adicionar}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/fornecedores/adicionar')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Novo Fornecedor</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Compras</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/fornecedores/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Conta Corrente</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Pagamentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/fornecedores/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Histórico</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 7. COMPRAS -->
-          <li class="nav-item has-treeview module-facturacao-item" th:if="${modulo_FACTURACAO != false}"
-            th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' active' : ''">
-              <i class="nav-icon fas fa-shopping-bag text-purple"></i>
-              <p>7. COMPRAS <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Nova Compra</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Facturas de Fornecedor</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Encomendas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/entrada}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Recepção de Mercadoria</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/devolucoes}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Devoluções a Fornecedor</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Histórico de Compras</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 8. TESOURARIA -->
-          <li class="nav-item has-treeview module-financeiro-item" th:if="${modulo_FINANCEIRO != false}"
-            th:classappend="${#request.requestURI.startsWith('/financeiro') or #request.requestURI.startsWith('/caixa')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/financeiro') or #request.requestURI.startsWith('/caixa')} ? ' active' : ''">
-              <i class="nav-icon fas fa-coins text-warning"></i>
-              <p>8. TESOURARIA <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link"><i class="fas fa-cash-register nav-icon"></i>
-                  <p>Caixa <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item"><a th:href="@{/caixa/abertura}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Abertura de Caixa</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/caixa/fecho}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Fecho de Caixa</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/caixa/monitor}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Movimentos</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/caixa/monitor}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Conferência</p>
-                    </a></li>
-                </ul>
-              </li>
-              <li class="nav-item"><a th:href="@{/financeiro/fluxo-caixa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Bancos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Recebimentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Pagamentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/financeiro/fluxo-caixa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Transferências</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Contas a Receber</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Contas a Pagar</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Métodos de Pagamento</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 9. AGT / FISCALIDADE -->
-          <li class="nav-item has-treeview module-facturacao-item" th:if="${modulo_FACTURACAO != false}"
-            th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais') or #request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/saft') or #request.requestURI.startsWith('/factura-eletronica')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais') or #request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/saft') or #request.requestURI.startsWith('/factura-eletronica')} ? ' active' : ''">
-              <i class="nav-icon fas fa-landmark text-danger"></i>
-              <p>9. AGT / FISCALIDADE <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Configuração Fiscal</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Dados da Empresa</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>NIF</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Regime Fiscal</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Regime de IVA</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Séries de Documentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Documentos Fiscais</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Comunicação / Validação</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/factura-eletronica/estado}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/factura-eletronica')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Estado dos Documentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>DLI</p>
-                </a></li>
-              <li class="nav-item has-treeview">
-                <a href="#" class="nav-link"><i class="fas fa-file-export nav-icon"></i>
-                  <p>SAF-T(AO) <i class="right fas fa-angle-left"></i></p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Gerar SAF-T</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Validar SAF-T</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Histórico</p>
-                    </a></li>
-                  <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
-                        class="far fa-dot-circle nav-icon"></i>
-                      <p>Exportar</p>
-                    </a></li>
-                </ul>
-              </li>
-              <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Certificação / Configuração AGT</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Logs de Comunicação</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 10. DOCUMENTOS -->
-          <li class="nav-item has-treeview module-facturacao-item" th:if="${modulo_FACTURACAO != false}"
-            th:classappend="${#request.requestURI == '/historico-vendas' and #request.getParameter('tipo') != null} ? ' menu-open' : ''">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-file-invoice text-primary"></i>
-              <p>10. DOCUMENTOS <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Todos os Documentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Facturas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FR')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Facturas-Recibo</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FP')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Proformas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/notas/listar(tipo='NC')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Notas de Crédito</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/notas/listar(tipo='ND')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Notas de Débito</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/guias/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Guias</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas(tipo='RC')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Recibos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Séries</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas(status='ANULADO')}" class="nav-link text-danger"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Documentos Anulados</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 11. RELATÓRIOS -->
-          <li class="nav-item has-treeview module-financeiro-item"
-            th:if="${modulo_FINANCEIRO != false or modulo_FACTURACAO != false}">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-chart-line text-success"></i>
-              <p>11. RELATÓRIOS <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Vendas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Facturação</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Vendas por Produto</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Vendas por Cliente</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Vendas por Utilizador</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Vendas por Período</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>IVA</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Impostos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Recebimentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Dívidas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Stock</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Compras</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/financeiro/fluxo-caixa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Caixa</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/dashboard/estatisticas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Margens / Rentabilidade</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Relatórios Fiscais</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 12. UTILIZADORES E SEGURANÇA -->
-          <li class="nav-item has-treeview module-administracao-item"
-            th:if="${modulo_ADMINISTRACAO != false or isAdmin or isSuperAdmin}"
-            th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
-              <i class="nav-icon fas fa-user-shield text-info"></i>
-              <p>12. UTILIZADORES E SEGURANÇA <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/configuracoes/utilizadores}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Utilizadores</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/controlo-acesso}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Perfis</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/controlo-acesso}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Permissões</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Empresas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Filiais</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/pos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Terminais / PDV</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Sessões</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral(tab='seguranca')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Alteração de Palavra-passe</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Auditoria</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 13. AUDITORIA -->
-          <li class="nav-item has-treeview module-administracao-item"
-            th:if="${modulo_ADMINISTRACAO != false or isAdmin or isSuperAdmin}"
-            th:classappend="${#request.requestURI.startsWith('/auditoria')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/auditoria')} ? ' active' : ''">
-              <i class="nav-icon fas fa-search text-warning"></i>
-              <p>13. AUDITORIA <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/auditoria')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Log de Operações</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Log de Login</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Alterações de Produtos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Alterações de Clientes</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Alterações de Configuração</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Documentos Emitidos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/historico-vendas(status='ANULADO')}" class="nav-link text-danger"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Documentos Anulados</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Tentativas de Alteração</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Exportar Auditoria</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 14. CONFIGURAÇÕES -->
-          <li class="nav-item has-treeview module-administracao-item"
-            th:if="${modulo_ADMINISTRACAO != false or isAdmin or isSuperAdmin}"
-            th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/moedas')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link"
-              th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
-              <i class="nav-icon fas fa-cogs text-secondary"></i>
-              <p>14. CONFIGURAÇÕES <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Dados da Empresa</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Logotipo</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Endereço</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Contactos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Configuração de Facturação</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Séries</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Numeração</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Impostos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/moedas}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Moeda</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Métodos de Pagamento</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                  <p>Armazéns</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Impressoras</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral(tab='email')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Email</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>WhatsApp</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral(tab='banco-dados')}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Backup</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Integrações</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/configuracoes/geral')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p>Sistema</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- RECURSOS HUMANOS (RH) -->
-          <li class="nav-item has-treeview module-rh-item" th:if="${modulo_RH}"
-            th:classappend="${#request.requestURI.startsWith('/rh')} ? ' menu-open' : ''">
-            <a href="#" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh')} ? ' active' : ''">
-              <i class="nav-icon fas fa-user-tie text-primary"></i>
-              <p>RECURSOS HUMANOS <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/rh/colaboradores}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/rh/colaboradores')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.rh.colaboradores}">Colaboradores</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/rh/processamento}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/rh/processamento')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.rh.folhas_vencimento}">Folhas de Vencimento</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/rh/departamentos}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/rh/departamentos')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.rh.departamentos}">Departamentos</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/rh/subsidios}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/rh/subsidios')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.rh.tipos_subsidio}">Tipos de Subsídio</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/rh/parametros}" class="nav-link"
-                  th:classappend="${#request.requestURI.startsWith('/rh/parametros')} ? ' active' : ''"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.rh.parametros}">Parâmetros</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- 15. SUPORTE -->
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-headset text-success"></i>
-              <p>15. SUPORTE <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link"
-                  onclick="if(typeof Swal!=='undefined'){Swal.fire({icon:'info',title:'Centro de Ajuda',text:'Bem-vindo ao Centro de Ajuda KwanzaERP. Consulte os manuais ou contacte o suporte.',confirmButtonColor:'#4338ca'});}">
-                  <i class="far fa-circle nav-icon text-info"></i>
-                  <p>Centro de Ajuda</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link"
-                  onclick="if(typeof Swal!=='undefined'){Swal.fire({icon:'info',title:'Manual de Utilizador',text:'O manual online e guias passo-a-passo do KwanzaERP estão disponíveis para consulta.',confirmButtonColor:'#4338ca'});}">
-                  <i class="far fa-circle nav-icon text-warning"></i>
-                  <p>Manual</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link"
-                  onclick="if(typeof Swal!=='undefined'){Swal.fire({icon:'question',title:'Contactar Suporte',html:'Linha de Apoio: <b>+244 923 000 000</b><br>Email: <b>suporte@kwanzaerp.ao</b>',confirmButtonColor:'#4338ca'});}">
-                  <i class="far fa-circle nav-icon text-success"></i>
-                  <p>Contactar Suporte</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a th:href="@{/factura-eletronica/estado}" class="nav-link">
-                  <i class="far fa-circle nav-icon text-danger"></i>
-                  <p>Estado do Sistema</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link"
-                  onclick="if(typeof Swal!=='undefined'){Swal.fire({title:'<strong>KwanzaERP</strong>',icon:'info',html:'Versão <b>2.0</b> - Sistema Integrado de Gestão Comercial e Facturação Electrónica Certificado pela AGT.<br><br>&copy; HZ Consultoria',confirmButtonColor:'#4338ca'});}">
-                  <i class="far fa-circle nav-icon text-primary"></i>
-                  <p>Sobre o KwanzaERP</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-
-          <!-- PAINEL GLOBAL (SaaS) -->
-          <li class="nav-item has-treeview module-saas-item" th:if="${modulo_PAINEL_GLOBAL}">
-            <a href="#" class="nav-link bg-warning text-dark">
-              <i class="nav-icon fas fa-globe"></i>
-              <p th:text="#{menu.header.painel_global}">PAINEL GLOBAL (SaaS) <i class="right fas fa-angle-left"></i></p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item"><a th:href="@{/superadmin/dashboard}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.saas.gestao_empresas}">Gestão de Empresas</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/superadmin/usuarios}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.saas.admins_globais}">Admins Globais</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/superadmin/licenca/gerador}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.saas.gerador_licencas}">Gerador de Licenças</p>
-                </a></li>
-              <li class="nav-item"><a th:href="@{/superadmin/planos-pagamento}" class="nav-link"><i
-                    class="far fa-circle nav-icon"></i>
-                  <p th:text="#{menu.saas.planos_pagamento}">Planos de Pagamento</p>
-                </a></li>
-            </ul>
-          </li>
-
-          <!-- SISTEMA: Terminar Sessão -->
-          <li class="nav-item mt-3 pt-2 border-top border-secondary">
-            <a href="javascript:void(0)" class="nav-link text-danger fw-bold"
-              onclick="document.getElementById('logoutFormSidebar').submit();">
-              <i class="nav-icon fas fa-power-off"></i>
-              <p th:text="#{menu.terminar_sessao}">Terminar Sessão</p>
-            </a>
-            <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none">
-            </form>
-          </li>
-        </ul>
-      </nav>
-      >>>>>>> 61eb1d50f002d3d7ce2415410a3ec6717cfe6174
     </div>
+  </aside>
+  <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="true">
+
+    <!-- HOME (Operadores e Utilizadores) -->
+    <li class="nav-item" th:if="${!isAdmin and !isSuperAdmin}">
+      <a th:href="@{/home}" class="nav-link" th:classappend="${#request.requestURI == '/home'} ? ' active' : ''">
+        <i class="nav-icon fas fa-home text-secondary"></i>
+        <p th:text="#{menu.home}">Página Inicial</p>
+      </a>
+    </li>
+
+    <!-- 1. DASHBOARD -->
+    <li class="nav-item has-treeview module-dashboard-item" th:if="${modulo_DASHBOARD != false}"
+      th:classappend="${#request.requestURI == '/dashboard' or #request.requestURI.startsWith('/dashboard/')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${#request.requestURI == '/dashboard' or #request.requestURI.startsWith('/dashboard/')} ? ' active' : ''">
+        <i class="nav-icon fas fa-chart-pie text-primary"></i>
+        <p>1. DASHBOARD <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/dashboard}" class="nav-link"
+            th:classappend="${#request.requestURI == '/dashboard'} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Visão Geral</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/dashboard/recebimentos')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Recebimentos</p>
+          </a></li>
+
+        <li class="nav-item"><a th:href="@{/dashboard/documentos-pendentes}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/dashboard/documentos-pendentes') or #request.requestURI.startsWith('/documentos-pendentes')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Documentos Pendentes</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 2. VENDAS -->
+    <li class="nav-item has-treeview module-vendas-item" th:if="${modulo_VENDAS != false}"
+      th:classappend="${(#request.requestURI.startsWith('/pos') or #request.requestURI.startsWith('/guias') or #request.requestURI.startsWith('/notas') or #request.requestURI.startsWith('/devolucoes') or #request.requestURI.startsWith('/caixa')) and !#request.requestURI.startsWith('/dashboard')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${(#request.requestURI.startsWith('/pos') or #request.requestURI.startsWith('/guias') or #request.requestURI.startsWith('/notas') or #request.requestURI.startsWith('/devolucoes') or #request.requestURI.startsWith('/caixa')) and !#request.requestURI.startsWith('/dashboard')} ? ' active' : ''">
+        <i class="nav-icon fas fa-shopping-cart text-success"></i>
+        <p>2. VENDAS <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/pos}" class="nav-link"
+            th:classappend="${#request.requestURI == '/pos'} ? ' active' : ''"><i
+              class="fas fa-cash-register nav-icon text-primary"></i>
+            <p><b>Ponto de Venda (PDV)</b></p>
+          </a></li>
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link"><i class="far fa-file-alt nav-icon"></i>
+            <p>Nova Factura <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FR')}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Factura-Recibo</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Factura</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FS')}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Factura Simplificada</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FP')}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Factura Proforma</p>
+              </a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a th:href="@{/guias/listar}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/guias')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Guia de Remessa</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/notas/listar(tipo='NC')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Nota de Crédito</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/notas/listar(tipo='ND')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Nota de Débito</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas(tipo='RC')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Recibos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/devolucoes}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/devolucoes')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Devoluções</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/documentos-pendentes}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/dashboard/documentos-pendentes') or #request.requestURI.startsWith('/documentos-pendentes')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Documentos Pendentes</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"
+            th:classappend="${#request.requestURI == '/historico-vendas'} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Histórico de Vendas</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 3. PRODUTOS E SERVIÇOS -->
+    <li class="nav-item has-treeview module-stock-item" th:if="${modulo_STOCK != false}"
+      th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI == '/cadastroProduto' or #request.requestURI.startsWith('/categorias')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${#request.requestURI.startsWith('/produtos') or #request.requestURI == '/cadastroProduto' or #request.requestURI.startsWith('/categorias')} ? ' active' : ''">
+        <i class="nav-icon fas fa-boxes text-warning"></i>
+        <p>3. PRODUTOS E SERVIÇOS <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link"><i class="fas fa-box-open nav-icon"></i>
+            <p>Produtos <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a th:href="@{/cadastroProduto}" class="nav-link"
+                th:classappend="${#request.requestURI == '/cadastroProduto'} ? ' active' : ''"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Novo Produto</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"
+                th:classappend="${#request.requestURI == '/produtos/listar'} ? ' active' : ''"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Consultar Produtos</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Editar Produto</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Importar Produtos</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Exportar Produtos</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/produtos/listar(inactivos='true')}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Inactivar Produto</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-dot-circle nav-icon"></i>
+                <p>Histórico de Alterações</p>
+              </a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a th:href="@{/produtos/listar(tipo='SERVICO')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Serviços</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/categorias/listar}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/categorias')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Categorias</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Marcas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Unidades de Medida</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Preços</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Tabelas de Preços</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Impostos / IVA</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/produtos/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Produtos Compostos</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 4. STOCK -->
+    <li class="nav-item has-treeview module-stock-item" th:if="${modulo_STOCK != false}"
+      th:classappend="${#request.requestURI.startsWith('/stock') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${#request.requestURI.startsWith('/stock') or #request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''">
+        <i class="nav-icon fas fa-warehouse text-info"></i>
+        <p>4. STOCK <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"
+            th:classappend="${#request.requestURI == '/stock/saldos'} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Inventário</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Existências</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/entrada}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/stock/entrada')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Entrada de Stock</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/saida}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/stock/saida')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Saída de Stock</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/movimentos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Transferência</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/ajuste}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/stock/ajuste')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Ajustamento de Stock</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/gestao-inventarios}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/gestao-inventarios')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Inventário Físico</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/alertas}" class="nav-link text-danger"><i
+              class="fas fa-exclamation-triangle nav-icon"></i>
+            <p>Stock Mínimo <span class="right badge bg-danger">!</span></p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/movimentos}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/stock/movimentos')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Movimentos de Stock</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Armazéns</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Relatórios de Stock</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 5. CLIENTES -->
+    <li class="nav-item has-treeview module-entidades-item" th:if="${modulo_ENTIDADES != false}"
+      th:classappend="${#request.requestURI.startsWith('/clientes')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link" th:classappend="${#request.requestURI.startsWith('/clientes')} ? ' active' : ''">
+        <i class="nav-icon fas fa-users text-teal"></i>
+        <p>5. CLIENTES <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/clientes/listar}" class="nav-link"
+            th:classappend="${#request.requestURI == '/clientes/listar'} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Clientes</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/clientes/adicionar}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/clientes/adicionar')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Novo Cliente</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/clientes/listar(tipo='PARTICULAR')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Clientes Particulares</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/clientes/listar(tipo='EMPRESA')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Empresas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/clientes/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Clientes a Crédito</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/clientes/historico}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Conta Corrente</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Dívidas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Recebimentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/clientes/historico}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/clientes/historico')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Histórico do Cliente</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 6. FORNECEDORES -->
+    <li class="nav-item has-treeview module-entidades-item" th:if="${modulo_ENTIDADES != false}"
+      th:classappend="${#request.requestURI.startsWith('/fornecedores')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link" th:classappend="${#request.requestURI.startsWith('/fornecedores')} ? ' active' : ''">
+        <i class="nav-icon fas fa-truck text-indigo"></i>
+        <p>6. FORNECEDORES <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/fornecedores/listar}" class="nav-link"
+            th:classappend="${#request.requestURI == '/fornecedores/listar'} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Fornecedores</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/fornecedores/adicionar}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/fornecedores/adicionar')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Novo Fornecedor</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Compras</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/fornecedores/listar}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Conta Corrente</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Pagamentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/fornecedores/listar}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Histórico</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 7. COMPRAS -->
+    <li class="nav-item has-treeview module-facturacao-item" th:if="${modulo_FACTURACAO != false}"
+      th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link" th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' active' : ''">
+        <i class="nav-icon fas fa-shopping-bag text-purple"></i>
+        <p>7. COMPRAS <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Nova Compra</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/despesas')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Facturas de Fornecedor</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Encomendas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/entrada}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Recepção de Mercadoria</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/devolucoes}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Devoluções a Fornecedor</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Histórico de Compras</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 8. TESOURARIA -->
+    <li class="nav-item has-treeview module-financeiro-item" th:if="${modulo_FINANCEIRO != false}"
+      th:classappend="${#request.requestURI.startsWith('/financeiro') or #request.requestURI.startsWith('/caixa')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${#request.requestURI.startsWith('/financeiro') or #request.requestURI.startsWith('/caixa')} ? ' active' : ''">
+        <i class="nav-icon fas fa-coins text-warning"></i>
+        <p>8. TESOURARIA <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link"><i class="fas fa-cash-register nav-icon"></i>
+            <p>Caixa <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a th:href="@{/caixa/abertura}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Abertura de Caixa</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/caixa/fecho}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Fecho de Caixa</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/caixa/monitor}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Movimentos</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/caixa/monitor}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Conferência</p>
+              </a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a th:href="@{/financeiro/fluxo-caixa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Bancos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Recebimentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Pagamentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/financeiro/fluxo-caixa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Transferências</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Contas a Receber</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Contas a Pagar</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Métodos de Pagamento</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 9. AGT / FISCALIDADE -->
+    <li class="nav-item has-treeview module-facturacao-item" th:if="${modulo_FACTURACAO != false}"
+      th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais') or #request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/saft') or #request.requestURI.startsWith('/factura-eletronica')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${#request.requestURI.startsWith('/configuracoes/fiscais') or #request.requestURI.startsWith('/configuracoes/comunicacao-agt') or #request.requestURI.startsWith('/configuracoes/saft') or #request.requestURI.startsWith('/factura-eletronica')} ? ' active' : ''">
+        <i class="nav-icon fas fa-landmark text-danger"></i>
+        <p>9. AGT / FISCALIDADE <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Configuração Fiscal</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Dados da Empresa</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>NIF</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Regime Fiscal</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/fiscais/regime-fiscal}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Regime de IVA</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Séries de Documentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Documentos Fiscais</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Comunicação / Validação</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/factura-eletronica/estado}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/factura-eletronica')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Estado dos Documentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>DLI</p>
+          </a></li>
+        <li class="nav-item has-treeview">
+          <a href="#" class="nav-link"><i class="fas fa-file-export nav-icon"></i>
+            <p>SAF-T(AO) <i class="right fas fa-angle-left"></i></p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Gerar SAF-T</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Validar SAF-T</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Histórico</p>
+              </a></li>
+            <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i
+                  class="far fa-dot-circle nav-icon"></i>
+                <p>Exportar</p>
+              </a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Certificação / Configuração AGT</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Logs de Comunicação</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 10. DOCUMENTOS -->
+    <li class="nav-item has-treeview module-facturacao-item" th:if="${modulo_FACTURACAO != false}"
+      th:classappend="${#request.requestURI == '/historico-vendas' and #request.getParameter('tipo') != null} ? ' menu-open' : ''">
+      <a href="#" class="nav-link">
+        <i class="nav-icon fas fa-file-invoice text-primary"></i>
+        <p>10. DOCUMENTOS <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Todos os Documentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FT')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Facturas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FR')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Facturas-Recibo</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas(tipo='FP')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Proformas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/notas/listar(tipo='NC')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Notas de Crédito</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/notas/listar(tipo='ND')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Notas de Débito</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/guias/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Guias</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas(tipo='RC')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Recibos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Séries</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas(status='ANULADO')}" class="nav-link text-danger"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Documentos Anulados</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 11. RELATÓRIOS -->
+    <li class="nav-item has-treeview module-financeiro-item"
+      th:if="${modulo_FINANCEIRO != false or modulo_FACTURACAO != false}">
+      <a href="#" class="nav-link">
+        <i class="nav-icon fas fa-chart-line text-success"></i>
+        <p>11. RELATÓRIOS <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Vendas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Facturação</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Vendas por Produto</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Vendas por Cliente</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Vendas por Utilizador</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Vendas por Período</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>IVA</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Impostos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Recebimentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/recebimentos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Dívidas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Stock</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/despesas/listar}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Compras</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/financeiro/fluxo-caixa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Caixa</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/dashboard/estatisticas}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Margens / Rentabilidade</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/saft}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Relatórios Fiscais</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 12. UTILIZADORES E SEGURANÇA -->
+    <li class="nav-item has-treeview module-administracao-item"
+      th:if="${modulo_ADMINISTRACAO != false or isAdmin or isSuperAdmin}"
+      th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores') or #request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''">
+        <i class="nav-icon fas fa-user-shield text-info"></i>
+        <p>12. UTILIZADORES E SEGURANÇA <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/configuracoes/utilizadores}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/configuracoes/utilizadores')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Utilizadores</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/controlo-acesso}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/configuracoes/controlo-acesso')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Perfis</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/controlo-acesso}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Permissões</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Empresas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Filiais</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/pos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Terminais / PDV</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Sessões</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral(tab='seguranca')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Alteração de Palavra-passe</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Auditoria</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 13. AUDITORIA -->
+    <li class="nav-item has-treeview module-administracao-item"
+      th:if="${modulo_ADMINISTRACAO != false or isAdmin or isSuperAdmin}"
+      th:classappend="${#request.requestURI.startsWith('/auditoria')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link" th:classappend="${#request.requestURI.startsWith('/auditoria')} ? ' active' : ''">
+        <i class="nav-icon fas fa-search text-warning"></i>
+        <p>13. AUDITORIA <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/auditoria')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Log de Operações</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Log de Login</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Alterações de Produtos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Alterações de Clientes</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Alterações de Configuração</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Documentos Emitidos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/historico-vendas(status='ANULADO')}" class="nav-link text-danger"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Documentos Anulados</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Tentativas de Alteração</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/auditoria}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Exportar Auditoria</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 14. CONFIGURAÇÕES -->
+    <li class="nav-item has-treeview module-administracao-item"
+      th:if="${modulo_ADMINISTRACAO != false or isAdmin or isSuperAdmin}"
+      th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/moedas')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link"
+        th:classappend="${#request.requestURI.startsWith('/configuracoes/geral') or #request.requestURI.startsWith('/configuracoes/series') or #request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''">
+        <i class="nav-icon fas fa-cogs text-secondary"></i>
+        <p>14. CONFIGURAÇÕES <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/configuracoes/empresa')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Dados da Empresa</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Logotipo</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Endereço</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/empresa}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Contactos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Configuração de Facturação</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/configuracoes/series')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Séries</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/series}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Numeração</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/fiscais/impostos}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Impostos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/moedas}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/configuracoes/moedas')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Moeda</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Métodos de Pagamento</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/stock/saldos}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+            <p>Armazéns</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Impressoras</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral(tab='email')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Email</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>WhatsApp</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral(tab='banco-dados')}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Backup</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/comunicacao-agt}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Integrações</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/configuracoes/geral}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/configuracoes/geral')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p>Sistema</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- RECURSOS HUMANOS (RH) -->
+    <li class="nav-item has-treeview module-rh-item" th:if="${modulo_RH}"
+      th:classappend="${#request.requestURI.startsWith('/rh')} ? ' menu-open' : ''">
+      <a href="#" class="nav-link" th:classappend="${#request.requestURI.startsWith('/rh')} ? ' active' : ''">
+        <i class="nav-icon fas fa-user-tie text-primary"></i>
+        <p>RECURSOS HUMANOS <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/rh/colaboradores}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/rh/colaboradores')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.rh.colaboradores}">Colaboradores</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/rh/processamento}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/rh/processamento')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.rh.folhas_vencimento}">Folhas de Vencimento</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/rh/departamentos}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/rh/departamentos')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.rh.departamentos}">Departamentos</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/rh/subsidios}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/rh/subsidios')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.rh.tipos_subsidio}">Tipos de Subsídio</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/rh/parametros}" class="nav-link"
+            th:classappend="${#request.requestURI.startsWith('/rh/parametros')} ? ' active' : ''"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.rh.parametros}">Parâmetros</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- 15. SUPORTE -->
+    <li class="nav-item has-treeview">
+      <a href="#" class="nav-link">
+        <i class="nav-icon fas fa-headset text-success"></i>
+        <p>15. SUPORTE <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link"
+            onclick="if(typeof Swal!=='undefined'){Swal.fire({icon:'info',title:'Centro de Ajuda',text:'Bem-vindo ao Centro de Ajuda KwanzaERP. Consulte os manuais ou contacte o suporte.',confirmButtonColor:'#4338ca'});}">
+            <i class="far fa-circle nav-icon text-info"></i>
+            <p>Centro de Ajuda</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link"
+            onclick="if(typeof Swal!=='undefined'){Swal.fire({icon:'info',title:'Manual de Utilizador',text:'O manual online e guias passo-a-passo do KwanzaERP estão disponíveis para consulta.',confirmButtonColor:'#4338ca'});}">
+            <i class="far fa-circle nav-icon text-warning"></i>
+            <p>Manual</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link"
+            onclick="if(typeof Swal!=='undefined'){Swal.fire({icon:'question',title:'Contactar Suporte',html:'Linha de Apoio: <b>+244 923 000 000</b><br>Email: <b>suporte@kwanzaerp.ao</b>',confirmButtonColor:'#4338ca'});}">
+            <i class="far fa-circle nav-icon text-success"></i>
+            <p>Contactar Suporte</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a th:href="@{/factura-eletronica/estado}" class="nav-link">
+            <i class="far fa-circle nav-icon text-danger"></i>
+            <p>Estado do Sistema</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0)" class="nav-link"
+            onclick="if(typeof Swal!=='undefined'){Swal.fire({title:'<strong>KwanzaERP</strong>',icon:'info',html:'Versão <b>2.0</b> - Sistema Integrado de Gestão Comercial e Facturação Electrónica Certificado pela AGT.<br><br>&copy; HZ Consultoria',confirmButtonColor:'#4338ca'});}">
+            <i class="far fa-circle nav-icon text-primary"></i>
+            <p>Sobre o KwanzaERP</p>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- PAINEL GLOBAL (SaaS) -->
+    <li class="nav-item has-treeview module-saas-item" th:if="${modulo_PAINEL_GLOBAL}">
+      <a href="#" class="nav-link bg-warning text-dark">
+        <i class="nav-icon fas fa-globe"></i>
+        <p th:text="#{menu.header.painel_global}">PAINEL GLOBAL (SaaS) <i class="right fas fa-angle-left"></i></p>
+      </a>
+      <ul class="nav nav-treeview">
+        <li class="nav-item"><a th:href="@{/superadmin/dashboard}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.saas.gestao_empresas}">Gestão de Empresas</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/superadmin/usuarios}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.saas.admins_globais}">Admins Globais</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/superadmin/licenca/gerador}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.saas.gerador_licencas}">Gerador de Licenças</p>
+          </a></li>
+        <li class="nav-item"><a th:href="@{/superadmin/planos-pagamento}" class="nav-link"><i
+              class="far fa-circle nav-icon"></i>
+            <p th:text="#{menu.saas.planos_pagamento}">Planos de Pagamento</p>
+          </a></li>
+      </ul>
+    </li>
+
+    <!-- SISTEMA: Terminar Sessão -->
+    <li class="nav-item mt-3 pt-2 border-top border-secondary">
+      <a href="javascript:void(0)" class="nav-link text-danger fw-bold"
+        onclick="document.getElementById('logoutFormSidebar').submit();">
+        <i class="nav-icon fas fa-power-off"></i>
+        <p th:text="#{menu.terminar_sessao}">Terminar Sessão</p>
+      </a>
+      <form th:action="@{/logout}" method="post" id="logoutFormSidebar" class="d-none">
+      </form>
+    </li>
+  </ul>
+  </nav>
+  </div>
   </aside>
 
   <!-- ===================================================================== -->

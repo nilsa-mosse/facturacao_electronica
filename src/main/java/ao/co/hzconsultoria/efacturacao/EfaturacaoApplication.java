@@ -195,6 +195,53 @@ public class EfaturacaoApplication {
                                 System.err.println(">>> Erro ao migrar tabela licencas_geradas: " + e.getMessage());
                         }
 
+                        // Migração: Criar tabelas para módulo Marketing Facebook
+                        try {
+                                jdbcTemplate.execute(
+                                                "CREATE TABLE IF NOT EXISTS configuracao_facebook (" +
+                                                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "empresa_id BIGINT UNIQUE, " +
+                                                                "page_access_token VARCHAR(1000), " +
+                                                                "page_id VARCHAR(100), " +
+                                                                "page_name VARCHAR(255), " +
+                                                                "ativo BOOLEAN DEFAULT FALSE, " +
+                                                                "publicar_promocoes_auto BOOLEAN DEFAULT FALSE, " +
+                                                                "publicar_stock_baixo BOOLEAN DEFAULT FALSE, " +
+                                                                "publicar_novos_produtos BOOLEAN DEFAULT FALSE, " +
+                                                                "template_mensagem_produto VARCHAR(2000), " +
+                                                                "template_mensagem_promocao VARCHAR(2000), " +
+                                                                "hashtags VARCHAR(500), " +
+                                                                "cron_expressao VARCHAR(100), " +
+                                                                "data_ultima_publicacao DATETIME NULL, " +
+                                                                "total_publicacoes_sucesso INT DEFAULT 0, " +
+                                                                "total_publicacoes_falha INT DEFAULT 0, " +
+                                                                "ultimo_log VARCHAR(2000), " +
+                                                                "app_id VARCHAR(200), " +
+                                                                "app_secret VARCHAR(200), " +
+                                                                "max_publicacoes_por_dia INT DEFAULT 5, " +
+                                                                "publicacoes_hoje INT DEFAULT 0, " +
+                                                                "data_reset_contador DATETIME NULL" +
+                                                                ")");
+                                jdbcTemplate.execute(
+                                                "CREATE TABLE IF NOT EXISTS publicacao_facebook (" +
+                                                                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "empresa_id BIGINT NULL, " +
+                                                                "produto_id BIGINT NULL, " +
+                                                                "tipo_publicacao VARCHAR(50), " +
+                                                                "mensagem VARCHAR(5000), " +
+                                                                "facebook_post_id VARCHAR(200), " +
+                                                                "status VARCHAR(50), " +
+                                                                "resposta_api VARCHAR(2000), " +
+                                                                "data_publicacao DATETIME NULL, " +
+                                                                "publicacao_manual BOOLEAN DEFAULT FALSE, " +
+                                                                "url_imagem VARCHAR(500)" +
+                                                                ")");
+                                System.out.println(
+                                                ">>> Migração: Tabelas do módulo Marketing Facebook verificadas/criadas com sucesso.");
+                        } catch (Exception e) {
+                                System.err.println(">>> Erro ao migrar tabelas Marketing Facebook: " + e.getMessage());
+                        }
+
                         // Migração: Criar tabelas para módulo POS, Mesas e KDS
                         try {
                                 jdbcTemplate.execute(
