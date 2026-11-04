@@ -2,463 +2,948 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="menu :: head">
-    <style>
-        .lucro-header {
-            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            color: #333;
-            box-shadow: 0 10px 20px rgba(247, 151, 30, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .icon-receita {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-        }
-
-        .icon-cogs {
-            background: rgba(255, 193, 7, 0.1);
-            color: #ffc107;
-        }
-
-        .icon-despesas {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-        }
-
-        .icon-lucro-bruto {
-            background: rgba(0, 123, 255, 0.1);
-            color: #007bff;
-        }
-
-        .icon-lucro-liquido {
-            background: rgba(111, 66, 193, 0.1);
-            color: #6f42c1;
-        }
-
-        .icon-margem {
-            background: rgba(23, 162, 184, 0.1);
-            color: #17a2b8;
-        }
-
-        .pnl-section {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .pnl-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #f1f3f5;
-            transition: background 0.2s;
-        }
-
-        .pnl-row:hover {
-            background: #f8f9fa;
-        }
-
-        .pnl-row:last-child {
-            border-bottom: none;
-        }
-
-        .pnl-row.pnl-total {
-            background: #f8f9fa;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .pnl-row.pnl-highlight {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 700;
-            font-size: 1.15rem;
-            border-radius: 0 0 15px 15px;
-        }
-
-        .table-modern {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .table-modern thead th {
-            background: #f8f9fa;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            font-weight: 700;
-            color: #6c757d;
-            border: none;
-            padding: 1.25rem 1rem;
-        }
-
-        .table-modern tbody td {
-            padding: 1.25rem 1rem;
-            border-bottom: 1px solid #f1f3f5;
-        }
-
-        .table-modern tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .badge-positive {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .badge-negative {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .badge-neutral {
-            background: rgba(108, 117, 125, 0.1);
-            color: #6c757d;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .dark-mode .stat-card,
-        .dark-mode .pnl-section,
-        .dark-mode .table-modern {
-            background: #2b3035;
-            color: #e9ecef;
-        }
-
-        .dark-mode .pnl-row:hover {
-            background: #343a40;
-        }
-
-        .dark-mode .pnl-row.pnl-total {
-            background: #343a40;
-        }
-
-        .dark-mode .table-modern thead th {
-            background: #343a40;
-            color: #adb5bd;
-        }
-
-        .dark-mode .lucro-header {
-            color: #1a1a2e;
-        }
-    </style>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" th:href="@{/plugins/datatables/css/dataTables.bootstrap5.min.css}">
+    <link rel="stylesheet" th:href="@{/plugins/datatables/css/buttons.bootstrap5.min.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 </head>
 
+<style>
+    * { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+    /* ── HERO BANNER ────────────────────────────────────────── */
+    .lm-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #78350f 35%, #b45309 65%, #d97706 100%);
+        border-radius: 24px;
+        padding: 2.5rem 2.5rem 4.5rem;
+        color: white;
+        margin-bottom: -3rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(120, 53, 15, 0.35);
+    }
+    .lm-hero::before {
+        content: ''; position: absolute;
+        top: -90px; right: -90px;
+        width: 360px; height: 360px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .lm-hero::after {
+        content: ''; position: absolute;
+        bottom: -110px; left: -80px;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .lm-hero-content { position: relative; z-index: 2; }
+
+    .hero-live-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        border-radius: 50px;
+        padding: 0.38rem 1rem;
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.8px;
+        text-transform: uppercase; color: #fef3c7;
+    }
+    .pulse-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #f59e0b;
+        box-shadow: 0 0 10px #f59e0b;
+        animation: pulse-gold 1.8s infinite;
+    }
+    @keyframes pulse-gold {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    .badge-growth-up {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #4ade80; font-size: 0.82rem; font-weight: 700;
+        padding: 0.35rem 0.85rem; border-radius: 50px;
+    }
+    .badge-growth-down {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171; font-size: 0.82rem; font-weight: 700;
+        padding: 0.35rem 0.85rem; border-radius: 50px;
+    }
+
+    /* ── PERIOD NAVIGATOR ───────────────────────────────────── */
+    .period-nav-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 0.5rem 0.8rem;
+        display: inline-flex; align-items: center; gap: 0.6rem;
+    }
+    .btn-nav-arrow {
+        width: 38px; height: 38px; border-radius: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white; border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none; transition: all 0.2s; font-size: 0.9rem;
+    }
+    .btn-nav-arrow:hover {
+        background: rgba(255, 255, 255, 0.3); color: white; transform: translateY(-1px);
+    }
+    .period-select {
+        background: rgba(255, 255, 255, 0.92);
+        color: #78350f;
+        border: none; border-radius: 10px;
+        padding: 0.45rem 0.9rem; font-size: 0.88rem; font-weight: 700;
+        outline: none; cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .btn-hero-action {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: white; border-radius: 12px;
+        padding: 0.55rem 1.2rem; font-size: 0.85rem; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px;
+        text-decoration: none; transition: all 0.2s;
+    }
+    .btn-hero-action:hover {
+        background: rgba(255, 255, 255, 0.3); color: white; transform: translateY(-2px);
+    }
+
+    /* ── KPI CARDS ──────────────────────────────────────────── */
+    .kpi-row { position: relative; z-index: 10; margin-bottom: 1.5rem; }
+    .kpi-card {
+        background: white; border-radius: 20px; padding: 1.5rem;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.05);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%; position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+        content: ''; position: absolute;
+        top: 0; left: 0; right: 0; height: 4px;
+        border-radius: 20px 20px 0 0;
+    }
+    .kpi-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
+    }
+    .kpi-net-profit::before { background: linear-gradient(90deg, #10b981, #06b6d4); }
+    .kpi-margin::before     { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .kpi-gross-profit::before { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+    .kpi-revenue::before    { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .kpi-cogs::before       { background: linear-gradient(90deg, #f97316, #ea580c); }
+    .kpi-expenses::before   { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+
+    .kpi-icon-box {
+        width: 48px; height: 48px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.35rem; color: white; margin-bottom: 0.9rem;
+    }
+    .kpi-net-profit .kpi-icon-box   { background: linear-gradient(135deg, #10b981, #06b6d4); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); }
+    .kpi-margin .kpi-icon-box       { background: linear-gradient(135deg, #6366f1, #8b5cf6); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3); }
+    .kpi-gross-profit .kpi-icon-box { background: linear-gradient(135deg, #0284c7, #38bdf8); box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3); }
+    .kpi-revenue .kpi-icon-box      { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3); }
+    .kpi-cogs .kpi-icon-box         { background: linear-gradient(135deg, #f97316, #ea580c); box-shadow: 0 6px 16px rgba(249, 115, 22, 0.3); }
+    .kpi-expenses .kpi-icon-box     { background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3); }
+
+    .kpi-label {
+        font-size: 0.73rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.8px; color: #94a3b8; margin-bottom: 0.25rem;
+    }
+    .kpi-val {
+        font-size: 1.48rem; font-weight: 800; color: #0f172a;
+        letter-spacing: -0.5px;
+    }
+    .kpi-sub {
+        font-size: 0.77rem; color: #64748b; margin-top: 0.35rem;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .kpi-progress-track {
+        height: 5px; border-radius: 5px; background: #f1f5f9;
+        margin-top: 0.75rem; overflow: hidden;
+    }
+    .kpi-progress-bar {
+        height: 100%; border-radius: 5px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── CONTENT PANELS ─────────────────────────────────────── */
+    .content-panel {
+        background: white; border-radius: 22px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+        overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .panel-head {
+        padding: 1.35rem 1.8rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.8rem;
+    }
+    .panel-head h5 {
+        font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .panel-subtitle { font-size: 0.78rem; color: #94a3b8; margin: 0; }
+
+    .chart-container-box {
+        padding: 1.5rem 1.8rem; position: relative; height: 280px;
+    }
+    .chart-doughnut-box {
+        padding: 1.2rem 1.5rem; position: relative; height: 280px;
+    }
+
+    /* ── DRE STATEMENT ROWS ─────────────────────────────────── */
+    .dre-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9rem; transition: background 0.2s;
+    }
+    .dre-row:hover { background: #f8fafc; }
+    .dre-row.dre-total {
+        background: #f8fafc; font-weight: 800; font-size: 1rem;
+    }
+    .dre-row.dre-final {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white; font-weight: 800; font-size: 1.15rem;
+        border-radius: 0 0 20px 20px;
+    }
+    .badge-dre-pos {
+        background: #dcfce7; color: #15803d; font-weight: 700;
+        padding: 0.35rem 0.8rem; border-radius: 8px;
+    }
+    .badge-dre-neg {
+        background: #fee2e2; color: #b91c1c; font-weight: 700;
+        padding: 0.35rem 0.8rem; border-radius: 8px;
+    }
+
+    /* ── NAV TABS STYLING ───────────────────────────────────── */
+    .custom-tabs .nav-link {
+        border: none; color: #64748b; font-weight: 700; font-size: 0.88rem;
+        padding: 1rem 1.5rem; border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+    }
+    .custom-tabs .nav-link:hover { color: #d97706; }
+    .custom-tabs .nav-link.active {
+        color: #b45309; border-bottom-color: #f59e0b; background: transparent;
+    }
+
+    /* ── MODERN TABLE ───────────────────────────────────────── */
+    .table-modern thead th {
+        background: #f8fafc; text-transform: uppercase;
+        font-size: 0.7rem; letter-spacing: 0.9px; font-weight: 800;
+        color: #94a3b8; border: none; padding: 1.1rem 1.2rem; white-space: nowrap;
+    }
+    .table-modern tbody td {
+        padding: 1.05rem 1.2rem; border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle; font-size: 0.87rem;
+    }
+    .table-modern tbody tr:last-child td { border-bottom: none; }
+    .table-modern tbody tr:hover td { background: #fafafa; }
+    .table-modern { border: none; margin: 0; }
+
+    .badge-ref {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e; padding: 0.35rem 0.75rem; border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    }
+
+    /* ── DARK MODE ──────────────────────────────────────────── */
+    .dark-mode .kpi-card,
+    .dark-mode .content-panel   { background: #1e293b; border-color: #334155; }
+    .dark-mode .kpi-val          { color: #f8fafc; }
+    .dark-mode .kpi-sub          { color: #94a3b8; }
+    .dark-mode .panel-head       { border-color: #334155; }
+    .dark-mode .panel-head h5    { color: #f8fafc; }
+    .dark-mode .dre-row          { border-color: #334155; color: #cbd5e1; }
+    .dark-mode .dre-row:hover    { background: #0f172a; }
+    .dark-mode .dre-row.dre-total { background: #0f172a; color: #f8fafc; }
+    .dark-mode .table-modern thead th { background: #0f172a; color: #94a3b8; }
+    .dark-mode .table-modern tbody td { border-color: #334155; color: #cbd5e1; }
+    .dark-mode .table-modern tbody tr:hover td { background: #0f172a; }
+    .dark-mode .custom-tabs .nav-link { color: #94a3b8; }
+    .dark-mode .custom-tabs .nav-link.active { color: #fbbf24; border-bottom-color: #f59e0b; }
+    .dark-mode .badge-ref        { background: #78350f; color: #fde68a; }
+    .dark-mode .kpi-progress-track { background: #334155; }
+
+    /* ── ANIMATIONS ─────────────────────────────────────────── */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(22px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeInUp 0.5s ease forwards; }
+    .del-1 { animation-delay: 0.08s; opacity: 0; }
+    .del-2 { animation-delay: 0.16s; opacity: 0; }
+    .del-3 { animation-delay: 0.24s; opacity: 0; }
+    .del-4 { animation-delay: 0.32s; opacity: 0; }
+</style>
+
 <body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
-    <div class="container py-5">
-        <!-- Header -->
-        <div class="lucro-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+<div class="container-fluid px-3 px-md-4 py-4" style="max-width: 1480px; margin: auto;">
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 1. HERO BANNER: DRE EXECUTIVO & NAVEGADOR DE PERÍODO            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="lm-hero fade-up">
+        <div class="lm-hero-content d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-4">
+            
+            <!-- Left Info -->
             <div>
-                <h1 class="display-5 fw-bold mb-1">
-                    <i class="fas fa-chart-pie me-2"></i>Lucro L&iacute;quido Mensal
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="hero-live-badge">
+                        <span class="pulse-dot"></span> Demonstração de Resultados (DRE)
+                    </span>
+                    <span th:if="${isMesAtual}" class="badge bg-warning bg-opacity-25 border border-warning border-opacity-50 text-white rounded-pill px-3 py-1" style="font-size:0.75rem; font-weight:700;">
+                        <i class="fas fa-dot-circle me-1 text-warning"></i> Mês Corrente
+                    </span>
+
+                    <!-- Variação do Lucro vs Mês Anterior -->
+                    <span th:if="${variacaoLucro >= 0}" class="badge-growth-up">
+                        <i class="fas fa-arrow-trend-up"></i>
+                        <span th:text="${'+' + #numbers.formatDecimal(variacaoLucro, 1, 'POINT', 1, 'COMMA') + '%'}">+0,0%</span>
+                        <span style="opacity:0.8; font-weight:500;">lucro vs mês ant.</span>
+                    </span>
+                    <span th:if="${variacaoLucro < 0}" class="badge-growth-down">
+                        <i class="fas fa-arrow-trend-down"></i>
+                        <span th:text="${#numbers.formatDecimal(variacaoLucro, 1, 'POINT', 1, 'COMMA') + '%'}">-0,0%</span>
+                        <span style="opacity:0.8; font-weight:500;">lucro vs mês ant.</span>
+                    </span>
+                </div>
+
+                <h1 class="display-6 fw-bold mb-1" style="letter-spacing:-0.5px;">
+                    <i class="fas fa-hand-holding-dollar me-2" style="opacity:0.85;"></i>
+                    Lucro Líquido — <span th:text="${nomeMes + ' de ' + anoSel}">Novembro de 2026</span>
                 </h1>
-                <p class="mb-0 opacity-75">
-                    <i class="far fa-calendar-alt me-2"></i>
-                    <span
-                        th:text="${#temporals.format(#temporals.createNow(), 'MMMM ''de'' yyyy')}">Abril
-                        de 2026</span>
-                    &mdash; Relat&oacute;rio de Resultados
+                <p class="mb-0 opacity-75" style="font-size: 0.92rem;">
+                    Relatório executivo de rentabilidade operacional: Receita, Custos de Mercadorias (COGS) e Despesas
                 </p>
             </div>
-            <div>
-                <a th:href="@{/dashboard}" class="btn btn-dark btn-lg rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-th-large me-2"></i> Dashboard
-                </a>
-            </div>
-        </div>
 
-        <!-- KPI Cards -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-4 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon icon-receita">
-                        <i class="fas fa-arrow-up"></i>
-                    </div>
-                    <span class="text-muted small fw-bold" th:text="#{receita.mensal.titulo}">RECEITA MENSAL</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:text="${#numbers.formatDecimal(receitaMensal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon icon-cogs">
-                        <i class="fas fa-boxes"></i>
-                    </div>
-                    <span class="text-muted small fw-bold">CUSTO DE MERCADORIAS (COGS)</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:text="${#numbers.formatDecimal(cogs, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon icon-despesas">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    <span class="text-muted small fw-bold" th:text="#{financeiro.despesas_operacionais}">DESPESAS OPERACIONAIS</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:text="${#numbers.formatDecimal(totalDespesas, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon icon-lucro-bruto">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <span class="text-muted small fw-bold" th:text="#{financeiro.lucro_bruto}">LUCRO BRUTO</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:text="${#numbers.formatDecimal(lucroBruto, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon icon-lucro-liquido">
-                        <i class="fas fa-hand-holding-usd"></i>
-                    </div>
-                    <span class="text-muted small fw-bold">LUCRO L&Iacute;QUIDO</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:classappend="${lucroLiquido >= 0 ? 'text-success' : 'text-danger'}"
-                        th:text="${#numbers.formatDecimal(lucroLiquido, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon icon-margem">
-                        <i class="fas fa-percentage"></i>
-                    </div>
-                    <span class="text-muted small fw-bold" th:text="#{financeiro.margem_lucro}">MARGEM DE LUCRO</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:classappend="${margemLucro >= 0 ? 'text-success' : 'text-danger'}"
-                        th:text="${#numbers.formatDecimal(margemLucro, 1, 'POINT', 2, 'COMMA')} + '%'">0,00%</h2>
-                </div>
-            </div>
-        </div>
+            <!-- Right: Period Navigator Form & Actions -->
+            <div class="d-flex flex-column align-items-lg-end gap-3 w-100 w-lg-auto">
+                
+                <!-- Period Navigator Form -->
+                <form th:action="@{/dashboard/lucro-liquido-mensal}" method="get" class="period-nav-card shadow-sm m-0">
+                    <!-- Prev Month -->
+                    <a th:href="@{/dashboard/lucro-liquido-mensal(mes=${mesAnterior}, ano=${anoAnterior})}" class="btn-nav-arrow" title="Mês Anterior">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
 
-        <!-- P&L Statement -->
-        <div class="row g-4 mb-5">
-            <div class="col-12">
-                <div class="pnl-section">
-                    <div class="p-4 border-bottom">
-                        <h4 class="mb-0 fw-bold"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Demonstra&ccedil;&atilde;o de Resultados</h4>
-                    </div>
-                    <div class="pnl-row">
-                        <span><i class="fas fa-plus-circle text-success me-2"></i>Receita Total de Vendas (Bruta)</span>
-                        <span class="badge-positive"
-                            th:text="${#numbers.formatDecimal(receitaMensalBruta, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                    </div>
-                    <div class="pnl-row">
-                        <span><i class="fas fa-undo text-danger me-2"></i>Devoluções (Notas de Crédito)</span>
-                        <span class="badge-negative"
-                            th:text="'- ' + ${#numbers.formatDecimal(totalDevolucoes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">- 0,00 Kz</span>
-                    </div>
-                    <div class="pnl-row" style="background: #fdfdfd;">
-                        <span><i class="fas fa-arrow-right text-muted me-2"></i>Receita Líquida</span>
-                        <span class="fw-bold"
-                            th:text="${#numbers.formatDecimal(receitaMensal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                    </div>
-                    <div class="pnl-row">
-                        <span><i class="fas fa-minus-circle text-warning me-2"></i>Custo das Mercadorias Vendidas (COGS)</span>
-                        <span class="badge-neutral"
-                            th:text="'- ' + ${#numbers.formatDecimal(cogs, 1, 'POINT', 2, 'COMMA')} + ' Kz'">- 0,00 Kz</span>
-                    </div>
-                    <div class="pnl-row pnl-total">
-                        <span><i class="fas fa-equals text-primary me-2"></i>Lucro Bruto</span>
-                        <span th:classappend="${lucroBruto >= 0 ? 'badge-positive' : 'badge-negative'}"
-                            th:text="${#numbers.formatDecimal(lucroBruto, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                    </div>
-                    <div class="pnl-row">
-                        <span><i class="fas fa-minus-circle text-danger me-2"></i>Despesas Operacionais</span>
-                        <span class="badge-negative"
-                            th:text="'- ' + ${#numbers.formatDecimal(totalDespesas, 1, 'POINT', 2, 'COMMA')} + ' Kz'">- 0,00 Kz</span>
-                    </div>
-                    <div class="pnl-row pnl-highlight">
-                        <span><i class="fas fa-trophy me-2"></i>Lucro L&iacute;quido</span>
-                        <span th:text="${#numbers.formatDecimal(lucroLiquido, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    <!-- Month Select -->
+                    <select name="mes" class="period-select" onchange="this.form.submit()">
+                        <option th:each="m : ${#numbers.sequence(1, 12)}" 
+                                th:value="${m}" 
+                                th:text="${mesesNomes[m]}" 
+                                th:selected="${m == mesSel}">Janeiro</option>
+                    </select>
 
-        <!-- Vendas do Mês -->
-        <div class="row g-4 mb-5">
-            <div class="col-lg-7">
-                <div class="table-modern">
-                    <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
-                        <h4 class="mb-0 fw-bold"><i class="fas fa-shopping-cart me-2 text-success"></i>Vendas do M&ecirc;s</h4>
-                        <span class="badge bg-success rounded-pill fs-6" th:text="${totalVendasCount} + ' vendas'">0 vendas</span>
-                    </div>
-                    <div class="table-responsive p-3">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="ps-3">Ref.</th>
-                                    <th>Data</th>
-                                    <th class="text-end pe-3">Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="venda : ${vendasDoMes}">
-                                    <td class="ps-3">
-                                        <span class="badge bg-light text-dark border fw-bold" th:text="'#' + ${venda.id}">#1</span>
-                                    </td>
-                                    <td>
-                                        <span th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy HH:mm')}">28/04/2026 14:30</span>
-                                    </td>
-                                    <td class="text-end pe-3">
-                                        <span class="fw-bold text-success"
-                                            th:text="${#numbers.formatDecimal(venda.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(vendasDoMes)}">
-                                    <td colspan="3" class="text-center text-muted py-4">
-                                        <i class="fas fa-inbox fa-2x mb-2 d-block opacity-50"></i>
-                                        Sem vendas registadas neste m&ecirc;s
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- Year Select -->
+                    <select name="ano" class="period-select" onchange="this.form.submit()">
+                        <option th:each="y : ${listaAnos}" 
+                                th:value="${y}" 
+                                th:text="${y}" 
+                                th:selected="${y == anoSel}">2026</option>
+                    </select>
+
+                    <!-- Next Month -->
+                    <a th:href="@{/dashboard/lucro-liquido-mensal(mes=${mesSeguinte}, ano=${anoSeguinte})}" class="btn-nav-arrow" title="Mês Seguinte">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </form>
+
+                <!-- Action Links -->
+                <div class="d-flex align-items-center gap-2">
+                    <a th:href="@{/dashboard}" class="btn-hero-action">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a>
+                    <button type="button" onclick="window.print()" class="btn-hero-action" title="Imprimir Relatório">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <a th:href="@{/dashboard/lucro-liquido-mensal(mes=${mesSel}, ano=${anoSel})}" class="btn-hero-action" title="Atualizar">
+                        <i class="fas fa-sync-alt"></i>
+                    </a>
                 </div>
             </div>
 
-            <!-- Despesas do Mês -->
-            <div class="col-lg-5">
-                <div class="table-modern">
-                    <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
-                        <h4 class="mb-0 fw-bold"><i class="fas fa-receipt me-2 text-danger"></i>Despesas do M&ecirc;s</h4>
-                        <span class="badge bg-danger rounded-pill fs-6" th:text="${despesasDoMes.size()} + ' registos'">0 registos</span>
-                    </div>
-                    <div class="table-responsive p-3">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="ps-3">Descri&ccedil;&atilde;o</th>
-                                    <th>Data</th>
-                                    <th class="text-end pe-3">Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="despesa : ${despesasDoMes}">
-                                    <td class="ps-3">
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-bold" th:text="${despesa.descricao}">Descrição</span>
-                                            <small class="text-muted" th:text="${despesa.categoria}" th:if="${despesa.categoria != null}">Categoria</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span th:text="${#temporals.format(despesa.dataDespesa, 'dd/MM/yyyy')}">28/04/2026</span>
-                                    </td>
-                                    <td class="text-end pe-3">
-                                        <span class="fw-bold text-danger"
-                                            th:text="${#numbers.formatDecimal(despesa.valor, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(despesasDoMes)}">
-                                    <td colspan="3" class="text-center text-muted py-4">
-                                        <i class="fas fa-check-circle fa-2x mb-2 d-block text-success opacity-50"></i>
-                                        Sem despesas registadas neste m&ecirc;s
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Devoluções do Mês -->
-        <div class="row g-4 mb-5">
-            <div class="col-12">
-                <div class="table-modern">
-                    <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
-                        <h4 class="mb-0 fw-bold"><i class="fas fa-undo me-2 text-danger"></i>Devoluções do Mês (Notas de Crédito)</h4>
-                        <span class="badge bg-danger rounded-pill fs-6" th:text="${devolucoesDoMes.size()} + ' registos'">0 registos</span>
-                    </div>
-                    <div class="table-responsive p-3">
-                        <table class="table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th class="ps-3">Nº Nota Crédito</th>
-                                    <th>Ref. Factura</th>
-                                    <th>Data</th>
-                                    <th class="text-end pe-3">Valor Estornado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="dev : ${devolucoesDoMes}">
-                                    <td class="ps-3">
-                                        <span class="badge bg-danger text-white fw-bold" th:text="${dev.fatura != null ? dev.fatura.numeroFatura : 'N/A'}">NC 001</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-muted" th:text="${dev.facturaRef != null ? dev.facturaRef : '-'}">FT 001</span>
-                                    </td>
-                                    <td>
-                                        <span th:text="${#temporals.format(dev.dataDevolucao, 'dd/MM/yyyy HH:mm')}">28/04/2026</span>
-                                    </td>
-                                    <td class="text-end pe-3">
-                                        <span class="fw-bold text-danger"
-                                            th:text="${#numbers.formatDecimal(dev.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                                    </td>
-                                </tr>
-                                <tr th:if="${#lists.isEmpty(devolucoesDoMes)}">
-                                    <td colspan="4" class="text-center text-muted py-4">
-                                        <i class="fas fa-check-circle fa-2x mb-2 d-block text-success opacity-50"></i>
-                                        Nenhuma devolução registada neste mês
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer Info -->
-        <div class="text-center text-muted small mt-4">
-            <i class="fas fa-info-circle me-1"></i>
-            O Lucro L&iacute;quido &eacute; calculado como: (<strong>Receita Bruta</strong> &minus; <strong>Devolu&ccedil;&otilde;es</strong>) &minus; <strong>Custo das Mercadorias</strong> &minus; <strong>Despesas Operacionais</strong>.
-            Os valores s&atilde;o actualizados em tempo real com base nos registos do m&ecirc;s corrente.
         </div>
     </div>
-</body>
 
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 2. 6 KPI CARDS COM ANIMAÇÕES & MÉTRICAS FINANCEIRAS             -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 kpi-row">
+        <!-- 1. Lucro Líquido -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-1">
+            <div class="kpi-card kpi-net-profit">
+                <div class="kpi-icon-box"><i class="fas fa-sack-dollar"></i></div>
+                <div class="kpi-label">Lucro Líquido</div>
+                <div class="kpi-val" id="kpiNetProfitVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Resultado Final</span>
+                    <span class="badge" th:classappend="${lucroLiquido >= 0 ? 'bg-success text-white' : 'bg-danger text-white'}" 
+                          style="font-size:0.68rem;" th:text="${lucroLiquido >= 0 ? 'Positivo' : 'Prejuízo'}">Positivo</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barNetProfit" style="background:linear-gradient(90deg, #10b981, #06b6d4); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Margem Líquida -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-2">
+            <div class="kpi-card kpi-margin">
+                <div class="kpi-icon-box"><i class="fas fa-percent"></i></div>
+                <div class="kpi-label">Margem Líquida</div>
+                <div class="kpi-val" id="kpiMarginVal">—%</div>
+                <div class="kpi-sub">
+                    <span>Rentabilidade Real</span>
+                    <span class="badge bg-light text-primary fw-bold" style="font-size:0.68rem;">ROI</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barMargin" style="background:linear-gradient(90deg, #6366f1, #8b5cf6); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Lucro Bruto -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-3">
+            <div class="kpi-card kpi-gross-profit">
+                <div class="kpi-icon-box"><i class="fas fa-chart-line"></i></div>
+                <div class="kpi-label">Lucro Bruto</div>
+                <div class="kpi-val" id="kpiGrossProfitVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Receita &minus; COGS</span>
+                    <span class="badge bg-light text-info fw-bold" style="font-size:0.68rem;" 
+                          th:text="${#numbers.formatDecimal(margemBruta, 1, 'POINT', 1, 'COMMA') + '%'}">0%</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barGrossProfit" style="background:linear-gradient(90deg, #0284c7, #38bdf8); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Receita Líquida Real -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-1">
+            <div class="kpi-card kpi-revenue">
+                <div class="kpi-icon-box"><i class="fas fa-wallet"></i></div>
+                <div class="kpi-label">Receita Real</div>
+                <div class="kpi-val" id="kpiRevenueVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Após estornos</span>
+                    <span class="badge bg-light text-warning fw-bold" style="font-size:0.68rem;">Líquida</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" style="background:linear-gradient(90deg, #f59e0b, #d97706); width:100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. COGS (Custo de Vendas) -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-2">
+            <div class="kpi-card kpi-cogs">
+                <div class="kpi-icon-box"><i class="fas fa-boxes-stacked"></i></div>
+                <div class="kpi-label">Custo Mercadorias</div>
+                <div class="kpi-val" id="kpiCogsVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Custo de aquisição</span>
+                    <span class="badge bg-light text-secondary fw-bold" style="font-size:0.68rem;">COGS</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barCogs" style="background:linear-gradient(90deg, #f97316, #ea580c); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Despesas Operacionais -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-3">
+            <div class="kpi-card kpi-expenses">
+                <div class="kpi-icon-box"><i class="fas fa-receipt"></i></div>
+                <div class="kpi-label">Despesas Operacionais</div>
+                <div class="kpi-val" id="kpiExpensesVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Custos fixos e var.</span>
+                    <span class="badge bg-light text-danger fw-bold" style="font-size:0.68rem;">Gastos</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barExpenses" style="background:linear-gradient(90deg, #ef4444, #b91c1c); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 3. GRÁFICOS: ESTRUTURA DRE + CATEGORIAS DE DESPESAS             -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 mb-4">
+        
+        <!-- Gráfico 1: Estrutura do DRE (Barras) -->
+        <div class="col-12 col-xl-7 fade-up del-2">
+            <div class="content-panel h-100">
+                <div class="panel-head">
+                    <div>
+                        <h5><i class="fas fa-chart-simple text-warning"></i> Decomposição do Resultado (DRE)</h5>
+                        <p class="panel-subtitle">Da receita bruta ao lucro líquido final</p>
+                    </div>
+                </div>
+                <div class="chart-container-box">
+                    <canvas id="chartDreWaterfall"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Despesas por Categoria (Doughnut) -->
+        <div class="col-12 col-xl-5 fade-up del-3">
+            <div class="content-panel h-100">
+                <div class="panel-head">
+                    <div>
+                        <h5><i class="fas fa-pie-chart text-danger"></i> Despesas por Categoria</h5>
+                        <p class="panel-subtitle">Destino dos custos operacionais no mês</p>
+                    </div>
+                </div>
+                <div class="chart-doughnut-box">
+                    <canvas id="chartDespesasCat"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 4. DEMONSTRAÇÃO DE RESULTADOS (DRE) FORMATO CONTÁBIL           -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="content-panel fade-up del-3 mb-4">
+        <div class="panel-head">
+            <div>
+                <h5><i class="fas fa-file-invoice-dollar text-primary"></i> Demonstração do Resultado do Exercício (DRE)</h5>
+                <p class="panel-subtitle">Resumo estruturado de apuração do resultado contábil</p>
+            </div>
+            <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                <i class="fas fa-print me-1"></i> Imprimir DRE
+            </button>
+        </div>
+
+        <div class="p-0">
+            <!-- 1. Receita Bruta -->
+            <div class="dre-row">
+                <div>
+                    <span class="badge bg-success bg-opacity-10 text-success fw-bold me-2">(+)</span>
+                    <span class="fw-bold text-dark">Receita Bruta de Vendas</span>
+                    <small class="text-muted d-block ps-4">Faturamento bruto global registado</small>
+                </div>
+                <span class="badge-dre-pos" th:text="${#numbers.formatDecimal(receitaMensalBruta, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+            </div>
+
+            <!-- 2. Devoluções -->
+            <div class="dre-row">
+                <div>
+                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold me-2">(&minus;)</span>
+                    <span class="text-secondary">Devoluções e Estornos (Notas de Crédito)</span>
+                    <small class="text-muted d-block ps-4">Mercadorias devolvidas ou faturas creditadas</small>
+                </div>
+                <span class="badge-dre-neg" th:text="'&minus; ' + ${#numbers.formatDecimal(totalDevolucoes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">&minus; 0,00 Kz</span>
+            </div>
+
+            <!-- 3. Receita Líquida Real -->
+            <div class="dre-row dre-total">
+                <div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold me-2">(=)</span>
+                    <span class="text-primary">Receita Líquida Real</span>
+                </div>
+                <span class="fw-bold text-primary fs-6" th:text="${#numbers.formatDecimal(receitaMensal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+            </div>
+
+            <!-- 4. Custo das Mercadorias (COGS) -->
+            <div class="dre-row">
+                <div>
+                    <span class="badge bg-warning bg-opacity-10 text-warning fw-bold me-2">(&minus;)</span>
+                    <span class="text-secondary">Custo das Mercadorias Vendidas (COGS)</span>
+                    <small class="text-muted d-block ps-4">Preço de custo de aquisição dos itens faturados</small>
+                </div>
+                <span class="badge-dre-neg" th:text="'&minus; ' + ${#numbers.formatDecimal(cogs, 1, 'POINT', 2, 'COMMA')} + ' Kz'">&minus; 0,00 Kz</span>
+            </div>
+
+            <!-- 5. Lucro Bruto -->
+            <div class="dre-row dre-total">
+                <div>
+                    <span class="badge bg-info bg-opacity-10 text-info fw-bold me-2">(=)</span>
+                    <span class="text-dark">Lucro Bruto</span>
+                    <span class="badge bg-light text-muted ms-2" th:text="'Margem Bruta: ' + ${#numbers.formatDecimal(margemBruta, 1, 'POINT', 1, 'COMMA')} + '%'">0%</span>
+                </div>
+                <span class="fw-bold fs-6" th:classappend="${lucroBruto >= 0 ? 'text-success' : 'text-danger'}" 
+                      th:text="${#numbers.formatDecimal(lucroBruto, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+            </div>
+
+            <!-- 6. Despesas Operacionais -->
+            <div class="dre-row">
+                <div>
+                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold me-2">(&minus;)</span>
+                    <span class="text-secondary">Despesas Operacionais e Administrativas</span>
+                    <small class="text-muted d-block ps-4">Alugueres, salários, serviços e manutenção</small>
+                </div>
+                <span class="badge-dre-neg" th:text="'&minus; ' + ${#numbers.formatDecimal(totalDespesas, 1, 'POINT', 2, 'COMMA')} + ' Kz'">&minus; 0,00 Kz</span>
+            </div>
+
+            <!-- 7. Lucro Líquido Final -->
+            <div class="dre-row dre-final">
+                <div>
+                    <i class="fas fa-trophy me-2"></i>
+                    <span>LUCRO LÍQUIDO FINAL DO EXERCÍCIO</span>
+                    <span class="badge bg-white text-dark ms-2" style="font-size:0.75rem;" 
+                          th:text="'Margem Líquida: ' + ${#numbers.formatDecimal(margemLucro, 1, 'POINT', 1, 'COMMA')} + '%'">0%</span>
+                </div>
+                <span class="fs-5" th:text="${#numbers.formatDecimal(lucroLiquido, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 5. ABAS DE AUDITORIA: VENDAS, DESPESAS E DEVOLUÇÕES            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="content-panel fade-up del-4">
+        
+        <!-- Nav Tabs Header -->
+        <div class="border-bottom px-3 pt-2 bg-light bg-opacity-50">
+            <ul class="nav custom-tabs" id="dreAuditTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-vendas-btn" data-bs-toggle="tab" data-bs-target="#tab-vendas" type="button" role="tab">
+                        <i class="fas fa-shopping-cart me-2 text-success"></i> Vendas do Mês 
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill ms-1" th:text="${vendasDoMes.size()}">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-despesas-btn" data-bs-toggle="tab" data-bs-target="#tab-despesas" type="button" role="tab">
+                        <i class="fas fa-receipt me-2 text-danger"></i> Despesas Operacionais 
+                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill ms-1" th:text="${despesasDoMes.size()}">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-devolucoes-btn" data-bs-toggle="tab" data-bs-target="#tab-devolucoes" type="button" role="tab">
+                        <i class="fas fa-undo me-2 text-warning"></i> Devoluções / NC 
+                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill ms-1" th:text="${devolucoesDoMes.size()}">0</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content p-3" id="dreAuditTabContent">
+            
+            <!-- Tab 1: Vendas -->
+            <div class="tab-pane fade show active" id="tab-vendas" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-modern align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">Referência</th>
+                                <th>Cliente</th>
+                                <th>Data e Hora</th>
+                                <th>Pagamento</th>
+                                <th class="text-end">Valor Total</th>
+                                <th class="text-end pe-3">Documento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="venda : ${vendasDoMes}">
+                                <td class="ps-3">
+                                    <span class="badge-ref" th:text="'#' + ${venda.id}">#1</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark" th:text="${venda.nomeCliente != null ? venda.nomeCliente : 'Consumidor Final'}">Cliente</span>
+                                </td>
+                                <td>
+                                    <span th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy HH:mm')}">28/04/2026 14:30</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border" th:text="${venda.formaPagamento != null ? venda.formaPagamento : 'CASH'}">CASH</span>
+                                </td>
+                                <td class="text-end fw-bold text-success" th:text="${#numbers.formatDecimal(venda.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</td>
+                                <td class="text-end pe-3">
+                                    <a th:if="${faturasMap.containsKey(venda.id)}" 
+                                       th:href="@{'/uploads/faturas/' + ${faturasMap.get(venda.id)} + '.pdf'}"
+                                       target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="fas fa-file-pdf me-1"></i> Factura
+                                    </a>
+                                    <span th:unless="${faturasMap.containsKey(venda.id)}" class="badge bg-light text-muted">Sem Doc.</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(vendasDoMes)}">
+                                <td colspan="6" class="text-center text-muted py-4">Sem vendas registadas neste mês.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Despesas -->
+            <div class="tab-pane fade" id="tab-despesas" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-modern align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">Descrição da Despesa</th>
+                                <th>Categoria</th>
+                                <th>Data de Registo</th>
+                                <th class="text-end pe-3">Valor Gasto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="despesa : ${despesasDoMes}">
+                                <td class="ps-3">
+                                    <span class="fw-bold text-dark" th:text="${despesa.descricao}">Descrição</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold" th:text="${despesa.categoria != null ? despesa.categoria : 'Geral'}">Categoria</span>
+                                </td>
+                                <td>
+                                    <span th:text="${#temporals.format(despesa.dataDespesa, 'dd/MM/yyyy')}">28/04/2026</span>
+                                </td>
+                                <td class="text-end pe-3 fw-bold text-danger" th:text="${#numbers.formatDecimal(despesa.valor, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(despesasDoMes)}">
+                                <td colspan="4" class="text-center text-muted py-4">Sem despesas registadas neste mês.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Devoluções -->
+            <div class="tab-pane fade" id="tab-devolucoes" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table table-modern align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-3">Nº Nota de Crédito</th>
+                                <th>Factura Referenciada</th>
+                                <th>Data de Estorno</th>
+                                <th class="text-end pe-3">Valor Estornado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="dev : ${devolucoesDoMes}">
+                                <td class="ps-3">
+                                    <span class="badge bg-danger text-white fw-bold" th:text="${dev.fatura != null ? dev.fatura.numeroFatura : 'NC-001'}">NC-001</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted fw-bold" th:text="${dev.facturaRef != null ? dev.facturaRef : '-'}">FT 001</span>
+                                </td>
+                                <td>
+                                    <span th:text="${#temporals.format(dev.dataDevolucao, 'dd/MM/yyyy HH:mm')}">28/04/2026</span>
+                                </td>
+                                <td class="text-end pe-3 fw-bold text-danger" th:text="${#numbers.formatDecimal(dev.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(devolucoesDoMes)}">
+                                <td colspan="4" class="text-center text-muted py-4">Nenhuma devolução registada neste mês.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /container-fluid -->
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- DATA BRIDGE: DADOS PREPARADOS PELO SPRING MVC PARA O JAVASCRIPT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var _dataLucro = {
+        mesSel:             /*[[${mesSel}]]*/ 11,
+        anoSel:             /*[[${anoSel}]]*/ 2026,
+        nomeMes:            /*[[${nomeMes}]]*/ 'Novembro',
+        receitaBruta:       /*[[${receitaMensalBruta}]]*/ 0,
+        devolucoes:         /*[[${totalDevolucoes}]]*/ 0,
+        receitaReal:        /*[[${receitaMensal}]]*/ 0,
+        cogs:               /*[[${cogs}]]*/ 0,
+        lucroBruto:         /*[[${lucroBruto}]]*/ 0,
+        margemBruta:        /*[[${margemBruta}]]*/ 0,
+        totalDespesas:      /*[[${totalDespesas}]]*/ 0,
+        lucroLiquido:       /*[[${lucroLiquido}]]*/ 0,
+        margemLucro:        /*[[${margemLucro}]]*/ 0,
+        despesasPorCategoria: /*[[${despesasPorCategoria}]]*/ {}
+    };
+    /*]]>*/
+</script>
+
+<script th:src="@{/plugins/chartjs/chart.min.js}"></script>
+
+<script th:inline="none">
+$(document).ready(function () {
+
+    /* ── 1. ANIMAÇÕES PROGRESSIVAS DOS NÚMEROS (COUNT-UP) ─────── */
+    function animateCount(el, targetVal, decimals, suffix) {
+        if (!el) return;
+        var duration = 1200, start = null;
+        function step(ts) {
+            if (!start) start = ts;
+            var progress = Math.min((ts - start) / duration, 1);
+            var ease = 1 - Math.pow(1 - progress, 3);
+            var current = targetVal * ease;
+            el.textContent = current.toLocaleString('pt-PT', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }) + (suffix || '');
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    setTimeout(function() {
+        animateCount(document.getElementById('kpiNetProfitVal'),   _dataLucro.lucroLiquido,  2, ' Kz');
+        animateCount(document.getElementById('kpiMarginVal'),      _dataLucro.margemLucro,   1, '%');
+        animateCount(document.getElementById('kpiGrossProfitVal'), _dataLucro.lucroBruto,    2, ' Kz');
+        animateCount(document.getElementById('kpiRevenueVal'),     _dataLucro.receitaReal,   2, ' Kz');
+        animateCount(document.getElementById('kpiCogsVal'),        _dataLucro.cogs,          2, ' Kz');
+        animateCount(document.getElementById('kpiExpensesVal'),    _dataLucro.totalDespesas, 2, ' Kz');
+
+        if (_dataLucro.receitaReal > 0) {
+            var netPct = Math.max(0, Math.min(100, Math.round((_dataLucro.lucroLiquido / _dataLucro.receitaReal) * 100)));
+            var grossPct = Math.max(0, Math.min(100, Math.round((_dataLucro.lucroBruto / _dataLucro.receitaReal) * 100)));
+            var cogsPct = Math.max(0, Math.min(100, Math.round((_dataLucro.cogs / _dataLucro.receitaReal) * 100)));
+            var expPct = Math.max(0, Math.min(100, Math.round((_dataLucro.totalDespesas / _dataLucro.receitaReal) * 100)));
+            document.getElementById('barNetProfit').style.width = netPct + '%';
+            document.getElementById('barGrossProfit').style.width = grossPct + '%';
+            document.getElementById('barCogs').style.width = cogsPct + '%';
+            document.getElementById('barExpenses').style.width = expPct + '%';
+            document.getElementById('barMargin').style.width = Math.max(0, Math.min(100, Math.round(_dataLucro.margemLucro))) + '%';
+        }
+    }, 250);
+
+    /* ── 2. GRÁFICO 1: DECOMPOSIÇÃO DRE (BARRAS) ──────────────── */
+    var isDark = document.body.classList.contains('dark-mode');
+    var textColor = isDark ? '#94a3b8' : '#64748b';
+    var gridColor  = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+
+    var ctxDre = document.getElementById('chartDreWaterfall').getContext('2d');
+    new Chart(ctxDre, {
+        type: 'bar',
+        data: {
+            labels: ['Receita Real', 'COGS (-)', 'Lucro Bruto', 'Despesas (-)', 'Lucro Líquido'],
+            datasets: [{
+                data: [
+                    _dataLucro.receitaReal,
+                    _dataLucro.cogs,
+                    _dataLucro.lucroBruto,
+                    _dataLucro.totalDespesas,
+                    _dataLucro.lucroLiquido
+                ],
+                backgroundColor: [
+                    '#f59e0b',
+                    '#f97316',
+                    '#0284c7',
+                    '#ef4444',
+                    _dataLucro.lucroLiquido >= 0 ? '#10b981' : '#dc2626'
+                ],
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ' ' + ctx.label + ': ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + ' Kz';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textColor, font: { size: 10, weight: '700' } }
+                },
+                y: {
+                    grid: { color: gridColor },
+                    border: { display: false },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 10 },
+                        callback: function(v) {
+                            if (Math.abs(v) >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+                            if (Math.abs(v) >= 1000) return (v / 1000).toFixed(0) + 'k';
+                            return v;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    /* ── 3. GRÁFICO 2: DESPESAS POR CATEGORIA (DOUGHNUT) ─────── */
+    var catLabels = [];
+    var catValues = [];
+    var catColors = ['#ef4444', '#f97316', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+
+    if (_dataLucro.despesasPorCategoria) {
+        for (var cKey in _dataLucro.despesasPorCategoria) {
+            catLabels.push(cKey);
+            catValues.push(_dataLucro.despesasPorCategoria[cKey]);
+        }
+    }
+
+    if (catValues.length === 0) {
+        catLabels = ['Sem Despesas'];
+        catValues = [1];
+        catColors = ['#e2e8f0'];
+    }
+
+    var ctxDesp = document.getElementById('chartDespesasCat').getContext('2d');
+    new Chart(ctxDesp, {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catValues,
+                backgroundColor: catColors,
+                borderWidth: 2,
+                borderColor: isDark ? '#1e293b' : '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        font: { size: 10, weight: '700' },
+                        boxWidth: 10,
+                        padding: 8
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ' ' + ctx.label + ': ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + ' Kz';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+});
+</script>
+</body>
 </html>

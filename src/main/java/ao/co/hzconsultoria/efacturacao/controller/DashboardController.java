@@ -155,88 +155,424 @@ public class DashboardController {
     }
 
     @GetMapping("/dashboard/vendas-dia")
-    public String vendasDia(Model model) {
+    public Object vendasDia(
+            @RequestParam(value = "data", required = false) String dataStr,
+            @RequestParam(value = "format", required = false) String format,
+            Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        List<Compra> vendas = dashboardService.getComprasDoDia(empresaId);
-        
-        double totalVendasGross = vendas.stream()
-            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()))
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        java.time.LocalDate dataSel = hoje;
+        if (dataStr != null && !dataStr.trim().isEmpty()) {
+            try {
+                dataSel = java.time.LocalDate.parse(dataStr.trim());
+            } catch (Exception e) {
+                dataSel = hoje;
+            }
+        }
+
+        boolean isHoje = dataSel.equals(hoje);
+        java.time.LocalDate dataOntem = dataSel.minusDays(1);
+        java.time.LocalDate dataAmanha = dataSel.plusDays(1);
+
+        List<Compra> vendas = dashboardService.getComprasPorData(empresaId, dataSel);
+        if (vendas == null) vendas = new java.util.ArrayList<>();
+
+        // Ordenar decrescente por data/hora
+        vendas.sort((a, b) -> {
+            if (a.getDataCompra() == null && b.getDataCompra() == null) return 0;
+            if (a.getDataCompra() == null) return 1;
+            if (b.getDataCompra() == null) return -1;
+            return b.getDataCompra().compareTo(a.getDataCompra());
+        });
+
+        List<Compra> validas = vendas.stream()
+            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()) && !"ANULADA".equalsIgnoreCase(v.getStatus()))
+            .collect(Collectors.toList());
+
+        double totalVendasGross = validas.stream()
             .mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0)
             .sum();
-            
+
         double totalIva = 0.0;
         java.util.Map<Long, String> faturasMap = new java.util.HashMap<>();
-        
+        java.util.Map<String, Double> hourlyData = new java.util.HashMap<>();
+        java.util.Map<String, Double> vendasPorPagamento = new java.util.LinkedHashMap<>();
+
+        int totalPagas = 0;
+        int totalEmitidas = 0;
+        int totalCanceladas = 0;
+
         for (Compra v : vendas) {
-            if (!"CANCELADA".equalsIgnoreCase(v.getStatus())) {
+            boolean isCancelada = "CANCELADA".equalsIgnoreCase(v.getStatus()) || "ANULADA".equalsIgnoreCase(v.getStatus());
+            if (isCancelada) {
+                totalCanceladas++;
+            } else if ("PAGA".equalsIgnoreCase(v.getStatus()) || "PAGO".equalsIgnoreCase(v.getStatus())) {
+                totalPagas++;
+            } else {
+                totalEmitidas++;
+            }
+
+            if (!isCancelada) {
                 if (v.getItens() != null) {
                     totalIva += v.getItens().stream()
                         .mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0)
                         .sum();
                 }
+
+                if (v.getDataCompra() != null) {
+                    int h = v.getDataCompra().getHour();
+                    String hKey = String.valueOf(h);
+                    double vTotal = v.getTotal() != null ? v.getTotal() : 0.0;
+                    hourlyData.put(hKey, hourlyData.getOrDefault(hKey, 0.0) + vTotal);
+                }
+
+                String forma = v.getFormaPagamento();
+                if (forma == null || forma.trim().isEmpty()) {
+                    forma = "Não Especificado";
+                } else {
+                    forma = forma.toUpperCase().trim();
+                    if (forma.contains("CASH") || forma.contains("DINHEIRO")) forma = "Dinheiro (Cash)";
+                    else if (forma.contains("TPA") || forma.contains("MULTICAIXA")) forma = "Multicaixa (TPA)";
+                    else if (forma.contains("TRANSF")) forma = "Transferência";
+                    else if (forma.contains("+")) forma = "Misto (" + forma + ")";
+                    else forma = forma.replace("_", " ");
+                }
+                double vTotal = v.getTotal() != null ? v.getTotal() : 0.0;
+                vendasPorPagamento.put(forma, vendasPorPagamento.getOrDefault(forma, 0.0) + vTotal);
             }
-            
-            // Buscar o número da fatura associada a esta compra
+
             List<ao.co.hzconsultoria.efacturacao.model.Fatura> faturas = faturaRepository.findByCompra(v);
             if (!faturas.isEmpty()) {
                 faturasMap.put(v.getId(), faturas.get(0).getNumeroFatura());
             }
+        }
+
+        double totalVendasLiquida = Math.max(0.0, totalVendasGross - totalIva);
+        int totalTransacoes = vendas.size();
+        int totalValidas = validas.size();
+        double ticketMedio = totalValidas > 0 ? (totalVendasLiquida / totalValidas) : 0.0;
+        double maiorVenda = validas.stream().mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0).max().orElse(0.0);
+
+        // Comparativo com o dia anterior
+        List<Compra> vendasOntem = dashboardService.getComprasPorData(empresaId, dataOntem);
+        List<Compra> validasOntem = (vendasOntem != null) ? vendasOntem.stream()
+            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()) && !"ANULADA".equalsIgnoreCase(v.getStatus()))
+            .collect(Collectors.toList()) : java.util.Collections.emptyList();
+        double grossOntem = validasOntem.stream().mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0).sum();
+        double ivaOntem = 0.0;
+        for (Compra v : validasOntem) {
+            if (v.getItens() != null) {
+                ivaOntem += v.getItens().stream().mapToDouble(i -> i.getIva() != null ? i.getIva() : 0.0).sum();
+            }
+        }
+        double liquidaOntem = Math.max(0.0, grossOntem - ivaOntem);
+        double variacaoPercentual = 0.0;
+        if (liquidaOntem > 0) {
+            variacaoPercentual = ((totalVendasLiquida - liquidaOntem) / liquidaOntem) * 100.0;
+        } else if (totalVendasLiquida > 0) {
+            variacaoPercentual = 100.0;
+        }
+
+        if ("json".equalsIgnoreCase(format)) {
+            java.util.Map<String, Object> jsonResponse = new java.util.HashMap<>();
+            jsonResponse.put("data", dataSel.toString());
+            jsonResponse.put("isHoje", isHoje);
+            jsonResponse.put("receitaLiquida", totalVendasLiquida);
+            jsonResponse.put("receitaBruta", totalVendasGross);
+            jsonResponse.put("ivaTotal", totalIva);
+            jsonResponse.put("ticketMedio", ticketMedio);
+            jsonResponse.put("maiorVenda", maiorVenda);
+            jsonResponse.put("totalTransacoes", totalTransacoes);
+            jsonResponse.put("totalValidas", totalValidas);
+            jsonResponse.put("totalPagas", totalPagas);
+            jsonResponse.put("totalCanceladas", totalCanceladas);
+            jsonResponse.put("variacaoPercentual", variacaoPercentual);
+            jsonResponse.put("receitaOntem", liquidaOntem);
+            jsonResponse.put("hourlyData", hourlyData);
+            jsonResponse.put("vendasPorPagamento", vendasPorPagamento);
+            return org.springframework.http.ResponseEntity.ok(jsonResponse);
         }
 
         model.addAttribute("vendasDoDia", vendas);
-        model.addAttribute("totalVendasDia", totalVendasGross - totalIva); // Venda Líquida
+        model.addAttribute("dataSel", dataSel.toString());
+        model.addAttribute("dataSelFormatada", dataSel.format(java.time.format.DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy", new java.util.Locale("pt", "PT"))));
+        model.addAttribute("dataOntem", dataOntem.toString());
+        model.addAttribute("dataAmanha", dataAmanha.toString());
+        model.addAttribute("isHoje", isHoje);
+
+        model.addAttribute("totalVendasDia", totalVendasLiquida); // Venda Líquida
+        model.addAttribute("totalVendasGross", totalVendasGross);
         model.addAttribute("totalIvaDia", totalIva);
+        model.addAttribute("totalTransacoes", totalTransacoes);
+        model.addAttribute("totalValidas", totalValidas);
+        model.addAttribute("totalPagas", totalPagas);
+        model.addAttribute("totalEmitidas", totalEmitidas);
+        model.addAttribute("totalCanceladas", totalCanceladas);
+        model.addAttribute("ticketMedio", ticketMedio);
+        model.addAttribute("maiorVenda", maiorVenda);
+        model.addAttribute("variacaoPercentual", variacaoPercentual);
+        model.addAttribute("receitaOntem", liquidaOntem);
+
         model.addAttribute("faturasMap", faturasMap);
+        model.addAttribute("hourlyData", hourlyData);
+        model.addAttribute("vendasPorPagamento", vendasPorPagamento);
         return "vendasDia";
     }
 
+    @GetMapping(value = "/api/dashboard/vendas-dia", produces = "application/json")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<?> apiVendasDia(
+            @RequestParam(value = "data", required = false) String dataStr,
+            Model model) {
+        return (org.springframework.http.ResponseEntity<?>) vendasDia(dataStr, "json", model);
+    }
+
     @GetMapping("/dashboard/receita-mensal")
-    public String receitaMensal(Model model) {
+    public Object receitaMensal(
+            @RequestParam(value = "mes", required = false) Integer mes,
+            @RequestParam(value = "ano", required = false) Integer ano,
+            @RequestParam(value = "format", required = false) String format,
+            Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-        List<Compra> vendas = dashboardService.getComprasDoMes(empresaId);
-        
-        double totalVendasGross = vendas.stream()
-            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()))
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        int mesSel = (mes != null && mes >= 1 && mes <= 12) ? mes : hoje.getMonthValue();
+        int anoSel = (ano != null && ano >= 2000 && ano <= 2100) ? ano : hoje.getYear();
+
+        java.time.LocalDate dataRef = java.time.LocalDate.of(anoSel, mesSel, 1);
+        int diasNoMes = dataRef.lengthOfMonth();
+
+        // Mês Anterior e Seguinte para navegação
+        java.time.LocalDate dataAnt = dataRef.minusMonths(1);
+        int mesAnterior = dataAnt.getMonthValue();
+        int anoAnterior = dataAnt.getYear();
+
+        java.time.LocalDate dataSeg = dataRef.plusMonths(1);
+        int mesSeguinte = dataSeg.getMonthValue();
+        int anoSeguinte = dataSeg.getYear();
+
+        boolean isMesAtual = (mesSel == hoje.getMonthValue() && anoSel == hoje.getYear());
+
+        // Compras do mês selecionado
+        List<Compra> vendas = dashboardService.getComprasDoMesEAno(empresaId, mesSel, anoSel);
+        if (vendas == null) {
+            vendas = new java.util.ArrayList<>();
+        }
+
+        // Ordenar as vendas pela data decrescente
+        vendas.sort((a, b) -> {
+            if (a.getDataCompra() == null && b.getDataCompra() == null) return 0;
+            if (a.getDataCompra() == null) return 1;
+            if (b.getDataCompra() == null) return -1;
+            return b.getDataCompra().compareTo(a.getDataCompra());
+        });
+
+        // Filtrar transações válidas (não canceladas/anuladas)
+        List<Compra> validas = vendas.stream()
+            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()) && !"ANULADA".equalsIgnoreCase(v.getStatus()))
+            .collect(Collectors.toList());
+
+        double totalVendasGross = validas.stream()
             .mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0)
             .sum();
-            
+
         double totalIva = 0.0;
         java.util.Map<Long, String> faturasMap = new java.util.HashMap<>();
+
+        // Mapa de vendas diárias: dia 1 .. diasNoMes
+        double[] vendasPorDia = new double[diasNoMes + 1];
+        int[] contagemPorDia = new int[diasNoMes + 1];
+
+        // Distribuição por método de pagamento
+        java.util.Map<String, Double> vendasPorPagamento = new java.util.LinkedHashMap<>();
         
+        int totalPagas = 0;
+        int totalEmitidas = 0;
+        int totalCanceladas = 0;
+
         for (Compra v : vendas) {
-            if (!"CANCELADA".equalsIgnoreCase(v.getStatus())) {
+            boolean isCancelada = "CANCELADA".equalsIgnoreCase(v.getStatus()) || "ANULADA".equalsIgnoreCase(v.getStatus());
+            if (isCancelada) {
+                totalCanceladas++;
+            } else if ("PAGA".equalsIgnoreCase(v.getStatus()) || "PAGO".equalsIgnoreCase(v.getStatus())) {
+                totalPagas++;
+            } else {
+                totalEmitidas++;
+            }
+
+            if (!isCancelada) {
                 if (v.getItens() != null) {
                     totalIva += v.getItens().stream()
                         .mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0)
                         .sum();
                 }
+
+                if (v.getDataCompra() != null) {
+                    int d = v.getDataCompra().getDayOfMonth();
+                    if (d >= 1 && d <= diasNoMes) {
+                        vendasPorDia[d] += (v.getTotal() != null ? v.getTotal() : 0.0);
+                        contagemPorDia[d]++;
+                    }
+                }
+
+                String forma = v.getFormaPagamento();
+                if (forma == null || forma.trim().isEmpty()) {
+                    forma = "Não Especificado";
+                } else {
+                    forma = forma.toUpperCase().trim();
+                    if (forma.contains("CASH") || forma.contains("DINHEIRO")) forma = "Dinheiro (Cash)";
+                    else if (forma.contains("TPA") || forma.contains("MULTICAIXA")) forma = "Multicaixa (TPA)";
+                    else if (forma.contains("TRANSF")) forma = "Transferência";
+                    else if (forma.contains("+")) forma = "Misto (" + forma + ")";
+                    else forma = forma.replace("_", " ");
+                }
+                double vTotal = v.getTotal() != null ? v.getTotal() : 0.0;
+                vendasPorPagamento.put(forma, vendasPorPagamento.getOrDefault(forma, 0.0) + vTotal);
             }
-            
-            // Buscar o número da fatura associada a esta compra
+
+            // Buscar fatura associada
             List<ao.co.hzconsultoria.efacturacao.model.Fatura> faturas = faturaRepository.findByCompra(v);
             if (!faturas.isEmpty()) {
                 faturasMap.put(v.getId(), faturas.get(0).getNumeroFatura());
             }
         }
 
+        double totalVendasLiquida = Math.max(0.0, totalVendasGross - totalIva);
+        int totalTransacoes = vendas.size();
+        int totalValidas = validas.size();
+        double ticketMedio = totalValidas > 0 ? (totalVendasLiquida / totalValidas) : 0.0;
+        double maiorVenda = validas.stream().mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0).max().orElse(0.0);
+
+        // Comparativo com mês anterior
+        List<Compra> vendasAnt = dashboardService.getComprasDoMesEAno(empresaId, mesAnterior, anoAnterior);
+        List<Compra> validasAnt = (vendasAnt != null) ? vendasAnt.stream()
+            .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()) && !"ANULADA".equalsIgnoreCase(v.getStatus()))
+            .collect(Collectors.toList()) : java.util.Collections.emptyList();
+            
+        double grossAnt = validasAnt.stream().mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0).sum();
+        double ivaAnt = 0.0;
+        for (Compra v : validasAnt) {
+            if (v.getItens() != null) {
+                ivaAnt += v.getItens().stream().mapToDouble(item -> item.getIva() != null ? item.getIva() : 0.0).sum();
+            }
+        }
+        double liquidaAnt = Math.max(0.0, grossAnt - ivaAnt);
+        double variacaoPercentual = 0.0;
+        if (liquidaAnt > 0) {
+            variacaoPercentual = ((totalVendasLiquida - liquidaAnt) / liquidaAnt) * 100.0;
+        } else if (totalVendasLiquida > 0) {
+            variacaoPercentual = 100.0;
+        }
+
+        // Top 5 produtos do mês
+        List<DashboardService.ProdutoMaisVendidoDTO> topProdutos = dashboardService.getProdutosMaisVendidosDoMes(empresaId, mesSel, anoSel, 5);
+
+        String[] mesesNomes = {"", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
+        String nomeMes = mesesNomes[mesSel];
+
+        List<Integer> listaAnos = new java.util.ArrayList<>();
+        for (int y = Math.min(2023, anoSel); y <= Math.max(hoje.getYear() + 1, anoSel); y++) {
+            listaAnos.add(y);
+        }
+
+        // Se for solicitado formato JSON (API / AJAX)
+        if ("json".equalsIgnoreCase(format)) {
+            java.util.Map<String, Object> jsonResponse = new java.util.HashMap<>();
+            jsonResponse.put("mes", mesSel);
+            jsonResponse.put("ano", anoSel);
+            jsonResponse.put("nomeMes", nomeMes);
+            jsonResponse.put("receitaLiquida", totalVendasLiquida);
+            jsonResponse.put("receitaBruta", totalVendasGross);
+            jsonResponse.put("ivaTotal", totalIva);
+            jsonResponse.put("totalTransacoes", totalTransacoes);
+            jsonResponse.put("totalValidas", totalValidas);
+            jsonResponse.put("totalPagas", totalPagas);
+            jsonResponse.put("totalEmitidas", totalEmitidas);
+            jsonResponse.put("totalCanceladas", totalCanceladas);
+            jsonResponse.put("ticketMedio", ticketMedio);
+            jsonResponse.put("maiorVenda", maiorVenda);
+            jsonResponse.put("variacaoPercentual", variacaoPercentual);
+            jsonResponse.put("receitaAnterior", liquidaAnt);
+            jsonResponse.put("vendasPorDia", vendasPorDia);
+            jsonResponse.put("vendasPorPagamento", vendasPorPagamento);
+            jsonResponse.put("topProdutos", topProdutos);
+            return org.springframework.http.ResponseEntity.ok(jsonResponse);
+        }
+
+        model.addAttribute("mesSel", mesSel);
+        model.addAttribute("anoSel", anoSel);
+        model.addAttribute("nomeMes", nomeMes);
+        model.addAttribute("isMesAtual", isMesAtual);
+        model.addAttribute("diasNoMes", diasNoMes);
+
+        model.addAttribute("mesAnterior", mesAnterior);
+        model.addAttribute("anoAnterior", anoAnterior);
+        model.addAttribute("mesSeguinte", mesSeguinte);
+        model.addAttribute("anoSeguinte", anoSeguinte);
+        model.addAttribute("listaAnos", listaAnos);
+        model.addAttribute("mesesNomes", mesesNomes);
+
         model.addAttribute("vendasDoMes", vendas);
-        model.addAttribute("totalVendasMes", totalVendasGross - totalIva); // Venda Líquida
+        model.addAttribute("totalVendasMes", totalVendasLiquida);
+        model.addAttribute("totalVendasGross", totalVendasGross);
         model.addAttribute("totalIvaMes", totalIva);
+        model.addAttribute("totalTransacoes", totalTransacoes);
+        model.addAttribute("totalValidas", totalValidas);
+        model.addAttribute("totalPagas", totalPagas);
+        model.addAttribute("totalEmitidas", totalEmitidas);
+        model.addAttribute("totalCanceladas", totalCanceladas);
+        model.addAttribute("ticketMedio", ticketMedio);
+        model.addAttribute("maiorVenda", maiorVenda);
+        model.addAttribute("variacaoPercentual", variacaoPercentual);
+        model.addAttribute("receitaAnterior", liquidaAnt);
+
         model.addAttribute("faturasMap", faturasMap);
+        model.addAttribute("vendasPorDia", vendasPorDia);
+        model.addAttribute("vendasPorPagamento", vendasPorPagamento);
+        model.addAttribute("topProdutos", topProdutos);
+
         return "receitaMensal";
     }
 
+    @GetMapping(value = "/api/dashboard/receita-mensal", produces = "application/json")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<?> apiReceitaMensal(
+            @RequestParam(value = "mes", required = false) Integer mes,
+            @RequestParam(value = "ano", required = false) Integer ano,
+            Model model) {
+        return (org.springframework.http.ResponseEntity<?>) receitaMensal(mes, ano, "json", model);
+    }
+
     @GetMapping("/dashboard/lucro-liquido-mensal")
-    public String lucroLiquidoMensal(Model model) {
+    public Object lucroLiquidoMensal(
+            @RequestParam(value = "mes", required = false) Integer mes,
+            @RequestParam(value = "ano", required = false) Integer ano,
+            @RequestParam(value = "format", required = false) String format,
+            Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
-
         java.time.LocalDate hoje = java.time.LocalDate.now();
-        java.time.LocalDate inicioMes = hoje.withDayOfMonth(1);
-        java.time.LocalDate fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth());
+        int mesSel = (mes != null && mes >= 1 && mes <= 12) ? mes : hoje.getMonthValue();
+        int anoSel = (ano != null && ano >= 2000 && ano <= 2100) ? ano : hoje.getYear();
 
-        // Vendas do mês (Excluindo canceladas)
-        List<Compra> vendasDoMes = dashboardService.getComprasDoMes(empresaId).stream()
-            .filter(c -> !"CANCELADA".equalsIgnoreCase(c.getStatus()))
+        java.time.LocalDate inicioMes = java.time.LocalDate.of(anoSel, mesSel, 1);
+        java.time.LocalDate fimMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
+
+        // Mês Anterior e Seguinte para navegação
+        java.time.LocalDate dataAnt = inicioMes.minusMonths(1);
+        int mesAnterior = dataAnt.getMonthValue();
+        int anoAnterior = dataAnt.getYear();
+
+        java.time.LocalDate dataSeg = inicioMes.plusMonths(1);
+        int mesSeguinte = dataSeg.getMonthValue();
+        int anoSeguinte = dataSeg.getYear();
+
+        boolean isMesAtual = (mesSel == hoje.getMonthValue() && anoSel == hoje.getYear());
+
+        // Vendas do mês (Excluindo canceladas/anuladas)
+        List<Compra> todasVendasMes = dashboardService.getComprasDoMesEAno(empresaId, mesSel, anoSel);
+        if (todasVendasMes == null) todasVendasMes = new java.util.ArrayList<>();
+
+        List<Compra> vendasDoMes = todasVendasMes.stream()
+            .filter(c -> !"CANCELADA".equalsIgnoreCase(c.getStatus()) && !"ANULADA".equalsIgnoreCase(c.getStatus()))
             .collect(Collectors.toList());
 
         // Receita total mensal (Bruta das não canceladas)
@@ -260,7 +596,7 @@ public class DashboardController {
             .sum();
 
         // Receita Bruta Real (Vendas Brutas - Devoluções Brutas)
-        double receitaMensal = receitaMensalBruta - totalDevolucoes;
+        double receitaMensal = Math.max(0.0, receitaMensalBruta - totalDevolucoes);
 
         // COGS (Custo dos Produtos Vendidos) - Baseado apenas nas vendas efectivas
         double cogs = 0.0;
@@ -289,32 +625,129 @@ public class DashboardController {
             .mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0)
             .sum();
 
+        // Agrupamento de despesas por categoria
+        java.util.Map<String, Double> despesasPorCategoria = new java.util.LinkedHashMap<>();
+        for (Despesa d : despesasDoMes) {
+            String cat = (d.getCategoria() != null && !d.getCategoria().trim().isEmpty()) ? d.getCategoria().trim() : "Geral / Outros";
+            double val = d.getValor() != null ? d.getValor() : 0.0;
+            despesasPorCategoria.put(cat, despesasPorCategoria.getOrDefault(cat, 0.0) + val);
+        }
+
         // Lucro Bruto = Receita - COGS
         double lucroBruto = receitaMensal - cogs;
+        double margemBruta = receitaMensal > 0 ? (lucroBruto / receitaMensal) * 100 : 0;
 
         // Lucro Líquido = Receita - COGS - Despesas
         double lucroLiquido = lucroBruto - totalDespesas;
-
-        // Margem de Lucro (%)
         double margemLucro = receitaMensal > 0 ? (lucroLiquido / receitaMensal) * 100 : 0;
 
-        // Número de vendas
+        // Comparativo com mês anterior (Lucro Líquido do mês anterior)
+        java.time.LocalDate inicioMesAnt = dataAnt.withDayOfMonth(1);
+        java.time.LocalDate fimMesAnt = dataAnt.withDayOfMonth(dataAnt.lengthOfMonth());
+        List<Compra> vendasAnt = dashboardService.getComprasDoMesEAno(empresaId, mesAnterior, anoAnterior).stream()
+            .filter(c -> !"CANCELADA".equalsIgnoreCase(c.getStatus()) && !"ANULADA".equalsIgnoreCase(c.getStatus()))
+            .collect(Collectors.toList());
+        double recAnt = vendasAnt.stream().mapToDouble(c -> c.getTotal() != null ? c.getTotal() : 0.0).sum();
+        double cogsAnt = 0.0;
+        for (Compra c : vendasAnt) {
+            if (c.getItens() != null) {
+                for (ItemCompra it : c.getItens()) {
+                    double pc = (it.getProduto() != null && it.getProduto().getPrecoCompra() != null) ? it.getProduto().getPrecoCompra() : 0.0;
+                    cogsAnt += (pc * (it.getQuantidade() != null ? it.getQuantidade() : 0));
+                }
+            }
+        }
+        double despAnt = todasDespesas.stream()
+            .filter(d -> d.getDataDespesa() != null && !d.getDataDespesa().isBefore(inicioMesAnt) && !d.getDataDespesa().isAfter(fimMesAnt))
+            .mapToDouble(d -> d.getValor() != null ? d.getValor() : 0.0).sum();
+        double lucroAnt = (recAnt - cogsAnt) - despAnt;
+        double variacaoLucro = 0.0;
+        if (Math.abs(lucroAnt) > 0) {
+            variacaoLucro = ((lucroLiquido - lucroAnt) / Math.abs(lucroAnt)) * 100.0;
+        } else if (lucroLiquido != 0) {
+            variacaoLucro = 100.0;
+        }
+
         long totalVendasCount = vendasDoMes.size();
+        String[] mesesNomes = {"", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
+        String nomeMes = mesesNomes[mesSel];
+
+        List<Integer> listaAnos = new java.util.ArrayList<>();
+        for (int y = Math.min(2023, anoSel); y <= Math.max(hoje.getYear() + 1, anoSel); y++) {
+            listaAnos.add(y);
+        }
+
+        // Mapear faturas
+        java.util.Map<Long, String> faturasMap = new java.util.HashMap<>();
+        for (Compra v : vendasDoMes) {
+            List<ao.co.hzconsultoria.efacturacao.model.Fatura> faturas = faturaRepository.findByCompra(v);
+            if (!faturas.isEmpty()) {
+                faturasMap.put(v.getId(), faturas.get(0).getNumeroFatura());
+            }
+        }
+
+        if ("json".equalsIgnoreCase(format)) {
+            java.util.Map<String, Object> jsonResponse = new java.util.HashMap<>();
+            jsonResponse.put("mes", mesSel);
+            jsonResponse.put("ano", anoSel);
+            jsonResponse.put("nomeMes", nomeMes);
+            jsonResponse.put("receitaMensalBruta", receitaMensalBruta);
+            jsonResponse.put("totalDevolucoes", totalDevolucoes);
+            jsonResponse.put("receitaMensal", receitaMensal);
+            jsonResponse.put("cogs", cogs);
+            jsonResponse.put("lucroBruto", lucroBruto);
+            jsonResponse.put("margemBruta", margemBruta);
+            jsonResponse.put("totalDespesas", totalDespesas);
+            jsonResponse.put("lucroLiquido", lucroLiquido);
+            jsonResponse.put("margemLucro", margemLucro);
+            jsonResponse.put("variacaoLucro", variacaoLucro);
+            jsonResponse.put("lucroAnterior", lucroAnt);
+            jsonResponse.put("totalVendasCount", totalVendasCount);
+            jsonResponse.put("despesasPorCategoria", despesasPorCategoria);
+            return org.springframework.http.ResponseEntity.ok(jsonResponse);
+        }
+
+        model.addAttribute("mesSel", mesSel);
+        model.addAttribute("anoSel", anoSel);
+        model.addAttribute("nomeMes", nomeMes);
+        model.addAttribute("isMesAtual", isMesAtual);
+        model.addAttribute("mesAnterior", mesAnterior);
+        model.addAttribute("anoAnterior", anoAnterior);
+        model.addAttribute("mesSeguinte", mesSeguinte);
+        model.addAttribute("anoSeguinte", anoSeguinte);
+        model.addAttribute("listaAnos", listaAnos);
+        model.addAttribute("mesesNomes", mesesNomes);
 
         model.addAttribute("receitaMensal", receitaMensal);
-        model.addAttribute("receitaMensalBruta", receitaMensalBruta); // Mostrar valor bruto real
+        model.addAttribute("receitaMensalBruta", receitaMensalBruta);
+        model.addAttribute("totalIvaVendas", totalIvaVendas);
         model.addAttribute("totalDevolucoes", totalDevolucoes);
         model.addAttribute("cogs", cogs);
         model.addAttribute("totalDespesas", totalDespesas);
         model.addAttribute("lucroBruto", lucroBruto);
+        model.addAttribute("margemBruta", margemBruta);
         model.addAttribute("lucroLiquido", lucroLiquido);
         model.addAttribute("margemLucro", margemLucro);
+        model.addAttribute("variacaoLucro", variacaoLucro);
+        model.addAttribute("lucroAnterior", lucroAnt);
+
         model.addAttribute("totalVendasCount", totalVendasCount);
         model.addAttribute("vendasDoMes", vendasDoMes);
         model.addAttribute("despesasDoMes", despesasDoMes);
         model.addAttribute("devolucoesDoMes", devolucoesDoMes);
+        model.addAttribute("despesasPorCategoria", despesasPorCategoria);
+        model.addAttribute("faturasMap", faturasMap);
 
         return "lucroMensal";
+    }
+
+    @GetMapping(value = "/api/dashboard/lucro-liquido-mensal", produces = "application/json")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<?> apiLucroLiquidoMensal(
+            @RequestParam(value = "mes", required = false) Integer mes,
+            @RequestParam(value = "ano", required = false) Integer ano,
+            Model model) {
+        return (org.springframework.http.ResponseEntity<?>) lucroLiquidoMensal(mes, ano, "json", model);
     }
 
     @GetMapping("/dashboard/recebimentos")

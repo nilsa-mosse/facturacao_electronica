@@ -84,7 +84,7 @@ public class DevolucaoService {
                 double percIva = (item.getIvaPercentual() != null) ? item.getIvaPercentual()
                         : (pFull.getIvaPercentual() != null ? pFull.getIvaPercentual() : 0.0);
                 double preco = (item.getPreco() != null) ? item.getPreco()
-                        : (pFull.getPreco() != null ? pFull.getPreco() : 0.0);
+                        : pFull.getPreco();
                 int qtd = (item.getQuantidade() != null && item.getQuantidade() > 0) ? item.getQuantidade() : 1;
 
                 item.setPreco(preco);

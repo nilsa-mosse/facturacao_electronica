@@ -406,6 +406,18 @@ public class DashboardService {
         return vendasDoDia;
     }
 
+    public List<Compra> getComprasPorData(Long empresaId, java.time.LocalDate data) {
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> vendasDoDia = new ArrayList<>();
+        if (data == null) return vendasDoDia;
+        for (Compra compra : compras) {
+            if (compra.getDataCompra() != null && compra.getDataCompra().toLocalDate().equals(data)) {
+                vendasDoDia.add(compra);
+            }
+        }
+        return vendasDoDia;
+    }
+
     public List<Compra> getComprasDoMes(Long empresaId) {
         List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
         java.time.LocalDate hoje = java.time.LocalDate.now();
@@ -421,6 +433,42 @@ public class DashboardService {
             }
         }
         return vendasDoMes;
+    }
+
+    public List<Compra> getComprasDoMesEAno(Long empresaId, int mes, int ano) {
+        List<Compra> compras = (empresaId == null) ? compraRepository.findAll() : compraRepository.findByEmpresa_Id(empresaId);
+        List<Compra> vendasDoMes = new ArrayList<>();
+        for (Compra compra : compras) {
+            if (compra.getDataCompra() != null) {
+                java.time.LocalDate data = compra.getDataCompra().toLocalDate();
+                if (data.getMonthValue() == mes && data.getYear() == ano) {
+                    vendasDoMes.add(compra);
+                }
+            }
+        }
+        return vendasDoMes;
+    }
+
+    public List<ProdutoMaisVendidoDTO> getProdutosMaisVendidosDoMes(Long empresaId, int mes, int ano, int limite) {
+        List<Compra> compras = getComprasDoMesEAno(empresaId, mes, ano);
+        Map<String, ProdutoMaisVendidoDTO> mapa = new HashMap<>();
+        for (Compra compra : compras) {
+            if (!"CANCELADA".equalsIgnoreCase(compra.getStatus()) && !"ANULADA".equalsIgnoreCase(compra.getStatus())) {
+                if (compra.getItens() != null) {
+                    for (ItemCompra item : compra.getItens()) {
+                        String nome = item.getNomeProduto();
+                        if (nome == null) continue;
+                        ProdutoMaisVendidoDTO dto = mapa.getOrDefault(nome, new ProdutoMaisVendidoDTO(nome, 0));
+                        dto.setQuantidadeVendida(dto.getQuantidadeVendida() + (item.getQuantidade() != null ? item.getQuantidade() : 0));
+                        mapa.put(nome, dto);
+                    }
+                }
+            }
+        }
+        return mapa.values().stream()
+                .sorted(Comparator.comparingInt(ProdutoMaisVendidoDTO::getQuantidadeVendida).reversed())
+                .limit(limite)
+                .collect(Collectors.toList());
     }
 
     public long getVendasTotaisMes(Long empresaId) {

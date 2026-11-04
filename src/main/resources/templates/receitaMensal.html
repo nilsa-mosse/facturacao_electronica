@@ -2,354 +2,1156 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="menu :: head">
-    <style>
-        .vendas-header {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            border-radius: 15px;
-            padding: 2rem;
-            color: white;
-            box-shadow: 0 10px 20px rgba(75, 108, 183, 0.2);
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .icon-sales {
-            background: rgba(75, 108, 183, 0.1);
-            color: #4b6cb7;
-        }
-
-        .icon-iva {
-            background: rgba(0, 123, 255, 0.1);
-            color: #007bff;
-        }
-
-        .icon-count {
-            background: rgba(255, 193, 7, 0.1);
-            color: #ffc107;
-        }
-
-        .table-modern {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .table-modern thead th {
-            background: #f8f9fa;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            font-weight: 700;
-            color: #6c757d;
-            border: none;
-            padding: 1.25rem 1rem;
-        }
-
-        .table-modern tbody td {
-            padding: 1.25rem 1rem;
-            border-bottom: 1px solid #f1f3f5;
-        }
-
-        .table-modern tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .btn-action {
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-action:hover {
-            transform: scale(1.05);
-        }
-
-        .badge-id {
-            background: #e9ecef;
-            color: #495057;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-family: 'Monaco', 'Consolas', monospace;
-        }
-
-        .dark-mode .stat-card,
-        .dark-mode .table-modern {
-            background: #2b3035;
-            color: #e9ecef;
-        }
-
-        .dark-mode .table-modern thead th {
-            background: #343a40;
-            color: #adb5bd;
-        }
-
-        .dark-mode .badge-id {
-            background: #343a40;
-            color: #dee2e6;
-        }
-
-        /* Esconder botões padrão do DataTables para usar apenas o menu customizado */
-        .dt-buttons {
-            display: none !important;
-        }
-    </style>
     <!-- DataTables CSS -->
     <link rel="stylesheet" th:href="@{/plugins/datatables/css/dataTables.bootstrap5.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/datatables/css/buttons.bootstrap5.min.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 </head>
 
+<style>
+    * { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+    /* ── HERO BANNER ────────────────────────────────────────── */
+    .rm-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 35%, #4338ca 70%, #0284c7 100%);
+        border-radius: 24px;
+        padding: 2.5rem 2.5rem 4.5rem;
+        color: white;
+        margin-bottom: -3rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(49, 46, 129, 0.35);
+    }
+    .rm-hero::before {
+        content: ''; position: absolute;
+        top: -90px; right: -90px;
+        width: 360px; height: 360px;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .rm-hero::after {
+        content: ''; position: absolute;
+        bottom: -110px; left: -80px;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .rm-hero-content { position: relative; z-index: 2; }
+
+    .hero-live-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        border-radius: 50px;
+        padding: 0.38rem 1rem;
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.8px;
+        text-transform: uppercase; color: #e0e7ff;
+    }
+    .pulse-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 10px #38bdf8;
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .badge-growth-up {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #4ade80;
+        font-size: 0.82rem; font-weight: 700;
+        padding: 0.35rem 0.85rem; border-radius: 50px;
+    }
+    .badge-growth-down {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171;
+        font-size: 0.82rem; font-weight: 700;
+        padding: 0.35rem 0.85rem; border-radius: 50px;
+    }
+
+    /* ── PERIOD NAVIGATOR ───────────────────────────────────── */
+    .period-nav-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 0.5rem 0.8rem;
+        display: inline-flex; align-items: center; gap: 0.6rem;
+    }
+    .btn-nav-arrow {
+        width: 38px; height: 38px; border-radius: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white; border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none; transition: all 0.2s;
+        font-size: 0.9rem;
+    }
+    .btn-nav-arrow:hover {
+        background: rgba(255, 255, 255, 0.3); color: white;
+        transform: translateY(-1px);
+    }
+    .period-select {
+        background: rgba(255, 255, 255, 0.92);
+        color: #1e1b4b;
+        border: none; border-radius: 10px;
+        padding: 0.45rem 0.9rem; font-size: 0.88rem; font-weight: 700;
+        outline: none; cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .btn-hero-action {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: white; border-radius: 12px;
+        padding: 0.55rem 1.2rem; font-size: 0.85rem; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px;
+        text-decoration: none; transition: all 0.2s;
+    }
+    .btn-hero-action:hover {
+        background: rgba(255, 255, 255, 0.3); color: white;
+        transform: translateY(-2px);
+    }
+
+    /* ── KPI CARDS ──────────────────────────────────────────── */
+    .kpi-row { position: relative; z-index: 10; margin-bottom: 1.5rem; }
+    .kpi-card {
+        background: white; border-radius: 20px; padding: 1.5rem;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.05);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%; position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+        content: ''; position: absolute;
+        top: 0; left: 0; right: 0; height: 4px;
+        border-radius: 20px 20px 0 0;
+    }
+    .kpi-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
+    }
+    .kpi-net::before      { background: linear-gradient(90deg, #4f46e5, #06b6d4); }
+    .kpi-gross::before    { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+    .kpi-iva::before      { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .kpi-ticket::before   { background: linear-gradient(90deg, #10b981, #14b8a6); }
+    .kpi-count::before    { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+    .kpi-max::before      { background: linear-gradient(90deg, #f43f5e, #fb923c); }
+
+    .kpi-icon-box {
+        width: 48px; height: 48px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.35rem; color: white; margin-bottom: 0.9rem;
+    }
+    .kpi-net .kpi-icon-box    { background: linear-gradient(135deg, #4f46e5, #06b6d4); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3); }
+    .kpi-gross .kpi-icon-box  { background: linear-gradient(135deg, #0284c7, #38bdf8); box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3); }
+    .kpi-iva .kpi-icon-box    { background: linear-gradient(135deg, #f59e0b, #ef4444); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3); }
+    .kpi-ticket .kpi-icon-box { background: linear-gradient(135deg, #10b981, #14b8a6); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); }
+    .kpi-count .kpi-icon-box  { background: linear-gradient(135deg, #8b5cf6, #ec4899); box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); }
+    .kpi-max .kpi-icon-box    { background: linear-gradient(135deg, #f43f5e, #fb923c); box-shadow: 0 6px 16px rgba(244, 63, 94, 0.3); }
+
+    .kpi-label {
+        font-size: 0.73rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.8px; color: #94a3b8; margin-bottom: 0.25rem;
+    }
+    .kpi-val {
+        font-size: 1.48rem; font-weight: 800; color: #0f172a;
+        letter-spacing: -0.5px;
+    }
+    .kpi-sub {
+        font-size: 0.77rem; color: #64748b; margin-top: 0.35rem;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .kpi-progress-track {
+        height: 5px; border-radius: 5px; background: #f1f5f9;
+        margin-top: 0.75rem; overflow: hidden;
+    }
+    .kpi-progress-bar {
+        height: 100%; border-radius: 5px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── CONTENT PANELS ─────────────────────────────────────── */
+    .content-panel {
+        background: white; border-radius: 22px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+        overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .panel-head {
+        padding: 1.35rem 1.8rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.8rem;
+    }
+    .panel-head h5 {
+        font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .panel-subtitle { font-size: 0.78rem; color: #94a3b8; margin: 0; }
+
+    /* ── CHART CONTAINER ────────────────────────────────────── */
+    .chart-container-box {
+        padding: 1.5rem 1.8rem;
+        position: relative;
+        height: 290px;
+    }
+    .chart-doughnut-box {
+        padding: 1.2rem 1.5rem;
+        position: relative;
+        height: 230px;
+    }
+
+    /* ── TOP PRODUCTS LIST ──────────────────────────────────── */
+    .top-prod-item {
+        padding: 0.75rem 1.2rem;
+        border-bottom: 1px solid #f8fafc;
+        display: flex; align-items: center; justify-content: space-between;
+        transition: background 0.2s;
+    }
+    .top-prod-item:hover { background: #f8fafc; }
+    .top-prod-rank {
+        width: 28px; height: 28px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; font-weight: 800;
+    }
+    .rank-1 { background: #fef3c7; color: #b45309; }
+    .rank-2 { background: #e2e8f0; color: #475569; }
+    .rank-3 { background: #ffedd5; color: #c2410c; }
+    .rank-other { background: #f1f5f9; color: #94a3b8; }
+
+    /* ── FILTERS & SEARCH ───────────────────────────────────── */
+    .filter-pill {
+        padding: 0.42rem 0.95rem; border-radius: 12px;
+        font-size: 0.76rem; font-weight: 700;
+        border: 1.5px solid #e2e8f0; cursor: pointer;
+        background: white; color: #64748b; transition: all 0.2s;
+    }
+    .filter-pill:hover { border-color: #6366f1; color: #4f46e5; }
+    .filter-pill.active {
+        background: #eef2ff; border-color: #6366f1; color: #4338ca;
+    }
+    .search-box-wrap { position: relative; }
+    .search-box-wrap i {
+        position: absolute; left: 16px; top: 50%;
+        transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem;
+    }
+    .search-box-wrap input {
+        border: 1.5px solid #e2e8f0; border-radius: 14px;
+        padding: 0.65rem 1rem 0.65rem 2.6rem;
+        font-size: 0.88rem; width: 100%; outline: none;
+        background: #f8fafc; transition: all 0.2s;
+    }
+    .search-box-wrap input:focus {
+        border-color: #4f46e5; background: white;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* ── MODERN TABLE ───────────────────────────────────────── */
+    .table-modern thead th {
+        background: #f8fafc; text-transform: uppercase;
+        font-size: 0.7rem; letter-spacing: 0.9px; font-weight: 800;
+        color: #94a3b8; border: none; padding: 1.1rem 1.2rem;
+        white-space: nowrap;
+    }
+    .table-modern tbody td {
+        padding: 1.05rem 1.2rem; border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle; font-size: 0.87rem;
+    }
+    .table-modern tbody tr:last-child td { border-bottom: none; }
+    .table-modern tbody tr:hover td { background: #fafafa; }
+    .table-modern { border: none; margin: 0; }
+
+    .badge-ref {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: #3730a3; padding: 0.35rem 0.75rem; border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    }
+    .doc-type-tag {
+        font-size: 0.68rem; font-weight: 800; padding: 0.15rem 0.45rem;
+        border-radius: 5px; text-transform: uppercase; margin-left: 4px;
+    }
+    .doc-ft { background: #e0f2fe; color: #0369a1; }
+    .doc-fr { background: #dcfce7; color: #15803d; }
+    .doc-fp { background: #fef9c3; color: #854d0e; }
+
+    .client-avatar {
+        width: 36px; height: 36px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.78rem; font-weight: 800; color: white; flex-shrink: 0;
+        background: linear-gradient(135deg, #6366f1, #3b82f6);
+    }
+    .pay-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 0.3rem 0.75rem; border-radius: 8px;
+        font-size: 0.75rem; font-weight: 700;
+        background: #f1f5f9; color: #475569;
+    }
+    .pay-multicaixa { background: #ede9fe; color: #6d28d9; }
+    .pay-cash        { background: #dcfce7; color: #15803d; }
+    .pay-transfer    { background: #e0f2fe; color: #0369a1; }
+
+    .status-pill {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 0.32rem 0.8rem; border-radius: 50px;
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .status-paga      { background: #dcfce7; color: #166534; }
+    .status-emitida   { background: #dbeafe; color: #1e40af; }
+    .status-cancelada { background: #fee2e2; color: #991b1b; }
+    .status-rascunho  { background: #fef3c7; color: #92400e; }
+
+    .btn-pdf-doc {
+        padding: 0.42rem 0.95rem; border-radius: 10px;
+        background: linear-gradient(135deg, #4f46e5, #4338ca);
+        color: white; border: none; font-size: 0.78rem; font-weight: 700;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        transition: all 0.2s; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+    }
+    .btn-pdf-doc:hover {
+        transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+        color: white;
+    }
+    .no-doc-tag {
+        padding: 0.35rem 0.75rem; border-radius: 8px;
+        background: #f1f5f9; color: #94a3b8; font-size: 0.73rem; font-weight: 600;
+    }
+
+    /* ── ACTION BUTTONS ─────────────────────────────────────── */
+    .btn-action-icon {
+        width: 38px; height: 38px; border-radius: 12px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+        cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-action-icon:hover {
+        border-color: #6366f1; color: #4f46e5; background: #eef2ff;
+    }
+    .btn-export-drop {
+        padding: 0.48rem 1.15rem; border-radius: 12px;
+        font-size: 0.8rem; font-weight: 700;
+        border: 1.5px solid #e2e8f0; background: white; color: #334155;
+        cursor: pointer; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-export-drop:hover {
+        border-color: #6366f1; color: #4338ca; background: #eef2ff;
+    }
+
+    .dt-buttons { display: none !important; }
+
+    /* ── DARK MODE ADAPTATIONS ──────────────────────────────── */
+    .dark-mode .kpi-card,
+    .dark-mode .content-panel   { background: #1e293b; border-color: #334155; }
+    .dark-mode .kpi-val          { color: #f8fafc; }
+    .dark-mode .kpi-sub          { color: #94a3b8; }
+    .dark-mode .panel-head       { border-color: #334155; }
+    .dark-mode .panel-head h5    { color: #f8fafc; }
+    .dark-mode .table-modern thead th { background: #0f172a; color: #94a3b8; }
+    .dark-mode .table-modern tbody td { border-color: #334155; color: #cbd5e1; }
+    .dark-mode .table-modern tbody tr:hover td { background: #0f172a; }
+    .dark-mode .search-box-wrap input { background: #0f172a; border-color: #334155; color: #f8fafc; }
+    .dark-mode .search-box-wrap input:focus { border-color: #6366f1; }
+    .dark-mode .filter-pill      { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    .dark-mode .filter-pill.active { background: #312e81; border-color: #6366f1; color: #c7d2fe; }
+    .dark-mode .btn-action-icon,
+    .dark-mode .btn-export-drop  { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    .dark-mode .top-prod-item    { border-color: #334155; }
+    .dark-mode .top-prod-item:hover { background: #0f172a; }
+    .dark-mode .badge-ref        { background: #312e81; color: #c7d2fe; }
+    .dark-mode .no-doc-tag       { background: #334155; color: #64748b; }
+    .dark-mode .kpi-progress-track { background: #334155; }
+
+    /* ── ANIMATIONS ─────────────────────────────────────────── */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(22px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeInUp 0.5s ease forwards; }
+    .del-1 { animation-delay: 0.08s; opacity: 0; }
+    .del-2 { animation-delay: 0.16s; opacity: 0; }
+    .del-3 { animation-delay: 0.24s; opacity: 0; }
+    .del-4 { animation-delay: 0.32s; opacity: 0; }
+</style>
+
 <body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
-    <div class="container py-5">
-        <!-- Header -->
-        <div class="vendas-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+<div class="container-fluid px-3 px-md-4 py-4" style="max-width: 1480px; margin: auto;">
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 1. HERO BANNER: MÊS, RELÓGIO & NAVEGADOR DE PERÍODO            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="rm-hero fade-up">
+        <div class="rm-hero-content d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-4">
+            
+            <!-- Left Info -->
             <div>
-                <h1 class="display-5 fw-bold mb-1" th:text="#{receita.mensal.titulo}">Receita do Mês</h1>
-                <p class="mb-0 opacity-75">
-                    <i class="far fa-calendar-alt me-2"></i>
-                    <span th:text="${#temporals.format(#temporals.createNow(), 'MMMM ''de'' yyyy')}">Abril de 2026</span>
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="hero-live-badge">
+                        <span class="pulse-dot"></span> Painel Executivo Mensal
+                    </span>
+                    <span th:if="${isMesAtual}" class="badge bg-primary bg-opacity-25 border border-primary border-opacity-50 text-white rounded-pill px-3 py-1" style="font-size:0.75rem; font-weight:700;">
+                        <i class="fas fa-dot-circle me-1 text-info"></i> Mês Corrente
+                    </span>
+                    <!-- Crescimento vs Mês Anterior -->
+                    <span th:if="${variacaoPercentual >= 0}" class="badge-growth-up">
+                        <i class="fas fa-arrow-trend-up"></i>
+                        <span th:text="${'+' + #numbers.formatDecimal(variacaoPercentual, 1, 'POINT', 1, 'COMMA') + '%'}">+0,0%</span>
+                        <span style="opacity:0.8; font-weight:500;">vs mês ant.</span>
+                    </span>
+                    <span th:if="${variacaoPercentual < 0}" class="badge-growth-down">
+                        <i class="fas fa-arrow-trend-down"></i>
+                        <span th:text="${#numbers.formatDecimal(variacaoPercentual, 1, 'POINT', 1, 'COMMA') + '%'}">-0,0%</span>
+                        <span style="opacity:0.8; font-weight:500;">vs mês ant.</span>
+                    </span>
+                </div>
+
+                <h1 class="display-6 fw-bold mb-1" style="letter-spacing:-0.5px;">
+                    <i class="fas fa-calendar-check me-2" style="opacity:0.85;"></i>
+                    Receita de <span th:text="${nomeMes + ' de ' + anoSel}">Novembro de 2026</span>
+                </h1>
+                <p class="mb-0 opacity-75" style="font-size: 0.92rem;">
+                    Demonstrativo consolidado de faturamento, liquidação de IVA e análise diária de vendas
                 </p>
             </div>
-            <div>
-                <a th:href="@{/dashboard}" class="btn btn-light btn-lg rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-th-large me-2 text-primary"></i> Dashboard
-                </a>
-            </div>
-        </div>
 
-        <!-- Quick Stats -->
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon icon-sales">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <span class="text-muted small fw-bold">RECEITA MENSAL</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:text="${#numbers.formatDecimal(totalVendasMes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon icon-iva">
-                        <i class="fas fa-percentage"></i>
-                    </div>
-                    <span class="text-muted small fw-bold">IVA ACUMULADO</span>
-                    <h2 class="mb-0 fw-bold mt-1"
-                        th:text="${#numbers.formatDecimal(totalIvaMes, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</h2>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon icon-count">
-                        <i class="fas fa-receipt"></i>
-                    </div>
-                    <span class="text-muted small fw-bold">TOTAL DE VENDAS</span>
-                    <h2 class="mb-0 fw-bold mt-1" th:text="${vendasDoMes.size()}">0</h2>
-                </div>
-            </div>
-        </div>
+            <!-- Right: Period Selector & Dashboard Button -->
+            <div class="d-flex flex-column align-items-lg-end gap-3 w-100 w-lg-auto">
+                
+                <!-- Period Navigator Form -->
+                <form th:action="@{/dashboard/receita-mensal}" method="get" class="period-nav-card shadow-sm m-0">
+                    <!-- Prev Month -->
+                    <a th:href="@{/dashboard/receita-mensal(mes=${mesAnterior}, ano=${anoAnterior})}" 
+                       class="btn-nav-arrow" title="Mês Anterior">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
 
-        <!-- Main Content -->
-        <div class="table-modern">
-            <div class="p-4 border-bottom d-flex align-items-center justify-content-between bg-white">
-                <h4 class="mb-0 fw-bold">Transações do Mês</h4>
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-pill me-2" type="button"
-                        id="btnExportar" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-download me-1"></i> Exportar
+                    <!-- Month Select -->
+                    <select name="mes" class="period-select" onchange="this.form.submit()">
+                        <option th:each="m : ${#numbers.sequence(1, 12)}" 
+                                th:value="${m}" 
+                                th:text="${mesesNomes[m]}" 
+                                th:selected="${m == mesSel}">Janeiro</option>
+                    </select>
+
+                    <!-- Year Select -->
+                    <select name="ano" class="period-select" onchange="this.form.submit()">
+                        <option th:each="y : ${listaAnos}" 
+                                th:value="${y}" 
+                                th:text="${y}" 
+                                th:selected="${y == anoSel}">2026</option>
+                    </select>
+
+                    <!-- Next Month -->
+                    <a th:href="@{/dashboard/receita-mensal(mes=${mesSeguinte}, ano=${anoSeguinte})}" 
+                       class="btn-nav-arrow" title="Mês Seguinte">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </form>
+
+                <!-- Action Links -->
+                <div class="d-flex align-items-center gap-2">
+                    <a th:href="@{/dashboard}" class="btn-hero-action">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a>
+                    <button type="button" onclick="window.print()" class="btn-hero-action" title="Imprimir Relatório">
+                        <i class="fas fa-print"></i> Imprimir
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="btnExportar">
-                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expCopy"><i
-                                    class="fas fa-copy me-2 text-primary"></i> Copiar Dados</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expExcel"><i
-                                    class="fas fa-file-excel me-2 text-success"></i> Excel (.xlsx)</a></li>
-                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expCSV"><i
-                                    class="fas fa-file-csv me-2 text-info"></i> CSV (.csv)</a></li>
-                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expPDF"><i
-                                    class="fas fa-file-pdf me-2 text-danger"></i> PDF Documento</a></li>
-                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expJSON"><i
-                                    class="fas fa-code me-2 text-dark"></i> JSON Data</a></li>
-                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expXML"><i
-                                    class="fas fa-file-code me-2 text-warning"></i> XML Format</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item py-2" href="javascript:void(0)" id="expPrint"><i
-                                    class="fas fa-print me-2 text-secondary"></i> Imprimir Tabela</a></li>
-                    </ul>
-                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="location.reload()">
+                    <a th:href="@{/dashboard/receita-mensal(mes=${mesSel}, ano=${anoSel})}" class="btn-hero-action" title="Atualizar">
                         <i class="fas fa-sync-alt"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
-            <div class="table-responsive p-3">
-                <table id="tabelaVendas" class="table align-middle mb-0" 
-                       th:data-lang-url="@{/plugins/datatables/i18n/pt-PT.json}">
-                    <thead>
-                        <tr>
-                            <th class="ps-4">Referência</th>
-                            <th>Data e Hora</th>
-                            <th class="text-end">Imposto (IVA)</th>
-                            <th class="text-end">Valor Total</th>
-                            <th class="text-end pe-4" data-orderable="false">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="venda : ${vendasDoMes}">
-                            <td class="ps-4">
-                                <span class="badge-id" th:text="'#' + ${venda.id}">#1</span>
-                            </td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold"
-                                        th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy HH:mm')}">28/04/2026 14:30</span>
-                                </div>
-                            </td>
-                            <td class="text-end">
-                                <span class="text-info fw-bold"
-                                    th:with="ivaTotal=${venda.itens != null ? #aggregates.sum(venda.itens.![iva != null ? iva : 0.0]) : 0.0}"
-                                    th:text="${#numbers.formatDecimal(ivaTotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
-                                    0,00 Kz
-                                </span>
-                            </td>
-                            <td class="text-end">
-                                <span class="fw-bold fs-5 text-dark"
-                                    th:text="${#numbers.formatDecimal(venda.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
-                                    0,00 Kz
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div th:if="${faturasMap.containsKey(venda.id)}"
-                                    class="d-flex justify-content-end gap-2">
-                                    <a th:href="@{'/uploads/faturas/' + ${faturasMap.get(venda.id)} + '.pdf'}"
-                                        target="_blank" class="btn btn-action btn-primary shadow-sm">
-                                        <i class="fas fa-file-pdf me-1"></i> Factura
-                                    </a>
-                                </div>
-                                <div th:unless="${faturasMap.containsKey(venda.id)}">
-                                    <span class="badge rounded-pill bg-light text-muted border">Sem Documento</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 2. 6 KPI CARDS COM ANIMAÇÕES & MÉTRICAS-CHAVE                   -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 kpi-row">
+        <!-- 1. Receita Líquida -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-1">
+            <div class="kpi-card kpi-net">
+                <div class="kpi-icon-box"><i class="fas fa-wallet"></i></div>
+                <div class="kpi-label">Receita Líquida</div>
+                <div class="kpi-val" id="kpiNetVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Sem IVA incluído</span>
+                    <span class="badge bg-light text-primary fw-bold" style="font-size:0.68rem;">Base Real</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barNet" style="background:linear-gradient(90deg, #4f46e5, #06b6d4); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Receita Bruta -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-2">
+            <div class="kpi-card kpi-gross">
+                <div class="kpi-icon-box"><i class="fas fa-receipt"></i></div>
+                <div class="kpi-label">Faturamento Bruto</div>
+                <div class="kpi-val" id="kpiGrossVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Com impostos</span>
+                    <span class="badge bg-light text-info fw-bold" style="font-size:0.68rem;">Total Geral</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" style="background:linear-gradient(90deg, #0284c7, #38bdf8); width:100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. IVA Acumulado -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-3">
+            <div class="kpi-card kpi-iva">
+                <div class="kpi-icon-box"><i class="fas fa-percent"></i></div>
+                <div class="kpi-label">IVA Liquidado</div>
+                <div class="kpi-val" id="kpiIvaVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Retenção fiscal</span>
+                    <span class="badge bg-light text-warning fw-bold" style="font-size:0.68rem;">AGT</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barIva" style="background:linear-gradient(90deg, #f59e0b, #ef4444); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Ticket Médio -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-1">
+            <div class="kpi-card kpi-ticket">
+                <div class="kpi-icon-box"><i class="fas fa-calculator"></i></div>
+                <div class="kpi-label">Ticket Médio</div>
+                <div class="kpi-val" id="kpiTicketVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Média por venda</span>
+                    <span class="badge bg-light text-success fw-bold" style="font-size:0.68rem;">Eficiência</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" style="background:linear-gradient(90deg, #10b981, #14b8a6); width:75%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Total de Vendas -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-2">
+            <div class="kpi-card kpi-count">
+                <div class="kpi-icon-box"><i class="fas fa-shopping-bag"></i></div>
+                <div class="kpi-label">Transações</div>
+                <div class="kpi-val" id="kpiCountVal">—</div>
+                <div class="kpi-sub">
+                    <span class="text-success fw-bold" th:text="${totalPagas + ' pagas'}">0 pagas</span>
+                    <span class="text-danger fw-bold" th:text="${totalCanceladas + ' canc.'}">0 canc.</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barPagas" style="background:linear-gradient(90deg, #8b5cf6, #ec4899); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Maior Venda -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-3">
+            <div class="kpi-card kpi-max">
+                <div class="kpi-icon-box"><i class="fas fa-trophy"></i></div>
+                <div class="kpi-label">Maior Venda</div>
+                <div class="kpi-val" id="kpiMaxVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Pico individual</span>
+                    <span class="badge bg-light text-danger fw-bold" style="font-size:0.68rem;">Recorde</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" style="background:linear-gradient(90deg, #f43f5e, #fb923c); width:85%;"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- DataTables & Extensions JS -->
-    <script th:src="@{/plugins/datatables/js/jquery.dataTables.min.js}"></script>
-    <script th:src="@{/plugins/datatables/js/dataTables.bootstrap5.min.js}"></script>
-    <script th:src="@{/plugins/datatables/js/dataTables.buttons.min.js}"></script>
-    <script th:src="@{/plugins/datatables/js/buttons.bootstrap5.min.js}"></script>
-    <script th:src="@{/plugins/datatables/js/jszip.min.js}"></script>
-    <script th:src="@{/plugins/datatables/js/pdfmake.min.js}"></script>
-    <script th:src="@{/plugins/datatables/js/vfs_fonts.js}"></script>
-    <script th:src="@{/plugins/datatables/js/buttons.html5.min.js}"></script>
-    <script th:src="@{/plugins/datatables/js/buttons.print.min.js}"></script>
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 3. GRÁFICOS INTERATIVOS & TOP PRODUTOS                          -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 mb-4">
+        
+        <!-- Gráfico 1: Evolução Diária da Receita (8 Colunas) -->
+        <div class="col-12 col-xl-8 fade-up del-2">
+            <div class="content-panel h-100">
+                <div class="panel-head">
+                    <div>
+                        <h5><i class="fas fa-chart-area text-primary"></i> Evolução da Receita Diária</h5>
+                        <p class="panel-subtitle">Comportamento das vendas ao longo de <span th:text="${nomeMes + ' ' + anoSel}">este mês</span></p>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary active" id="btnChartArea" onclick="switchChartType('line')">
+                            <i class="fas fa-chart-area me-1"></i> Linha
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="btnChartBar" onclick="switchChartType('bar')">
+                            <i class="fas fa-chart-bar me-1"></i> Barras
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container-box">
+                    <canvas id="chartEvolucaoDiaria"></canvas>
+                </div>
+            </div>
+        </div>
 
-    <script th:inline="none">
-        $(document).ready(function () {
-            var table = $('#tabelaVendas').DataTable({
-                "language": {
-                    "url": $('#tabelaVendas').data('lang-url')
-                },
-                "order": [[1, "desc"]],
-                "searching": false,
-                "dom": '<"d-none"B>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
-                "buttons": [
-                    {
-                        extend: 'copyHtml5',
-                        exportOptions: { columns: [0, 1, 2, 3] }
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        exportOptions: { columns: [0, 1, 2, 3] }
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        exportOptions: { columns: [0, 1, 2, 3] }
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        exportOptions: { columns: [0, 1, 2, 3] }
-                    },
-                    {
-                        extend: 'print',
-                        exportOptions: { columns: [0, 1, 2, 3] }
+        <!-- Gráfico 2: Formas de Pagamento + Top Produtos (4 Colunas) -->
+        <div class="col-12 col-xl-4 fade-up del-3">
+            <div class="content-panel h-100 d-flex flex-column">
+                <div class="panel-head">
+                    <div>
+                        <h5><i class="fas fa-credit-card text-info"></i> Meios de Pagamento</h5>
+                        <p class="panel-subtitle">Distribuição por forma de liquidação</p>
+                    </div>
+                </div>
+                
+                <div class="chart-doughnut-box">
+                    <canvas id="chartPagamentos"></canvas>
+                </div>
+
+                <!-- Top Produtos Ranking -->
+                <div class="border-top p-3 flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-bold" style="font-size:0.75rem; text-transform:uppercase;">
+                            <i class="fas fa-star text-warning me-1"></i> Produtos Mais Vendidos
+                        </span>
+                        <span class="badge bg-light text-muted" th:text="${topProdutos.size() + ' itens'}">0</span>
+                    </div>
+
+                    <div th:if="${topProdutos.empty}" class="text-center py-3 text-muted" style="font-size:0.85rem;">
+                        Nenhum produto faturado neste período.
+                    </div>
+
+                    <div th:unless="${topProdutos.empty}">
+                        <div th:each="prod, iter : ${topProdutos}" class="top-prod-item rounded-3 mb-1">
+                            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                <span class="top-prod-rank" 
+                                      th:classappend="${iter.index == 0 ? 'rank-1' : (iter.index == 1 ? 'rank-2' : (iter.index == 2 ? 'rank-3' : 'rank-other'))}" 
+                                      th:text="${iter.count}">1</span>
+                                <span class="fw-bold text-truncate" style="max-width:180px; font-size:0.82rem;" th:text="${prod.nome}">Produto</span>
+                            </div>
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" th:text="${prod.quantidadeVendida + ' un.'}">0 un.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 4. TABELA DE TRANSAÇÕES DO MÊS COM EXPORTAÇÃO & FILTROS        -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="content-panel fade-up del-4">
+        
+        <!-- Header da Tabela -->
+        <div class="panel-head">
+            <div>
+                <h5><i class="fas fa-file-invoice-dollar text-primary"></i> Transações e Faturas do Mês</h5>
+                <p class="panel-subtitle" id="tableCounterLabel">A carregar listagem…</p>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- Status Pills -->
+                <button class="filter-pill active" onclick="applyStatusFilter(this, 'all')">Todas</button>
+                <button class="filter-pill" onclick="applyStatusFilter(this, 'PAGA')">Pagas</button>
+                <button class="filter-pill" onclick="applyStatusFilter(this, 'EMITIDA')">Emitidas</button>
+                <button class="filter-pill" onclick="applyStatusFilter(this, 'CANCELADA')">Canceladas</button>
+
+                <!-- Export Dropdown -->
+                <div class="dropdown">
+                    <button class="btn-export-drop dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cloud-arrow-down text-primary"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2">
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpCopy"><i class="fas fa-copy me-2 text-primary"></i> Copiar Dados</a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpExcel"><i class="fas fa-file-excel me-2 text-success"></i> Excel (.xlsx)</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpCSV"><i class="fas fa-file-csv me-2 text-info"></i> CSV (.csv)</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpPDF"><i class="fas fa-file-pdf me-2 text-danger"></i> PDF Relatório</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpJSON"><i class="fas fa-code me-2 text-dark"></i> JSON Data</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpXML"><i class="fas fa-file-code me-2 text-warning"></i> XML</a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpPrint"><i class="fas fa-print me-2 text-secondary"></i> Imprimir Tabela</a></li>
+                    </ul>
+                </div>
+
+                <a th:href="@{/dashboard/receita-mensal(mes=${mesSel}, ano=${anoSel})}" class="btn-action-icon" title="Recarregar">
+                    <i class="fas fa-sync-alt"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Barra de Busca Rápida -->
+        <div class="p-3 border-bottom bg-light bg-opacity-25">
+            <div class="search-box-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="inputSearchVendas" placeholder="Pesquisar instantaneamente por nº de fatura, cliente, NIF, forma de pagamento ou valor…">
+            </div>
+        </div>
+
+        <!-- Tabela Responsiva -->
+        <div class="table-responsive">
+            <table id="tabelaVendasMes" class="table table-modern align-middle mb-0"
+                   th:data-lang-url="@{/plugins/datatables/i18n/pt-PT.json}">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Referência / Doc</th>
+                        <th>Cliente</th>
+                        <th>Data e Hora</th>
+                        <th>Forma de Pagamento</th>
+                        <th>Status</th>
+                        <th class="text-end">IVA</th>
+                        <th class="text-end">Total Geral</th>
+                        <th class="text-end pe-4" data-orderable="false">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="venda : ${vendasDoMes}" th:attr="data-status=${venda.status}">
+                        
+                        <!-- Referência / Tipo Doc -->
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="badge-ref" th:text="'#' + ${venda.id}">#1</span>
+                                <span th:if="${venda.tipoDocumento != null}"
+                                      class="doc-type-tag"
+                                      th:classappend="${venda.tipoDocumento == 'FT' ? 'doc-ft' : (venda.tipoDocumento == 'FR' ? 'doc-fr' : 'doc-fp')}"
+                                      th:text="${venda.tipoDocumento}">FT</span>
+                            </div>
+                            <div th:if="${faturasMap.containsKey(venda.id)}" class="mt-1">
+                                <small class="text-muted fw-bold" style="font-size:0.72rem; font-family:'JetBrains Mono', monospace;" th:text="${faturasMap.get(venda.id)}">FT 2026/01</small>
+                            </div>
+                        </td>
+
+                        <!-- Cliente -->
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="client-avatar"
+                                     th:text="${venda.nomeCliente != null && !venda.nomeCliente.isEmpty() ? venda.nomeCliente.substring(0,1).toUpperCase() : (venda.cliente != null && venda.cliente.nome != null ? venda.cliente.nome.substring(0,1).toUpperCase() : 'C')}">
+                                    C
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark"
+                                          th:text="${venda.nomeCliente != null && !venda.nomeCliente.isEmpty() ? venda.nomeCliente : (venda.cliente != null ? venda.cliente.nome : 'Consumidor Final')}">
+                                        Consumidor Final
+                                    </span>
+                                    <small class="text-muted" style="font-size:0.72rem;"
+                                           th:text="${venda.nifCliente != null && !venda.nifCliente.isEmpty() ? 'NIF: ' + venda.nifCliente : (venda.cliente != null && venda.cliente.nif != null ? 'NIF: ' + venda.cliente.nif : 'Consumidor Final')}">
+                                        Consumidor Final
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Data e Hora -->
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark"
+                                      th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy')}">28/04/2026</span>
+                                <small class="text-muted"
+                                       th:text="${#temporals.format(venda.dataCompra, 'HH:mm')} + 'h'">14:30h</small>
+                            </div>
+                        </td>
+
+                        <!-- Pagamento -->
+                        <td>
+                            <span class="pay-badge"
+                                  th:classappend="${venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('TPA') ? 'pay-multicaixa' : (venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('CASH') ? 'pay-cash' : 'pay-transfer')}">
+                                <i th:class="${venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('TPA') ? 'fas fa-credit-card' : (venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('CASH') ? 'fas fa-money-bill-wave' : 'fas fa-building-columns')}"></i>
+                                <span th:text="${venda.formaPagamento != null ? venda.formaPagamento : 'Não Especificado'}">CASH</span>
+                            </span>
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                            <span class="status-pill"
+                                  th:classappend="${venda.status == 'PAGA' || venda.status == 'PAGO' ? 'status-paga' : (venda.status == 'CANCELADA' || venda.status == 'ANULADA' ? 'status-cancelada' : 'status-emitida')}">
+                                <i th:class="${venda.status == 'PAGA' || venda.status == 'PAGO' ? 'fas fa-check-circle' : (venda.status == 'CANCELADA' || venda.status == 'ANULADA' ? 'fas fa-times-circle' : 'fas fa-clock')}"></i>
+                                <span th:text="${venda.status != null ? venda.status : 'EMITIDA'}">PAGA</span>
+                            </span>
+                        </td>
+
+                        <!-- IVA -->
+                        <td class="text-end">
+                            <span class="fw-bold text-secondary"
+                                  th:with="ivaTotal=${venda.itens != null ? #aggregates.sum(venda.itens.![iva != null ? iva : 0.0]) : 0.0}"
+                                  th:text="${#numbers.formatDecimal(ivaTotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
+                                0,00 Kz
+                            </span>
+                        </td>
+
+                        <!-- Total Geral -->
+                        <td class="text-end">
+                            <span class="fw-bold fs-6 text-dark"
+                                  th:text="${#numbers.formatDecimal(venda.total != null ? venda.total : 0.0, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
+                                0,00 Kz
+                            </span>
+                        </td>
+
+                        <!-- Ações -->
+                        <td class="text-end pe-4">
+                            <div th:if="${faturasMap.containsKey(venda.id)}" class="d-flex justify-content-end">
+                                <a th:href="@{'/uploads/faturas/' + ${faturasMap.get(venda.id)} + '.pdf'}"
+                                   target="_blank" class="btn-pdf-doc" title="Visualizar Documento">
+                                    <i class="fas fa-file-pdf"></i> Factura
+                                </a>
+                            </div>
+                            <div th:unless="${faturasMap.containsKey(venda.id)}">
+                                <span class="no-doc-tag">Sem Doc.</span>
+                            </div>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div id="emptyTableState" class="text-center py-5" style="display:none;">
+                <div style="font-size: 3.5rem; color:#cbd5e1; margin-bottom:1rem;">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <h5 class="fw-bold text-secondary">Nenhuma transação encontrada</h5>
+                <p class="text-muted" style="font-size:0.88rem;">Tente ajustar os filtros de status ou a busca textual.</p>
+            </div>
+        </div>
+
+    </div>
+
+</div><!-- /container-fluid -->
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- DATA BRIDGE: DADOS PREPARADOS PELO SPRING MVC PARA O JAVASCRIPT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var _dataMes = {
+        mesSel:             /*[[${mesSel}]]*/ 11,
+        anoSel:             /*[[${anoSel}]]*/ 2026,
+        nomeMes:            /*[[${nomeMes}]]*/ 'Novembro',
+        receitaLiquida:     /*[[${totalVendasMes}]]*/ 0,
+        receitaBruta:       /*[[${totalVendasGross}]]*/ 0,
+        ivaTotal:           /*[[${totalIvaMes}]]*/ 0,
+        totalTransacoes:    /*[[${totalTransacoes}]]*/ 0,
+        totalValidas:       /*[[${totalValidas}]]*/ 0,
+        totalPagas:         /*[[${totalPagas}]]*/ 0,
+        totalCanceladas:    /*[[${totalCanceladas}]]*/ 0,
+        ticketMedio:        /*[[${ticketMedio}]]*/ 0,
+        maiorVenda:         /*[[${maiorVenda}]]*/ 0,
+        diasNoMes:          /*[[${diasNoMes}]]*/ 30,
+        vendasPorDia:       /*[[${vendasPorDia}]]*/ [],
+        vendasPorPagamento: /*[[${vendasPorPagamento}]]*/ {}
+    };
+    /*]]>*/
+</script>
+
+<!-- Scripts Essenciais: jQuery, DataTables, Buttons, Chart.js -->
+<script th:src="@{/plugins/datatables/js/jquery.dataTables.min.js}"></script>
+<script th:src="@{/plugins/datatables/js/dataTables.bootstrap5.min.js}"></script>
+<script th:src="@{/plugins/datatables/js/dataTables.buttons.min.js}"></script>
+<script th:src="@{/plugins/datatables/js/buttons.bootstrap5.min.js}"></script>
+<script th:src="@{/plugins/datatables/js/jszip.min.js}"></script>
+<script th:src="@{/plugins/datatables/js/pdfmake.min.js}"></script>
+<script th:src="@{/plugins/datatables/js/vfs_fonts.js}"></script>
+<script th:src="@{/plugins/datatables/js/buttons.html5.min.js}"></script>
+<script th:src="@{/plugins/datatables/js/buttons.print.min.js}"></script>
+<script th:src="@{/plugins/chartjs/chart.min.js}"></script>
+
+<script th:inline="none">
+$(document).ready(function () {
+
+    /* ── 1. ANIMAÇÕES PROGRESSIVAS DOS NÚMEROS (COUNT-UP) ─────── */
+    function animateCount(el, targetVal, decimals, suffix) {
+        if (!el) return;
+        var duration = 1200, start = null;
+        function step(ts) {
+            if (!start) start = ts;
+            var progress = Math.min((ts - start) / duration, 1);
+            var ease = 1 - Math.pow(1 - progress, 3);
+            var current = targetVal * ease;
+            el.textContent = current.toLocaleString('pt-PT', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }) + (suffix || '');
+            if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    setTimeout(function() {
+        animateCount(document.getElementById('kpiNetVal'),    _dataMes.receitaLiquida,  2, ' Kz');
+        animateCount(document.getElementById('kpiGrossVal'),  _dataMes.receitaBruta,    2, ' Kz');
+        animateCount(document.getElementById('kpiIvaVal'),    _dataMes.ivaTotal,        2, ' Kz');
+        animateCount(document.getElementById('kpiTicketVal'), _dataMes.ticketMedio,     2, ' Kz');
+        animateCount(document.getElementById('kpiCountVal'),  _dataMes.totalTransacoes, 0, '');
+        animateCount(document.getElementById('kpiMaxVal'),    _dataMes.maiorVenda,      2, ' Kz');
+
+        if (_dataMes.receitaBruta > 0) {
+            var netPct = Math.round((_dataMes.receitaLiquida / _dataMes.receitaBruta) * 100);
+            var ivaPct = Math.round((_dataMes.ivaTotal / _dataMes.receitaBruta) * 100);
+            document.getElementById('barNet').style.width = netPct + '%';
+            document.getElementById('barIva').style.width = ivaPct + '%';
+        }
+        if (_dataMes.totalTransacoes > 0) {
+            var pagasPct = Math.round((_dataMes.totalPagas / _dataMes.totalTransacoes) * 100);
+            document.getElementById('barPagas').style.width = pagasPct + '%';
+        }
+    }, 250);
+
+    /* ── 2. GRÁFICO 1: EVOLUÇÃO DIÁRIA DA RECEITA ─────────────── */
+    var isDark = document.body.classList.contains('dark-mode');
+    var textColor = isDark ? '#94a3b8' : '#64748b';
+    var gridColor  = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+
+    var dayLabels = [];
+    var dayValues = [];
+    var totalDays = _dataMes.diasNoMes || 30;
+
+    for (var d = 1; d <= totalDays; d++) {
+        dayLabels.push('Dia ' + d);
+        var val = (_dataMes.vendasPorDia && _dataMes.vendasPorDia[d]) ? _dataMes.vendasPorDia[d] : 0;
+        dayValues.push(val);
+    }
+
+    var ctxDaily = document.getElementById('chartEvolucaoDiaria').getContext('2d');
+    var gradArea = ctxDaily.createLinearGradient(0, 0, 0, 270);
+    gradArea.addColorStop(0, 'rgba(79, 70, 229, 0.45)');
+    gradArea.addColorStop(1, 'rgba(79, 70, 229, 0.01)');
+
+    var chartDaily = new Chart(ctxDaily, {
+        type: 'line',
+        data: {
+            labels: dayLabels,
+            datasets: [{
+                label: 'Receita (Kz)',
+                data: dayValues,
+                borderColor: '#4f46e5',
+                borderWidth: 2.5,
+                backgroundColor: gradArea,
+                fill: true,
+                tension: 0.35,
+                pointBackgroundColor: '#4f46e5',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: dayValues.map(function(v){ return v > 0 ? 3.5 : 0; }),
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                    titleColor: isDark ? '#f8fafc' : '#0f172a',
+                    bodyColor: isDark ? '#cbd5e1' : '#475569',
+                    borderColor: '#e2e8f0',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(ctx) {
+                            return 'Receita: ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + ' Kz';
+                        }
                     }
-                ]
-            });
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textColor, font: { size: 10, weight: '600' } }
+                },
+                y: {
+                    grid: { color: gridColor },
+                    border: { display: false },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 10 },
+                        callback: function(v) {
+                            if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+                            if (v >= 1000) return (v / 1000).toFixed(0) + 'k';
+                            return v;
+                        }
+                    }
+                }
+            }
+        }
+    });
 
-            // Vincular ações
-            $('#expCopy').on('click', function () { table.button('.buttons-copy').trigger(); });
-            $('#expExcel').on('click', function () { table.button('.buttons-excel').trigger(); });
-            $('#expCSV').on('click', function () { table.button('.buttons-csv').trigger(); });
-            $('#expPDF').on('click', function () { table.button('.buttons-pdf').trigger(); });
-            $('#expPrint').on('click', function () { table.button('.buttons-print').trigger(); });
+    window.switchChartType = function(type) {
+        chartDaily.config.type = type;
+        if (type === 'bar') {
+            chartDaily.data.datasets[0].backgroundColor = 'rgba(79, 70, 229, 0.85)';
+            chartDaily.data.datasets[0].borderRadius = 6;
+            $('#btnChartBar').addClass('active');
+            $('#btnChartArea').removeClass('active');
+        } else {
+            chartDaily.data.datasets[0].backgroundColor = gradArea;
+            chartDaily.data.datasets[0].fill = true;
+            $('#btnChartArea').addClass('active');
+            $('#btnChartBar').removeClass('active');
+        }
+        chartDaily.update();
+    };
 
-            $('#expJSON').on('click', function () {
-                var data = table.buttons.exportData({ columns: [0, 1, 2, 3] });
-                var json = JSON.stringify(data.body);
-                var blob = new Blob([json], { type: "application/json" });
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = "vendas_mes.json";
-                a.click();
-            });
+    /* ── 3. GRÁFICO 2: MEIOS DE PAGAMENTO (DOUGHNUT) ──────────── */
+    var payLabels = [];
+    var payValues = [];
+    var payColors = ['#4f46e5', '#10b981', '#0284c7', '#f59e0b', '#ec4899', '#8b5cf6'];
 
-            $('#expXML').on('click', function () {
-                var data = table.buttons.exportData({ columns: [0, 1, 2, 3] });
-                var xml = '<?xml version="1.0" encoding="UTF-8"?><vendas>';
-                data.body.forEach(function (row) {
-                    xml += '<venda>';
-                    xml += '<referencia>' + row[0] + '</referencia>';
-                    xml += '<data_hora>' + row[1] + '</data_hora>';
-                    xml += '<iva>' + row[2] + '</iva>';
-                    xml += '<total>' + row[3] + '</total>';
-                    xml += '</venda>';
-                });
-                xml += '</vendas>';
-                var blob = new Blob([xml], { type: "application/xml" });
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = "vendas_mes.xml";
-                a.click();
-            });
+    if (_dataMes.vendasPorPagamento) {
+        for (var pKey in _dataMes.vendasPorPagamento) {
+            payLabels.push(pKey);
+            payValues.push(_dataMes.vendasPorPagamento[pKey]);
+        }
+    }
+
+    if (payValues.length === 0) {
+        payLabels = ['Sem Registos'];
+        payValues = [1];
+        payColors = ['#e2e8f0'];
+    }
+
+    var ctxPay = document.getElementById('chartPagamentos').getContext('2d');
+    new Chart(ctxPay, {
+        type: 'doughnut',
+        data: {
+            labels: payLabels,
+            datasets: [{
+                data: payValues,
+                backgroundColor: payColors,
+                borderWidth: 2,
+                borderColor: isDark ? '#1e293b' : '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        font: { size: 10, weight: '700' },
+                        boxWidth: 10,
+                        padding: 8
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ' ' + ctx.label + ': ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + ' Kz';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    /* ── 4. DATATABLE CONFIGURAÇÃO & EXPORTAÇÕES ──────────────── */
+    var dataTable = $('#tabelaVendasMes').DataTable({
+        language: { url: $('#tabelaVendasMes').data('lang-url') },
+        order: [[2, 'desc']],
+        searching: false,
+        pageLength: 10,
+        dom: '<"d-none"B>rt<"d-flex justify-content-between align-items-center mt-3 px-4 pb-3"ip>',
+        buttons: [
+            { extend: 'copyHtml5',  exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'excelHtml5', exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'csvHtml5',   exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'pdfHtml5',   exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'print',      exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } }
+        ]
+    });
+
+    function updateTableLabel() {
+        var count = dataTable.rows({ filter: 'applied' }).count();
+        document.getElementById('tableCounterLabel').textContent =
+            count + ' transaç' + (count === 1 ? 'ão' : 'ões') + ' correspondente' + (count === 1 ? '' : 's');
+        document.getElementById('emptyTableState').style.display = (count === 0) ? 'block' : 'none';
+    }
+    updateTableLabel();
+
+    // Eventos de Exportação
+    $('#btnExpCopy').on('click',  function(){ dataTable.button('.buttons-copy').trigger(); });
+    $('#btnExpExcel').on('click', function(){ dataTable.button('.buttons-excel').trigger(); });
+    $('#btnExpCSV').on('click',   function(){ dataTable.button('.buttons-csv').trigger(); });
+    $('#btnExpPDF').on('click',   function(){ dataTable.button('.buttons-pdf').trigger(); });
+    $('#btnExpPrint').on('click', function(){ dataTable.button('.buttons-print').trigger(); });
+
+    $('#btnExpJSON').on('click', function(){
+        var d = dataTable.buttons.exportData({ columns: [0, 1, 2, 3, 4, 5, 6] });
+        var blob = new Blob([JSON.stringify(d.body, null, 2)], { type: 'application/json' });
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = 'receita_' + _dataMes.nomeMes + '_' + _dataMes.anoSel + '.json';
+        a.click();
+    });
+
+    $('#btnExpXML').on('click', function(){
+        var d = dataTable.buttons.exportData({ columns: [0, 1, 2, 3, 4, 5, 6] });
+        var xml = '<?xml version="1.0" encoding="UTF-8"?><receita_mensal mes="' + _dataMes.nomeMes + '" ano="' + _dataMes.anoSel + '">';
+        d.body.forEach(function(row){
+            xml += '<transacao>';
+            xml += '<referencia>' + row[0] + '</referencia>';
+            xml += '<cliente>' + row[1] + '</cliente>';
+            xml += '<data>' + row[2] + '</data>';
+            xml += '<pagamento>' + row[3] + '</pagamento>';
+            xml += '<status>' + row[4] + '</status>';
+            xml += '<iva>' + row[5] + '</iva>';
+            xml += '<total>' + row[6] + '</total>';
+            xml += '</transacao>';
         });
-    </script>
-</body>
+        xml += '</receita_mensal>';
+        var blob = new Blob([xml], { type: 'application/xml' });
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = 'receita_' + _dataMes.nomeMes + '_' + _dataMes.anoSel + '.xml';
+        a.click();
+    });
 
+    /* ── 5. BUSCA INSTANTÂNEA ─────────────────────────────────── */
+    $('#inputSearchVendas').on('input', function() {
+        var query = $(this).val().toLowerCase();
+        dataTable.rows().every(function() {
+            var node = $(this.node());
+            node.toggle(node.text().toLowerCase().indexOf(query) >= 0);
+        });
+        updateTableLabel();
+    });
+
+    /* ── 6. FILTRO RÁPIDO DE STATUS ──────────────────────────── */
+    window.applyStatusFilter = function(btn, status) {
+        $('.filter-pill').removeClass('active');
+        $(btn).addClass('active');
+
+        dataTable.rows().every(function() {
+            var node = $(this.node());
+            if (status === 'all') {
+                node.show();
+            } else {
+                var rowStatus = (node.attr('data-status') || '').toUpperCase();
+                node.toggle(rowStatus === status.toUpperCase());
+            }
+        });
+        updateTableLabel();
+    };
+
+});
+</script>
+</body>
 </html>

@@ -6,496 +6,792 @@
     <link rel="stylesheet" th:href="@{/plugins/datatables/css/dataTables.bootstrap5.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/datatables/css/buttons.bootstrap5.min.css}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-
-        /* ── HERO HEADER ──────────────────────────────── */
-        .vd-hero {
-            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #8b5cf6 100%);
-            border-radius: 24px;
-            padding: 2.5rem 2.5rem 4rem;
-            color: white;
-            margin-bottom: -2.5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(99,102,241,.35);
-        }
-        .vd-hero::before {
-            content: ''; position: absolute;
-            top: -80px; right: -80px;
-            width: 320px; height: 320px;
-            background: rgba(255,255,255,.08);
-            border-radius: 50%;
-        }
-        .vd-hero::after {
-            content: ''; position: absolute;
-            bottom: -100px; left: -60px;
-            width: 260px; height: 260px;
-            background: rgba(255,255,255,.05);
-            border-radius: 50%;
-        }
-        .vd-hero-content { position: relative; z-index: 2; }
-        .vd-hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: .25rem; }
-
-        .live-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(255,255,255,.18);
-            border: 1px solid rgba(255,255,255,.3);
-            backdrop-filter: blur(10px);
-            border-radius: 50px;
-            padding: .35rem .9rem;
-            font-size: .78rem; font-weight: 600; color: white;
-        }
-        .live-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #4ade80;
-            animation: pulse-green 1.5s infinite;
-        }
-        @keyframes pulse-green {
-            0%   { box-shadow: 0 0 0 0 rgba(74,222,128,.5); }
-            70%  { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
-            100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
-        }
-        .realtime-clock {
-            font-size: 2.5rem; font-weight: 800; letter-spacing: 2px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* ── KPI CARDS ────────────────────────────────── */
-        .kpi-row { position: relative; z-index: 10; margin-bottom: 1.5rem; }
-        .kpi-card {
-            background: white; border-radius: 20px; padding: 1.6rem;
-            border: 1px solid rgba(226,232,240,.8);
-            box-shadow: 0 4px 24px rgba(0,0,0,.06);
-            transition: all .35s cubic-bezier(.4,0,.2,1);
-            height: 100%; position: relative; overflow: hidden;
-        }
-        .kpi-card::before {
-            content: ''; position: absolute;
-            top: 0; left: 0; right: 0; height: 3px;
-            border-radius: 20px 20px 0 0;
-        }
-        .kpi-revenue::before { background: linear-gradient(90deg,#0ea5e9,#6366f1); }
-        .kpi-iva::before     { background: linear-gradient(90deg,#f59e0b,#ef4444); }
-        .kpi-count::before   { background: linear-gradient(90deg,#10b981,#06d6a0); }
-        .kpi-avg::before     { background: linear-gradient(90deg,#8b5cf6,#ec4899); }
-        .kpi-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,.12); }
-        .kpi-icon-wrap {
-            width: 52px; height: 52px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem; margin-bottom: 1rem; color: white;
-        }
-        .kpi-revenue .kpi-icon-wrap { background: linear-gradient(135deg,#0ea5e9,#6366f1); }
-        .kpi-iva     .kpi-icon-wrap { background: linear-gradient(135deg,#f59e0b,#ef4444); }
-        .kpi-count   .kpi-icon-wrap { background: linear-gradient(135deg,#10b981,#06d6a0); }
-        .kpi-avg     .kpi-icon-wrap { background: linear-gradient(135deg,#8b5cf6,#ec4899); }
-        .kpi-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
-        .kpi-value { font-size: 1.5rem; font-weight: 800; color: #1e293b; margin-top: .2rem; }
-        .kpi-sub   { font-size: .78rem; color: #64748b; margin-top: .3rem; }
-        .mini-progress { height: 4px; border-radius: 4px; background: #f1f5f9; margin-top: .75rem; overflow: hidden; }
-        .mini-progress-bar { height: 100%; border-radius: 4px; transition: width 1.2s ease; }
-
-        /* ── CONTENT CARDS ────────────────────────────── */
-        .content-card {
-            background: white; border-radius: 20px;
-            border: 1px solid rgba(226,232,240,.8);
-            box-shadow: 0 4px 24px rgba(0,0,0,.05);
-            overflow: hidden; margin-bottom: 1.5rem;
-        }
-        .card-header-custom {
-            padding: 1.4rem 1.8rem;
-            border-bottom: 1px solid #f1f5f9;
-            display: flex; align-items: center; justify-content: space-between;
-            flex-wrap: wrap; gap: .75rem;
-        }
-        .card-header-custom h5 { font-size: 1rem; font-weight: 700; color: #1e293b; margin: 0; }
-        .card-header-custom .card-subtitle { font-size: .78rem; color: #94a3b8; margin: 0; }
-
-        /* ── CHART ────────────────────────────────────── */
-        .chart-wrapper { padding: 1.5rem 1.8rem; height: 220px; position: relative; }
-
-        /* ── SEARCH & FILTERS ─────────────────────────── */
-        .search-input-wrap { position: relative; }
-        .search-input-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: .85rem; }
-        .search-input-wrap input {
-            border: 1.5px solid #e2e8f0; border-radius: 12px;
-            padding: .55rem .9rem .55rem 2.4rem; font-size: .85rem; width: 100%;
-            outline: none; transition: border-color .2s; background: #f8fafc;
-        }
-        .search-input-wrap input:focus { border-color: #6366f1; background: white; }
-
-        .filter-btn {
-            padding: .4rem .85rem; border-radius: 10px; font-size: .75rem; font-weight: 600;
-            border: 1.5px solid #e2e8f0; cursor: pointer; transition: all .2s;
-            background: white; color: #64748b;
-        }
-        .filter-btn.active { border-color: #6366f1; color: #6366f1; background: #eff0ff; }
-
-        /* ── TABLE ────────────────────────────────────── */
-        .table-modern thead th {
-            background: #f8fafc; text-transform: uppercase;
-            font-size: .7rem; letter-spacing: 1px; font-weight: 700;
-            color: #94a3b8; border: none; padding: 1rem 1.2rem; white-space: nowrap;
-        }
-        .table-modern tbody td {
-            padding: 1rem 1.2rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle;
-        }
-        .table-modern tbody tr:last-child td { border-bottom: none; }
-        .table-modern tbody tr:hover td { background: #f8fafc; }
-        .table-modern { border: none; margin: 0; }
-
-        .ref-badge {
-            background: linear-gradient(135deg,#eff0ff,#e0e7ff);
-            color: #4f46e5; padding: .3rem .7rem; border-radius: 8px;
-            font-family: 'Monaco','Consolas',monospace; font-size: .8rem; font-weight: 700;
-        }
-        .client-avatar {
-            width: 34px; height: 34px; border-radius: 10px;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: .72rem; font-weight: 700; color: white; flex-shrink: 0;
-        }
-        .status-badge {
-            padding: .28rem .75rem; border-radius: 20px;
-            font-size: .7rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
-        }
-        .status-emitida   { background: #dbeafe; color: #1d4ed8; }
-        .status-paga      { background: #dcfce7; color: #15803d; }
-        .status-cancelada { background: #fee2e2; color: #b91c1c; }
-        .status-rascunho  { background: #fef9c3; color: #92400e; }
-        .status-anulada   { background: #f1f5f9; color: #475569; }
-        .status-vencida   { background: #ffe4e6; color: #9f1239; }
-        .status-validada  { background: #e0f2fe; color: #0369a1; }
-
-        .btn-view-pdf {
-            padding: .4rem .9rem; border-radius: 10px;
-            background: linear-gradient(135deg,#6366f1,#4f46e5);
-            color: white; border: none; font-size: .78rem; font-weight: 600;
-            cursor: pointer; transition: all .2s;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
-        }
-        .btn-view-pdf:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.4); color: white; }
-        .no-doc-badge { padding: .3rem .75rem; border-radius: 8px; background: #f1f5f9; color: #94a3b8; font-size: .72rem; font-weight: 600; }
-
-        /* ── ACTION BAR ───────────────────────────────── */
-        .btn-icon-sm {
-            width: 36px; height: 36px; border-radius: 10px;
-            display: inline-flex; align-items: center; justify-content: center;
-            border: 1.5px solid #e2e8f0; background: white; color: #64748b;
-            cursor: pointer; transition: all .2s; font-size: .85rem;
-        }
-        .btn-icon-sm:hover { border-color: #6366f1; color: #6366f1; background: #eff0ff; }
-        .btn-export {
-            padding: .45rem 1.1rem; border-radius: 10px; font-size: .8rem; font-weight: 600;
-            border: 1.5px solid #e2e8f0; background: white; color: #475569;
-            cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 6px;
-        }
-        .btn-export:hover { border-color: #6366f1; color: #6366f1; background: #eff0ff; }
-        .btn-back {
-            padding: .6rem 1.4rem; border-radius: 14px; font-size: .85rem; font-weight: 700;
-            border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.2); color: white;
-            backdrop-filter: blur(10px); cursor: pointer; transition: all .2s;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-back:hover { background: rgba(255,255,255,.35); color: white; transform: translateY(-2px); }
-
-        /* ── EMPTY STATE ──────────────────────────────── */
-        .empty-state { padding: 4rem 2rem; text-align: center; }
-        .empty-state .empty-icon { font-size: 4rem; color: #cbd5e1; margin-bottom: 1rem; }
-        .empty-state h5 { color: #64748b; font-weight: 700; }
-        .empty-state p  { color: #94a3b8; font-size: .85rem; }
-
-        /* ── DATATABLES ───────────────────────────────── */
-        .dt-buttons { display: none !important; }
-        .dataTables_info { font-size: .8rem; color: #94a3b8; }
-
-        /* ── DARK MODE ────────────────────────────────── */
-        .dark-mode .kpi-card,
-        .dark-mode .content-card { background: #1e2333; border-color: #2d3748; }
-        .dark-mode .kpi-value    { color: #f1f5f9; }
-        .dark-mode .kpi-label    { color: #6b7280; }
-        .dark-mode .kpi-sub      { color: #9ca3af; }
-        .dark-mode .card-header-custom h5  { color: #f1f5f9; }
-        .dark-mode .card-header-custom     { border-color: #2d3748; }
-        .dark-mode .table-modern thead th  { background: #252b3b; color: #6b7280; }
-        .dark-mode .table-modern tbody td  { border-color: #2d3748; color: #d1d5db; }
-        .dark-mode .table-modern tbody tr:hover td { background: #252b3b; }
-        .dark-mode .ref-badge              { background: #2d3748; color: #818cf8; }
-        .dark-mode .search-input-wrap input { background: #252b3b; border-color: #374151; color: #d1d5db; }
-        .dark-mode .search-input-wrap input:focus { border-color: #6366f1; background: #2d3748; }
-        .dark-mode .filter-btn             { background: #252b3b; border-color: #374151; color: #9ca3af; }
-        .dark-mode .filter-btn.active      { background: #312e81; border-color: #6366f1; color: #a5b4fc; }
-        .dark-mode .btn-icon-sm, .dark-mode .btn-export { background: #252b3b; border-color: #374151; color: #9ca3af; }
-        .dark-mode .btn-icon-sm:hover, .dark-mode .btn-export:hover { background: #312e81; border-color: #6366f1; color: #a5b4fc; }
-        .dark-mode .no-doc-badge           { background: #2d3748; color: #6b7280; }
-        .dark-mode .mini-progress          { background: #2d3748; }
-        .dark-mode .dataTables_info        { color: #6b7280; }
-
-        /* ── ANIMATIONS ───────────────────────────────── */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in-up { animation: fadeInUp .5s ease forwards; }
-        .delay-1 { animation-delay: .1s; opacity: 0; }
-        .delay-2 { animation-delay: .2s; opacity: 0; }
-        .delay-3 { animation-delay: .3s; opacity: 0; }
-        .delay-4 { animation-delay: .4s; opacity: 0; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 </head>
 
+<style>
+    * { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+
+    /* ── HERO BANNER ────────────────────────────────────────── */
+    .vd-hero {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 25%, #047857 55%, #0284c7 100%);
+        border-radius: 24px;
+        padding: 2.5rem 2.5rem 4.5rem;
+        color: white;
+        margin-bottom: -3rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(6, 78, 59, 0.35);
+    }
+    .vd-hero::before {
+        content: ''; position: absolute;
+        top: -90px; right: -90px;
+        width: 360px; height: 360px;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .vd-hero::after {
+        content: ''; position: absolute;
+        bottom: -110px; left: -80px;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .vd-hero-content { position: relative; z-index: 2; }
+
+    .hero-live-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        border-radius: 50px;
+        padding: 0.38rem 1rem;
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.8px;
+        text-transform: uppercase; color: #a7f3d0;
+    }
+    .pulse-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #34d399;
+        box-shadow: 0 0 10px #34d399;
+        animation: pulse-green 1.8s infinite;
+    }
+    @keyframes pulse-green {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    .badge-growth-up {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(34, 197, 94, 0.2);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #4ade80; font-size: 0.82rem; font-weight: 700;
+        padding: 0.35rem 0.85rem; border-radius: 50px;
+    }
+    .badge-growth-down {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171; font-size: 0.82rem; font-weight: 700;
+        padding: 0.35rem 0.85rem; border-radius: 50px;
+    }
+
+    .realtime-clock-display {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.8rem; font-weight: 800; letter-spacing: 1px;
+        color: white; line-height: 1;
+    }
+
+    /* ── PERIOD NAVIGATOR ───────────────────────────────────── */
+    .period-nav-card {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 0.5rem 0.8rem;
+        display: inline-flex; align-items: center; gap: 0.6rem;
+    }
+    .btn-nav-arrow {
+        width: 38px; height: 38px; border-radius: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white; border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none; transition: all 0.2s; font-size: 0.9rem;
+    }
+    .btn-nav-arrow:hover {
+        background: rgba(255, 255, 255, 0.3); color: white; transform: translateY(-1px);
+    }
+    .date-input-picker {
+        background: rgba(255, 255, 255, 0.92);
+        color: #064e3b;
+        border: none; border-radius: 10px;
+        padding: 0.45rem 0.9rem; font-size: 0.88rem; font-weight: 700;
+        outline: none; cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .btn-hero-action {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: white; border-radius: 12px;
+        padding: 0.55rem 1.2rem; font-size: 0.85rem; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px;
+        text-decoration: none; transition: all 0.2s;
+    }
+    .btn-hero-action:hover {
+        background: rgba(255, 255, 255, 0.3); color: white; transform: translateY(-2px);
+    }
+
+    /* ── KPI CARDS ──────────────────────────────────────────── */
+    .kpi-row { position: relative; z-index: 10; margin-bottom: 1.5rem; }
+    .kpi-card {
+        background: white; border-radius: 20px; padding: 1.5rem;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.05);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%; position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+        content: ''; position: absolute;
+        top: 0; left: 0; right: 0; height: 4px;
+        border-radius: 20px 20px 0 0;
+    }
+    .kpi-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.1);
+    }
+    .kpi-net::before      { background: linear-gradient(90deg, #10b981, #06b6d4); }
+    .kpi-gross::before    { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+    .kpi-iva::before      { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .kpi-ticket::before   { background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+    .kpi-count::before    { background: linear-gradient(90deg, #059669, #34d399); }
+    .kpi-max::before      { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+
+    .kpi-icon-box {
+        width: 48px; height: 48px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.35rem; color: white; margin-bottom: 0.9rem;
+    }
+    .kpi-net .kpi-icon-box    { background: linear-gradient(135deg, #10b981, #06b6d4); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); }
+    .kpi-gross .kpi-icon-box  { background: linear-gradient(135deg, #0284c7, #38bdf8); box-shadow: 0 6px 16px rgba(2, 132, 199, 0.3); }
+    .kpi-iva .kpi-icon-box    { background: linear-gradient(135deg, #f59e0b, #ef4444); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3); }
+    .kpi-ticket .kpi-icon-box { background: linear-gradient(135deg, #8b5cf6, #6366f1); box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); }
+    .kpi-count .kpi-icon-box  { background: linear-gradient(135deg, #059669, #34d399); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3); }
+    .kpi-max .kpi-icon-box    { background: linear-gradient(135deg, #ec4899, #f43f5e); box-shadow: 0 6px 16px rgba(236, 72, 153, 0.3); }
+
+    .kpi-label {
+        font-size: 0.73rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.8px; color: #94a3b8; margin-bottom: 0.25rem;
+    }
+    .kpi-val {
+        font-size: 1.48rem; font-weight: 800; color: #0f172a;
+        letter-spacing: -0.5px;
+    }
+    .kpi-sub {
+        font-size: 0.77rem; color: #64748b; margin-top: 0.35rem;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .kpi-progress-track {
+        height: 5px; border-radius: 5px; background: #f1f5f9;
+        margin-top: 0.75rem; overflow: hidden;
+    }
+    .kpi-progress-bar {
+        height: 100%; border-radius: 5px; transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── CONTENT PANELS ─────────────────────────────────────── */
+    .content-panel {
+        background: white; border-radius: 22px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+        overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .panel-head {
+        padding: 1.35rem 1.8rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.8rem;
+    }
+    .panel-head h5 {
+        font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .panel-subtitle { font-size: 0.78rem; color: #94a3b8; margin: 0; }
+
+    .chart-container-box {
+        padding: 1.5rem 1.8rem; position: relative; height: 260px;
+    }
+    .chart-doughnut-box {
+        padding: 1.2rem 1.5rem; position: relative; height: 260px;
+    }
+
+    /* ── FILTERS & SEARCH ───────────────────────────────────── */
+    .filter-pill {
+        padding: 0.42rem 0.95rem; border-radius: 12px;
+        font-size: 0.76rem; font-weight: 700;
+        border: 1.5px solid #e2e8f0; cursor: pointer;
+        background: white; color: #64748b; transition: all 0.2s;
+    }
+    .filter-pill:hover { border-color: #10b981; color: #059669; }
+    .filter-pill.active {
+        background: #ecfdf5; border-color: #10b981; color: #047857;
+    }
+    .search-box-wrap { position: relative; }
+    .search-box-wrap i {
+        position: absolute; left: 16px; top: 50%;
+        transform: translateY(-50%); color: #94a3b8; font-size: 0.9rem;
+    }
+    .search-box-wrap input {
+        border: 1.5px solid #e2e8f0; border-radius: 14px;
+        padding: 0.65rem 1rem 0.65rem 2.6rem;
+        font-size: 0.88rem; width: 100%; outline: none;
+        background: #f8fafc; transition: all 0.2s;
+    }
+    .search-box-wrap input:focus {
+        border-color: #10b981; background: white;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    /* ── MODERN TABLE ───────────────────────────────────────── */
+    .table-modern thead th {
+        background: #f8fafc; text-transform: uppercase;
+        font-size: 0.7rem; letter-spacing: 0.9px; font-weight: 800;
+        color: #94a3b8; border: none; padding: 1.1rem 1.2rem; white-space: nowrap;
+    }
+    .table-modern tbody td {
+        padding: 1.05rem 1.2rem; border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle; font-size: 0.87rem;
+    }
+    .table-modern tbody tr:last-child td { border-bottom: none; }
+    .table-modern tbody tr:hover td { background: #fafafa; }
+    .table-modern { border: none; margin: 0; }
+
+    .badge-ref {
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        color: #065f46; padding: 0.35rem 0.75rem; border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 700;
+    }
+    .doc-type-tag {
+        font-size: 0.68rem; font-weight: 800; padding: 0.15rem 0.45rem;
+        border-radius: 5px; text-transform: uppercase; margin-left: 4px;
+    }
+    .doc-ft { background: #e0f2fe; color: #0369a1; }
+    .doc-fr { background: #dcfce7; color: #15803d; }
+    .doc-fp { background: #fef9c3; color: #854d0e; }
+
+    .client-avatar {
+        width: 36px; height: 36px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.78rem; font-weight: 800; color: white; flex-shrink: 0;
+        background: linear-gradient(135deg, #10b981, #0284c7);
+    }
+    .pay-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 0.3rem 0.75rem; border-radius: 8px;
+        font-size: 0.75rem; font-weight: 700; background: #f1f5f9; color: #475569;
+    }
+    .pay-multicaixa { background: #ede9fe; color: #6d28d9; }
+    .pay-cash        { background: #dcfce7; color: #15803d; }
+    .pay-transfer    { background: #e0f2fe; color: #0369a1; }
+
+    .status-pill {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 0.32rem 0.8rem; border-radius: 50px;
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .status-paga      { background: #dcfce7; color: #166534; }
+    .status-emitida   { background: #dbeafe; color: #1e40af; }
+    .status-cancelada { background: #fee2e2; color: #991b1b; }
+    .status-rascunho  { background: #fef3c7; color: #92400e; }
+
+    .btn-pdf-doc {
+        padding: 0.42rem 0.95rem; border-radius: 10px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white; border: none; font-size: 0.78rem; font-weight: 700;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        transition: all 0.2s; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+    }
+    .btn-pdf-doc:hover {
+        transform: translateY(-1px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        color: white;
+    }
+    .no-doc-tag {
+        padding: 0.35rem 0.75rem; border-radius: 8px;
+        background: #f1f5f9; color: #94a3b8; font-size: 0.73rem; font-weight: 600;
+    }
+
+    .btn-action-icon {
+        width: 38px; height: 38px; border-radius: 12px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+        cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-action-icon:hover {
+        border-color: #10b981; color: #059669; background: #ecfdf5;
+    }
+    .btn-export-drop {
+        padding: 0.48rem 1.15rem; border-radius: 12px;
+        font-size: 0.8rem; font-weight: 700;
+        border: 1.5px solid #e2e8f0; background: white; color: #334155;
+        cursor: pointer; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-export-drop:hover {
+        border-color: #10b981; color: #047857; background: #ecfdf5;
+    }
+
+    .dt-buttons { display: none !important; }
+
+    /* ── DARK MODE ──────────────────────────────────────────── */
+    .dark-mode .kpi-card,
+    .dark-mode .content-panel   { background: #1e293b; border-color: #334155; }
+    .dark-mode .kpi-val          { color: #f8fafc; }
+    .dark-mode .kpi-sub          { color: #94a3b8; }
+    .dark-mode .panel-head       { border-color: #334155; }
+    .dark-mode .panel-head h5    { color: #f8fafc; }
+    .dark-mode .table-modern thead th { background: #0f172a; color: #94a3b8; }
+    .dark-mode .table-modern tbody td { border-color: #334155; color: #cbd5e1; }
+    .dark-mode .table-modern tbody tr:hover td { background: #0f172a; }
+    .dark-mode .search-box-wrap input { background: #0f172a; border-color: #334155; color: #f8fafc; }
+    .dark-mode .search-box-wrap input:focus { border-color: #10b981; }
+    .dark-mode .filter-pill      { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    .dark-mode .filter-pill.active { background: #064e3b; border-color: #10b981; color: #a7f3d0; }
+    .dark-mode .btn-action-icon,
+    .dark-mode .btn-export-drop  { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    .dark-mode .badge-ref        { background: #064e3b; color: #a7f3d0; }
+    .dark-mode .no-doc-tag       { background: #334155; color: #64748b; }
+    .dark-mode .kpi-progress-track { background: #334155; }
+
+    /* ── ANIMATIONS ─────────────────────────────────────────── */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(22px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeInUp 0.5s ease forwards; }
+    .del-1 { animation-delay: 0.08s; opacity: 0; }
+    .del-2 { animation-delay: 0.16s; opacity: 0; }
+    .del-3 { animation-delay: 0.24s; opacity: 0; }
+    .del-4 { animation-delay: 0.32s; opacity: 0; }
+</style>
+
 <body th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
-<div class="container-fluid px-4 py-4" style="max-width:1400px;margin:auto;">
+<div class="container-fluid px-3 px-md-4 py-4" style="max-width: 1480px; margin: auto;">
 
-    <!-- ═══ HERO HEADER ══════════════════════════════════════════ -->
-    <div class="vd-hero fade-in-up">
-        <div class="vd-hero-content d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-4">
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 1. HERO BANNER: DATA, RELÓGIO AO VIVO & SELETOR DE DATA         -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="vd-hero fade-up">
+        <div class="vd-hero-content d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-4">
+            
+            <!-- Left Info -->
             <div>
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <span class="live-badge">
-                        <span class="live-dot"></span> AO VIVO
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="hero-live-badge">
+                        <span class="pulse-dot"></span> 
+                        <span th:text="${isHoje ? 'EM TEMPO REAL · HOJE' : 'HISTÓRICO DIÁRIO'}">EM TEMPO REAL · HOJE</span>
                     </span>
-                    <span id="heroDate" style="opacity:.8;font-size:.9rem;"></span>
+                    <span th:if="${isHoje}" class="badge bg-success bg-opacity-25 border border-success border-opacity-50 text-white rounded-pill px-3 py-1" style="font-size:0.75rem; font-weight:700;">
+                        <i class="fas fa-satellite-dish me-1 text-warning"></i> Ao Vivo
+                    </span>
+                    
+                    <!-- Variação vs Ontem -->
+                    <span th:if="${variacaoPercentual >= 0}" class="badge-growth-up">
+                        <i class="fas fa-arrow-trend-up"></i>
+                        <span th:text="${'+' + #numbers.formatDecimal(variacaoPercentual, 1, 'POINT', 1, 'COMMA') + '%'}">+0,0%</span>
+                        <span style="opacity:0.8; font-weight:500;">vs ontem</span>
+                    </span>
+                    <span th:if="${variacaoPercentual < 0}" class="badge-growth-down">
+                        <i class="fas fa-arrow-trend-down"></i>
+                        <span th:text="${#numbers.formatDecimal(variacaoPercentual, 1, 'POINT', 1, 'COMMA') + '%'}">-0,0%</span>
+                        <span style="opacity:0.8; font-weight:500;">vs ontem</span>
+                    </span>
                 </div>
-                <h1 class="mb-1">
-                    <i class="fas fa-store me-2" style="opacity:.8;"></i>Vendas de Hoje
+
+                <h1 class="display-6 fw-bold mb-1" style="letter-spacing:-0.5px;">
+                    <i class="fas fa-store me-2" style="opacity:0.85;"></i>
+                    Vendas de <span th:text="${dataSelFormatada}">04 de Novembro de 2026</span>
                 </h1>
-                <p style="opacity:.75;margin:0;font-size:.9rem;">Acompanhe em tempo real todas as transações do dia</p>
+                <p class="mb-0 opacity-75" style="font-size: 0.92rem;">
+                    Acompanhamento contínuo de transações diárias, distribuição horária e meios de pagamento
+                </p>
             </div>
-            <div class="d-flex flex-column align-items-end gap-3">
-                <div class="realtime-clock" id="realtimeClock">--:--:--</div>
-                <a th:href="@{/dashboard}" class="btn-back">
-                    <i class="fas fa-th-large"></i> Dashboard
-                </a>
+
+            <!-- Right: Date Navigator Form & Clock -->
+            <div class="d-flex flex-column align-items-lg-end gap-3 w-100 w-lg-auto">
+                
+                <div class="d-flex align-items-center gap-3">
+                    <div th:if="${isHoje}" class="text-end">
+                        <small class="text-white-50 text-uppercase fw-bold" style="font-size:0.68rem; letter-spacing:1px;">Hora Actual</small>
+                        <div class="realtime-clock-display" id="liveClock">--:--:--</div>
+                    </div>
+
+                    <!-- Date Navigator Form -->
+                    <form th:action="@{/dashboard/vendas-dia}" method="get" class="period-nav-card shadow-sm m-0">
+                        <!-- Prev Day -->
+                        <a th:href="@{/dashboard/vendas-dia(data=${dataOntem})}" class="btn-nav-arrow" title="Dia Anterior">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+
+                        <!-- Date Picker -->
+                        <input type="date" name="data" th:value="${dataSel}" class="date-input-picker" onchange="this.form.submit()">
+
+                        <!-- Next Day -->
+                        <a th:href="@{/dashboard/vendas-dia(data=${dataAmanha})}" class="btn-nav-arrow" title="Dia Seguinte">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </form>
+                </div>
+
+                <!-- Action Links -->
+                <div class="d-flex align-items-center gap-2">
+                    <a th:unless="${isHoje}" th:href="@{/dashboard/vendas-dia}" class="btn-hero-action">
+                        <i class="fas fa-calendar-day"></i> Ver Hoje
+                    </a>
+                    <a th:href="@{/dashboard}" class="btn-hero-action">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a>
+                    <button type="button" onclick="window.print()" class="btn-hero-action" title="Imprimir Relatório">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <a th:href="@{/dashboard/vendas-dia(data=${dataSel})}" class="btn-hero-action" title="Atualizar">
+                        <i class="fas fa-sync-alt"></i>
+                    </a>
+                </div>
             </div>
+
         </div>
     </div>
 
-    <!-- ═══ KPI CARDS ══════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 2. 6 KPI CARDS COM ANIMAÇÕES & MÉTRICAS DO DIA                  -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <div class="row g-3 kpi-row">
-        <div class="col-6 col-lg-3 fade-in-up delay-1">
-            <div class="kpi-card kpi-revenue">
-                <div class="kpi-icon-wrap"><i class="fas fa-coins"></i></div>
+        <!-- 1. Receita Líquida -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-1">
+            <div class="kpi-card kpi-net">
+                <div class="kpi-icon-box"><i class="fas fa-coins"></i></div>
                 <div class="kpi-label">Receita Líquida</div>
-                <div class="kpi-value" id="kpiReceita">— Kz</div>
-                <div class="kpi-sub">Sem IVA incluído</div>
-                <div class="mini-progress"><div class="mini-progress-bar" id="barReceita" style="background:linear-gradient(90deg,#0ea5e9,#6366f1);width:0%;"></div></div>
+                <div class="kpi-val" id="kpiNetVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Sem IVA incluído</span>
+                    <span class="badge bg-light text-success fw-bold" style="font-size:0.68rem;">Base Real</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barNet" style="background:linear-gradient(90deg, #10b981, #06b6d4); width:0%;"></div>
+                </div>
             </div>
         </div>
-        <div class="col-6 col-lg-3 fade-in-up delay-2">
+
+        <!-- 2. Faturamento Bruto -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-2">
+            <div class="kpi-card kpi-gross">
+                <div class="kpi-icon-box"><i class="fas fa-receipt"></i></div>
+                <div class="kpi-label">Faturamento Bruto</div>
+                <div class="kpi-val" id="kpiGrossVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Total com impostos</span>
+                    <span class="badge bg-light text-info fw-bold" style="font-size:0.68rem;">Total Geral</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" style="background:linear-gradient(90deg, #0284c7, #38bdf8); width:100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. IVA Coletado -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-3">
             <div class="kpi-card kpi-iva">
-                <div class="kpi-icon-wrap"><i class="fas fa-percentage"></i></div>
+                <div class="kpi-icon-box"><i class="fas fa-percent"></i></div>
                 <div class="kpi-label" th:text="#{financeiro.iva_coletado}">IVA Coletado</div>
-                <div class="kpi-value" id="kpiIva">— Kz</div>
-                <div class="kpi-sub">Taxa fiscal acumulada</div>
-                <div class="mini-progress"><div class="mini-progress-bar" id="barIva" style="background:linear-gradient(90deg,#f59e0b,#ef4444);width:0%;"></div></div>
+                <div class="kpi-val" id="kpiIvaVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Retenção fiscal</span>
+                    <span class="badge bg-light text-warning fw-bold" style="font-size:0.68rem;">AGT</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barIva" style="background:linear-gradient(90deg, #f59e0b, #ef4444); width:0%;"></div>
+                </div>
             </div>
         </div>
-        <div class="col-6 col-lg-3 fade-in-up delay-3">
-            <div class="kpi-card kpi-count">
-                <div class="kpi-icon-wrap"><i class="fas fa-receipt"></i></div>
-                <div class="kpi-label">Total de Vendas</div>
-                <div class="kpi-value" id="kpiTotal">—</div>
-                <div class="kpi-sub">Transações registadas</div>
-                <div class="mini-progress"><div class="mini-progress-bar" id="barTotal" style="background:linear-gradient(90deg,#10b981,#06d6a0);width:100%;"></div></div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3 fade-in-up delay-4">
-            <div class="kpi-card kpi-avg">
-                <div class="kpi-icon-wrap"><i class="fas fa-chart-line"></i></div>
+
+        <!-- 4. Ticket Médio -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-1">
+            <div class="kpi-card kpi-ticket">
+                <div class="kpi-icon-box"><i class="fas fa-chart-line"></i></div>
                 <div class="kpi-label">Ticket Médio</div>
-                <div class="kpi-value" id="kpiTicket">— Kz</div>
-                <div class="kpi-sub">Por transação</div>
-                <div class="mini-progress"><div class="mini-progress-bar" id="barTicket" style="background:linear-gradient(90deg,#8b5cf6,#ec4899);width:0%;"></div></div>
+                <div class="kpi-val" id="kpiTicketVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Média por transação</span>
+                    <span class="badge bg-light text-primary fw-bold" style="font-size:0.68rem;">Média</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" style="background:linear-gradient(90deg, #8b5cf6, #6366f1); width:75%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Total de Vendas -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-2">
+            <div class="kpi-card kpi-count">
+                <div class="kpi-icon-box"><i class="fas fa-shopping-cart"></i></div>
+                <div class="kpi-label">Total de Vendas</div>
+                <div class="kpi-val" id="kpiCountVal">—</div>
+                <div class="kpi-sub">
+                    <span class="text-success fw-bold" th:text="${totalPagas + ' pagas'}">0 pagas</span>
+                    <span class="text-danger fw-bold" th:text="${totalCanceladas + ' canc.'}">0 canc.</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" id="barPagas" style="background:linear-gradient(90deg, #059669, #34d399); width:0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Maior Venda -->
+        <div class="col-12 col-sm-6 col-xl-2 fade-up del-3">
+            <div class="kpi-card kpi-max">
+                <div class="kpi-icon-box"><i class="fas fa-trophy"></i></div>
+                <div class="kpi-label">Maior Venda</div>
+                <div class="kpi-val" id="kpiMaxVal">— Kz</div>
+                <div class="kpi-sub">
+                    <span>Pico do dia</span>
+                    <span class="badge bg-light text-danger fw-bold" style="font-size:0.68rem;">Recorde</span>
+                </div>
+                <div class="kpi-progress-track">
+                    <div class="kpi-progress-bar" style="background:linear-gradient(90deg, #ec4899, #f43f5e); width:85%;"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ═══ CHART + TABLE ══════════════════════════════════════════ -->
-    <div class="row g-3">
-
-        <!-- Gráfico horário -->
-        <div class="col-12 col-xl-4 fade-in-up delay-2">
-            <div class="content-card h-100">
-                <div class="card-header-custom">
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 3. GRÁFICOS: EVOLUÇÃO HORÁRIA + MEIOS DE PAGAMENTO              -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 mb-4">
+        
+        <!-- Gráfico Horário (8 Colunas) -->
+        <div class="col-12 col-xl-8 fade-up del-2">
+            <div class="content-panel h-100">
+                <div class="panel-head">
                     <div>
-                        <h5><i class="fas fa-chart-bar me-2" style="color:#6366f1;"></i>Vendas por Hora</h5>
-                        <p class="card-subtitle">Distribuição ao longo do dia</p>
+                        <h5><i class="fas fa-clock text-success"></i> Distribuição Horária de Vendas</h5>
+                        <p class="panel-subtitle">Intensidade do faturamento por hora do dia</p>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-success active" id="btnHArea" onclick="switchHourlyType('line')">
+                            <i class="fas fa-chart-area me-1"></i> Linha
+                        </button>
+                        <button type="button" class="btn btn-outline-success" id="btnHBar" onclick="switchHourlyType('bar')">
+                            <i class="fas fa-chart-bar me-1"></i> Barras
+                        </button>
                     </div>
                 </div>
-                <div class="chart-wrapper">
+                <div class="chart-container-box">
                     <canvas id="chartHourly"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Tabela de transações -->
-        <div class="col-12 col-xl-8 fade-in-up delay-3">
-            <div class="content-card">
-                <div class="card-header-custom">
+        <!-- Gráfico Meios de Pagamento (4 Colunas) -->
+        <div class="col-12 col-xl-4 fade-up del-3">
+            <div class="content-panel h-100">
+                <div class="panel-head">
                     <div>
-                        <h5><i class="fas fa-list me-2" style="color:#6366f1;"></i>Listagem de Transações</h5>
-                        <p class="card-subtitle" id="tableCountLabel">A carregar…</p>
-                    </div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <button class="filter-btn active" onclick="filterTable(this,'all')">Todos</button>
-                        <button class="filter-btn" onclick="filterTable(this,'EMITIDA')">Emitidas</button>
-                        <button class="filter-btn" onclick="filterTable(this,'PAGA')">Pagas</button>
-                        <button class="filter-btn" onclick="filterTable(this,'CANCELADA')">Canceladas</button>
-                        <div class="dropdown">
-                            <button class="btn-export dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-download"></i> Exportar
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2">
-                                <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" id="expCopy"><i class="fas fa-copy me-2 text-primary"></i>Copiar</a></li>
-                                <li><hr class="dropdown-divider my-1"></li>
-                                <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" id="expExcel"><i class="fas fa-file-excel me-2 text-success"></i>Excel</a></li>
-                                <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" id="expCSV"><i class="fas fa-file-csv me-2 text-info"></i>CSV</a></li>
-                                <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" id="expPDF"><i class="fas fa-file-pdf me-2 text-danger"></i>PDF</a></li>
-                                <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" id="expJSON"><i class="fas fa-code me-2 text-dark"></i>JSON</a></li>
-                                <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" id="expXML"><i class="fas fa-file-code me-2 text-warning"></i>XML</a></li>
-                                <li><hr class="dropdown-divider my-1"></li>
-                                <li><a class="dropdown-item rounded-2 py-2" href="javascript:void(0)" id="expPrint"><i class="fas fa-print me-2 text-secondary"></i>Imprimir</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn-icon-sm" onclick="location.reload()" title="Atualizar"><i class="fas fa-sync-alt"></i></button>
+                        <h5><i class="fas fa-credit-card text-info"></i> Meios de Pagamento</h5>
+                        <p class="panel-subtitle">Formas de liquidação no dia</p>
                     </div>
                 </div>
-
-                <!-- Search -->
-                <div class="px-4 pt-3 pb-2">
-                    <div class="search-input-wrap">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchVendas" placeholder="Pesquisar por referência, cliente ou valor…">
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <div class="table-responsive">
-                    <table id="tabelaVendas" class="table table-modern align-middle mb-0"
-                           th:data-lang-url="@{/plugins/datatables/i18n/pt-PT.json}">
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Referência</th>
-                                <th>Cliente</th>
-                                <th>Hora</th>
-                                <th>Pagamento</th>
-                                <th>Status</th>
-                                <th class="text-end">IVA</th>
-                                <th class="text-end">Total</th>
-                                <th class="text-end pe-4" data-orderable="false">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="venda : ${vendasDoDia}" th:attr="data-status=${venda.status}">
-                                <!-- Referência -->
-                                <td class="ps-4">
-                                    <span class="ref-badge" th:text="'#' + ${venda.id}">#1</span>
-                                    <div class="mt-1" th:if="${venda.tipoDocumento != null}">
-                                        <small class="text-muted" style="font-size:.68rem;font-weight:600;" th:text="${venda.tipoDocumento}"></small>
-                                    </div>
-                                </td>
-                                <!-- Cliente -->
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="client-avatar"
-                                             th:style="${venda.nomeCliente != null ? 'background:linear-gradient(135deg,#6366f1,#8b5cf6)' : 'background:#94a3b8'}"
-                                             th:text="${venda.nomeCliente != null ? #strings.substring(venda.nomeCliente,0,(#strings.length(venda.nomeCliente) > 1 ? 2 : 1)) : 'CF'}">CF</div>
-                                        <div>
-                                            <div style="font-size:.82rem;font-weight:600;"
-                                                 th:text="${venda.nomeCliente != null ? venda.nomeCliente : 'Consumidor Final'}">CF</div>
-                                            <div class="text-muted" style="font-size:.7rem;"
-                                                 th:text="${venda.nifCliente != null ? 'NIF: ' + venda.nifCliente : ''}"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <!-- Hora -->
-                                <td>
-                                    <div class="fw-bold" style="font-size:.88rem;font-variant-numeric:tabular-nums;"
-                                         th:text="${#temporals.format(venda.dataCompra, 'HH:mm')}">00:00</div>
-                                    <div class="text-muted" style="font-size:.7rem;">local</div>
-                                </td>
-                                <!-- Pagamento -->
-                                <td>
-                                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:.75rem;font-weight:600;color:#475569;">
-                                        <i class="fas"
-                                           th:classappend="${venda.formaPagamento == 'CASH' ? 'fa-money-bill-wave' :
-                                                            venda.formaPagamento == 'TPA' ? 'fa-credit-card' :
-                                                            venda.formaPagamento == 'TRANSFERENCIA' ? 'fa-university' : 'fa-circle-dot'}"
-                                           th:style="${venda.formaPagamento == 'CASH' ? 'color:#16a34a' :
-                                                       venda.formaPagamento == 'TPA' ? 'color:#2563eb' :
-                                                       venda.formaPagamento == 'TRANSFERENCIA' ? 'color:#0891b2' : 'color:#94a3b8'}"></i>
-                                        <span th:text="${venda.formaPagamento != null ? venda.formaPagamento : '—'}">—</span>
-                                    </span>
-                                </td>
-                                <!-- Status -->
-                                <td>
-                                    <span class="status-badge"
-                                          th:classappend="${venda.status == 'EMITIDA' ? 'status-emitida' :
-                                                           venda.status == 'PAGA' ? 'status-paga' :
-                                                           venda.status == 'CANCELADA' ? 'status-cancelada' :
-                                                           venda.status == 'RASCUNHO' ? 'status-rascunho' :
-                                                           venda.status == 'ANULADA' ? 'status-anulada' :
-                                                           venda.status == 'VENCIDA' ? 'status-vencida' :
-                                                           venda.status == 'VALIDADA_AGT' ? 'status-validada' : 'status-anulada'}"
-                                          th:text="${venda.status}">EMITIDA</span>
-                                </td>
-                                <!-- IVA -->
-                                <td class="text-end">
-                                    <span style="font-size:.85rem;font-weight:600;color:#f59e0b;"
-                                          th:with="ivaTotal=${venda.itens != null ? #aggregates.sum(venda.itens.![iva != null ? iva : 0.0]) : 0.0}"
-                                          th:text="${#numbers.formatDecimal(ivaTotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                                </td>
-                                <!-- Total -->
-                                <td class="text-end">
-                                    <span class="fw-bold" style="font-size:.95rem;"
-                                          th:text="${#numbers.formatDecimal(venda.total, 1, 'POINT', 2, 'COMMA')} + ' Kz'">0,00 Kz</span>
-                                </td>
-                                <!-- Ação -->
-                                <td class="text-end pe-4">
-                                    <div th:if="${faturasMap.containsKey(venda.id)}">
-                                        <a th:href="@{'/uploads/faturas/' + ${faturasMap.get(venda.id)} + '.pdf'}"
-                                           target="_blank" class="btn-view-pdf">
-                                            <i class="fas fa-file-pdf"></i> Fatura
-                                        </a>
-                                    </div>
-                                    <div th:unless="${faturasMap.containsKey(venda.id)}">
-                                        <span class="no-doc-badge">Sem Doc.</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div id="emptyState" class="empty-state" style="display:none;">
-                        <div class="empty-icon"><i class="fas fa-store-slash"></i></div>
-                        <h5>Nenhuma venda encontrada</h5>
-                        <p>Tente ajustar os filtros ou aguarde novas transações.</p>
-                    </div>
+                <div class="chart-doughnut-box">
+                    <canvas id="chartPaymentDay"></canvas>
                 </div>
             </div>
         </div>
+
     </div>
 
-</div><!-- /container -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- 4. TABELA DE TRANSAÇÕES DO DIA COM EXPORTAÇÃO & FILTROS        -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div class="content-panel fade-up del-4">
+        
+        <div class="panel-head">
+            <div>
+                <h5><i class="fas fa-list-check text-success"></i> Transações do Dia</h5>
+                <p class="panel-subtitle" id="tableCountLabel">A carregar listagem…</p>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <!-- Status Pills -->
+                <button class="filter-pill active" onclick="applyStatusFilter(this, 'all')">Todas</button>
+                <button class="filter-pill" onclick="applyStatusFilter(this, 'PAGA')">Pagas</button>
+                <button class="filter-pill" onclick="applyStatusFilter(this, 'EMITIDA')">Emitidas</button>
+                <button class="filter-pill" onclick="applyStatusFilter(this, 'CANCELADA')">Canceladas</button>
 
-<!-- DATA BRIDGE: Thymeleaf → JS -->
+                <!-- Export Dropdown -->
+                <div class="dropdown">
+                    <button class="btn-export-drop dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-cloud-arrow-down text-success"></i> Exportar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2">
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpCopy"><i class="fas fa-copy me-2 text-primary"></i> Copiar Dados</a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpExcel"><i class="fas fa-file-excel me-2 text-success"></i> Excel (.xlsx)</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpCSV"><i class="fas fa-file-csv me-2 text-info"></i> CSV (.csv)</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpPDF"><i class="fas fa-file-pdf me-2 text-danger"></i> PDF Relatório</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpJSON"><i class="fas fa-code me-2 text-dark"></i> JSON Data</a></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpXML"><i class="fas fa-file-code me-2 text-warning"></i> XML</a></li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" id="btnExpPrint"><i class="fas fa-print me-2 text-secondary"></i> Imprimir Tabela</a></li>
+                    </ul>
+                </div>
+
+                <a th:href="@{/dashboard/vendas-dia(data=${dataSel})}" class="btn-action-icon" title="Recarregar">
+                    <i class="fas fa-sync-alt"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Barra de Busca Rápida -->
+        <div class="p-3 border-bottom bg-light bg-opacity-25">
+            <div class="search-box-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="inputSearchVendas" placeholder="Pesquisar por referência, cliente, NIF, pagamento ou valor…">
+            </div>
+        </div>
+
+        <!-- Tabela Responsiva -->
+        <div class="table-responsive">
+            <table id="tabelaVendasDia" class="table table-modern align-middle mb-0"
+                   th:data-lang-url="@{/plugins/datatables/i18n/pt-PT.json}">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Referência / Doc</th>
+                        <th>Cliente</th>
+                        <th>Hora</th>
+                        <th>Forma de Pagamento</th>
+                        <th>Status</th>
+                        <th class="text-end">IVA</th>
+                        <th class="text-end">Total</th>
+                        <th class="text-end pe-4" data-orderable="false">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="venda : ${vendasDoDia}" th:attr="data-status=${venda.status}">
+                        
+                        <!-- Referência / Tipo Doc -->
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-1">
+                                <span class="badge-ref" th:text="'#' + ${venda.id}">#1</span>
+                                <span th:if="${venda.tipoDocumento != null}"
+                                      class="doc-type-tag"
+                                      th:classappend="${venda.tipoDocumento == 'FT' ? 'doc-ft' : (venda.tipoDocumento == 'FR' ? 'doc-fr' : 'doc-fp')}"
+                                      th:text="${venda.tipoDocumento}">FT</span>
+                            </div>
+                            <div th:if="${faturasMap.containsKey(venda.id)}" class="mt-1">
+                                <small class="text-muted fw-bold" style="font-size:0.72rem; font-family:'JetBrains Mono', monospace;" th:text="${faturasMap.get(venda.id)}">FT 2026/01</small>
+                            </div>
+                        </td>
+
+                        <!-- Cliente -->
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="client-avatar"
+                                     th:text="${venda.nomeCliente != null && !venda.nomeCliente.isEmpty() ? venda.nomeCliente.substring(0,1).toUpperCase() : (venda.cliente != null && venda.cliente.nome != null ? venda.cliente.nome.substring(0,1).toUpperCase() : 'C')}">
+                                    C
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark"
+                                          th:text="${venda.nomeCliente != null && !venda.nomeCliente.isEmpty() ? venda.nomeCliente : (venda.cliente != null ? venda.cliente.nome : 'Consumidor Final')}">
+                                        Consumidor Final
+                                    </span>
+                                    <small class="text-muted" style="font-size:0.72rem;"
+                                           th:text="${venda.nifCliente != null && !venda.nifCliente.isEmpty() ? 'NIF: ' + venda.nifCliente : (venda.cliente != null && venda.cliente.nif != null ? 'NIF: ' + venda.cliente.nif : 'Consumidor Final')}">
+                                        Consumidor Final
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Hora -->
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark"
+                                      th:text="${#temporals.format(venda.dataCompra, 'HH:mm')} + 'h'">14:30h</span>
+                                <small class="text-muted" style="font-size:0.72rem;"
+                                       th:text="${#temporals.format(venda.dataCompra, 'dd/MM/yyyy')}">04/11/2026</small>
+                            </div>
+                        </td>
+
+                        <!-- Pagamento -->
+                        <td>
+                            <span class="pay-badge"
+                                  th:classappend="${venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('TPA') ? 'pay-multicaixa' : (venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('CASH') ? 'pay-cash' : 'pay-transfer')}">
+                                <i th:class="${venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('TPA') ? 'fas fa-credit-card' : (venda.formaPagamento != null && venda.formaPagamento.toUpperCase().contains('CASH') ? 'fas fa-money-bill-wave' : 'fas fa-building-columns')}"></i>
+                                <span th:text="${venda.formaPagamento != null ? venda.formaPagamento : 'Não Especificado'}">CASH</span>
+                            </span>
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                            <span class="status-pill"
+                                  th:classappend="${venda.status == 'PAGA' || venda.status == 'PAGO' ? 'status-paga' : (venda.status == 'CANCELADA' || venda.status == 'ANULADA' ? 'status-cancelada' : 'status-emitida')}">
+                                <i th:class="${venda.status == 'PAGA' || venda.status == 'PAGO' ? 'fas fa-check-circle' : (venda.status == 'CANCELADA' || venda.status == 'ANULADA' ? 'fas fa-times-circle' : 'fas fa-clock')}"></i>
+                                <span th:text="${venda.status != null ? venda.status : 'EMITIDA'}">PAGA</span>
+                            </span>
+                        </td>
+
+                        <!-- IVA -->
+                        <td class="text-end">
+                            <span class="fw-bold text-secondary"
+                                  th:with="ivaTotal=${venda.itens != null ? #aggregates.sum(venda.itens.![iva != null ? iva : 0.0]) : 0.0}"
+                                  th:text="${#numbers.formatDecimal(ivaTotal, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
+                                0,00 Kz
+                            </span>
+                        </td>
+
+                        <!-- Total -->
+                        <td class="text-end">
+                            <span class="fw-bold fs-6 text-dark"
+                                  th:text="${#numbers.formatDecimal(venda.total != null ? venda.total : 0.0, 1, 'POINT', 2, 'COMMA')} + ' Kz'">
+                                0,00 Kz
+                            </span>
+                        </td>
+
+                        <!-- Ações -->
+                        <td class="text-end pe-4">
+                            <div th:if="${faturasMap.containsKey(venda.id)}" class="d-flex justify-content-end">
+                                <a th:href="@{'/uploads/faturas/' + ${faturasMap.get(venda.id)} + '.pdf'}"
+                                   target="_blank" class="btn-pdf-doc" title="Visualizar Documento">
+                                    <i class="fas fa-file-pdf"></i> Factura
+                                </a>
+                            </div>
+                            <div th:unless="${faturasMap.containsKey(venda.id)}">
+                                <span class="no-doc-tag">Sem Doc.</span>
+                            </div>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div id="emptyTableState" class="text-center py-5" style="display:none;">
+                <div style="font-size: 3.5rem; color:#cbd5e1; margin-bottom:1rem;">
+                    <i class="fas fa-store-slash"></i>
+                </div>
+                <h5 class="fw-bold text-secondary">Nenhuma venda encontrada para esta data</h5>
+                <p class="text-muted" style="font-size:0.88rem;">Tente selecionar outro dia ou aguarde novos registos.</p>
+            </div>
+        </div>
+
+    </div>
+
+</div><!-- /container-fluid -->
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- DATA BRIDGE: DADOS PREPARADOS PELO SPRING MVC PARA O JAVASCRIPT -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <script th:inline="javascript">
     /*<![CDATA[*/
-    var _totalVendasDia = /*[[${totalVendasDia}]]*/ 0;
-    var _totalIvaDia    = /*[[${totalIvaDia}]]*/ 0;
-    var _countVendas    = /*[[${vendasDoDia.size()}]]*/ 0;
-    var _hourlyData     = {};
-    /*[# th:each="v : ${vendasDoDia}"]*/
-    (function(){
-        var h   = /*[[${#temporals.format(v.dataCompra, 'H')}]]*/ '0';
-        var val = /*[[${v.total != null ? v.total : 0}]]*/ 0;
-        _hourlyData[h] = (_hourlyData[h] || 0) + val;
-    })();
-    /*[/]*/
+    var _dataDia = {
+        dataSel:            /*[[${dataSel}]]*/ '2026-11-04',
+        isHoje:             /*[[${isHoje}]]*/ true,
+        receitaLiquida:     /*[[${totalVendasDia}]]*/ 0,
+        receitaBruta:       /*[[${totalVendasGross}]]*/ 0,
+        ivaTotal:           /*[[${totalIvaDia}]]*/ 0,
+        totalTransacoes:    /*[[${totalTransacoes}]]*/ 0,
+        totalValidas:       /*[[${totalValidas}]]*/ 0,
+        totalPagas:         /*[[${totalPagas}]]*/ 0,
+        totalCanceladas:    /*[[${totalCanceladas}]]*/ 0,
+        ticketMedio:        /*[[${ticketMedio}]]*/ 0,
+        maiorVenda:         /*[[${maiorVenda}]]*/ 0,
+        hourlyData:         /*[[${hourlyData}]]*/ {},
+        vendasPorPagamento: /*[[${vendasPorPagamento}]]*/ {}
+    };
     /*]]>*/
 </script>
 
-<!-- DataTables & Extensions JS -->
+<!-- Scripts Essenciais: jQuery, DataTables, Buttons, Chart.js -->
 <script th:src="@{/plugins/datatables/js/jquery.dataTables.min.js}"></script>
 <script th:src="@{/plugins/datatables/js/dataTables.bootstrap5.min.js}"></script>
 <script th:src="@{/plugins/datatables/js/dataTables.buttons.min.js}"></script>
@@ -510,162 +806,299 @@
 <script th:inline="none">
 $(document).ready(function () {
 
-    /* 1. RELÓGIO EM TEMPO REAL */
-    var months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    var days   = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+    /* ── 1. RELÓGIO EM TEMPO REAL ─────────────────────────────── */
     function updateClock() {
+        var el = document.getElementById('liveClock');
+        if (!el) return;
         var now = new Date();
-        document.getElementById('realtimeClock').textContent =
-            String(now.getHours()).padStart(2,'0') + ':' +
-            String(now.getMinutes()).padStart(2,'0') + ':' +
-            String(now.getSeconds()).padStart(2,'0');
-        document.getElementById('heroDate').textContent =
-            days[now.getDay()] + ', ' + now.getDate() + ' de ' + months[now.getMonth()] + ' de ' + now.getFullYear();
+        el.textContent =
+            String(now.getHours()).padStart(2, '0') + ':' +
+            String(now.getMinutes()).padStart(2, '0') + ':' +
+            String(now.getSeconds()).padStart(2, '0');
     }
     updateClock(); setInterval(updateClock, 1000);
 
-    /* 2. KPI ANIMATED COUNTERS */
-    function animateCount(el, end, decimals, suffix) {
-        var duration = 1400, startTime = null;
+    /* ── 2. ANIMAÇÕES PROGRESSIVAS DOS NÚMEROS (COUNT-UP) ─────── */
+    function animateCount(el, targetVal, decimals, suffix) {
+        if (!el) return;
+        var duration = 1200, start = null;
         function step(ts) {
-            if (!startTime) startTime = ts;
-            var p = Math.min((ts - startTime) / duration, 1);
-            var ease = 1 - Math.pow(1 - p, 3);
-            var current = end * ease;
-            el.textContent = current.toLocaleString('pt-PT',{minimumFractionDigits:decimals,maximumFractionDigits:decimals}) + (suffix||'');
-            if (p < 1) requestAnimationFrame(step);
+            if (!start) start = ts;
+            var progress = Math.min((ts - start) / duration, 1);
+            var ease = 1 - Math.pow(1 - progress, 3);
+            var current = targetVal * ease;
+            el.textContent = current.toLocaleString('pt-PT', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }) + (suffix || '');
+            if (progress < 1) requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
     }
 
-    var receita = _totalVendasDia || 0;
-    var iva     = _totalIvaDia    || 0;
-    var count   = _countVendas    || 0;
-    var ticket  = count > 0 ? receita / count : 0;
-    var gross   = receita + iva;
+    setTimeout(function() {
+        animateCount(document.getElementById('kpiNetVal'),    _dataDia.receitaLiquida,  2, ' Kz');
+        animateCount(document.getElementById('kpiGrossVal'),  _dataDia.receitaBruta,    2, ' Kz');
+        animateCount(document.getElementById('kpiIvaVal'),    _dataDia.ivaTotal,        2, ' Kz');
+        animateCount(document.getElementById('kpiTicketVal'), _dataDia.ticketMedio,     2, ' Kz');
+        animateCount(document.getElementById('kpiCountVal'),  _dataDia.totalTransacoes, 0, '');
+        animateCount(document.getElementById('kpiMaxVal'),    _dataDia.maiorVenda,      2, ' Kz');
 
-    setTimeout(function(){
-        animateCount(document.getElementById('kpiReceita'), receita, 2, ' Kz');
-        animateCount(document.getElementById('kpiIva'),     iva,     2, ' Kz');
-        animateCount(document.getElementById('kpiTotal'),   count,   0, '');
-        animateCount(document.getElementById('kpiTicket'),  ticket,  2, ' Kz');
-        if (gross > 0) {
-            document.getElementById('barReceita').style.width = Math.round(receita/gross*100)+'%';
-            document.getElementById('barIva').style.width     = Math.round(iva/gross*100)+'%';
+        if (_dataDia.receitaBruta > 0) {
+            var netPct = Math.round((_dataDia.receitaLiquida / _dataDia.receitaBruta) * 100);
+            var ivaPct = Math.round((_dataDia.ivaTotal / _dataDia.receitaBruta) * 100);
+            document.getElementById('barNet').style.width = netPct + '%';
+            document.getElementById('barIva').style.width = ivaPct + '%';
         }
-        document.getElementById('barTicket').style.width = count > 0 ? '75%' : '0%';
-    }, 400);
+        if (_dataDia.totalTransacoes > 0) {
+            var pagasPct = Math.round((_dataDia.totalPagas / _dataDia.totalTransacoes) * 100);
+            document.getElementById('barPagas').style.width = pagasPct + '%';
+        }
+    }, 250);
 
-    /* 3. GRÁFICO HORÁRIO */
-    var labels = [], data = [];
-    for (var h = 6; h <= 22; h++) {
-        labels.push(h + 'h');
-        data.push(_hourlyData[String(h)] || 0);
-    }
+    /* ── 3. GRÁFICO HORÁRIO (6h ÀS 23h) ───────────────────────── */
     var isDark = document.body.classList.contains('dark-mode');
-    var gridColor  = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
-    var labelColor = isDark ? '#6b7280' : '#94a3b8';
-    var ctx = document.getElementById('chartHourly').getContext('2d');
-    var grad = ctx.createLinearGradient(0,0,0,200);
-    grad.addColorStop(0,'rgba(99,102,241,.4)');
-    grad.addColorStop(1,'rgba(99,102,241,.02)');
-    new Chart(ctx, {
-        type: 'bar',
+    var textColor = isDark ? '#94a3b8' : '#64748b';
+    var gridColor  = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+
+    var hourLabels = [];
+    var hourValues = [];
+    for (var h = 6; h <= 23; h++) {
+        hourLabels.push(h + 'h');
+        var val = (_dataDia.hourlyData && _dataDia.hourlyData[String(h)]) ? _dataDia.hourlyData[String(h)] : 0;
+        hourValues.push(val);
+    }
+
+    var ctxH = document.getElementById('chartHourly').getContext('2d');
+    var gradH = ctxH.createLinearGradient(0, 0, 0, 240);
+    gradH.addColorStop(0, 'rgba(16, 185, 129, 0.45)');
+    gradH.addColorStop(1, 'rgba(16, 185, 129, 0.01)');
+
+    var chartH = new Chart(ctxH, {
+        type: 'line',
         data: {
-            labels: labels,
+            labels: hourLabels,
             datasets: [{
-                data: data,
-                backgroundColor: data.map(function(v){ return v>0?grad:'transparent'; }),
-                borderColor: '#6366f1', borderWidth: 2,
-                borderRadius: 6, borderSkipped: false
+                label: 'Receita Horária (Kz)',
+                data: hourValues,
+                borderColor: '#10b981',
+                borderWidth: 2.5,
+                backgroundColor: gradH,
+                fill: true,
+                tension: 0.35,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: hourValues.map(function(v){ return v > 0 ? 3.5 : 0; }),
+                pointHoverRadius: 6
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: isDark?'#1e2333':'#fff',
-                    titleColor: isDark?'#d1d5db':'#1e293b',
-                    bodyColor: isDark?'#9ca3af':'#64748b',
-                    borderColor:'#e2e8f0', borderWidth:1, padding:10,
-                    callbacks: { label: function(c){ return ' '+c.raw.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2})+' Kz'; }}
+                    backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                    titleColor: isDark ? '#f8fafc' : '#0f172a',
+                    bodyColor: isDark ? '#cbd5e1' : '#475569',
+                    borderColor: '#e2e8f0',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(ctx) {
+                            return 'Vendas: ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + ' Kz';
+                        }
+                    }
                 }
             },
             scales: {
-                x: { grid:{display:false}, ticks:{color:labelColor,font:{size:10}} },
-                y: { grid:{color:gridColor}, ticks:{color:labelColor,font:{size:10},callback:function(v){return v>=1000?(v/1000).toFixed(0)+'k':v;}}, border:{display:false} }
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textColor, font: { size: 10, weight: '600' } }
+                },
+                y: {
+                    grid: { color: gridColor },
+                    border: { display: false },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 10 },
+                        callback: function(v) {
+                            if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+                            if (v >= 1000) return (v / 1000).toFixed(0) + 'k';
+                            return v;
+                        }
+                    }
+                }
             }
         }
     });
 
-    /* 4. DATATABLE */
-    var table = $('#tabelaVendas').DataTable({
-        language: { url: $('#tabelaVendas').data('lang-url') },
-        order: [[2,'desc']], searching: false, pageLength: 10,
-        dom: '<"d-none"B>rt<"d-flex justify-content-between align-items-center mt-2 px-4 pb-3"ip>',
+    window.switchHourlyType = function(type) {
+        chartH.config.type = type;
+        if (type === 'bar') {
+            chartH.data.datasets[0].backgroundColor = 'rgba(16, 185, 129, 0.85)';
+            chartH.data.datasets[0].borderRadius = 6;
+            $('#btnHBar').addClass('active');
+            $('#btnHArea').removeClass('active');
+        } else {
+            chartH.data.datasets[0].backgroundColor = gradH;
+            chartH.data.datasets[0].fill = true;
+            $('#btnHArea').addClass('active');
+            $('#btnHBar').removeClass('active');
+        }
+        chartH.update();
+    };
+
+    /* ── 4. GRÁFICO MEIOS DE PAGAMENTO DO DIA (DOUGHNUT) ─────── */
+    var payLabels = [];
+    var payValues = [];
+    var payColors = ['#10b981', '#0284c7', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1'];
+
+    if (_dataDia.vendasPorPagamento) {
+        for (var pKey in _dataDia.vendasPorPagamento) {
+            payLabels.push(pKey);
+            payValues.push(_dataDia.vendasPorPagamento[pKey]);
+        }
+    }
+
+    if (payValues.length === 0) {
+        payLabels = ['Sem Registos'];
+        payValues = [1];
+        payColors = ['#e2e8f0'];
+    }
+
+    var ctxP = document.getElementById('chartPaymentDay').getContext('2d');
+    new Chart(ctxP, {
+        type: 'doughnut',
+        data: {
+            labels: payLabels,
+            datasets: [{
+                data: payValues,
+                backgroundColor: payColors,
+                borderWidth: 2,
+                borderColor: isDark ? '#1e293b' : '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textColor,
+                        font: { size: 10, weight: '700' },
+                        boxWidth: 10,
+                        padding: 8
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ' ' + ctx.label + ': ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            }) + ' Kz';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    /* ── 5. DATATABLE CONFIGURAÇÃO & EXPORTAÇÕES ──────────────── */
+    var dataTable = $('#tabelaVendasDia').DataTable({
+        language: { url: $('#tabelaVendasDia').data('lang-url') },
+        order: [[2, 'desc']],
+        searching: false,
+        pageLength: 10,
+        dom: '<"d-none"B>rt<"d-flex justify-content-between align-items-center mt-3 px-4 pb-3"ip>',
         buttons: [
-            { extend:'copyHtml5',  exportOptions:{columns:[0,1,2,3,4,5,6]} },
-            { extend:'excelHtml5', exportOptions:{columns:[0,1,2,3,4,5,6]} },
-            { extend:'csvHtml5',   exportOptions:{columns:[0,1,2,3,4,5,6]} },
-            { extend:'pdfHtml5',   exportOptions:{columns:[0,1,2,3,4,5,6]} },
-            { extend:'print',      exportOptions:{columns:[0,1,2,3,4,5,6]} }
+            { extend: 'copyHtml5',  exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'excelHtml5', exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'csvHtml5',   exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'pdfHtml5',   exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } },
+            { extend: 'print',      exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6] } }
         ]
     });
 
-    function updateLabel() {
-        var n = table.rows({filter:'applied'}).count();
+    function updateTableLabel() {
+        var count = dataTable.rows({ filter: 'applied' }).count();
         document.getElementById('tableCountLabel').textContent =
-            n + ' transaç' + (n===1?'ão':'ões') + ' encontrada' + (n===1?'':'s');
-        document.getElementById('emptyState').style.display = n===0?'block':'none';
+            count + ' transaç' + (count === 1 ? 'ão' : 'ões') + ' correspondente' + (count === 1 ? '' : 's');
+        document.getElementById('emptyTableState').style.display = (count === 0) ? 'block' : 'none';
     }
-    updateLabel();
+    updateTableLabel();
 
-    /* 5. EXPORTAÇÕES */
-    $('#expCopy').on('click',  function(){ table.button('.buttons-copy').trigger(); });
-    $('#expExcel').on('click', function(){ table.button('.buttons-excel').trigger(); });
-    $('#expCSV').on('click',   function(){ table.button('.buttons-csv').trigger(); });
-    $('#expPDF').on('click',   function(){ table.button('.buttons-pdf').trigger(); });
-    $('#expPrint').on('click', function(){ table.button('.buttons-print').trigger(); });
-    $('#expJSON').on('click', function(){
-        var d = table.buttons.exportData({columns:[0,1,2,3,4,5,6]});
-        var blob = new Blob([JSON.stringify(d.body)],{type:'application/json'});
+    $('#btnExpCopy').on('click',  function(){ dataTable.button('.buttons-copy').trigger(); });
+    $('#btnExpExcel').on('click', function(){ dataTable.button('.buttons-excel').trigger(); });
+    $('#btnExpCSV').on('click',   function(){ dataTable.button('.buttons-csv').trigger(); });
+    $('#btnExpPDF').on('click',   function(){ dataTable.button('.buttons-pdf').trigger(); });
+    $('#btnExpPrint').on('click', function(){ dataTable.button('.buttons-print').trigger(); });
+
+    $('#btnExpJSON').on('click', function(){
+        var d = dataTable.buttons.exportData({ columns: [0, 1, 2, 3, 4, 5, 6] });
+        var blob = new Blob([JSON.stringify(d.body, null, 2)], { type: 'application/json' });
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = 'vendas_dia.json'; a.click();
+        a.download = 'vendas_' + _dataDia.dataSel + '.json';
+        a.click();
     });
-    $('#expXML').on('click', function(){
-        var d = table.buttons.exportData({columns:[0,1,2,3,4,5,6]});
-        var xml = '<?xml version="1.0" encoding="UTF-8"?><vendas>';
+
+    $('#btnExpXML').on('click', function(){
+        var d = dataTable.buttons.exportData({ columns: [0, 1, 2, 3, 4, 5, 6] });
+        var xml = '<?xml version="1.0" encoding="UTF-8"?><vendas data="' + _dataDia.dataSel + '">';
         d.body.forEach(function(row){
-            xml += '<venda><referencia>'+row[0]+'</referencia><cliente>'+row[1]+'</cliente><hora>'+row[2]+'</hora><pagamento>'+row[3]+'</pagamento><status>'+row[4]+'</status><iva>'+row[5]+'</iva><total>'+row[6]+'</total></venda>';
+            xml += '<transacao>';
+            xml += '<referencia>' + row[0] + '</referencia>';
+            xml += '<cliente>' + row[1] + '</cliente>';
+            xml += '<hora>' + row[2] + '</hora>';
+            xml += '<pagamento>' + row[3] + '</pagamento>';
+            xml += '<status>' + row[4] + '</status>';
+            xml += '<iva>' + row[5] + '</iva>';
+            xml += '<total>' + row[6] + '</total>';
+            xml += '</transacao>';
         });
         xml += '</vendas>';
-        var blob = new Blob([xml],{type:'application/xml'});
+        var blob = new Blob([xml], { type: 'application/xml' });
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = 'vendas_dia.xml'; a.click();
+        a.download = 'vendas_' + _dataDia.dataSel + '.xml';
+        a.click();
     });
 
-    /* 6. PESQUISA EM TEMPO REAL */
-    $('#searchVendas').on('input', function(){
-        var q = $(this).val().toLowerCase();
-        table.rows().every(function(){
-            var row = $(this.node());
-            row.toggle(row.text().toLowerCase().indexOf(q) >= 0);
+    /* ── 6. BUSCA INSTANTÂNEA ─────────────────────────────────── */
+    $('#inputSearchVendas').on('input', function() {
+        var query = $(this).val().toLowerCase();
+        dataTable.rows().every(function() {
+            var node = $(this.node());
+            node.toggle(node.text().toLowerCase().indexOf(query) >= 0);
         });
-        updateLabel();
+        updateTableLabel();
     });
 
-    /* 7. FILTROS DE STATUS */
-    window.filterTable = function(btn, status) {
-        document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-        btn.classList.add('active');
-        table.rows().every(function(){
-            var row = $(this.node());
-            if (status==='all') row.show();
-            else row.toggle((row.attr('data-status')||'').toUpperCase()===status.toUpperCase());
+    /* ── 7. FILTRO RÁPIDO DE STATUS ──────────────────────────── */
+    window.applyStatusFilter = function(btn, status) {
+        $('.filter-pill').removeClass('active');
+        $(btn).addClass('active');
+
+        dataTable.rows().every(function() {
+            var node = $(this.node());
+            if (status === 'all') {
+                node.show();
+            } else {
+                var rowStatus = (node.attr('data-status') || '').toUpperCase();
+                node.toggle(rowStatus === status.toUpperCase());
+            }
         });
-        updateLabel();
+        updateTableLabel();
     };
+
 });
 </script>
 </body>
