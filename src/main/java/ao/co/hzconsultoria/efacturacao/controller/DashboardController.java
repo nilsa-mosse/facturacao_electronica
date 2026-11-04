@@ -52,7 +52,9 @@ public class DashboardController {
     private ao.co.hzconsultoria.efacturacao.repository.DevolucaoRepository devolucaoRepository;
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public Object dashboard(
+            @RequestParam(value = "format", required = false) String format,
+            Model model) {
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
         
         if (empresaId != null) {
@@ -65,45 +67,145 @@ public class DashboardController {
             model.addAttribute("isSetupCompleto", true);
         }
 
-        model.addAttribute("produtosMaisVendidos", dashboardService.getProdutosMaisVendidos(empresaId, 10));
-        model.addAttribute("vendasUltimos30Dias", dashboardService.getVendasUltimos30Dias(empresaId));
-        model.addAttribute("produtosEstoqueBaixo", dashboardService.getProdutosEstoqueBaixo(empresaId, 5));
-
-        // 1ª Linha
-        model.addAttribute("vendasHoje", dashboardService.getReceitaDia(empresaId));
-        model.addAttribute("vendasMes", dashboardService.getReceitaMensal(empresaId));
-        model.addAttribute("totalIva", dashboardService.getTotalIvaMes(empresaId));
-        model.addAttribute("totalFacturas", dashboardService.getTotalFacturasMes(empresaId));
-        
-        // 2ª Linha
-        model.addAttribute("totalPagamentos", dashboardService.getTotalPagamentosMes(empresaId));
-        model.addAttribute("totalClientes", dashboardService.getTotalClientes(empresaId));
-        model.addAttribute("totalPendentes", dashboardService.getTotalPendentes(empresaId));
-        model.addAttribute("totalLucro", dashboardService.getLucroTotal(empresaId));
-        model.addAttribute("totalMovimentos", dashboardService.getTotalMovimentos(empresaId));
-        model.addAttribute("lucroBrutoMensal", dashboardService.getLucroBrutoMensal(empresaId));
-        model.addAttribute("lucroLiquidoMensal", dashboardService.getLucroMensal(empresaId));
-
-        // Dados para os novos gráficos
-        model.addAttribute("receitaVsDespesa", dashboardService.getReceitaVsDespesaData(empresaId));
-        model.addAttribute("comparacaoPeriodos", dashboardService.getComparacaoPeriodosData(empresaId));
-        model.addAttribute("vendasPorLocalizacao", dashboardService.getVendasPorLocalizacao(empresaId));
-        model.addAttribute("horariosPico", dashboardService.getHorariosPicoVendas(empresaId));
-
-        // Widget de Caixas Abertos para Admin/Gestor
-        if (empresaId != null) {
-            List<Caixa> caixasAbertos = caixaService.getCaixasAbertosPorEmpresa(empresaId);
-            double totalFaturadoCaixas = caixasAbertos.stream().mapToDouble(c -> c.getTotalFaturado() != null ? c.getTotalFaturado() : 0.0).sum();
-            model.addAttribute("caixasAbertos", caixasAbertos);
-            model.addAttribute("qtdCaixasAbertos", caixasAbertos.size());
-            model.addAttribute("totalFaturadoCaixas", totalFaturadoCaixas);
-        } else {
-            model.addAttribute("caixasAbertos", new java.util.ArrayList<>());
-            model.addAttribute("qtdCaixasAbertos", 0);
-            model.addAttribute("totalFaturadoCaixas", 0.0);
+        // Vendas hoje e variação vs ontem
+        java.time.LocalDate hoje = java.time.LocalDate.now();
+        java.time.LocalDate ontem = hoje.minusDays(1);
+        double vendasHoje = dashboardService.getReceitaDia(empresaId);
+        List<Compra> vendasOntem = dashboardService.getComprasPorData(empresaId, ontem);
+        double receitaOntem = 0.0;
+        if (vendasOntem != null) {
+            receitaOntem = vendasOntem.stream()
+                .filter(v -> !"CANCELADA".equalsIgnoreCase(v.getStatus()) && !"ANULADA".equalsIgnoreCase(v.getStatus()))
+                .mapToDouble(v -> v.getTotal() != null ? v.getTotal() : 0.0)
+                .sum();
+        }
+        double variacaoDia = 0.0;
+        if (receitaOntem > 0) {
+            variacaoDia = ((vendasHoje - receitaOntem) / receitaOntem) * 100.0;
+        } else if (vendasHoje > 0) {
+            variacaoDia = 100.0;
         }
 
+        // Vendas do mês e comparativo vs mês anterior
+        double vendasMes = dashboardService.getReceitaMensal(empresaId);
+        double receitaMesAnt = dashboardService.getReceitaMesAnterior(empresaId);
+        double variacaoMes = 0.0;
+        if (receitaMesAnt > 0) {
+            variacaoMes = ((vendasMes - receitaMesAnt) / receitaMesAnt) * 100.0;
+        } else if (vendasMes > 0) {
+            variacaoMes = 100.0;
+        }
+
+        // Lucro
+        double lucroLiquidoMensal = dashboardService.getLucroMensal(empresaId);
+        double lucroBrutoMensal = dashboardService.getLucroBrutoMensal(empresaId);
+
+        // Contagens e totais
+        long totalFacturas = dashboardService.getTotalFacturasMes(empresaId);
+        double totalIva = dashboardService.getTotalIvaMes(empresaId);
+        long totalClientes = dashboardService.getTotalClientes(empresaId);
+        long totalPendentes = dashboardService.getTotalPendentes(empresaId);
+
+        List<Compra> comprasDoMes = dashboardService.getComprasDoMes(empresaId);
+        long vendasMesCount = comprasDoMes != null ? comprasDoMes.size() : 0;
+        double ticketMedioMes = (vendasMesCount > 0 && vendasMes > 0) ? (vendasMes / vendasMesCount) : 0.0;
+
+        // Distribuição por meio de pagamento
+        java.util.Map<String, Double> vendasPorPagamento = new java.util.LinkedHashMap<>();
+        if (comprasDoMes != null) {
+            for (Compra v : comprasDoMes) {
+                if (!"CANCELADA".equalsIgnoreCase(v.getStatus()) && !"ANULADA".equalsIgnoreCase(v.getStatus())) {
+                    String forma = v.getFormaPagamento();
+                    if (forma == null || forma.trim().isEmpty()) {
+                        forma = "Outros";
+                    } else {
+                        forma = forma.toUpperCase().trim();
+                        if (forma.contains("CASH") || forma.contains("DINHEIRO")) forma = "Dinheiro";
+                        else if (forma.contains("TPA") || forma.contains("MULTICAIXA")) forma = "Multicaixa (TPA)";
+                        else if (forma.contains("TRANSF")) forma = "Transferência";
+                        else if (forma.contains("+")) forma = "Misto";
+                        else forma = forma.replace("_", " ");
+                    }
+                    double val = v.getTotal() != null ? v.getTotal() : 0.0;
+                    vendasPorPagamento.put(forma, vendasPorPagamento.getOrDefault(forma, 0.0) + val);
+                }
+            }
+        }
+
+        List<ao.co.hzconsultoria.efacturacao.model.Produto> produtosEstoqueBaixo = dashboardService.getProdutosEstoqueBaixo(empresaId, 5);
+        int totalProdutosEstoqueBaixo = produtosEstoqueBaixo != null ? produtosEstoqueBaixo.size() : 0;
+
+        List<DashboardService.ProdutoMaisVendidoDTO> produtosMaisVendidos = dashboardService.getProdutosMaisVendidos(empresaId, 10);
+        Map<String, Object> receitaVsDespesa = dashboardService.getReceitaVsDespesaData(empresaId);
+        Map<String, Object> comparacaoPeriodos = dashboardService.getComparacaoPeriodosData(empresaId);
+        Map<Integer, Long> horariosPico = dashboardService.getHorariosPicoVendas(empresaId);
+
+        // Widget de Caixas Abertos
+        List<Caixa> caixasAbertos = (empresaId != null) ? caixaService.getCaixasAbertosPorEmpresa(empresaId) : new java.util.ArrayList<>();
+        double totalFaturadoCaixas = caixasAbertos.stream().mapToDouble(c -> c.getTotalFaturado() != null ? c.getTotalFaturado() : 0.0).sum();
+        int qtdCaixasAbertos = caixasAbertos.size();
+
+        if ("json".equalsIgnoreCase(format)) {
+            java.util.Map<String, Object> jsonResponse = new java.util.HashMap<>();
+            jsonResponse.put("vendasHoje", vendasHoje);
+            jsonResponse.put("variacaoDia", variacaoDia);
+            jsonResponse.put("vendasMes", vendasMes);
+            jsonResponse.put("variacaoMes", variacaoMes);
+            jsonResponse.put("lucroLiquidoMensal", lucroLiquidoMensal);
+            jsonResponse.put("lucroBrutoMensal", lucroBrutoMensal);
+            jsonResponse.put("totalFacturas", totalFacturas);
+            jsonResponse.put("totalIva", totalIva);
+            jsonResponse.put("totalClientes", totalClientes);
+            jsonResponse.put("ticketMedioMes", ticketMedioMes);
+            jsonResponse.put("totalProdutosEstoqueBaixo", totalProdutosEstoqueBaixo);
+            jsonResponse.put("vendasPorPagamento", vendasPorPagamento);
+            jsonResponse.put("qtdCaixasAbertos", qtdCaixasAbertos);
+            jsonResponse.put("totalFaturadoCaixas", totalFaturadoCaixas);
+            return org.springframework.http.ResponseEntity.ok(jsonResponse);
+        }
+
+        model.addAttribute("produtosMaisVendidos", produtosMaisVendidos);
+        model.addAttribute("vendasUltimos30Dias", dashboardService.getVendasUltimos30Dias(empresaId));
+        model.addAttribute("produtosEstoqueBaixo", produtosEstoqueBaixo);
+        model.addAttribute("totalProdutosEstoqueBaixo", totalProdutosEstoqueBaixo);
+
+        model.addAttribute("vendasHoje", vendasHoje);
+        model.addAttribute("variacaoDia", variacaoDia);
+        model.addAttribute("receitaOntem", receitaOntem);
+
+        model.addAttribute("vendasMes", vendasMes);
+        model.addAttribute("variacaoMes", variacaoMes);
+        model.addAttribute("receitaMesAnt", receitaMesAnt);
+        model.addAttribute("vendasMesCount", vendasMesCount);
+        model.addAttribute("ticketMedioMes", ticketMedioMes);
+
+        model.addAttribute("totalIva", totalIva);
+        model.addAttribute("totalFacturas", totalFacturas);
+        model.addAttribute("totalPagamentos", dashboardService.getTotalPagamentosMes(empresaId));
+        model.addAttribute("totalClientes", totalClientes);
+        model.addAttribute("totalPendentes", totalPendentes);
+        model.addAttribute("totalLucro", dashboardService.getLucroTotal(empresaId));
+        model.addAttribute("totalMovimentos", dashboardService.getTotalMovimentos(empresaId));
+        model.addAttribute("lucroBrutoMensal", lucroBrutoMensal);
+        model.addAttribute("lucroLiquidoMensal", lucroLiquidoMensal);
+
+        model.addAttribute("vendasPorPagamento", vendasPorPagamento);
+        model.addAttribute("receitaVsDespesa", receitaVsDespesa);
+        model.addAttribute("comparacaoPeriodos", comparacaoPeriodos);
+        model.addAttribute("vendasPorLocalizacao", dashboardService.getVendasPorLocalizacao(empresaId));
+        model.addAttribute("horariosPico", horariosPico);
+
+        model.addAttribute("caixasAbertos", caixasAbertos);
+        model.addAttribute("qtdCaixasAbertos", qtdCaixasAbertos);
+        model.addAttribute("totalFaturadoCaixas", totalFaturadoCaixas);
+
         return "dashboard";
+    }
+
+    @GetMapping(value = "/api/dashboard", produces = "application/json")
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<?> apiDashboard(Model model) {
+        return (org.springframework.http.ResponseEntity<?>) dashboard("json", model);
     }
 
     @GetMapping("/dashboard/estatisticas")

@@ -1,159 +1,253 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="menu :: head"></head>
+<head th:replace="menu :: head">
+    <!-- Chart.js & Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
 
 <style>
     :root {
-        --glass-bg: rgba(255, 255, 255, 0.95);
-        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-        --primary-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-        --success-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        --info-grad: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        --warning-grad: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        --danger-grad: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --primary-grad: linear-gradient(135deg, #1e1b4b 0%, #312e81 35%, #4338ca 70%, #0284c7 100%);
+        --success-grad: linear-gradient(135deg, #065f46 0%, #059669 50%, #10b981 100%);
+        --info-grad: linear-gradient(135deg, #0369a1 0%, #0284c7 50%, #38bdf8 100%);
+        --warning-grad: linear-gradient(135deg, #b45309 0%, #d97706 50%, #f59e0b 100%);
+        --danger-grad: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ef4444 100%);
+        --purple-grad: linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #a855f7 100%);
     }
+
+    * { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
 
     .content-wrapper {
         background-color: #f8fafc !important;
     }
 
-    .welcome-hero {
+    /* ── COCKPIT WELCOME HERO ─────────────────────────────────── */
+    .cockpit-hero {
         background: var(--primary-grad);
-        border-radius: 20px;
-        padding: 30px;
+        border-radius: 24px;
+        padding: 2.2rem 2.4rem;
         color: white;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 25px -5px rgba(67, 56, 202, 0.3);
+        margin-bottom: 1.8rem;
+        box-shadow: 0 20px 50px rgba(49, 46, 129, 0.35);
         position: relative;
         overflow: hidden;
     }
-
-    .welcome-hero::after {
-        content: '';
-        position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 200px;
-        height: 200px;
-        background: rgba(255, 255, 255, 0.1);
+    .cockpit-hero::before {
+        content: ''; position: absolute;
+        top: -80px; right: -80px;
+        width: 320px; height: 320px;
+        background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, rgba(255,255,255,0) 70%);
         border-radius: 50%;
+        pointer-events: none;
+    }
+    .cockpit-hero::after {
+        content: ''; position: absolute;
+        bottom: -100px; left: -80px;
+        width: 280px; height: 280px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(255,255,255,0) 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+    .cockpit-content { position: relative; z-index: 2; }
+
+    .live-pulse-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(12px);
+        border-radius: 50px;
+        padding: 0.35rem 0.95rem;
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.8px;
+        text-transform: uppercase; color: #e0e7ff;
+    }
+    .pulse-dot-cyan {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 10px #38bdf8;
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.35); opacity: 0.6; }
     }
 
+    .realtime-clock-box {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.8rem; font-weight: 800; letter-spacing: 1px;
+        color: white; line-height: 1;
+    }
+
+    /* Quick Shortcuts Bar */
+    .quick-action-btn {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+        color: white; border-radius: 14px;
+        padding: 0.55rem 1.15rem; font-size: 0.84rem; font-weight: 700;
+        display: inline-flex; align-items: center; gap: 8px;
+        text-decoration: none; transition: all 0.2s;
+    }
+    .quick-action-btn:hover {
+        background: rgba(255, 255, 255, 0.3); color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    .btn-pos-special {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    .btn-pos-special:hover {
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    }
+
+    /* ── KPI CARDS ──────────────────────────────────────────── */
     .kpi-card {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        gap: 15px;
+        background: white; border-radius: 20px; padding: 1.4rem 1.5rem;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.04);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer; height: 100%; position: relative; overflow: hidden;
+        display: flex; flex-direction: column; justify-content: space-between;
     }
-
+    .kpi-card::before {
+        content: ''; position: absolute;
+        top: 0; left: 0; right: 0; height: 4px;
+        border-radius: 20px 20px 0 0;
+    }
     .kpi-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1);
-        border-color: #6366f1;
+        transform: translateY(-6px);
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.09);
+    }
+    .kpi-day::before      { background: var(--success-grad); }
+    .kpi-month::before    { background: var(--primary-grad); }
+    .kpi-profit::before   { background: var(--warning-grad); }
+    .kpi-invoices::before { background: var(--info-grad); }
+    .kpi-iva::before      { background: var(--purple-grad); }
+    .kpi-ticket::before   { background: linear-gradient(90deg, #06b6d4, #0284c7); }
+    .kpi-clients::before  { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+    .kpi-stock::before    { background: var(--danger-grad); }
+
+    .kpi-icon-box {
+        width: 46px; height: 46px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; color: white; flex-shrink: 0;
+    }
+    .kpi-day .kpi-icon-box      { background: var(--success-grad); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3); }
+    .kpi-month .kpi-icon-box    { background: var(--primary-grad); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3); }
+    .kpi-profit .kpi-icon-box   { background: var(--warning-grad); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3); }
+    .kpi-invoices .kpi-icon-box { background: var(--info-grad);    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3); }
+    .kpi-iva .kpi-icon-box      { background: var(--purple-grad);  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3); }
+    .kpi-ticket .kpi-icon-box   { background: linear-gradient(135deg, #06b6d4, #0284c7); box-shadow: 0 6px 16px rgba(6, 182, 212, 0.3); }
+    .kpi-clients .kpi-icon-box  { background: linear-gradient(135deg, #ec4899, #f43f5e); box-shadow: 0 6px 16px rgba(236, 72, 153, 0.3); }
+    .kpi-stock .kpi-icon-box    { background: var(--danger-grad);  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3); }
+
+    .kpi-label {
+        font-size: 0.73rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.8px; color: #94a3b8; margin-bottom: 0.2rem;
+    }
+    .kpi-val {
+        font-size: 1.38rem; font-weight: 800; color: #0f172a;
+        letter-spacing: -0.5px;
+    }
+    .kpi-footer-tag {
+        font-size: 0.74rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 0.65rem; padding-top: 0.65rem; border-top: 1px solid #f1f5f9;
     }
 
-    .kpi-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-        flex-shrink: 0;
+    /* ── PANELS & CHARTS ────────────────────────────────────── */
+    .dashboard-panel {
+        background: white; border-radius: 22px;
+        border: 1px solid rgba(226, 232, 240, 0.85);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+        overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .panel-head {
+        padding: 1.35rem 1.8rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.8rem;
+    }
+    .panel-head h5 {
+        font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .panel-subtitle { font-size: 0.78rem; color: #94a3b8; margin: 0; }
+
+    .chart-box-large {
+        padding: 1.5rem 1.8rem; position: relative; height: 320px;
+    }
+    .chart-box-medium {
+        padding: 1.2rem 1.5rem; position: relative; height: 260px;
     }
 
-    .kpi-info .kpi-label {
-        font-size: 0.85rem;
-        color: #64748b;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    /* ── TOP PRODUCTS LIST ──────────────────────────────────── */
+    .top-prod-row {
+        padding: 0.85rem 1.4rem;
+        border-bottom: 1px solid #f8fafc;
+        display: flex; align-items: center; justify-content: space-between;
+        transition: background 0.2s;
     }
-
-    .kpi-info .kpi-value {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-top: 2px;
+    .top-prod-row:hover { background: #f8fafc; }
+    .top-prod-row:last-child { border-bottom: none; }
+    .rank-badge {
+        width: 28px; height: 28px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.76rem; font-weight: 800; flex-shrink: 0;
     }
+    .rank-gold   { background: #fef3c7; color: #b45309; }
+    .rank-silver { background: #e2e8f0; color: #475569; }
+    .rank-bronze { background: #ffedd5; color: #c2410c; }
+    .rank-norm   { background: #f1f5f9; color: #94a3b8; }
 
-    .chart-container {
-        background: white;
-        border-radius: 20px;
-        padding: 25px;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        box-shadow: var(--glass-shadow);
-        margin-bottom: 25px;
-        overflow: hidden; /* Prevents resize loops */
+    /* ── LIVE CAIXA COCKPIT ─────────────────────────────────── */
+    .caixa-cockpit-bar {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 20px; overflow: hidden;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+        margin-bottom: 1.8rem;
     }
-
-    .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+    .caixa-cockpit-head {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.8rem;
     }
-
-    .chart-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1e293b;
-    }
-
-    .canvas-wrapper {
-        position: relative;
-        width: 100%;
-    }
-
-    .top-products-list .list-group-item {
-        border: none;
-        padding: 12px 0;
-        background: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .product-rank {
-        width: 30px;
-        height: 30px;
-        background: #f1f5f9;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.8rem;
-        color: #64748b;
-    }
-
-    .text-indigo { color: #4f46e5 !important; }
-    .fw-700 { font-weight: 700; }
-
-    .blink-dot-dash {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
+    .blink-dot-green {
+        width: 10px; height: 10px; border-radius: 50%;
         background: #22c55e;
-        border-radius: 50%;
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+        box-shadow: 0 0 12px #22c55e;
         animation: pulse-green 1.5s infinite;
     }
-
     @keyframes pulse-green {
-        0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
-        70%  { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.4); opacity: 0.5; }
     }
+
+    /* ── DARK MODE ──────────────────────────────────────────── */
+    .dark-mode .content-wrapper   { background-color: #0b0f19 !important; }
+    .dark-mode .kpi-card,
+    .dark-mode .dashboard-panel   { background: #1e293b; border-color: #334155; }
+    .dark-mode .kpi-val           { color: #f8fafc; }
+    .dark-mode .kpi-footer-tag    { border-color: #334155; color: #94a3b8; }
+    .dark-mode .panel-head        { border-color: #334155; }
+    .dark-mode .panel-head h5     { color: #f8fafc; }
+    .dark-mode .top-prod-row      { border-color: #334155; }
+    .dark-mode .top-prod-row:hover { background: #0f172a; }
+
+    /* ── ANIMATIONS ─────────────────────────────────────────── */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(22px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeInUp 0.5s ease forwards; }
+    .del-1 { animation-delay: 0.08s; opacity: 0; }
+    .del-2 { animation-delay: 0.16s; opacity: 0; }
+    .del-3 { animation-delay: 0.24s; opacity: 0; }
+    .del-4 { animation-delay: 0.32s; opacity: 0; }
 </style>
 
 <body class="hold-transition sidebar-mini layout-fixed" th:classappend="${globalTema == 'dark' ? 'dark-mode' : ''}">
@@ -162,23 +256,68 @@
         <aside th:replace="menu :: sidebar"></aside>
 
         <main class="content-wrapper">
-            <div class="container-fluid px-4 pt-4">
+            <div class="container-fluid px-3 px-md-4 pt-4 pb-5" style="max-width: 1540px; margin: auto;">
                 
-                <!-- Welcome Hero Section -->
-                <div class="welcome-hero">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h2 class="fw-bold mb-1"><span th:text="#{dashboard.ola}">Olá</span>, <span th:text="${usuario_NOME != null ? usuario_NOME : #messages.msg('dashboard.utilizador')}">Utilizador</span>! 👋</h2>
-                            <p class="mb-0 opacity-75" th:text="#{dashboard.subtitulo}">Aqui está o que está a acontecer no seu negócio hoje.</p>
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- 1. COCKPIT HERO: SAUDAÇÃO, RELÓGIO & ATALHOS RÁPIDOS            -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <div class="cockpit-hero fade-up">
+                    <div class="cockpit-content d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-4">
+                        
+                        <!-- Left: Greeting & Date -->
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                <span class="live-pulse-badge">
+                                    <span class="pulse-dot-cyan"></span> Central de Operações
+                                </span>
+                                <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1" style="font-size:0.75rem; font-weight:700;">
+                                    <i class="fas fa-building me-1 text-info"></i>
+                                    <span th:text="${globalSistemaNome != null ? globalSistemaNome : 'Kwanza ERP'}">Kwanza ERP</span>
+                                </span>
+                            </div>
+
+                            <h1 class="display-6 fw-bold mb-1" style="letter-spacing:-0.5px;">
+                                <span id="dynamicGreeting">Olá</span>, 
+                                <span th:text="${usuario_NOME != null ? usuario_NOME : #messages.msg('dashboard.utilizador')}">Utilizador</span>! 👋
+                            </h1>
+                            <p class="mb-0 opacity-75" style="font-size: 0.94rem;" th:text="#{dashboard.subtitulo}">
+                                Aqui está a visão consolidada em tempo real da performance do seu negócio.
+                            </p>
                         </div>
-                        <div class="col-md-4 text-md-end d-none d-md-block">
-                            <h5 class="mb-0 fw-bold" id="currentDate">--/--/----</h5>
-                            <span class="badge bg-white bg-opacity-25" id="currentTime">00:00</span>
+
+                        <!-- Right: Clock & Quick Action Buttons -->
+                        <div class="d-flex flex-column align-items-lg-end gap-3 w-100 w-lg-auto">
+                            
+                            <!-- Realtime Clock -->
+                            <div class="text-lg-end">
+                                <div class="realtime-clock-box" id="cockpitClock">--:--:--</div>
+                                <small class="text-white opacity-75 fw-bold" id="cockpitDate" style="font-size:0.82rem;">--</small>
+                            </div>
+
+                            <!-- Quick Action Bar -->
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <a th:href="@{/pos}" class="quick-action-btn btn-pos-special" title="Terminal POS [F1]">
+                                    <i class="fas fa-cash-register"></i> Ponto de Venda [F1]
+                                </a>
+                                <a th:href="@{/historico-vendas}" class="quick-action-btn" title="Histórico de Facturas">
+                                    <i class="fas fa-file-invoice"></i> Facturas
+                                </a>
+                                <a th:href="@{/cadastroProduto}" class="quick-action-btn" title="Novo Produto">
+                                    <i class="fas fa-plus-circle"></i> Novo Artigo
+                                </a>
+                                <a th:href="@{/dashboard/estatisticas}" class="quick-action-btn" title="Relatórios e Estatísticas">
+                                    <i class="fas fa-chart-pie"></i> Relatórios
+                                </a>
+                            </div>
+
                         </div>
+
                     </div>
                 </div>
 
-                <!-- Access Denied / Proibição Alert Banner -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- ALERTA: PROIBIÇÃO OU SETUP PENDENTE (SE APLICÁVEL)             -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
                 <div th:if="${param.error != null}" class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between" role="alert" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 6px solid #ef4444 !important;">
                     <div class="d-flex align-items-center gap-3">
                         <div class="rounded-circle d-flex align-items-center justify-content-center bg-white text-danger" style="width: 45px; height: 45px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 1.25rem;">
@@ -192,7 +331,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-                <!-- Setup Wizard Alert Banner -->
                 <div th:if="${!globalSetupCompleto}" class="card border-0 mb-4 rounded-4" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 6px solid #d97706 !important; box-shadow: 0 4px 20px rgba(217, 119, 6, 0.08);">
                     <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="d-flex align-items-center gap-3">
@@ -210,304 +348,599 @@
                     </div>
                 </div>
 
-                <!-- KPI Cards Grid -->
-                <div class="row mb-4">
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="kpi-card" th:onclick="|location.href='@{/dashboard/vendas-dia}'|">
-                            <div class="kpi-icon" style="background: var(--success-grad)">
-                                <i class="fas fa-shopping-cart"></i>
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- 2. GRID EXECUTIVO DE 8 KPI CARDS COM ANIMAÇÕES & LINKS DIRETOS  -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <div class="row g-3 mb-4">
+                    
+                    <!-- 1. Vendas Hoje -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-1">
+                        <div class="kpi-card kpi-day" onclick="location.href='/dashboard/vendas-dia'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label" th:text="#{dashboard.vendas_hoje}">Vendas Hoje</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-shopping-cart"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiVendasHoje">— Kz</div>
                             </div>
-                            <div class="kpi-info">
-                                <div class="kpi-label" th:text="#{dashboard.vendas_hoje}">Vendas Hoje</div>
-                                <div class="kpi-value" th:text="${'Kz ' + #numbers.formatDecimal(vendasHoje != null ? vendasHoje : 0, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="kpi-card" th:onclick="|location.href='@{/dashboard/receita-mensal}'|">
-                            <div class="kpi-icon" style="background: var(--primary-grad)">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="kpi-info">
-                                <div class="kpi-label" th:text="#{dashboard.vendas_mes}">Vendas Mês</div>
-                                <div class="kpi-value" th:text="${'Kz ' + #numbers.formatDecimal(vendasMes != null ? vendasMes : 0, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="kpi-card" th:onclick="|location.href='@{/dashboard/lucro-liquido-mensal}'|">
-                            <div class="kpi-icon" style="background: var(--warning-grad)">
-                                <i class="fas fa-hand-holding-usd"></i>
-                            </div>
-                            <div class="kpi-info">
-                                <div class="kpi-label" th:text="#{dashboard.lucro_liquido}">Lucro Líquido</div>
-                                <div class="kpi-value" th:text="${'Kz ' + #numbers.formatDecimal(lucroLiquidoMensal != null ? lucroLiquidoMensal : 0, 1, 'COMMA', 2, 'POINT').replace('.', ',').replace(',', '.')}">Kz 0,00</div>
+                            <div class="kpi-footer-tag">
+                                <span class="text-success fw-bold">
+                                    <i class="fas fa-arrow-up-right-from-square me-1"></i> Ver Hoje
+                                </span>
+                                <span th:if="${variacaoDia != null}" 
+                                      th:class="${variacaoDia >= 0 ? 'badge bg-success bg-opacity-10 text-success' : 'badge bg-danger bg-opacity-10 text-danger'}" 
+                                      th:text="${(variacaoDia >= 0 ? '+' : '') + #numbers.formatDecimal(variacaoDia, 1, 'POINT', 1, 'COMMA') + '%'}">+0%</span>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-md-6 mb-4">
-                        <div class="kpi-card" th:onclick="|location.href='@{/historico-vendas}'|">
-                            <div class="kpi-icon" style="background: var(--danger-grad)">
-                                <i class="fas fa-file-invoice"></i>
+
+                    <!-- 2. Vendas Mês -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-2">
+                        <div class="kpi-card kpi-month" onclick="location.href='/dashboard/receita-mensal'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label" th:text="#{dashboard.vendas_mes}">Vendas Mês</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-chart-line"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiVendasMes">— Kz</div>
                             </div>
-                            <div class="kpi-info">
-                                <div class="kpi-label" th:text="#{dashboard.facturas}">Facturas</div>
-                                <div class="kpi-value" th:text="${totalFacturas != null ? totalFacturas : 0}">0</div>
+                            <div class="kpi-footer-tag">
+                                <span class="text-primary fw-bold">
+                                    <i class="fas fa-calendar-check me-1"></i> Painel Mensal
+                                </span>
+                                <span th:if="${variacaoMes != null}" 
+                                      th:class="${variacaoMes >= 0 ? 'badge bg-success bg-opacity-10 text-success' : 'badge bg-danger bg-opacity-10 text-danger'}" 
+                                      th:text="${(variacaoMes >= 0 ? '+' : '') + #numbers.formatDecimal(variacaoMes, 1, 'POINT', 1, 'COMMA') + '%'}">+0%</span>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- 3. Lucro Líquido -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-3">
+                        <div class="kpi-card kpi-profit" onclick="location.href='/dashboard/lucro-liquido-mensal'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label" th:text="#{dashboard.lucro_liquido}">Lucro Líquido</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-hand-holding-dollar"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiLucro">— Kz</div>
+                            </div>
+                            <div class="kpi-footer-tag">
+                                <span class="text-warning fw-bold">
+                                    <i class="fas fa-file-invoice-dollar me-1"></i> Demonstração DRE
+                                </span>
+                                <span class="badge" th:classappend="${lucroLiquidoMensal != null && lucroLiquidoMensal >= 0 ? 'bg-success text-white' : 'bg-danger text-white'}" 
+                                      th:text="${lucroLiquidoMensal != null && lucroLiquidoMensal >= 0 ? 'Rentável' : 'Atenção'}">Rentável</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Facturas -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-4">
+                        <div class="kpi-card kpi-invoices" onclick="location.href='/historico-vendas'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label" th:text="#{dashboard.facturas}">Facturas Emitidas</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-file-invoice"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiFacturas">—</div>
+                            </div>
+                            <div class="kpi-footer-tag">
+                                <span class="text-info fw-bold">
+                                    <i class="fas fa-receipt me-1"></i> Histórico Fiscal
+                                </span>
+                                <span class="badge bg-info bg-opacity-10 text-info fw-bold">AGT Validado</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. IVA Liquidado -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-1">
+                        <div class="kpi-card kpi-iva" onclick="location.href='/dashboard/receita-mensal'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label">IVA Liquidado</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-percent"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiIva">— Kz</div>
+                            </div>
+                            <div class="kpi-footer-tag">
+                                <span class="text-secondary fw-bold">Imposto Fiscal AGT</span>
+                                <span class="badge bg-light text-muted">Retenção</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Ticket Médio -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-2">
+                        <div class="kpi-card kpi-ticket" onclick="location.href='/dashboard/receita-mensal'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label">Ticket Médio</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-calculator"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiTicket">— Kz</div>
+                            </div>
+                            <div class="kpi-footer-tag">
+                                <span class="text-secondary fw-bold">Média por Fatura</span>
+                                <span class="badge bg-cyan bg-opacity-10 text-cyan fw-bold">Eficiência</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Base de Clientes -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-3">
+                        <div class="kpi-card kpi-clients" onclick="location.href='/clientes/listar'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label" th:text="#{dashboard.clientes}">Clientes Ativos</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-users"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiClientes">—</div>
+                            </div>
+                            <div class="kpi-footer-tag">
+                                <span class="text-secondary fw-bold">Base Cadastrada</span>
+                                <span class="text-primary fw-bold"><i class="fas fa-user-plus me-1"></i> Gerir</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. Alerta de Estoque Baixo -->
+                    <div class="col-12 col-sm-6 col-xl-3 fade-up del-4">
+                        <div class="kpi-card kpi-stock" onclick="location.href='/dashboard/estoque-baixo'">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="kpi-label">Estoque Crítico</span>
+                                    <div class="kpi-icon-box"><i class="fas fa-boxes-stacked"></i></div>
+                                </div>
+                                <div class="kpi-val" id="dashKpiStock">—</div>
+                            </div>
+                            <div class="kpi-footer-tag">
+                                <span th:if="${totalProdutosEstoqueBaixo > 0}" class="text-danger fw-bold">
+                                    <i class="fas fa-triangle-exclamation me-1"></i> Reposição Urgente
+                                </span>
+                                <span th:unless="${totalProdutosEstoqueBaixo > 0}" class="text-success fw-bold">
+                                    <i class="fas fa-circle-check me-1"></i> Estoque Saudável
+                                </span>
+                                <span class="badge" th:classappend="${totalProdutosEstoqueBaixo > 0 ? 'bg-danger text-white' : 'bg-success text-white'}" 
+                                      th:text="${totalProdutosEstoqueBaixo > 0 ? totalProdutosEstoqueBaixo + ' itens' : 'OK'}">OK</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- 3. LIVE CAIXA STATUS COCKPIT (SE HOUVER CAIXAS ABERTOS)         -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <div th:if="${qtdCaixasAbertos != null and qtdCaixasAbertos > 0}" class="caixa-cockpit-bar fade-up del-1">
+                    <div class="caixa-cockpit-head">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="blink-dot-green"></span>
+                            <span class="text-white fw-bold fs-6">
+                                <i class="fas fa-cash-register me-2 text-warning"></i> Caixas Abertos em Turno
+                            </span>
+                            <span class="badge bg-success px-3 py-1 rounded-pill fw-bold" th:text="${qtdCaixasAbertos} + ' Activo(s)'">1 Activo(s)</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-white-50 small fw-bold">
+                                Total em Sessões:
+                                <strong class="text-success fs-6 ms-1" th:text="'Kz ' + ${#numbers.formatDecimal(totalFaturadoCaixas, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</strong>
+                            </span>
+                            <a th:href="@{/caixa/monitor}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold">
+                                <i class="fas fa-external-link-alt me-1"></i> Monitor de Caixas
+                            </a>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle" style="background: transparent;">
+                            <thead>
+                                <tr class="text-white-50 small text-uppercase" style="border-bottom: 1px solid rgba(255,255,255,0.08);">
+                                    <th class="ps-4 py-2">Sessão</th>
+                                    <th>Operador</th>
+                                    <th>Abertura</th>
+                                    <th class="text-end">Numerário</th>
+                                    <th class="text-end">Multicaixa</th>
+                                    <th class="text-end pe-4">Total Faturado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="c : ${caixasAbertos}">
+                                    <td class="ps-4 fw-bold text-info" th:text="${c.codigo != null ? c.codigo : 'CX-' + c.id}">CX-1</td>
+                                    <td class="fw-bold" th:text="${c.operador != null ? c.operador.nome : 'Operador'}">Operador</td>
+                                    <td class="text-white-50 small" th:text="${#temporals.format(c.dataAbertura, 'HH:mm')} + ' — ' + ${#temporals.format(c.dataAbertura, 'dd/MM')}">10:00</td>
+                                    <td class="text-end fw-bold text-success" th:text="'Kz ' + ${#numbers.formatDecimal(c.totalNumerario != null ? c.totalNumerario : 0, 1, 'POINT', 2, 'COMMA')}">0 Kz</td>
+                                    <td class="text-end fw-bold text-cyan" th:text="'Kz ' + ${#numbers.formatDecimal(c.totalMulticaixa != null ? c.totalMulticaixa : 0, 1, 'POINT', 2, 'COMMA')}">0 Kz</td>
+                                    <td class="text-end pe-4 fw-bold text-warning fs-6" th:text="'Kz ' + ${#numbers.formatDecimal(c.totalFaturado != null ? c.totalFaturado : 0, 1, 'POINT', 2, 'COMMA')}">0 Kz</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Live Caixa Status Widget (Visible only for Admin/Gestor when caixas are open) -->
-                <div th:if="${qtdCaixasAbertos != null and qtdCaixasAbertos > 0}" class="mb-4">
-                    <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
-                        <!-- Animated header bar -->
-                        <div class="card-header border-0 px-4 py-3 d-flex align-items-center justify-content-between"
-                             style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="blink-dot-dash"></span>
-                                <span class="text-white fw-700 fs-6">
-                                    <i class="fas fa-cash-register me-2"></i><span th:text="#{dashboard.caixas_abertos_titulo}">Caixas Abertos em Tempo Real</span>
-                                </span>
-                                <span class="badge bg-success px-3 py-2 rounded-pill fw-700"
-                                      th:text="${qtdCaixasAbertos} + ' activo(s)'"></span>
-                            </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="text-white opacity-75 small fw-600">
-                                    <span th:text="#{dashboard.total_faturado}">Total Faturado</span>:
-                                    <strong class="text-success fs-6 ms-1"
-                                            th:text="'Kz ' + ${#numbers.formatDecimal(totalFaturadoCaixas, 1, 'POINT', 2, 'COMMA')}">Kz 0,00</strong>
-                                </span>
-                                <a th:href="@{/caixa/monitor}" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-600">
-                                    <i class="fas fa-external-link-alt me-1"></i> <span th:text="#{dashboard.ver_monitor_completo}">Ver Monitor Completo</span>
-                                </a>
-                            </div>
-                        </div>
-                        <!-- Caixa rows -->
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0 align-middle">
-                                    <thead class="bg-light">
-                                        <tr class="small text-muted">
-                                            <th class="ps-4 py-2 fw-700" th:text="#{column.codigo}">Sessão</th>
-                                            <th class="fw-700" th:text="#{column.operador}">Operador</th>
-                                            <th class="fw-700" th:text="#{pos.carrinho.titulo}">Abertura</th>
-                                            <th class="text-end fw-700" th:text="#{menu.vendas}">Numerário</th>
-                                            <th class="text-end fw-700" th:text="#{config.pagamentos.titulo}">Multicaixa</th>
-                                            <th class="text-end pe-4 fw-700" th:text="#{dashboard.total_faturado}">Total Faturado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="c : ${caixasAbertos}">
-                                            <td class="ps-4 fw-700 text-indigo small"
-                                                th:text="${c.codigo != null ? c.codigo : 'CX-' + c.id}"></td>
-                                            <td class="fw-600 small" th:text="${c.operador.nome}"></td>
-                                            <td class="text-muted small"
-                                                th:text="${#temporals.format(c.dataAbertura, 'HH:mm')} + ' — ' + ${#temporals.format(c.dataAbertura, 'dd/MM')}"></td>
-                                            <td class="text-end small fw-600 text-success"
-                                                th:text="'Kz ' + ${#numbers.formatDecimal(c.totalNumerario != null ? c.totalNumerario : 0, 1, 'POINT', 2, 'COMMA')}"></td>
-                                            <td class="text-end small fw-600 text-info"
-                                                th:text="'Kz ' + ${#numbers.formatDecimal(c.totalMulticaixa != null ? c.totalMulticaixa : 0, 1, 'POINT', 2, 'COMMA')}"></td>
-                                            <td class="text-end pe-4 fw-700"
-                                                th:text="'Kz ' + ${#numbers.formatDecimal(c.totalFaturado != null ? c.totalFaturado : 0, 1, 'POINT', 2, 'COMMA')}"></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Section - Main -->
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="chart-container">
-                            <div class="chart-header">
-                                <h5 class="chart-title" th:text="#{dashboard.desempenho_financeiro}">Desempenho Financeiro (Receita vs Despesas)</h5>
-                                <div class="dropdown">
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- 4. PAINEL DE GRÁFICOS EXECUTIVOS                               -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <div class="row g-3 mb-4">
+                    
+                    <!-- Gráfico Principal: Receita vs Despesas (8 Colunas) -->
+                    <div class="col-12 col-xl-8 fade-up del-2">
+                        <div class="dashboard-panel h-100">
+                            <div class="panel-head">
+                                <div>
+                                    <h5><i class="fas fa-chart-area text-primary"></i> Desempenho Financeiro (Receita vs Despesas)</h5>
+                                    <p class="panel-subtitle">Evolução comparativa dos fluxos operacionais</p>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-primary active" id="btnChartLine" onclick="switchMainChart('line')">
+                                            <i class="fas fa-chart-line me-1"></i> Linha
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary" id="btnChartBar" onclick="switchMainChart('bar')">
+                                            <i class="fas fa-chart-bar me-1"></i> Barras
+                                        </button>
+                                    </div>
                                     <button class="btn btn-light btn-sm rounded-pill px-3" onclick="exportarGrafico('graficoReceitaDespesa')">
-                                        <i class="fas fa-download me-1"></i> <span th:text="#{btn.exportar}">Exportar</span>
+                                        <i class="fas fa-download me-1 text-primary"></i> PNG
                                     </button>
                                 </div>
                             </div>
-                            <div class="canvas-wrapper" style="height: 300px;">
+                            <div class="chart-box-large">
                                 <canvas id="graficoReceitaDespesa"></canvas>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="chart-container">
-                                    <h5 class="chart-title mb-4" th:text="#{dashboard.vendas_localizacao}">Vendas por Localização</h5>
-                                    <div class="canvas-wrapper" style="height: 250px;">
-                                        <canvas id="graficoLocalizacao"></canvas>
-                                    </div>
+                    <!-- Gráfico 2: Meios de Pagamento (4 Colunas) -->
+                    <div class="col-12 col-xl-4 fade-up del-3">
+                        <div class="dashboard-panel h-100">
+                            <div class="panel-head">
+                                <div>
+                                    <h5><i class="fas fa-credit-card text-info"></i> Meios de Pagamento</h5>
+                                    <p class="panel-subtitle">Distribuição por forma de liquidação</p>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="chart-container">
-                                    <h5 class="chart-title mb-4" th:text="#{dashboard.horarios_pico}">Horários de Pico</h5>
-                                    <div class="canvas-wrapper" style="height: 250px;">
-                                        <canvas id="graficoHorarios"></canvas>
-                                    </div>
-                                </div>
+                            <div class="chart-box-large">
+                                <canvas id="graficoPagamentosDash"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-4">
-                        <!-- Top Products -->
-                        <div class="chart-container">
-                            <h5 class="chart-title mb-4" th:text="#{dashboard.produtos_mais_vendidos}">Produtos Mais Vendidos</h5>
-                            <div class="top-products-list">
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item" th:each="produto, iter : ${produtosMaisVendidos}">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="product-rank" th:text="${iter.index + 1}">1</div>
-                                            <span class="fw-semibold text-slate-700" th:text="${produto.nome}">Produto</span>
-                                        </div>
-                                        <span class="badge bg-indigo-100 text-indigo-700 rounded-pill px-3" th:text="${produto.quantidadeVendida + ' un'}">0 un</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <!-- Summary Comparison -->
-                        <div class="chart-container">
-                            <h5 class="chart-title mb-4" th:text="#{dashboard.mes_atual_vs_passado}">Mês Atual vs Passado</h5>
-                            <div class="canvas-wrapper" style="height: 300px;">
-                                <canvas id="graficoComparacao"></canvas>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-            </div>
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <!-- 5. SEGUNDA LINHA: HORÁRIOS DE PICO & TOP PRODUTOS               -->
+                <!-- ═══════════════════════════════════════════════════════════════ -->
+                <div class="row g-3">
+                    
+                    <!-- Horários de Pico (6 Colunas) -->
+                    <div class="col-12 col-xl-6 fade-up del-2">
+                        <div class="dashboard-panel h-100">
+                            <div class="panel-head">
+                                <div>
+                                    <h5><i class="fas fa-clock text-warning"></i> Horários de Maior Movimento</h5>
+                                    <p class="panel-subtitle">Volume de vendas distribuído por horário</p>
+                                </div>
+                            </div>
+                            <div class="chart-box-medium">
+                                <canvas id="graficoHorarios"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top 10 Produtos Mais Vendidos (6 Colunas) -->
+                    <div class="col-12 col-xl-6 fade-up del-3">
+                        <div class="dashboard-panel h-100 d-flex flex-column">
+                            <div class="panel-head">
+                                <div>
+                                    <h5><i class="fas fa-trophy text-amber-500 text-warning"></i> Produtos Mais Vendidos</h5>
+                                    <p class="panel-subtitle">Artigos de maior saída no período</p>
+                                </div>
+                                <span class="badge bg-light text-muted fw-bold" th:text="${produtosMaisVendidos.size()} + ' produtos'">10 produtos</span>
+                            </div>
+                            
+                            <div class="flex-grow-1 overflow-auto" style="max-height: 290px;">
+                                <div th:if="${#lists.isEmpty(produtosMaisVendidos)}" class="text-center py-5 text-muted">
+                                    <i class="fas fa-box-open fa-2x mb-2 d-block opacity-50"></i>
+                                    Nenhum produto vendido registado até ao momento.
+                                </div>
+
+                                <div th:unless="${#lists.isEmpty(produtosMaisVendidos)}">
+                                    <div th:each="prod, iter : ${produtosMaisVendidos}" class="top-prod-row">
+                                        <div class="d-flex align-items-center gap-3 overflow-hidden">
+                                            <span class="rank-badge" 
+                                                  th:classappend="${iter.index == 0 ? 'rank-gold' : (iter.index == 1 ? 'rank-silver' : (iter.index == 2 ? 'rank-bronze' : 'rank-norm'))}" 
+                                                  th:text="${iter.count}">1</span>
+                                            <div class="overflow-hidden">
+                                                <span class="fw-bold text-dark text-truncate d-block" style="font-size:0.86rem;" th:text="${prod.nome}">Produto</span>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill" 
+                                              th:text="${prod.quantidadeVendida + ' un.'}">0 un.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div><!-- /container-fluid -->
         </main>
+        
         <footer th:replace="menu :: footer"></footer>
     </div>
 
-    <script th:src="@{/plugins/chartjs/chart.min.js}"></script>
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- DATA BRIDGE: DADOS PREPARADOS PELO SPRING MVC PARA O JAVASCRIPT -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <script th:inline="javascript">
-        // Data e Hora Atual
-        function updateTime() {
-            const agora = new Date();
-            const options = { day: '2-digit', month: 'long', year: 'numeric' };
-            document.getElementById('currentDate').textContent = agora.toLocaleDateString('pt-PT', options);
-            document.getElementById('currentTime').textContent = agora.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        /*<![CDATA[*/
+        var _dashData = {
+            vendasHoje:         /*[[${vendasHoje != null ? vendasHoje : 0}]]*/ 0,
+            vendasMes:          /*[[${vendasMes != null ? vendasMes : 0}]]*/ 0,
+            lucroLiquido:       /*[[${lucroLiquidoMensal != null ? lucroLiquidoMensal : 0}]]*/ 0,
+            totalFacturas:      /*[[${totalFacturas != null ? totalFacturas : 0}]]*/ 0,
+            totalIva:           /*[[${totalIva != null ? totalIva : 0}]]*/ 0,
+            ticketMedioMes:     /*[[${ticketMedioMes != null ? ticketMedioMes : 0}]]*/ 0,
+            totalClientes:      /*[[${totalClientes != null ? totalClientes : 0}]]*/ 0,
+            totalEstoqueBaixo:  /*[[${totalProdutosEstoqueBaixo != null ? totalProdutosEstoqueBaixo : 0}]]*/ 0,
+            receitaVsDespesa:   /*[[${receitaVsDespesa}]]*/ { labels: [], receitas: [], despesas: [] },
+            vendasPorPagamento: /*[[${vendasPorPagamento}]]*/ {},
+            horariosPico:       /*[[${horariosPico}]]*/ {}
+        };
+        /*]]>*/
+    </script>
+
+    <script th:src="@{/plugins/chartjs/chart.min.js}"></script>
+
+    <script th:inline="none">
+    $(document).ready(function () {
+
+        /* ── 1. RELÓGIO DIGITAL & SAUDAÇÃO DINÂMICA ──────────────── */
+        var monthsPt = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        var daysPt   = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+
+        function updateCockpitClock() {
+            var now = new Date();
+            var h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+            document.getElementById('cockpitClock').textContent =
+                String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            document.getElementById('cockpitDate').textContent =
+                daysPt[now.getDay()] + ', ' + now.getDate() + ' de ' + monthsPt[now.getMonth()] + ' de ' + now.getFullYear();
+
+            var greeting = 'Olá';
+            if (h >= 5 && h < 12) greeting = 'Bom dia';
+            else if (h >= 12 && h < 18) greeting = 'Boa tarde';
+            else greeting = 'Boa noite';
+            document.getElementById('dynamicGreeting').textContent = greeting;
         }
-        setInterval(updateTime, 1000);
-        updateTime();
+        updateCockpitClock(); setInterval(updateCockpitClock, 1000);
 
-        // Configurações Globais do Chart.js
-        Chart.defaults.color = '#64748b';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        /* ── 2. ANIMAÇÕES PROGRESSIVAS (COUNT-UP) ────────────────── */
+        function animateCount(el, targetVal, decimals, suffix) {
+            if (!el) return;
+            var duration = 1200, start = null;
+            function step(ts) {
+                if (!start) start = ts;
+                var progress = Math.min((ts - start) / duration, 1);
+                var ease = 1 - Math.pow(1 - progress, 3);
+                var current = targetVal * ease;
+                el.textContent = current.toLocaleString('pt-PT', {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                }) + (suffix || '');
+                if (progress < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
 
-        // 1. Gráfico Receita vs Despesas (Line Chart com Gradiente)
-        var rdData = /*[[${receitaVsDespesa}]]*/ { labels: [], receitas: [], despesas: [] };
-        const ctxRD = document.getElementById('graficoReceitaDespesa').getContext('2d');
-        
-        const gradReceita = ctxRD.createLinearGradient(0, 0, 0, 400);
-        gradReceita.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
-        gradReceita.addColorStop(1, 'rgba(99, 102, 241, 0)');
+        setTimeout(function() {
+            animateCount(document.getElementById('dashKpiVendasHoje'), _dashData.vendasHoje,     2, ' Kz');
+            animateCount(document.getElementById('dashKpiVendasMes'),  _dashData.vendasMes,      2, ' Kz');
+            animateCount(document.getElementById('dashKpiLucro'),      _dashData.lucroLiquido,   2, ' Kz');
+            animateCount(document.getElementById('dashKpiFacturas'),   _dashData.totalFacturas,  0, '');
+            animateCount(document.getElementById('dashKpiIva'),        _dashData.totalIva,       2, ' Kz');
+            animateCount(document.getElementById('dashKpiTicket'),     _dashData.ticketMedioMes, 2, ' Kz');
+            animateCount(document.getElementById('dashKpiClientes'),   _dashData.totalClientes,  0, '');
+            animateCount(document.getElementById('dashKpiStock'),      _dashData.totalEstoqueBaixo, 0, ' un.');
+        }, 200);
 
-        new Chart(ctxRD, {
+        /* ── 3. GRÁFICO PRINCIPAL: RECEITA VS DESPESAS ────────────── */
+        var isDark = document.body.classList.contains('dark-mode');
+        var textColor = isDark ? '#94a3b8' : '#64748b';
+        var gridColor  = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+
+        var rdData = _dashData.receitaVsDespesa || { labels: [], receitas: [], despesas: [] };
+        var ctxRD = document.getElementById('graficoReceitaDespesa').getContext('2d');
+        var gradRec = ctxRD.createLinearGradient(0, 0, 0, 300);
+        gradRec.addColorStop(0, 'rgba(79, 70, 229, 0.4)');
+        gradRec.addColorStop(1, 'rgba(79, 70, 229, 0.01)');
+
+        var chartMain = new Chart(ctxRD, {
             type: 'line',
             data: {
-                labels: rdData.labels,
-                datasets: [{
-                    label: 'Receita',
-                    data: rdData.receitas,
-                    borderColor: '#6366f1',
-                    borderWidth: 3,
-                    backgroundColor: gradReceita,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#6366f1'
-                }, {
-                    label: 'Despesas',
-                    data: rdData.despesas,
-                    borderColor: '#f43f5e',
-                    borderWidth: 3,
-                    borderDash: [5, 5],
-                    fill: false,
-                    tension: 0.4,
-                    pointRadius: 4
-                }]
+                labels: rdData.labels || [],
+                datasets: [
+                    {
+                        label: 'Receita (Kz)',
+                        data: rdData.receitas || [],
+                        borderColor: '#4f46e5',
+                        borderWidth: 3,
+                        backgroundColor: gradRec,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3.5,
+                        pointBackgroundColor: '#4f46e5',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Despesas (Kz)',
+                        data: rdData.despesas || [],
+                        borderColor: '#f43f5e',
+                        borderWidth: 2.5,
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#f43f5e'
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'top', align: 'end' } },
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top', align: 'end',
+                        labels: { color: textColor, font: { size: 11, weight: '700' } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ' ' + ctx.dataset.label + ': ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }) + ' Kz';
+                            }
+                        }
+                    }
+                },
                 scales: {
-                    y: { grid: { borderDash: [2, 2] }, ticks: { callback: v => 'Kz ' + v.toLocaleString() } },
-                    x: { grid: { display: false } }
+                    x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
+                    y: {
+                        grid: { color: gridColor }, border: { display: false },
+                        ticks: {
+                            color: textColor, font: { size: 10 },
+                            callback: function(v) {
+                                if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+                                if (v >= 1000) return (v / 1000).toFixed(0) + 'k';
+                                return v;
+                            }
+                        }
+                    }
                 }
             }
         });
 
-        // 2. Gráfico Localização (Doughnut)
-        var locData = /*[[${vendasPorLocalizacao}]]*/ {};
-        new Chart(document.getElementById('graficoLocalizacao'), {
+        window.switchMainChart = function(type) {
+            chartMain.config.type = type;
+            if (type === 'bar') {
+                chartMain.data.datasets[0].backgroundColor = 'rgba(79, 70, 229, 0.85)';
+                chartMain.data.datasets[0].borderRadius = 6;
+                chartMain.data.datasets[1].backgroundColor = 'rgba(244, 63, 94, 0.85)';
+                chartMain.data.datasets[1].borderRadius = 6;
+                $('#btnChartBar').addClass('active');
+                $('#btnChartLine').removeClass('active');
+            } else {
+                chartMain.data.datasets[0].backgroundColor = gradRec;
+                chartMain.data.datasets[0].fill = true;
+                $('#btnChartLine').addClass('active');
+                $('#btnChartBar').removeClass('active');
+            }
+            chartMain.update();
+        };
+
+        /* ── 4. GRÁFICO MEIOS DE PAGAMENTO (DOUGHNUT) ─────────────── */
+        var payLabels = [];
+        var payValues = [];
+        var payColors = ['#4f46e5', '#10b981', '#0284c7', '#f59e0b', '#ec4899', '#8b5cf6'];
+
+        if (_dashData.vendasPorPagamento) {
+            for (var pKey in _dashData.vendasPorPagamento) {
+                payLabels.push(pKey);
+                payValues.push(_dashData.vendasPorPagamento[pKey]);
+            }
+        }
+        if (payValues.length === 0) {
+            payLabels = ['Sem Registos'];
+            payValues = [1];
+            payColors = ['#e2e8f0'];
+        }
+
+        var ctxP = document.getElementById('graficoPagamentosDash').getContext('2d');
+        new Chart(ctxP, {
             type: 'doughnut',
             data: {
-                labels: Object.keys(locData),
+                labels: payLabels,
                 datasets: [{
-                    data: Object.values(locData),
-                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-                    borderWidth: 0,
-                    hoverOffset: 15
+                    data: payValues,
+                    backgroundColor: payColors,
+                    borderWidth: 2,
+                    borderColor: isDark ? '#1e293b' : '#ffffff'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '75%',
-                plugins: { legend: { position: 'bottom' } }
+                cutout: '72%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: textColor, font: { size: 10, weight: '700' }, boxWidth: 10, padding: 8 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ' ' + ctx.label + ': ' + Number(ctx.raw || 0).toLocaleString('pt-PT', {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                }) + ' Kz';
+                            }
+                        }
+                    }
+                }
             }
         });
 
-        // 3. Gráfico Horários de Pico
-        var picoData = /*[[${horariosPico}]]*/ {};
-        new Chart(document.getElementById('graficoHorarios'), {
+        /* ── 5. GRÁFICO HORÁRIOS DE PICO ─────────────────────────── */
+        var picoData = _dashData.horariosPico || {};
+        var picoLabels = [];
+        var picoValues = [];
+        for (var h = 8; h <= 22; h++) {
+            picoLabels.push(h + 'h');
+            picoValues.push(picoData[h] || 0);
+        }
+
+        var ctxH = document.getElementById('graficoHorarios').getContext('2d');
+        var gradBar = ctxH.createLinearGradient(0, 0, 0, 240);
+        gradBar.addColorStop(0, '#f59e0b');
+        gradBar.addColorStop(1, '#d97706');
+
+        new Chart(ctxH, {
             type: 'bar',
             data: {
-                labels: Object.keys(picoData).map(h => h + 'h'),
+                labels: picoLabels,
                 datasets: [{
                     label: 'Vendas',
-                    data: Object.values(picoData),
-                    backgroundColor: '#6366f1',
-                    borderRadius: 8
+                    data: picoValues,
+                    backgroundColor: gradBar,
+                    borderRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { y: { display: false }, x: { grid: { display: false } } }
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
+                    y: { grid: { color: gridColor }, border: { display: false }, ticks: { color: textColor, font: { size: 10 } } }
+                }
             }
         });
 
-        // 4. Comparação de Períodos
-        var compData = /*[[${comparacaoPeriodos}]]*/ { labels: [], atual: [], passado: [] };
-        new Chart(document.getElementById('graficoComparacao'), {
-            type: 'bar',
-            data: {
-                labels: ['Vendas'],
-                datasets: [
-                    { label: 'Atual', data: [compData.atual.reduce((a,b) => a+b, 0)], backgroundColor: '#6366f1', borderRadius: 10 },
-                    { label: 'Passado', data: [compData.passado.reduce((a,b) => a+b, 0)], backgroundColor: '#e2e8f0', borderRadius: 10 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-
-        function exportarGrafico(id) {
-            const link = document.createElement('a');
-            link.href = document.getElementById(id).toDataURL('image/png');
-            link.download = 'dashboard-report.png';
+        window.exportarGrafico = function(id) {
+            var canvas = document.getElementById(id);
+            if (!canvas) return;
+            var link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'relatorio-dashboard.png';
             link.click();
-        }
+        };
+
+    });
     </script>
 </body>
 </html>
