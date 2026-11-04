@@ -167,28 +167,85 @@
 
                         <!-- Compositor Rápido de Mensagem -->
                         <div class="card shadow-sm border-0 mb-4">
-                            <div class="card-header bg-white py-3 border-bottom">
+                            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
                                 <h5 class="card-title fw-bold mb-0 text-dark">
                                     <i class="fas fa-edit text-primary me-2"></i>Publicação Rápida na Página
                                 </h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle rounded-pill fw-semibold px-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-magic me-1"></i> Modelos Prontos
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width: 280px;">
+                                        <li><h6 class="dropdown-header text-uppercase small fw-bold">Escolha um Modelo Dinâmico</h6></li>
+                                        <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="carregarTemplate('ERP')"><i class="fas fa-laptop-code text-primary me-2"></i><strong>Kwanza ERP & Facturação AGT</strong><small class="d-block text-muted">Venda de software de gestão</small></a></li>
+                                        <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="carregarTemplate('NOVIDADE')"><i class="fas fa-star text-warning me-2"></i><strong>Lançamento / Novidade</strong><small class="d-block text-muted">Anúncio de novos produtos</small></a></li>
+                                        <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="carregarTemplate('PROMO')"><i class="fas fa-fire text-danger me-2"></i><strong>Super Promoção / Desconto</strong><small class="d-block text-muted">Ofertas por tempo limitado</small></a></li>
+                                        <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="carregarTemplate('ESCASSEZ')"><i class="fas fa-hourglass-half text-warning me-2"></i><strong>Últimas Unidades em Stock</strong><small class="d-block text-muted">Gatilho de urgência e escassez</small></a></li>
+                                        <li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="carregarTemplate('CONTATO')"><i class="fab fa-whatsapp text-success me-2"></i><strong>Contacto & Encomendas</strong><small class="d-block text-muted">Chamada directa para WhatsApp</small></a></li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="card-body p-4">
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold text-muted">Escreva o anúncio ou novidade para os seus seguidores:</label>
-                                    <textarea id="mensagemPersonalizada" class="form-control" rows="3"
+                                    <label class="form-label small fw-bold text-muted">Texto do anúncio ou novidade para a página:</label>
+                                    <textarea id="mensagemPersonalizada" class="form-control" rows="4"
                                               placeholder="Ex: 🎉 Grande novidade! Chegou um novo lote de produtos à nossa loja. Venha conferir ou ligue para 9XX XXX XXX!"></textarea>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <small class="text-muted" id="contadorChars">0 / 63206 caracteres</small>
-                                        <small class="text-muted">Publicação directa na cronologia da página</small>
+                                        <small class="text-muted"><i class="fab fa-facebook text-primary me-1"></i> Publicação directa com foto/vídeo</small>
                                     </div>
                                 </div>
+
+                                <!-- Secção de Anexo de Foto / Vídeo -->
+                                <div class="mb-3 p-3 bg-light rounded-3 border">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                        <span class="small fw-bold text-dark">
+                                            <i class="fas fa-paperclip text-muted me-1"></i> Mídia da Publicação (Foto ou Vídeo):
+                                        </span>
+                                        <div class="d-flex gap-2">
+                                            <input type="file" id="mediaUploadInput" accept="image/*,video/mp4,video/quicktime,video/mov" class="d-none" onchange="processarFicheiroSelecionado(this)">
+                                            <button type="button" class="btn btn-sm btn-white border shadow-sm rounded-pill px-3" onclick="document.getElementById('mediaUploadInput').click()">
+                                                <i class="fas fa-upload text-primary me-1"></i> Carregar Foto / Vídeo
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-white border shadow-sm rounded-pill px-3" onclick="toggleUrlMedia()">
+                                                <i class="fas fa-link text-info me-1"></i> Link Web (URL)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Campo de Link URL (oculto por padrão) -->
+                                    <div id="containerUrlMedia" class="mt-2" style="display: none;">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-white"><i class="fas fa-globe text-muted"></i></span>
+                                            <input type="url" id="mediaUrl" class="form-control" placeholder="https://exemplo.com/imagem.jpg ou video.mp4" oninput="atualizarPreviewUrl()">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="limparUrlMedia()">✕ Limpar</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card de Pré-visualização da Mídia -->
+                                    <div id="previewMediaContainer" class="mt-2 p-2 bg-white border rounded-3 d-flex align-items-center justify-content-between" style="display: none !important;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div id="previewThumbnail" class="rounded bg-light d-flex align-items-center justify-content-center text-primary" style="width: 50px; height: 50px; overflow: hidden; font-size: 1.4rem;">
+                                                <i class="fas fa-image"></i>
+                                            </div>
+                                            <div>
+                                                <div id="previewNome" class="fw-bold small text-dark text-truncate" style="max-width: 280px;">imagem.jpg</div>
+                                                <div id="previewInfo" class="text-muted" style="font-size: 0.75rem;">Foto • 1.2 MB</div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="removerMedia()">
+                                            <i class="fas fa-trash-alt me-1"></i> Remover
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
                                     <div th:if="${!fbConfig.ativo}" class="text-warning-emphasis small bg-warning bg-opacity-10 border border-warning rounded-3 px-3 py-1.5 d-flex align-items-center gap-2">
                                         <i class="fas fa-exclamation-triangle text-warning"></i>
                                         <span>A integração está desactivada. <a th:href="@{/marketing/facebook/config}" class="fw-bold text-dark text-decoration-underline">Active a integração nas Configurações</a> para habilitar o botão.</span>
                                     </div>
                                     <div th:if="${fbConfig.ativo}"></div>
-                                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+                                    <button type="button" id="btnPublicarMsg" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
                                             onclick="publicarMensagem()"
                                             th:disabled="${!fbConfig.ativo}"
                                             th:title="${!fbConfig.ativo ? 'Active a integração nas Configurações para publicar' : 'Publicar agora no Facebook'}">
@@ -505,7 +562,128 @@
         });
     }
 
-    // Publicar Mensagem Personalizada
+    // ═════════════════════════════════════════════════════════════════════════
+    //  MODELOS DINÂMICOS PRONTOS
+    // ═════════════════════════════════════════════════════════════════════════
+
+    const TEMPLATES_FB = {
+        ERP: "🚀 GESTÃO EMPRESARIAL COMPLETA COM O KwanzaERP! 🚀\n\nModernize a sua empresa, controle o seu stock em tempo real e emita facturas certificadas em total conformidade com a AGT!\n\nO software KwanzaERP oferece tudo o que o seu negócio precisa:\n✅ Facturação Certificada pela AGT (Geração do ficheiro SAF-T AO)\n✅ Ponto de Venda (POS) Rápido e Intuitivo\n✅ Gestão Integrada de Stock, Armazéns e Vendas\n✅ Relatórios Financeiros e Fecho de Caixa Seguro\n✅ Suporte Técnico e Formação Completa da sua Equipa\n\n💰 Preço: Sob Consulta\n📍 Instalação em Luanda e em todas as províncias de Angola!\n\n📲 Solicite agora uma demonstração ou faça o seu pedido (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121",
+
+        NOVIDADE: "✨ NOVIDADE EXCLUSIVA NO SISTEMA KwanzaERP! ✨\n\nTemos o prazer de apresentar o mais recente artigo disponível na nossa empresa:\n\n🛍️ Artigo: [Nome do Artigo / Solução]\n💰 Preço: Sob Consulta\n📦 Stock: Disponível para entrega imediata!\n\nℹ️ Destaques:\n• Qualidade superior com garantia comprovada\n• Gestão e rastreabilidade total pelo KwanzaERP\n• Entregas rápidas em Luanda e envios para todo o país!\n\n📲 Contacte-nos já para encomendar ou saber mais (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121",
+
+        PROMO: "🔥 OPORTUNIDADE ESPECIAL COM O KwanzaERP! 🔥\n\nAproveite as melhores condições e descontos exclusivos do mercado!\n\n🛍️ Solução: KwanzaERP - Facturação Electrónica Certificada AGT\n💥 Condições especiais para novos clientes por tempo limitado!\n💰 Preço: Sob Consulta\n\n✅ Evite multas da AGT e assuma o controlo total do seu negócio!\n✅ Sistema homologado, seguro e de alta performance.\n\n⚠️ Vagas de instalação promocionais limitadas para este mês!\n📲 Fale connosco hoje mesmo (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121",
+
+        ESCASSEZ: "🚨 ATENÇÃO: ÚLTIMAS LICENÇAS E UNIDADES DISPONÍVEIS! 🚨\n\nNão deixe a modernização e conformidade da sua empresa para a última da hora!\n\n👉 Garanta já a implementação do KwanzaERP no seu estabelecimento comercial!\n💰 Preço: Sob Consulta\n🚚 Instalação rápida, suporte técnico e formação incluídos.\n\n📲 Reserve a sua vaga antes do encerramento (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121",
+
+        CONTATO: "🛍️ ATENDIMENTO E ENCOMENDAS - KwanzaERP 🛍️\n\nProcura as melhores soluções de software de facturação e gestão comercial em Angola?\n\n🏢 Sistema: KwanzaERP - Facturação Certificada AGT\n💰 Preço: Sob Consulta\n📍 Localização: Luanda, Angola (Atendimento a nível nacional)\n🕒 Horário: Segunda a Sábado das 08h às 18h\n\n📲 Linha de Apoio e Encomendas (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121\n\n💬 Mande mensagem no WhatsApp agora mesmo para um atendimento personalizado!"
+    };
+
+    function carregarTemplate(tipo) {
+        if (TEMPLATES_FB[tipo]) {
+            const txtArea = document.getElementById('mensagemPersonalizada');
+            txtArea.value = TEMPLATES_FB[tipo];
+            txtArea.dispatchEvent(new Event('input'));
+            txtArea.focus();
+            mostrarToast(true, 'Modelo Carregado', 'O modelo foi inserido. Personalize os dados e clique em Publicar!');
+        }
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    //  GESTÃO DE MÍDIA (FOTO / VÍDEO)
+    // ═════════════════════════════════════════════════════════════════════════
+
+    let ficheiroSelecionado = null;
+
+    function processarFicheiroSelecionado(input) {
+        if (!input.files || input.files.length === 0) return;
+        const file = input.files[0];
+        ficheiroSelecionado = file;
+
+        const urlInput = document.getElementById('mediaUrl');
+        if (urlInput) urlInput.value = '';
+        const containerUrl = document.getElementById('containerUrlMedia');
+        if (containerUrl) containerUrl.style.display = 'none';
+
+        const container = document.getElementById('previewMediaContainer');
+        const nomeEl = document.getElementById('previewNome');
+        const infoEl = document.getElementById('previewInfo');
+        const thumbEl = document.getElementById('previewThumbnail');
+
+        nomeEl.textContent = file.name;
+        const tamanhoMb = (file.size / (1024 * 1024)).toFixed(2);
+        const isVideo = file.type.startsWith('video/') || file.name.endsWith('.mp4') || file.name.endsWith('.mov');
+
+        infoEl.textContent = (isVideo ? '🎥 Vídeo' : '📷 Foto') + ' • ' + tamanhoMb + ' MB';
+
+        if (isVideo) {
+            thumbEl.innerHTML = '<i class="fas fa-video text-danger"></i>';
+        } else {
+            const reader = new FileReader();
+            reader.onload = e => {
+                thumbEl.innerHTML = '<img src="' + e.target.result + '" style="width:100%; height:100%; object-fit:cover;">';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        container.style.removeProperty('display');
+    }
+
+    function toggleUrlMedia() {
+        const c = document.getElementById('containerUrlMedia');
+        if (c.style.display === 'none') {
+            c.style.display = 'block';
+            document.getElementById('mediaUrl').focus();
+        } else {
+            c.style.display = 'none';
+        }
+    }
+
+    function atualizarPreviewUrl() {
+        const url = document.getElementById('mediaUrl').value.trim();
+        if (!url) {
+            removerMedia();
+            return;
+        }
+        ficheiroSelecionado = null;
+        document.getElementById('mediaUploadInput').value = '';
+
+        const container = document.getElementById('previewMediaContainer');
+        const nomeEl = document.getElementById('previewNome');
+        const infoEl = document.getElementById('previewInfo');
+        const thumbEl = document.getElementById('previewThumbnail');
+
+        nomeEl.textContent = url;
+        const isVideo = url.toLowerCase().includes('.mp4') || url.toLowerCase().includes('.mov');
+        infoEl.textContent = (isVideo ? '🎥 Vídeo por Link' : '📷 Imagem por Link');
+
+        if (isVideo) {
+            thumbEl.innerHTML = '<i class="fas fa-video text-danger"></i>';
+        } else {
+            thumbEl.innerHTML = '<img src="' + url + '" style="width:100%; height:100%; object-fit:cover;" onerror="this.src=\'\'">';
+        }
+
+        container.style.removeProperty('display');
+    }
+
+    function limparUrlMedia() {
+        document.getElementById('mediaUrl').value = '';
+        removerMedia();
+    }
+
+    function removerMedia() {
+        ficheiroSelecionado = null;
+        const fileInput = document.getElementById('mediaUploadInput');
+        if (fileInput) fileInput.value = '';
+        const urlInput = document.getElementById('mediaUrl');
+        if (urlInput) urlInput.value = '';
+        const container = document.getElementById('previewMediaContainer');
+        if (container) container.style.display = 'none';
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    //  PUBLICAR MENSAGEM (TEXTO + FOTO/VÍDEO)
+    // ═════════════════════════════════════════════════════════════════════════
+
     function publicarMensagem() {
         const mensagem = document.getElementById('mensagemPersonalizada').value.trim();
         if (!mensagem) {
@@ -513,24 +691,56 @@
             return;
         }
 
+        const btn = document.getElementById('btnPublicarMsg');
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>A publicar no Facebook...';
+        }
+
         const csrfToken = getCsrfToken();
         const csrfHeader = getCsrfHeader();
 
-        const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        };
-        if (csrfToken) {
-            headers[csrfHeader] = csrfToken;
-            headers['X-CSRF-TOKEN'] = csrfToken;
-            headers['X-XSRF-TOKEN'] = csrfToken;
+        const mediaUrl = document.getElementById('mediaUrl') ? document.getElementById('mediaUrl').value.trim() : '';
+
+        let requestOptions;
+        if (ficheiroSelecionado || mediaUrl) {
+            const formData = new FormData();
+            formData.append('mensagem', mensagem);
+            if (ficheiroSelecionado) {
+                formData.append('ficheiro', ficheiroSelecionado);
+            }
+            if (mediaUrl) {
+                formData.append('mediaUrl', mediaUrl);
+            }
+
+            const headers = { 'Accept': 'application/json' };
+            if (csrfToken) {
+                headers[csrfHeader] = csrfToken;
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+            requestOptions = {
+                method: 'POST',
+                headers: headers,
+                body: formData
+            };
+        } else {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+            if (csrfToken) {
+                headers[csrfHeader] = csrfToken;
+                headers['X-CSRF-TOKEN'] = csrfToken;
+            }
+            requestOptions = {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ mensagem: mensagem })
+            };
         }
 
-        fetch('/marketing/facebook/mensagem', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({ mensagem: mensagem })
-        })
+        fetch('/marketing/facebook/mensagem', requestOptions)
         .then(async r => {
             const text = await r.text();
             try {
@@ -543,16 +753,27 @@
             }
         })
         .then(data => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
             if (data.sucesso) {
-                mostrarToast(true, '✅ Mensagem publicada no Facebook!', data.mensagem);
+                mostrarToast(true, '✅ Publicado com sucesso!', data.mensagem);
                 document.getElementById('mensagemPersonalizada').value = '';
-                contador.textContent = '0 / 63206 caracteres';
+                removerMedia();
+                if (contador) contador.textContent = '0 / 63206 caracteres';
                 setTimeout(() => location.reload(), 2000);
             } else {
                 mostrarToast(false, '❌ Erro na publicação', data.mensagem);
             }
         })
-        .catch(err => mostrarToast(false, 'Erro ao publicar', err.message));
+        .catch(err => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+            mostrarToast(false, 'Erro ao publicar', err.message);
+        });
     }
 </script>
 

@@ -151,18 +151,52 @@ public class FacebookService {
     }
 
     /**
-     * Publica uma mensagem personalizada (sem produto específico).
+     * Publica uma mensagem personalizada simples (sem mídia).
      */
     @Transactional
     public ResultadoPublicacao publicarMensagemPersonalizada(String mensagem, Long empresaId) {
+        return publicarMensagemPersonalizada(mensagem, empresaId, null, null, null, null);
+    }
+
+    /**
+     * Publica uma mensagem personalizada com suporte a imagem ou vídeo (upload ou URL).
+     */
+    @Transactional
+    public ResultadoPublicacao publicarMensagemPersonalizada(String mensagem, Long empresaId,
+                                                             byte[] mediaBytes, String mediaType,
+                                                             String mediaNome, String mediaUrl) {
         ConfiguracaoFacebook config = obterOuCriarConfig(empresaId);
 
         if (!config.isAtivo() || isTokenVazio(config) || isPageIdVazio(config)) {
             return ResultadoPublicacao.falha("Facebook não configurado ou inactivo.");
         }
 
-        ResultadoPublicacao resultado = publicarTexto(config, mensagem);
-        registarPublicacao(null, empresaId, "MANUAL", mensagem, resultado, true, null);
+        ResultadoPublicacao resultado;
+        boolean hasBytes = (mediaBytes != null && mediaBytes.length > 0);
+        boolean hasUrl = (mediaUrl != null && !mediaUrl.trim().isEmpty());
+        boolean isVideo = (mediaType != null && mediaType.toLowerCase().startsWith("video/"))
+                || (mediaNome != null && (mediaNome.toLowerCase().endsWith(".mp4") || mediaNome.toLowerCase().endsWith(".mov")))
+                || (hasUrl && (mediaUrl.toLowerCase().contains(".mp4") || mediaUrl.toLowerCase().contains(".mov")));
+
+        if (isVideo) {
+            if (hasBytes) {
+                resultado = publicarVideoBlob(config, mensagem, mediaBytes, mediaNome);
+            } else if (hasUrl) {
+                resultado = publicarVideoUrl(config, mensagem, mediaUrl);
+            } else {
+                resultado = publicarTexto(config, mensagem);
+            }
+        } else if (hasBytes) {
+            resultado = publicarComImagemBlob(config, mensagem, mediaBytes);
+        } else if (hasUrl) {
+            resultado = publicarComImagemUrl(config, mensagem, mediaUrl);
+        } else {
+            resultado = publicarTexto(config, mensagem);
+        }
+
+        String mediaRef = hasUrl ? mediaUrl : (hasBytes ? (isVideo ? "video-upload" : "imagem-upload") : null);
+        String tipoPub = isVideo ? "VIDEO" : (hasBytes || hasUrl ? "IMAGEM" : "MANUAL");
+        registarPublicacao(null, empresaId, tipoPub, mensagem, resultado, true, mediaRef);
         actualizarContadores(config, resultado.isSucesso());
 
         return resultado;
@@ -317,6 +351,84 @@ public class FacebookService {
         }
     }
 
+    /** Publica vídeo via URL */
+    private ResultadoPublicacao publicarVideoUrl(ConfiguracaoFacebook config, String descricao, String videoUrl) {
+        try {
+            String endpoint = "https://graph-video.facebook.com/v19.0/" + config.getPageId() + "/videos";
+            String params = "description=" + URLEncoder.encode(descricao, "UTF-8") +
+                    "&file_url=" + URLEncoder.encode(videoUrl, "UTF-8") +
+                    "&access_token=" + URLEncoder.encode(config.getPageAccessToken(), "UTF-8");
+
+            String resposta = fazerPostHttp(endpoint, params);
+            return processarResposta(resposta);
+
+        } catch (Exception e) {
+            log.warn("Erro ao publicar vídeo por URL, tentando endpoint padrão: {}", e.getMessage());
+            try {
+                String endpointFallback = GRAPH_API_URL + "/" + config.getPageId() + "/videos";
+                String params = "description=" + URLEncoder.encode(descricao, "UTF-8") +
+                        "&file_url=" + URLEncoder.encode(videoUrl, "UTF-8") +
+                        "&access_token=" + URLEncoder.encode(config.getPageAccessToken(), "UTF-8");
+                String resposta = fazerPostHttp(endpointFallback, params);
+                return processarResposta(resposta);
+            } catch (Exception ex) {
+                return ResultadoPublicacao.falha("Erro ao publicar vídeo no Facebook: " + ex.getMessage());
+            }
+        }
+    }
+
+    /** Publica vídeo em bytes (upload directo) */
+    private ResultadoPublicacao publicarVideoBlob(ConfiguracaoFacebook config, String descricao, byte[] videoBytes, String nomeArquivo) {
+        try {
+            String endpoint = "https://graph-video.facebook.com/v19.0/" + config.getPageId() + "/videos";
+            String boundary = "----FacebookVideoUpload" + System.currentTimeMillis();
+
+            URL url = new URL(endpoint);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            conn.setConnectTimeout(60000);
+            conn.setReadTimeout(180000); // 3 minutos para vídeos maiores
+
+            try (OutputStream os = conn.getOutputStream();
+                 PrintWriter writer = new PrintWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8), true)) {
+
+                // Campo: access_token
+                writer.append("--").append(boundary).append("\r\n");
+                writer.append("Content-Disposition: form-data; name=\"access_token\"").append("\r\n\r\n");
+                writer.append(config.getPageAccessToken()).append("\r\n").flush();
+
+                // Campo: description
+                writer.append("--").append(boundary).append("\r\n");
+                writer.append("Content-Disposition: form-data; name=\"description\"").append("\r\n\r\n");
+                writer.append(descricao).append("\r\n").flush();
+
+                // Campo: source (vídeo binário)
+                String filename = (nomeArquivo != null && !nomeArquivo.isEmpty()) ? nomeArquivo : "video.mp4";
+                String contentType = (filename.toLowerCase().endsWith(".mov")) ? "video/quicktime" : "video/mp4";
+
+                writer.append("--").append(boundary).append("\r\n");
+                writer.append("Content-Disposition: form-data; name=\"source\"; filename=\"").append(filename).append("\"").append("\r\n");
+                writer.append("Content-Type: ").append(contentType).append("\r\n\r\n");
+                writer.flush();
+                os.write(videoBytes);
+                os.flush();
+                writer.append("\r\n").flush();
+                writer.append("--").append(boundary).append("--").append("\r\n");
+                writer.flush();
+            }
+
+            int responseCode = conn.getResponseCode();
+            String resposta = lerResposta(conn, responseCode);
+            return processarResposta(resposta);
+
+        } catch (Exception e) {
+            log.warn("Erro ao publicar vídeo blob no Facebook: {}", e.getMessage());
+            return ResultadoPublicacao.falha("Erro ao carregar vídeo para o Facebook: " + e.getMessage());
+        }
+    }
+
     /**
      * Verifica se o token e a página estão válidos, chamando a API Graph.
      * Utilizado no ecrã de configuração para validar antes de guardar.
@@ -409,7 +521,7 @@ public class FacebookService {
     private String construirMensagemProduto(Produto produto, ConfiguracaoFacebook config) {
         String template = config.getTemplateMensagemProduto();
         if (template == null || template.isEmpty()) {
-            template = "🛍️ Produto: {nome}\n💰 Preço: {preco} Kz\n{descricao}";
+            template = "✨ PRODUTO DISPONÍVEL NO SISTEMA KwanzaERP! ✨\n\n🛍️ Artigo: {nome}\n📂 Categoria: {categoria}\n💰 Preço: Sob Consulta\n📦 Stock: {stock} unidades\n\nℹ️ Detalhes do Produto:\n{descricao}\n\n📍 Entregas rápidas em Luanda e envio para todas as províncias!\n📲 Contacte-nos já (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121";
         }
 
         String preco = String.format("%.2f", produto.getPreco());
@@ -434,7 +546,7 @@ public class FacebookService {
     private String construirMensagemPromocao(Produto produto, ConfiguracaoFacebook config) {
         String template = config.getTemplateMensagemPromocao();
         if (template == null || template.isEmpty()) {
-            template = "🔥 PROMOÇÃO!\n🛍️ {nome}\n💥 Por apenas: {preco} Kz\n{descricao}";
+            template = "🔥 OPORTUNIDADE ESPECIAL NO KwanzaERP! 🔥\n\n🛍️ Artigo: {nome}\n💥 Condições promocionais exclusivas!\n💰 Preço: Sob Consulta\n\nℹ️ Informações:\n{descricao}\n\n⏰ Oferta válida até durar o stock existente!\n📲 Garanta já as suas condições especiais (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121";
         }
 
         String preco = String.format("%.2f", produto.getPreco());

@@ -242,13 +242,14 @@ public class ProdutoController {
     }
 
     @PostMapping("/produtos/editar")
+    @Transactional
     public String editarProduto(
             @RequestParam("id") Long id,
             @RequestParam("nome") String nome,
-            @RequestParam("descricao") String descricao,
+            @RequestParam(value = "descricao", required = false, defaultValue = "") String descricao,
             @RequestParam("preco") double preco,
-            @RequestParam("quantidadeEstoque") Double quantidadeEstoque,
-            @RequestParam("codigoBarra") String codigoBarra,
+            @RequestParam(value = "quantidadeEstoque", required = false) Double quantidadeEstoque,
+            @RequestParam(value = "codigoBarra", required = false, defaultValue = "") String codigoBarra,
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam(value = "imagem", required = false) MultipartFile imagem,
             @RequestParam(value = "ivaPercentual", required = false) Double ivaPercentual,
@@ -256,9 +257,15 @@ public class ProdutoController {
             @RequestParam(value = "dataExpiracao", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataExpiracao,
             @RequestParam(value = "unidadeMedida", required = false) String unidadeMedida,
             @RequestParam(value = "precoCompra", required = false) Double precoCompra,
-            RedirectAttributes redirectAttributes) throws IOException {
+            RedirectAttributes redirectAttributes) {
+
+        System.out.println("====== EDITAR PRODUTO: Requisição recebida ======");
+        System.out.println("  ID: " + id + ", Nome: " + nome + ", Preço: " + preco);
+        System.out.println("  Quantidade: " + quantidadeEstoque + ", Categoria: " + categoriaId);
 
         Long empresaId = ao.co.hzconsultoria.efacturacao.security.SecurityUtils.getCurrentEmpresaId();
+        System.out.println("  Empresa ID (sessão): " + empresaId);
+        
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
 

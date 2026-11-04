@@ -51,11 +51,11 @@ public class ConfiguracaoFacebook implements Serializable {
 
     /** Mensagem/template padrão para publicações de produtos */
     @Column(name = "template_mensagem_produto", length = 2000)
-    private String templateMensagemProduto = "🛍️ Produto disponível: {nome}\n💰 Preço: {preco} Kz\n📦 {descricao}\n\n📞 Entre em contacto para fazer o seu pedido!";
+    private String templateMensagemProduto = "✨ PRODUTO DISPONÍVEL NO SISTEMA KwanzaERP! ✨\n\n🛍️ Artigo: {nome}\n📂 Categoria: {categoria}\n💰 Preço: Sob Consulta\n📦 Stock: {stock} unidades\n\nℹ️ Detalhes do Produto:\n{descricao}\n\n📍 Entregas rápidas em Luanda e envio para todas as províncias!\n📲 Contacte-nos já (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121";
 
     /** Mensagem/template para publicações de promoções */
     @Column(name = "template_mensagem_promocao", length = 2000)
-    private String templateMensagemPromocao = "🔥 PROMOÇÃO ESPECIAL!\n\n🛍️ {nome}\n💥 De: {preco_original} Kz → Por apenas: {preco} Kz\n{descricao}\n\n⏰ Aproveite enquanto dura! Contacte-nos agora!";
+    private String templateMensagemPromocao = "🔥 OPORTUNIDADE ESPECIAL NO KwanzaERP! 🔥\n\n🛍️ Artigo: {nome}\n💥 Condições promocionais exclusivas!\n💰 Preço: Sob Consulta\n\nℹ️ Informações:\n{descricao}\n\n⏰ Oferta válida até durar o stock existente!\n📲 Garanta já as suas condições especiais (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121";
 
     /** Hashtags a adicionar a todas as publicações */
     @Column(name = "hashtags", length = 500)

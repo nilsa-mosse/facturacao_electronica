@@ -204,26 +204,51 @@
                                 <div class="card-body p-4">
 
                                     <!-- Template Produto -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold text-dark small">Template Padrão de Produto</label>
-                                        <textarea class="form-control small" rows="3" th:field="*{templateMensagemProduto}" id="tplProduto"></textarea>
-                                        <div class="mt-1 d-flex gap-1 flex-wrap">
-                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{nome}')">{nome}</span>
-                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{preco}')">{preco}</span>
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                                            <label class="form-label fw-bold text-dark small mb-0">Template Padrão de Produto</label>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-0.5" onclick="aplicarPreset('tplProduto', 'COMERCIAL')">
+                                                    <i class="fas fa-magic me-1"></i> Modelo Elegante
+                                                </button>
+                                                <button type="button" class="btn btn-outline-warning btn-sm rounded-pill px-2.5 py-0.5 ms-1" onclick="aplicarPreset('tplProduto', 'ESCASSEZ')">
+                                                    <i class="fas fa-hourglass-half me-1"></i> Modelo Escassez
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-0.5 ms-1" onclick="aplicarPreset('tplProduto', 'TECNICO')">
+                                                    <i class="fas fa-list-check me-1"></i> Modelo Detalhado
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <textarea class="form-control small" rows="5" th:field="*{templateMensagemProduto}" id="tplProduto"></textarea>
+                                        <div class="mt-2 d-flex gap-1 flex-wrap align-items-center">
+                                            <small class="text-muted fw-bold me-1">Inserir Tag:</small>
+                                            <span class="badge bg-light text-primary border cursor-pointer" onclick="inserirTag('tplProduto', '{nome}')">{nome}</span>
+                                            <span class="badge bg-light text-success border cursor-pointer" onclick="inserirTag('tplProduto', '{preco}')">{preco}</span>
                                             <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{descricao}')">{descricao}</span>
-                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{categoria}')">{categoria}</span>
-                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplProduto', '{stock}')">{stock}</span>
+                                            <span class="badge bg-light text-info border cursor-pointer" onclick="inserirTag('tplProduto', '{categoria}')">{categoria}</span>
+                                            <span class="badge bg-light text-danger border cursor-pointer" onclick="inserirTag('tplProduto', '{stock}')">{stock}</span>
                                         </div>
                                     </div>
 
                                     <!-- Template Promoção -->
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold text-dark small">Template de Promoção Especial</label>
-                                        <textarea class="form-control small" rows="3" th:field="*{templateMensagemPromocao}" id="tplPromo"></textarea>
-                                        <div class="mt-1 d-flex gap-1 flex-wrap">
-                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{nome}')">{nome}</span>
-                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{preco}')">{preco}</span>
-                                            <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{preco_original}')">{preco_original}</span>
+                                    <div class="mb-4">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                                            <label class="form-label fw-bold text-dark small mb-0">Template de Promoção Especial</label>
+                                            <div class="btn-group btn-group-sm">
+                                                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-0.5" onclick="aplicarPreset('tplPromo', 'PROMO_DESCONTO')">
+                                                    <i class="fas fa-fire me-1"></i> Mega Desconto
+                                                </button>
+                                                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-2.5 py-0.5 ms-1" onclick="aplicarPreset('tplPromo', 'PROMO_LIQUIDACAO')">
+                                                    <i class="fas fa-bolt me-1"></i> Liquidação Total
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <textarea class="form-control small" rows="5" th:field="*{templateMensagemPromocao}" id="tplPromo"></textarea>
+                                        <div class="mt-2 d-flex gap-1 flex-wrap align-items-center">
+                                            <small class="text-muted fw-bold me-1">Inserir Tag:</small>
+                                            <span class="badge bg-light text-primary border cursor-pointer" onclick="inserirTag('tplPromo', '{nome}')">{nome}</span>
+                                            <span class="badge bg-light text-success border cursor-pointer" onclick="inserirTag('tplPromo', '{preco}')">{preco}</span>
+                                            <span class="badge bg-light text-muted border cursor-pointer text-decoration-line-through" onclick="inserirTag('tplPromo', '{preco_original}')">{preco_original}</span>
                                             <span class="badge bg-light text-dark border cursor-pointer" onclick="inserirTag('tplPromo', '{descricao}')">{descricao}</span>
                                         </div>
                                     </div>
@@ -283,6 +308,28 @@
         area.value = text.substring(0, start) + tag + text.substring(end);
         area.focus();
         area.selectionStart = area.selectionEnd = start + tag.length;
+    }
+
+    const PRESETS_CONFIG = {
+        COMERCIAL: "✨ PRODUTO DISPONÍVEL NO SISTEMA KwanzaERP! ✨\n\n🛍️ Artigo: {nome}\n📂 Categoria: {categoria}\n💰 Preço: Sob Consulta\n📦 Stock Disponível: {stock} unidades\n\nℹ️ Detalhes do Produto:\n{descricao}\n\n📍 Entregas rápidas em Luanda e envio para todas as províncias!\n📲 Contacte-nos já (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121",
+        
+        ESCASSEZ: "🚨 ATENÇÃO: ÚLTIMAS UNIDADES EM STOCK - KwanzaERP! 🚨\n\nNão perca a oportunidade de adquirir o seu {nome}!\n\n💰 Preço: Sob Consulta\n⚠️ Restam apenas {stock} unidades disponíveis no armazém!\n\n{descricao}\n\n📲 Envie mensagem ou ligue agora (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121\n🚚 Entregamos em Luanda e enviamos para todo o país!",
+        
+        TECNICO: "💼 GESTÃO E QUALIDADE GARANTIDA COM O KwanzaERP! 💼\n\nApresentamos: {nome}\n\n💰 Preço: Sob Consulta\n🏷️ Categoria: {categoria}\n📦 Quantidade em Armazém: {stock} un.\n\n📝 Especificações e Detalhes:\n{descricao}\n\n✅ Garantia e Facturação Certificada pela AGT\n📲 Contacte-nos já (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121",
+
+        PROMO_DESCONTO: "🔥 OPORTUNIDADE ESPECIAL NO KwanzaERP! 🔥\n\n🛍️ Artigo em Destaque: {nome}\n💥 Condições especiais de aquisição por tempo limitado!\n💰 Preço: Sob Consulta\n\nℹ️ Informações:\n{descricao}\n\n⏰ Oferta válida até durar o stock existente!\n📲 Garanta já as suas condições especiais (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121",
+
+        PROMO_LIQUIDACAO: "⚡ LIQUIDAÇÃO E CONDIÇÕES ÚNICAS COM O KwanzaERP! ⚡\n\nAproveite esta grande oportunidade em {nome}!\n\n💰 Preço: Sob Consulta\n📦 Restam pouquíssimas unidades em armazém!\n\n{descricao}\n\n🚀 Envie mensagem agora (WhatsApp e Chamada Normal Unitel):\n📞 934 068 121"
+    };
+
+    function aplicarPreset(textareaId, presetKey) {
+        if (PRESETS_CONFIG[presetKey]) {
+            const area = document.getElementById(textareaId);
+            if (area) {
+                area.value = PRESETS_CONFIG[presetKey];
+                area.focus();
+            }
+        }
     }
 
     function getCsrfToken() {

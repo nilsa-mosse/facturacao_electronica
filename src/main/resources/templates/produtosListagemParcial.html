@@ -52,7 +52,7 @@
   <div class="modal fade" th:id="${'detalhesModal_' + produto.id}" tabindex="-1" aria-labelledby="detalhesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data" onsubmit="return atualizarProdutos(event, this)">
+        <form th:action="@{/produtos/editar}" method="post" enctype="multipart/form-data">
           <div class="modal-header">
             <h5 class="modal-title produto-titulo" id="detalhesModalLabel">Detalhes do Produto</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -120,9 +120,16 @@ if (window.atualizarProdutos) {
     form.onsubmit = function(event) {
       event.preventDefault();
       var formData = new FormData(form);
+      // Obter o token CSRF do cookie (CookieCsrfTokenRepository)
+      var csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*\=\s*([^;]*).*$)|^.*$/, '$1');
+      var headers = {};
+      if (csrfToken) {
+        headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken);
+      }
       fetch(form.action, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: headers
       }).then(response => {
         if (response.redirected || response.ok) {
           // Fecha o modal
@@ -138,6 +145,9 @@ if (window.atualizarProdutos) {
         } else {
           alert('Erro ao salvar alterações.');
         }
+      }).catch(function(err) {
+        console.error('Erro de rede ao editar produto:', err);
+        alert('Erro ao salvar alterações.');
       });
       return false;
     };

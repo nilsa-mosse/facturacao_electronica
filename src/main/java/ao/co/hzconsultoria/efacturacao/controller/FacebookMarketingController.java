@@ -230,18 +230,25 @@ public class FacebookMarketingController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  PUBLICAR MENSAGEM PERSONALIZADA
+    //  PUBLICAR MENSAGEM PERSONALIZADA (COM SUPORTE A IMAGEM / VÍDEO)
     // ─────────────────────────────────────────────────────────────────────────
 
-    @PostMapping("/mensagem")
+    @PostMapping(value = "/mensagem")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> publicarMensagem(@RequestBody Map<String, String> body) {
+    public ResponseEntity<Map<String, Object>> publicarMensagem(
+            @RequestParam(value = "mensagem", required = false) String mensagemParam,
+            @RequestParam(value = "mediaUrl", required = false) String mediaUrl,
+            @RequestParam(value = "ficheiro", required = false) org.springframework.web.multipart.MultipartFile ficheiro,
+            @RequestBody(required = false) Map<String, String> jsonBody) {
+
         Long empresaId = getEmpresaId();
         if (empresaId == null) {
             return ResponseEntity.status(401).body(Collections.singletonMap("erro", "Não autenticado"));
         }
 
-        String mensagem = body.get("mensagem");
+        String mensagem = (jsonBody != null && jsonBody.containsKey("mensagem"))
+                ? jsonBody.get("mensagem") : mensagemParam;
+
         if (mensagem == null || mensagem.trim().isEmpty()) {
             Map<String, Object> erro = new HashMap<>();
             erro.put("sucesso", false);
@@ -249,7 +256,22 @@ public class FacebookMarketingController {
             return ResponseEntity.badRequest().body(erro);
         }
 
-        ResultadoPublicacao resultado = facebookService.publicarMensagemPersonalizada(mensagem, empresaId);
+        byte[] mediaBytes = null;
+        String mediaType = null;
+        String mediaNome = null;
+
+        if (ficheiro != null && !ficheiro.isEmpty()) {
+            try {
+                mediaBytes = ficheiro.getBytes();
+                mediaType = ficheiro.getContentType();
+                mediaNome = ficheiro.getOriginalFilename();
+            } catch (Exception e) {
+                // Log and continue with text
+            }
+        }
+
+        ResultadoPublicacao resultado = facebookService.publicarMensagemPersonalizada(
+                mensagem, empresaId, mediaBytes, mediaType, mediaNome, mediaUrl);
 
         Map<String, Object> resp = new HashMap<>();
         resp.put("sucesso", resultado.isSucesso());
